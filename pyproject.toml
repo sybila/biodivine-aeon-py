@@ -4,6 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "biodivine-bdd"
+version = "0.0.1"
 requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Rust",
