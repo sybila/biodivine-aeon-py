@@ -11,14 +11,12 @@ jobs:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
-        working-directory: ./lib-bdd
         manylinux: auto
         command: build
         args: --release -o dist
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
-        working-directory: ./lib-bdd
         name: wheels
         path: dist
 
@@ -28,13 +26,11 @@ jobs:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
-        working-directory: ./lib-bdd
         command: build
         args: --release --no-sdist -o dist
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
-        working-directory: ./lib-bdd
         name: wheels
         path: dist
 
@@ -44,21 +40,16 @@ jobs:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
-        working-directory: ./lib-bdd
         command: build
         args: --release --no-sdist -o dist --universal2
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
-        working-directory: ./lib-bdd
         name: wheels
         path: dist
 
   bdd-release:
     name: Release
-    defaults:
-      run:
-        working-directory: ./lib-bdd
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/')"
     needs: [ bdd-macos, bdd-windows, bdd-linux ]
