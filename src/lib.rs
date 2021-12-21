@@ -419,6 +419,14 @@ impl BooleanExpression {
             Err(message) => Err(PyTypeError::new_err(message)),
         }
     }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!("{}", self.0))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("BooleanExpression({})", self.0))
+    }
 }
 
 // BddVariableSetBuilder *****************
