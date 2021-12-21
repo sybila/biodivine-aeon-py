@@ -1,0 +1,12 @@
+[package]
+name = "biodivine-lib-bdd-py"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+name = "biodivine_bdd"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.15.1", features = ["extension-module"] }
+biodivine-lib-bdd = "0.3.0"
