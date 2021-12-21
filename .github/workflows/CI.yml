@@ -5,54 +5,63 @@ on:
   pull_request:
 
 jobs:
-  linux:
-    runs-on: ubuntu-latest
+  bdd-linux:    
+    runs-on: ubuntu-latest    
     steps:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
+        working-directory: ./lib-bdd
         manylinux: auto
         command: build
         args: --release -o dist
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
+        working-directory: ./lib-bdd
         name: wheels
         path: dist
 
-  windows:
-    runs-on: windows-latest
+  bdd-windows:
+    runs-on: windows-latest    
     steps:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
+        working-directory: ./lib-bdd
         command: build
         args: --release --no-sdist -o dist
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
+        working-directory: ./lib-bdd
         name: wheels
         path: dist
 
-  macos:
+  bdd-macos:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
+        working-directory: ./lib-bdd
         command: build
         args: --release --no-sdist -o dist --universal2
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
+        working-directory: ./lib-bdd
         name: wheels
         path: dist
 
-  release:
+  bdd-release:
     name: Release
+    defaults:
+      run:
+        working-directory: ./lib-bdd
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ macos, windows, linux ]
+    needs: [ bdd-macos, bdd-windows, bdd-linux ]
     steps:
       - uses: actions/download-artifact@v2
         with:
