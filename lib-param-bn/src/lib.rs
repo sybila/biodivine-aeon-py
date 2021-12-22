@@ -2,7 +2,7 @@ extern crate biodivine_bdd;
 extern crate biodivine_lib_param_bn;
 
 use biodivine_bdd::{Bdd, BooleanExpression};
-use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
+use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{
     GraphColoredVertices, GraphColors, GraphVertices,
@@ -474,7 +474,7 @@ impl BooleanNetwork {
 
 #[pyclass]
 #[derive(Clone)]
-struct ColorSet(biodivine_lib_param_bn::symbolic_async_graph::GraphColors);
+pub struct ColorSet(biodivine_lib_param_bn::symbolic_async_graph::GraphColors);
 
 impl From<ColorSet> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors {
     fn from(value: ColorSet) -> Self {
@@ -538,7 +538,7 @@ impl ColorSet {
 
 #[pyclass]
 #[derive(Clone)]
-struct VertexSet(biodivine_lib_param_bn::symbolic_async_graph::GraphVertices);
+pub struct VertexSet(biodivine_lib_param_bn::symbolic_async_graph::GraphVertices);
 
 impl From<VertexSet> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices {
     fn from(value: VertexSet) -> Self {
@@ -607,7 +607,7 @@ impl VertexSet {
 
 #[pyclass]
 #[derive(Clone)]
-struct ColoredVertexSet(biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices);
+pub struct ColoredVertexSet(biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices);
 
 impl From<ColoredVertexSet> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices {
     fn from(value: ColoredVertexSet) -> Self {
@@ -703,11 +703,185 @@ impl ColoredVertexSet {
 #[derive(Clone)]
 pub struct SymbolicAsyncGraph(biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph);
 
+impl From<SymbolicAsyncGraph> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph {
+    fn from(value: SymbolicAsyncGraph) -> Self {
+        value.0
+    }
+}
+
+impl From<biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for SymbolicAsyncGraph {
+    fn from(value: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self {
+        SymbolicAsyncGraph(value)
+    }
+}
+
+#[pymethods]
+impl SymbolicAsyncGraph {
+    /// Create a new symbolic async graph from a Boolean network.
+    #[new]
+    pub fn new(network: BooleanNetwork) -> PyResult<SymbolicAsyncGraph> {
+        let result =
+            biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::new(network.into());
+        match result {
+            Ok(graph) => Ok(graph.into()),
+            Err(e) => Err(PyTypeError::new_err(e)),
+        }
+    }
+
+    /// Get the underlying Boolean network of this graph.
+    pub fn network(&self) -> BooleanNetwork {
+        self.0.as_network().clone().into()
+    }
+
+    /// Create a set which contains every color-vertex pair with a specified variable fixed
+    /// to the specified constant.
+    pub fn fix_variable(&self, variable: &PyAny, value: bool) -> PyResult<ColoredVertexSet> {
+        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
+            self.0
+                .as_network()
+                .as_graph()
+                .find_variable(name.as_str())
+                .unwrap()
+                .into()
+        } else {
+            variable.extract::<VariableId>()?
+        };
+        Ok(self.0.fix_network_variable(id.into(), value).into())
+    }
+
+    /// Given a graph vertex (as a boolean vector), create a set of color-vertex pairs
+    /// which contains exactly this one vertex with all possible graph colors.
+    pub fn fix_vertex(&self, vertex: Vec<bool>) -> ColoredVertexSet {
+        self.0
+            .vertex(&ArrayBitVector::from_bool_vector(vertex))
+            .into()
+    }
+
+    /// Create a Boolean network which matches this graph, but its parameters are fully specified,
+    /// and the specification is picked from the given color set.
+    pub fn pick_witness(&self, colors: &ColorSet) -> BooleanNetwork {
+        self.0.pick_witness(&colors.0).into()
+    }
+
+    /// Make an empty `ColorSet`.
+    pub fn empty_colors(&self) -> ColorSet {
+        self.0.mk_empty_colors().into()
+    }
+
+    /// Make an empty `ColoredVertexSet`.
+    pub fn empty_colored_vertices(&self) -> ColoredVertexSet {
+        self.0.mk_empty_vertices().into()
+    }
+
+    /// Return all colors valid in this graph.
+    pub fn unit_colors(&self) -> ColorSet {
+        self.0.mk_unit_colors().into()
+    }
+
+    /// Return all color-vertex pairs valid in this graph.
+    pub fn unit_colored_vertices(&self) -> ColoredVertexSet {
+        self.0.mk_unit_colored_vertices().into()
+    }
+
+    /// Compute all successors of the provided color-vertex pairs.
+    pub fn post(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.post(&set.0).into()
+    }
+
+    /// Compute all predecessors of the provided color-vertex pairs.
+    pub fn pre(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.pre(&set.0).into()
+    }
+
+    /// Compute a subset of the given color-vertex pairs that can perform a transition.
+    pub fn can_post(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.can_post(&set.0).into()
+    }
+
+    /// Compute a subset of the given color-vertex pairs that can be reached by a transition.
+    pub fn can_pre(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.can_pre(&set.0).into()
+    }
+
+    /// The same as `post`, but only for transitions under one variable.
+    pub fn var_post(&self, variable: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
+            self.0
+                .as_network()
+                .as_graph()
+                .find_variable(name.as_str())
+                .unwrap()
+                .into()
+        } else {
+            variable.extract::<VariableId>()?
+        };
+        Ok(self.0.var_post(id.into(), &set.0).into())
+    }
+
+    /// The same as `pre`, but only for transitions under one variable.
+    pub fn var_pre(&self, variable: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
+            self.0
+                .as_network()
+                .as_graph()
+                .find_variable(name.as_str())
+                .unwrap()
+                .into()
+        } else {
+            variable.extract::<VariableId>()?
+        };
+        Ok(self.0.var_pre(id.into(), &set.0).into())
+    }
+
+    /// The same as `can_post`, but only for transitions under one variable.
+    pub fn var_can_post(
+        &self,
+        variable: &PyAny,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
+            self.0
+                .as_network()
+                .as_graph()
+                .find_variable(name.as_str())
+                .unwrap()
+                .into()
+        } else {
+            variable.extract::<VariableId>()?
+        };
+        Ok(self.0.var_can_post(id.into(), &set.0).into())
+    }
+
+    /// The same as `can_pre`, but only for transitions under one variable.
+    pub fn var_can_pre(
+        &self,
+        variable: &PyAny,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
+            self.0
+                .as_network()
+                .as_graph()
+                .find_variable(name.as_str())
+                .unwrap()
+                .into()
+        } else {
+            variable.extract::<VariableId>()?
+        };
+        Ok(self.0.var_can_pre(id.into(), &set.0).into())
+    }
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn biodivine_boolean_networks(_py: Python, module: &PyModule) -> PyResult<()> {
+    module.add_class::<VariableId>()?;
+    module.add_class::<ParameterId>()?;
     module.add_class::<RegulatoryGraph>()?;
     module.add_class::<BooleanNetwork>()?;
     module.add_class::<SymbolicAsyncGraph>()?;
+    module.add_class::<ColorSet>()?;
+    module.add_class::<VertexSet>()?;
+    module.add_class::<ColoredVertexSet>()?;
     Ok(())
 }

@@ -520,7 +520,9 @@ impl BddVariable {
 #[pymodule]
 fn biodivine_bdd(_py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<Bdd>()?;
+    module.add_class::<BddVariable>()?;
     module.add_class::<BddVariableSet>()?;
     module.add_class::<BddVariableSetBuilder>()?;
+    module.add_class::<BooleanExpression>()?;
     Ok(())
 }
