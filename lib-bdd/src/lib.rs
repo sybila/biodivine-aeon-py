@@ -6,7 +6,7 @@ use pyo3::types::{PyDict, PyList};
 
 #[pyclass]
 #[derive(Clone)]
-struct Bdd(biodivine_lib_bdd::Bdd);
+pub struct Bdd(biodivine_lib_bdd::Bdd);
 
 impl From<biodivine_lib_bdd::Bdd> for Bdd {
     fn from(value: biodivine_lib_bdd::Bdd) -> Self {
@@ -23,47 +23,47 @@ impl From<Bdd> for biodivine_lib_bdd::Bdd {
 #[pymethods]
 impl Bdd {
     /// Compute a logical negation of this Bdd.
-    fn not(&self) -> Bdd {
+    pub fn not(&self) -> Bdd {
         self.0.not().into()
     }
 
     /// Compute a logical conjunction of two formulas.
-    fn and(&self, other: &Bdd) -> Bdd {
+    pub fn and(&self, other: &Bdd) -> Bdd {
         self.0.and(&other.0).into()
     }
 
     /// Compute a logical disjunction of two formulas.
-    fn or(&self, other: &Bdd) -> Bdd {
+    pub fn or(&self, other: &Bdd) -> Bdd {
         self.0.or(&other.0).into()
     }
 
     /// Compute a logical implication of two formulas.
-    fn imp(&self, other: &Bdd) -> Bdd {
+    pub fn imp(&self, other: &Bdd) -> Bdd {
         self.0.imp(&other.0).into()
     }
 
     /// Compute a logical equivalence of two formulas.
-    fn iff(&self, other: &Bdd) -> Bdd {
+    pub fn iff(&self, other: &Bdd) -> Bdd {
         self.0.iff(&other.0).into()
     }
 
     /// Compute a logical xor of two formulas.
-    fn xor(&self, other: &Bdd) -> Bdd {
+    pub fn xor(&self, other: &Bdd) -> Bdd {
         self.0.xor(&other.0).into()
     }
 
     /// Compute a logical conjunction of this formula with a negated second formula.
-    fn and_not(&self, other: &Bdd) -> Bdd {
+    pub fn and_not(&self, other: &Bdd) -> Bdd {
         self.0.and_not(&other.0).into()
     }
 
     /// Compute a projection over the given Bdd variable.
-    fn var_project(&self, variable: &BddVariable) -> Bdd {
+    pub fn var_project(&self, variable: &BddVariable) -> Bdd {
         self.0.var_project(variable.0).into()
     }
 
     /// Compute a projection over all the given Bdd variables.
-    fn project(&self, variables: &PyList) -> PyResult<Bdd> {
+    pub fn project(&self, variables: &PyList) -> PyResult<Bdd> {
         let mut vars = Vec::with_capacity(variables.len());
         for var in variables {
             vars.push(var.extract::<BddVariable>()?.0);
@@ -75,14 +75,14 @@ impl Bdd {
     ///
     ///
     /// See the original Rust library docs for operation details.
-    fn var_pick(&self, variable: &BddVariable) -> Bdd {
+    pub fn var_pick(&self, variable: &BddVariable) -> Bdd {
         self.0.var_pick(variable.0).into()
     }
 
     /// Compute a pick operation for all the given Bdd variables (biased towards 0).
     ///
     /// See the original Rust library docs for operation details.
-    fn pick(&self, variables: &PyList) -> PyResult<Bdd> {
+    pub fn pick(&self, variables: &PyList) -> PyResult<Bdd> {
         let mut vars = Vec::with_capacity(variables.len());
         for var in variables {
             vars.push(var.extract::<BddVariable>()?.0);
@@ -91,7 +91,7 @@ impl Bdd {
     }
 
     /// Compute a selection for the given Bdd variable with the given value.
-    fn var_select(&self, var: &BddVariable, value: bool) -> Bdd {
+    pub fn var_select(&self, var: &BddVariable, value: bool) -> Bdd {
         self.0.var_select(var.0, value).into()
     }
 
@@ -99,7 +99,7 @@ impl Bdd {
     ///
     /// The partial valuation is a dictionary ` { BddVariable: bool }` which specifies variable
     /// values that should be fixed.
-    fn select(&self, values: &PyDict) -> PyResult<Bdd> {
+    pub fn select(&self, values: &PyDict) -> PyResult<Bdd> {
         let mut valuation = Vec::new();
         for (k, v) in values {
             let key = k.extract::<BddVariable>()?;
@@ -114,7 +114,7 @@ impl Bdd {
     /// Variable names are resolved from a given `BddVariableSet`. If not given, the names
     /// default to `x_0`, `x_1`, etc.
     #[args(variables = "None")]
-    fn to_dot(&self, variables: Option<&BddVariableSet>) -> String {
+    pub fn to_dot(&self, variables: Option<&BddVariableSet>) -> String {
         if let Some(value) = variables {
             self.0.to_dot_string(&value.0, true)
         } else {
@@ -131,58 +131,58 @@ impl Bdd {
 
     /// Produces a raw string representation of this Bdd that can be saved into a file or sent
     /// over the network.
-    fn to_raw_string(&self) -> String {
+    pub fn to_raw_string(&self) -> String {
         self.0.to_string()
     }
 
     /// Read a Bdd from a raw string representation.
     #[staticmethod]
-    fn from_raw_string(data: &str) -> Bdd {
+    pub fn from_raw_string(data: &str) -> Bdd {
         // This will panic on error, but the necessary function to extract the error
         // is private in the Bdd struct (for now).
         biodivine_lib_bdd::Bdd::from_string(data).into()
     }
 
     /// Check if this formula represents a single conjunctive clause (a single path in Bdd format).
-    fn is_conjunctive_clause(&self) -> bool {
+    pub fn is_conjunctive_clause(&self) -> bool {
         self.0.is_clause()
     }
 
     /// Check that this Bdd represents a single valuation with all variables fixed.
-    fn is_valuation(&self) -> bool {
+    pub fn is_valuation(&self) -> bool {
         self.0.is_valuation()
     }
 
     /// Return the number of nodes in this Bdd.
-    fn node_count(&self) -> usize {
+    pub fn node_count(&self) -> usize {
         self.0.size()
     }
 
     /// Return the number of variables supported by this Bdd (not all have to be used).
-    fn var_count(&self) -> usize {
+    pub fn var_count(&self) -> usize {
         self.0.is_valuation() as usize
     }
 
     /// True is this Bdd represents a tautology.
-    fn is_true(&self) -> bool {
+    pub fn is_true(&self) -> bool {
         self.0.is_true()
     }
 
     /// True is this Bdd represents a contradiction.
-    fn is_false(&self) -> bool {
+    pub fn is_false(&self) -> bool {
         self.0.is_false()
     }
 
     /// Return an count of satisfying valuations in this Bdd (the number may be approximate
     /// when the Bdd is sufficiently large).
-    fn cardinality(&self) -> f64 {
+    pub fn cardinality(&self) -> f64 {
         self.0.cardinality()
     }
 
     /// Return a bool vector representing one satisfying valuation of this Bdd.
     ///
     /// If the Bdd is not satisfiable, the vector is empty
-    fn sat_witness(&self, py: Python) -> PyObject {
+    pub fn sat_witness(&self, py: Python) -> PyObject {
         if let Some(valuation) = self.0.sat_witness() {
             valuation.vector().into_py(py)
         } else {
@@ -198,7 +198,7 @@ impl Bdd {
     /// The first argument is a variable set that will supply the variable names. If it is not
     /// given, then default names are used.
     #[args(variables = "None")]
-    fn to_boolean_expression(&self, variables: Option<&BddVariableSet>) -> BooleanExpression {
+    pub fn to_boolean_expression(&self, variables: Option<&BddVariableSet>) -> BooleanExpression {
         if let Some(variables) = variables {
             self.0.to_boolean_expression(&variables.0).into()
         } else {
@@ -212,14 +212,26 @@ impl Bdd {
 
 #[pyclass]
 #[derive(Clone)]
-struct BddVariableSet(biodivine_lib_bdd::BddVariableSet);
+pub struct BddVariableSet(biodivine_lib_bdd::BddVariableSet);
+
+impl From<BddVariableSet> for biodivine_lib_bdd::BddVariableSet {
+    fn from(value: BddVariableSet) -> Self {
+        value.0
+    }
+}
+
+impl From<biodivine_lib_bdd::BddVariableSet> for BddVariableSet {
+    fn from(value: biodivine_lib_bdd::BddVariableSet) -> Self {
+        BddVariableSet(value)
+    }
+}
 
 #[pymethods]
 impl BddVariableSet {
     /// Create a new BddVariableSet by supplying either a number of variables (which will be
     /// named x_0, x_1, etc.), or a list of names.
     #[new]
-    fn new(arg1: &PyAny) -> PyResult<BddVariableSet> {
+    pub fn new(arg1: &PyAny) -> PyResult<BddVariableSet> {
         if let Ok(num_vars) = arg1.extract::<u16>() {
             Ok(BddVariableSet(
                 biodivine_lib_bdd::BddVariableSet::new_anonymous(num_vars),
@@ -241,7 +253,7 @@ impl BddVariableSet {
 
     /// Evaluate the given Boolean expression into a Bdd. If the argument is a string, it is
     /// first parsed into an expression and then evaluated.
-    fn eval_expression(&self, expression: &PyAny) -> PyResult<Bdd> {
+    pub fn eval_expression(&self, expression: &PyAny) -> PyResult<Bdd> {
         if let Ok(expression) = expression.extract::<String>() {
             Ok(self.0.eval_expression_string(&expression).into())
         } else if let Ok(expression) = expression.extract::<BooleanExpression>() {
@@ -255,19 +267,19 @@ impl BddVariableSet {
     }
 
     /// Get the total number of variables in this variable set.
-    fn num_vars(&self) -> u16 {
+    pub fn num_vars(&self) -> u16 {
         self.0.num_vars()
     }
 
     /// Get the full list of variables in this set.
-    fn all_variables(&self, py: Python) -> PyObject {
+    pub fn all_variables(&self, py: Python) -> PyObject {
         let variables: Vec<BddVariable> =
             self.0.variables().into_iter().map(|v| v.into()).collect();
         variables.into_py(py)
     }
 
     /// Get a variable reference using its name. Raises an exception if a variable is not found.
-    fn find_variable(&self, name: String) -> PyResult<BddVariable> {
+    pub fn find_variable(&self, name: String) -> PyResult<BddVariable> {
         if let Some(var) = self.0.var_by_name(name.as_str()) {
             Ok(BddVariable(var))
         } else {
@@ -279,12 +291,12 @@ impl BddVariableSet {
     }
 
     /// Return the name of the given variable in this set.
-    fn name_of(&self, variable: BddVariable) -> String {
+    pub fn name_of(&self, variable: BddVariable) -> String {
         self.0.name_of(variable.into())
     }
 
     /// Create a Bdd corresponding to a constant function.
-    fn mk_const(&self, value: bool) -> Bdd {
+    pub fn mk_const(&self, value: bool) -> Bdd {
         if value {
             self.0.mk_true().into()
         } else {
@@ -294,7 +306,7 @@ impl BddVariableSet {
 
     /// Create a Bdd corresponding to a literal function, i.e. `x` or `!x` for a particular
     /// variable `x`.
-    fn mk_literal(&self, variable: &PyAny, value: bool) -> PyResult<Bdd> {
+    pub fn mk_literal(&self, variable: &PyAny, value: bool) -> PyResult<Bdd> {
         let bdd_var: biodivine_lib_bdd::BddVariable;
         if let Ok(variable) = variable.extract::<BddVariable>() {
             bdd_var = variable.into();
@@ -319,7 +331,7 @@ impl BddVariableSet {
     /// negative literals.
     ///
     /// Variables which do not appear in the dictionary do not appear in the clause.
-    fn mk_conjunctive_clause(&self, items: &PyDict) -> PyResult<Bdd> {
+    pub fn mk_conjunctive_clause(&self, items: &PyDict) -> PyResult<Bdd> {
         let mut partial_valuation = biodivine_lib_bdd::BddPartialValuation::empty();
         for (key, value) in items {
             let var: biodivine_lib_bdd::BddVariable;
@@ -343,7 +355,7 @@ impl BddVariableSet {
 
     /// Create a Bdd representing a disjunctive clause. The argument is a partial valuation
     /// of Bdd variables in the clause (see `mk_conjunctive_clause`).
-    fn mk_disjunctive_clause(&self, items: &PyDict) -> PyResult<Bdd> {
+    pub fn mk_disjunctive_clause(&self, items: &PyDict) -> PyResult<Bdd> {
         let mut partial_valuation = biodivine_lib_bdd::BddPartialValuation::empty();
         for (key, value) in items {
             let var: biodivine_lib_bdd::BddVariable;
@@ -367,7 +379,7 @@ impl BddVariableSet {
 
     /// Create a conjunction of a list of disjunctive clauses (see `mk_disjunctive_clause` for
     /// the supported argument format).
-    fn mk_cnf(&self, clauses: &PyList) -> PyResult<Bdd> {
+    pub fn mk_cnf(&self, clauses: &PyList) -> PyResult<Bdd> {
         let mut result = self.0.mk_true();
         for clause in clauses {
             let clause: biodivine_lib_bdd::Bdd =
@@ -379,7 +391,7 @@ impl BddVariableSet {
 
     /// Create a disjunction of a list of conjunctive clauses (see `mk_conjunctive_clause` for
     /// the supported argument format).
-    fn mk_dnf(&self, clauses: &PyList) -> PyResult<Bdd> {
+    pub fn mk_dnf(&self, clauses: &PyList) -> PyResult<Bdd> {
         let mut result = self.0.mk_false();
         for clause in clauses {
             let clause: biodivine_lib_bdd::Bdd =
@@ -394,7 +406,7 @@ impl BddVariableSet {
 
 #[pyclass]
 #[derive(Clone)]
-struct BooleanExpression(biodivine_lib_bdd::boolean_expression::BooleanExpression);
+pub struct BooleanExpression(biodivine_lib_bdd::boolean_expression::BooleanExpression);
 
 impl From<biodivine_lib_bdd::boolean_expression::BooleanExpression> for BooleanExpression {
     fn from(value: biodivine_lib_bdd::boolean_expression::BooleanExpression) -> Self {
@@ -411,7 +423,7 @@ impl From<BooleanExpression> for biodivine_lib_bdd::boolean_expression::BooleanE
 #[pymethods]
 impl BooleanExpression {
     #[staticmethod]
-    fn parse(value: &str) -> PyResult<BooleanExpression> {
+    pub fn parse(value: &str) -> PyResult<BooleanExpression> {
         let parsed: Result<biodivine_lib_bdd::boolean_expression::BooleanExpression, String> =
             std::convert::TryFrom::try_from(value);
         match parsed {
@@ -432,19 +444,19 @@ impl BooleanExpression {
 // BddVariableSetBuilder *****************
 
 #[pyclass]
-struct BddVariableSetBuilder(biodivine_lib_bdd::BddVariableSetBuilder, Vec<String>);
+pub struct BddVariableSetBuilder(biodivine_lib_bdd::BddVariableSetBuilder, Vec<String>);
 
 #[pymethods]
 impl BddVariableSetBuilder {
     /// Create a new, empty variable set builder.
     #[new]
-    fn new() -> Self {
+    pub fn new() -> Self {
         BddVariableSetBuilder(biodivine_lib_bdd::BddVariableSetBuilder::new(), Vec::new())
     }
 
     /// Create a new variable with the given name. Returns a `BddVariable` instance that can be
     /// later used to create and query actual BDDs.
-    fn make_variable(&mut self, name: &str) -> BddVariable {
+    pub fn make_variable(&mut self, name: &str) -> BddVariable {
         let var = self.0.make_variable(name).into();
         self.1.push(name.to_string());
         var
@@ -452,7 +464,7 @@ impl BddVariableSetBuilder {
 
     /// Create multiple variables with the names supplied as a list. Returns a list of
     /// `BddVariable` objects.
-    fn make(&mut self, py: Python, names: &PyList) -> PyResult<PyObject> {
+    pub fn make(&mut self, py: Python, names: &PyList) -> PyResult<PyObject> {
         let mut result: Vec<BddVariable> = Vec::new();
         for i in 0..names.len() {
             let name = names.get_item(i)?;
@@ -466,7 +478,7 @@ impl BddVariableSetBuilder {
     }
 
     /// Convert this builder to an actual variable set.
-    fn build(&self) -> BddVariableSet {
+    pub fn build(&self) -> BddVariableSet {
         let mut builder = biodivine_lib_bdd::BddVariableSetBuilder::new();
         for name in &self.1 {
             builder.make_variable(name);
@@ -479,7 +491,7 @@ impl BddVariableSetBuilder {
 
 #[pyclass]
 #[derive(Clone)]
-struct BddVariable(biodivine_lib_bdd::BddVariable);
+pub struct BddVariable(biodivine_lib_bdd::BddVariable);
 
 impl From<biodivine_lib_bdd::BddVariable> for BddVariable {
     fn from(value: biodivine_lib_bdd::BddVariable) -> Self {
