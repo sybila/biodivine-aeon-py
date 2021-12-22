@@ -1,7 +1,12 @@
 extern crate biodivine_bdd;
 extern crate biodivine_lib_param_bn;
 
-use biodivine_bdd::BooleanExpression;
+use biodivine_bdd::{Bdd, BooleanExpression};
+use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
+use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::{
+    GraphColoredVertices, GraphColors, GraphVertices,
+};
 use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
@@ -464,6 +469,233 @@ impl BooleanNetwork {
         } else {
             Err(PyTypeError::new_err(format!("Expected parameter name.")))
         }
+    }
+}
+
+#[pyclass]
+#[derive(Clone)]
+struct ColorSet(biodivine_lib_param_bn::symbolic_async_graph::GraphColors);
+
+impl From<ColorSet> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors {
+    fn from(value: ColorSet) -> Self {
+        value.0
+    }
+}
+
+impl From<biodivine_lib_param_bn::symbolic_async_graph::GraphColors> for ColorSet {
+    fn from(value: GraphColors) -> Self {
+        ColorSet(value)
+    }
+}
+
+#[pymethods]
+impl ColorSet {
+    /// Convert this set to a raw Bdd.
+    pub fn to_bdd(&self) -> Bdd {
+        self.0.as_bdd().clone().into()
+    }
+
+    /// Populate a new color set with a raw Bdd.
+    pub fn copy_with(&self, bdd: Bdd) -> Self {
+        self.0.copy(bdd.into()).into()
+    }
+
+    /// Get an approximate count of elements in this set.
+    pub fn cardinality(&self) -> f64 {
+        self.0.approx_cardinality()
+    }
+
+    /// Return a color set with a single element (or empty set if the whole set is empty).
+    pub fn pick_singleton(&self) -> Self {
+        self.0.pick_singleton().into()
+    }
+
+    /// Compute a union of two color sets.
+    pub fn union(&self, other: &Self) -> Self {
+        self.0.union(&other.0).into()
+    }
+
+    /// Compute an intersection of two color sets.
+    pub fn intersect(&self, other: &Self) -> Self {
+        self.0.intersect(&other.0).into()
+    }
+
+    /// Compute a difference of two color sets.
+    pub fn minus(&self, other: &Self) -> Self {
+        self.0.minus(&other.0).into()
+    }
+
+    /// Returns true if this set is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    /// Returns true if this set is a subset.
+    pub fn is_subset(&self, other: &Self) -> bool {
+        self.0.is_subset(&other.0)
+    }
+}
+
+#[pyclass]
+#[derive(Clone)]
+struct VertexSet(biodivine_lib_param_bn::symbolic_async_graph::GraphVertices);
+
+impl From<VertexSet> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices {
+    fn from(value: VertexSet) -> Self {
+        value.0
+    }
+}
+
+impl From<biodivine_lib_param_bn::symbolic_async_graph::GraphVertices> for VertexSet {
+    fn from(value: GraphVertices) -> Self {
+        VertexSet(value)
+    }
+}
+
+#[pymethods]
+impl VertexSet {
+    /// Convert this set to a raw Bdd.
+    pub fn to_bdd(&self) -> Bdd {
+        self.0.as_bdd().clone().into()
+    }
+
+    /// Populate a new set with a raw Bdd.
+    pub fn copy_with(&self, bdd: Bdd) -> Self {
+        self.0.copy(bdd.into()).into()
+    }
+
+    /// Get an approximate count of elements in this set.
+    pub fn cardinality(&self) -> f64 {
+        self.0.approx_cardinality()
+    }
+
+    /// Compute a union of two sets.
+    pub fn union(&self, other: &Self) -> Self {
+        self.0.union(&other.0).into()
+    }
+
+    /// Compute an intersection of two sets.
+    pub fn intersect(&self, other: &Self) -> Self {
+        self.0.intersect(&other.0).into()
+    }
+
+    /// Compute a difference of two sets.
+    pub fn minus(&self, other: &Self) -> Self {
+        self.0.minus(&other.0).into()
+    }
+
+    /// Returns true if this set is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    /// Returns true if this set is a subset.
+    pub fn is_subset(&self, other: &Self) -> bool {
+        self.0.is_subset(&other.0)
+    }
+
+    /// Turn this symbolic set into an explicit list of vertices (each represented as a Boolean
+    /// vector). Note that if this set is large, this may exhaust system memory easily.
+    pub fn vertices(&self) -> Vec<Vec<bool>> {
+        self.0
+            .materialize()
+            .iter()
+            .map(|bv| bv.values())
+            .collect::<Vec<_>>()
+    }
+}
+
+#[pyclass]
+#[derive(Clone)]
+struct ColoredVertexSet(biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices);
+
+impl From<ColoredVertexSet> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices {
+    fn from(value: ColoredVertexSet) -> Self {
+        value.0
+    }
+}
+
+impl From<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for ColoredVertexSet {
+    fn from(value: GraphColoredVertices) -> Self {
+        ColoredVertexSet(value)
+    }
+}
+
+#[pymethods]
+impl ColoredVertexSet {
+    /// Convert this set to a raw Bdd.
+    pub fn to_bdd(&self) -> Bdd {
+        self.0.as_bdd().clone().into()
+    }
+
+    /// Populate a new set with a raw Bdd.
+    pub fn copy_with(&self, bdd: Bdd) -> Self {
+        self.0.copy(bdd.into()).into()
+    }
+
+    /// Get an approximate count of elements in this set.
+    pub fn cardinality(&self) -> f64 {
+        self.0.approx_cardinality()
+    }
+
+    /// Compute a union of two sets.
+    pub fn union(&self, other: &Self) -> Self {
+        self.0.union(&other.0).into()
+    }
+
+    /// Compute an intersection of two sets.
+    pub fn intersect(&self, other: &Self) -> Self {
+        self.0.intersect(&other.0).into()
+    }
+
+    /// Compute a difference of two sets.
+    pub fn minus(&self, other: &Self) -> Self {
+        self.0.minus(&other.0).into()
+    }
+
+    /// Returns true if this set is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    /// Returns true if this set is a subset.
+    pub fn is_subset(&self, other: &Self) -> bool {
+        self.0.is_subset(&other.0)
+    }
+
+    /// Return only vertices in this set.
+    pub fn vertices(&self) -> VertexSet {
+        self.0.vertices().into()
+    }
+
+    /// Return only colors in this set.
+    pub fn colors(&self) -> ColorSet {
+        self.0.colors().into()
+    }
+
+    /// Pick a single color-vertex pair from this set.
+    pub fn pick_singleton(&self) -> Self {
+        self.0.pick_singleton().into()
+    }
+
+    /// For every vertex in this set, pick exactly one color.
+    pub fn pick_color(&self) -> Self {
+        self.0.pick_color().into()
+    }
+
+    /// For every color in this set, pick exactly one vertex.
+    pub fn pick_vertex(&self) -> Self {
+        self.0.pick_vertex().into()
+    }
+
+    /// Remove given color from this set for all vertices.
+    pub fn minus_colors(&self, other: &ColorSet) -> Self {
+        self.0.minus_colors(&other.0).into()
+    }
+
+    /// Keep only colours in the given set for all vertices.
+    pub fn intersect_colors(&self, other: &ColorSet) -> Self {
+        self.0.intersect_colors(&other.0).into()
     }
 }
 
