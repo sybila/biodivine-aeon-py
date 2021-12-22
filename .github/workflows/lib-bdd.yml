@@ -1,4 +1,4 @@
-name: CI
+name: lib-bdd
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: wheels-bdd
-        path: dist
+        path: lib-bdd/dist
 
   bdd-windows:
     runs-on: windows-latest    
@@ -32,7 +32,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: wheels-bdd
-        path: dist
+        path: lib-bdd/dist
 
   bdd-macos:
     runs-on: macos-latest
@@ -46,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: wheels-bdd
-        path: dist
+        path: lib-bdd/dist
 
   bdd-release:
     name: Release

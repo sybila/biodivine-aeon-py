@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "biodivine-bdd"
-repository = "https://github.com/sybila/biodivine-lib-bdd-py"
+repository = "https://github.com/sybila/biodivine-bindings-py/lib-bdd"
 documentation = "https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_bdd.ipynb"
 description = "Python bindings for the Biodivine Binary Decision Diagram library."
 version = "0.0.2"
