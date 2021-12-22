@@ -1,0 +1,18 @@
+[build-system]
+requires = ["maturin>=0.12,<0.13"]
+build-backend = "maturin"
+
+[project]
+name = "biodivine-boolean-networks"
+repository = "https://github.com/sybila/biodivine-bindings-py/lib-param-bn"
+documentation = "https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_bn.ipynb"
+description = "Python bindings for the Biodivine (Parametrised) Boolean Networks library."
+version = "0.0.1"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+
