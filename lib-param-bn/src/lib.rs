@@ -542,6 +542,14 @@ impl ColorSet {
     pub fn is_subset(&self, other: &Self) -> bool {
         self.0.is_subset(&other.0)
     }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!("ColorSet({})", self.0.approx_cardinality()))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("ColorSet({})", self.0.approx_cardinality()))
+    }
 }
 
 #[pyclass]
@@ -619,11 +627,19 @@ impl VertexSet {
             .map(|bv| bv.values())
             .collect::<Vec<_>>()
     }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!("VertexSet({})", self.0.approx_cardinality()))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("VertexSet({})", self.0.approx_cardinality()))
+    }
 }
 
 #[pyclass]
 #[derive(Clone)]
-pub struct ColoredVertexSet(biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices);
+pub struct ColoredVertexSet(pub biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices);
 
 impl From<ColoredVertexSet> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices {
     fn from(value: ColoredVertexSet) -> Self {
@@ -721,11 +737,19 @@ impl ColoredVertexSet {
     pub fn intersect_colors(&self, other: &ColorSet) -> Self {
         self.0.intersect_colors(&other.0).into()
     }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!("ColoredVertexSet({}, {}x{})", self.0.approx_cardinality(), self.0.vertices().approx_cardinality(), self.0.colors().approx_cardinality()))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("ColoredVertexSet({}, {}x{})", self.0.approx_cardinality(), self.0.vertices().approx_cardinality(), self.0.colors().approx_cardinality()))
+    }
 }
 
 #[pyclass]
 #[derive(Clone)]
-pub struct SymbolicAsyncGraph(biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph);
+pub struct SymbolicAsyncGraph(pub biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph);
 
 impl From<SymbolicAsyncGraph> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph {
     fn from(value: SymbolicAsyncGraph) -> Self {
