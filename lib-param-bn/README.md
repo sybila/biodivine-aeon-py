@@ -11,6 +11,6 @@ The library is available on `PyPi`, so you can install it directly through pip:
 pip install biodivine_boolean_networks
 ```
 
-A basic example of usage for the Python byndings is provided in this [Jupyter notebook](https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_bn.ipynb). To learn more details about the library, please refer to the original [Rust repository](https://github.com/sybila/biodivine-lib-param-bn) where you can find detailed documentation about its capabilities. Also, the documentation comments in this repository may be helpful to understand how some of the elements were translated from Rust to Python.
+A basic example of usage for the Python byndings is provided in this [Jupyter notebook](https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_bn.ipynb). To learn more details about the library, please refer to the original [Rust repository](https://github.com/sybila/biodivine-lib-param-bn) where you can find detailed documentation about its capabilities. Also, the documentation comments in this repository may be helpful to understand how some elements were translated from Rust to Python.
 
 
