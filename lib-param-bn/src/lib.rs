@@ -1,7 +1,7 @@
 extern crate biodivine_bdd;
 extern crate biodivine_lib_param_bn;
 
-use biodivine_bdd::{Bdd, BddVariableSet};
+use biodivine_bdd::{Bdd, BddVariable, BddVariableSet, BddVariableSetBuilder, BooleanExpression};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{
@@ -912,5 +912,11 @@ fn biodivine_boolean_networks(_py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<ColorSet>()?;
     module.add_class::<VertexSet>()?;
     module.add_class::<ColoredVertexSet>()?;
+    // Re-export everything here as well, because the types are incompatible in Python :/
+    module.add_class::<Bdd>()?;
+    module.add_class::<BddVariable>()?;
+    module.add_class::<BddVariableSet>()?;
+    module.add_class::<BddVariableSetBuilder>()?;
+    module.add_class::<BooleanExpression>()?;
     Ok(())
 }
