@@ -1,13 +1,13 @@
 extern crate biodivine_bdd;
 extern crate biodivine_lib_param_bn;
 
-use biodivine_bdd::{Bdd, BooleanExpression};
+use biodivine_bdd::{Bdd, BddVariableSet};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{
     GraphColoredVertices, GraphColors, GraphVertices,
 };
-use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
+use biodivine_lib_param_bn::Monotonicity;
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -381,17 +381,17 @@ impl BooleanNetwork {
         function: Option<String>,
     ) -> PyResult<()> {
         let graph = self.graph();
-        let variable = self.graph().find_variable(variable)?;
+        let variable = graph.find_variable(variable)?;
+        let name = graph.get_variable_name(variable);
+
+        // Always remove the old update function so that we can "add" a new one.
+        self.0.set_update_function(variable.into(), None).unwrap();
+
         let result = if let Some(function) = function {
-            let expression = BooleanExpression::parse(function.as_str())?;
-            let function = FnUpdate::try_from_expression(expression.into(), &graph.into());
-            if let Some(function) = function {
-                self.0.set_update_function(variable.into(), Some(function))
-            } else {
-                Err("Function expression uses unknown variables.".to_string())
-            }
+            self.0
+                .add_string_update_function(name.as_str(), function.as_str())
         } else {
-            self.0.set_update_function(variable.into(), None)
+            Ok(())
         };
 
         match result {
@@ -500,6 +500,14 @@ impl ColorSet {
         self.0.copy(bdd.into()).into()
     }
 
+    /// Populate a new set with a raw Bdd in a string.
+    pub fn copy_with_raw_string(&self, bdd: String) -> PyResult<Self> {
+        Ok(self
+            .0
+            .copy(Bdd::from_raw_string(bdd.as_str()).into())
+            .into())
+    }
+
     /// Get an approximate count of elements in this set.
     pub fn cardinality(&self) -> f64 {
         self.0.approx_cardinality()
@@ -562,6 +570,14 @@ impl VertexSet {
     /// Populate a new set with a raw Bdd.
     pub fn copy_with(&self, bdd: Bdd) -> Self {
         self.0.copy(bdd.into()).into()
+    }
+
+    /// Populate a new set with a raw Bdd in a string.
+    pub fn copy_with_raw_string(&self, bdd: String) -> PyResult<Self> {
+        Ok(self
+            .0
+            .copy(Bdd::from_raw_string(bdd.as_str()).into())
+            .into())
     }
 
     /// Get an approximate count of elements in this set.
@@ -631,6 +647,14 @@ impl ColoredVertexSet {
     /// Populate a new set with a raw Bdd.
     pub fn copy_with(&self, bdd: Bdd) -> Self {
         self.0.copy(bdd.into()).into()
+    }
+
+    /// Populate a new set with a raw Bdd in a string.
+    pub fn copy_with_raw_string(&self, bdd: String) -> PyResult<Self> {
+        Ok(self
+            .0
+            .copy(Bdd::from_raw_string(bdd.as_str()).into())
+            .into())
     }
 
     /// Get an approximate count of elements in this set.
@@ -731,6 +755,11 @@ impl SymbolicAsyncGraph {
     /// Get the underlying Boolean network of this graph.
     pub fn network(&self) -> BooleanNetwork {
         self.0.as_network().clone().into()
+    }
+
+    /// Get the variable set that is used for symbolic encoding.
+    pub fn bdd_variables(&self) -> BddVariableSet {
+        self.0.symbolic_context().bdd_variable_set().clone().into()
     }
 
     /// Create a set which contains every color-vertex pair with a specified variable fixed
