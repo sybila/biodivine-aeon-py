@@ -7,7 +7,7 @@ name = "biodivine-boolean-networks"
 repository = "https://github.com/sybila/biodivine-bindings-py/lib-param-bn"
 documentation = "https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_bn.ipynb"
 description = "Python bindings for the Biodivine (Parametrised) Boolean Networks library."
-version = "0.0.5"
+version = "0.0.6"
 requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Rust",
