@@ -163,6 +163,11 @@ impl RegulatoryGraph {
         self.0.get_variable_name(id.into()).clone()
     }
 
+    /// Set a variable name for the given id.
+    pub fn set_variable_name(&mut self, id: VariableId, name: &str) -> PyResult<()> {
+        self.0.set_variable_name(id.0, name).map_err(|error| PyTypeError::new_err(error))
+    }
+
     /// Get the number of variables in this regulatory graph.
     pub fn num_vars(&self) -> usize {
         self.0.num_vars()
@@ -469,6 +474,13 @@ impl BooleanNetwork {
         } else {
             Err(PyTypeError::new_err(format!("Expected parameter name.")))
         }
+    }
+
+    /// Set a variable name for the given id.
+    pub fn set_variable_name(&mut self, id: &PyAny, name: &str) -> PyResult<()> {
+        let variable = self.graph().find_variable(id)?;
+        let result = self.0.as_graph_mut().set_variable_name(variable.0, name);
+        result.map_err(|error| PyTypeError::new_err(error))
     }
 }
 

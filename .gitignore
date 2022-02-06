@@ -84,3 +84,6 @@ docs/_build/
 
 # Pyenv
 .python-version
+
+# Virtual Python environment
+.env

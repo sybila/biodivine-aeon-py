@@ -9,7 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 pyo3 = { version = "0.15.1", features = ["extension-module"] }
-biodivine-lib-param-bn = "0.2.0"
+biodivine-lib-param-bn = "0.2.1"
 biodivine-lib-bdd = "0.3.0"
 biodivine-lib-bdd-py = { path = "../lib-bdd" }
 biodivine-lib-param-bn-py = { path = "../lib-param-bn" }
