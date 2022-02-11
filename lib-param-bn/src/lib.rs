@@ -165,7 +165,9 @@ impl RegulatoryGraph {
 
     /// Set a variable name for the given id.
     pub fn set_variable_name(&mut self, id: VariableId, name: &str) -> PyResult<()> {
-        self.0.set_variable_name(id.0, name).map_err(|error| PyTypeError::new_err(error))
+        self.0
+            .set_variable_name(id.0, name)
+            .map_err(|error| PyTypeError::new_err(error))
     }
 
     /// Get the number of variables in this regulatory graph.
@@ -751,11 +753,21 @@ impl ColoredVertexSet {
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(format!("ColoredVertexSet({}, {}x{})", self.0.approx_cardinality(), self.0.vertices().approx_cardinality(), self.0.colors().approx_cardinality()))
+        Ok(format!(
+            "ColoredVertexSet({}, {}x{})",
+            self.0.approx_cardinality(),
+            self.0.vertices().approx_cardinality(),
+            self.0.colors().approx_cardinality()
+        ))
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("ColoredVertexSet({}, {}x{})", self.0.approx_cardinality(), self.0.vertices().approx_cardinality(), self.0.colors().approx_cardinality()))
+        Ok(format!(
+            "ColoredVertexSet({}, {}x{})",
+            self.0.approx_cardinality(),
+            self.0.vertices().approx_cardinality(),
+            self.0.colors().approx_cardinality()
+        ))
     }
 }
 
@@ -801,16 +813,7 @@ impl SymbolicAsyncGraph {
     /// Create a set which contains every color-vertex pair with a specified variable fixed
     /// to the specified constant.
     pub fn fix_variable(&self, variable: &PyAny, value: bool) -> PyResult<ColoredVertexSet> {
-        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
-            self.0
-                .as_network()
-                .as_graph()
-                .find_variable(name.as_str())
-                .unwrap()
-                .into()
-        } else {
-            variable.extract::<VariableId>()?
-        };
+        let id = self.resolve_variable(variable)?;
         Ok(self.0.fix_network_variable(id.into(), value).into())
     }
 
@@ -868,33 +871,71 @@ impl SymbolicAsyncGraph {
         self.0.can_pre(&set.0).into()
     }
 
+    /// Compute the subset of the given set that can reach a state *within* the same
+    /// set using *some* transition.
+    pub fn can_post_within(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.can_post_within(&set.0).into()
+    }
+
+    /// Compute the subset of the given set that can be reached from a state *within* the same
+    /// set using *some* transition.
+    pub fn can_pre_within(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.can_pre_within(&set.0).into()
+    }
+
+    /// Compute the subset of the given set that can reach a state *outside* the same
+    /// set using *some* transition.
+    pub fn can_post_out(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.can_post_out(&set.0).into()
+    }
+
+    /// Compute the subset of the given set that can be reached from a state *outside* the same
+    /// set using *some* transition.
+    pub fn can_pre_out(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.can_pre_out(&set.0).into()
+    }
+
+    /// Compute the subset of the given set that will reach a state *within* the same
+    /// set using *every* admissible transition.
+    ///
+    /// States which have no outgoing transitions are also included.
+    pub fn will_post_within(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.will_post_within(&set.0).into()
+    }
+
+    /// Compute the subset of the given set that will be reached from a state *within* the same
+    /// set using *every* admissible transition.
+    ///
+    /// States which have no incoming transitions are also included.
+    pub fn will_pre_within(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.will_pre_within(&set.0).into()
+    }
+
+    /// Compute the subset of the given set that will reach a state *outside* the same
+    /// set using *every* admissible transition.
+    ///
+    /// States which have no outgoing transitions are also included.
+    pub fn will_post_out(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.will_post_out(&set.0).into()
+    }
+
+    /// Compute the subset of the given set that will be reached from a state *outside* the same
+    /// set using *every* admissible transition.
+    ///
+    /// States which have no incoming transitions are also included.
+    pub fn will_pre_out(&self, set: &ColoredVertexSet) -> ColoredVertexSet {
+        self.0.will_pre_out(&set.0).into()
+    }
+
     /// The same as `post`, but only for transitions under one variable.
     pub fn var_post(&self, variable: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
-        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
-            self.0
-                .as_network()
-                .as_graph()
-                .find_variable(name.as_str())
-                .unwrap()
-                .into()
-        } else {
-            variable.extract::<VariableId>()?
-        };
+        let id = self.resolve_variable(variable)?;
         Ok(self.0.var_post(id.into(), &set.0).into())
     }
 
     /// The same as `pre`, but only for transitions under one variable.
     pub fn var_pre(&self, variable: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
-        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
-            self.0
-                .as_network()
-                .as_graph()
-                .find_variable(name.as_str())
-                .unwrap()
-                .into()
-        } else {
-            variable.extract::<VariableId>()?
-        };
+        let id = self.resolve_variable(variable)?;
         Ok(self.0.var_pre(id.into(), &set.0).into())
     }
 
@@ -904,16 +945,7 @@ impl SymbolicAsyncGraph {
         variable: &PyAny,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
-            self.0
-                .as_network()
-                .as_graph()
-                .find_variable(name.as_str())
-                .unwrap()
-                .into()
-        } else {
-            variable.extract::<VariableId>()?
-        };
+        let id = self.resolve_variable(variable)?;
         Ok(self.0.var_can_post(id.into(), &set.0).into())
     }
 
@@ -923,17 +955,63 @@ impl SymbolicAsyncGraph {
         variable: &PyAny,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        let id: VariableId = if let Ok(name) = variable.extract::<String>() {
-            self.0
-                .as_network()
-                .as_graph()
-                .find_variable(name.as_str())
-                .unwrap()
-                .into()
-        } else {
-            variable.extract::<VariableId>()?
-        };
+        let id = self.resolve_variable(variable)?;
         Ok(self.0.var_can_pre(id.into(), &set.0).into())
+    }
+
+    /// Compute the subset of `set` that has predecessors *within* `set` using only trasition
+    /// under the given `variable`.
+    pub fn var_can_pre_within(
+        &self,
+        variable: &PyAny,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let id = self.resolve_variable(variable)?;
+        Ok(self.0.var_can_pre_within(id.into(), &set.0).into())
+    }
+
+    /// Compute the subset of `set` that has successors *within* `set` using only trasition
+    /// under the given `variable`.
+    pub fn var_can_post_within(
+        &self,
+        variable: &PyAny,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let id = self.resolve_variable(variable)?;
+        Ok(self.0.var_can_post_within(id.into(), &set.0).into())
+    }
+
+    /// Compute the subset of `set` that has predecessors *outside* `set` using only trasitions
+    /// under the given `variable`.
+    pub fn var_can_pre_out(
+        &self,
+        variable: &PyAny,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let id = self.resolve_variable(variable)?;
+        Ok(self.0.var_can_pre_out(id.into(), &set.0).into())
+    }
+
+    /// Compute the subset of `set` that has successors *outside* `set` using only trasitions
+    /// under the given `variable`.
+    pub fn var_can_post_out(
+        &self,
+        variable: &PyAny,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let id = self.resolve_variable(variable)?;
+        Ok(self.0.var_can_post_out(id.into(), &set.0).into())
+    }
+
+    /// Resolve a variable that is either a string or a numeric value
+    fn resolve_variable(&self, variable: &PyAny) -> PyResult<VariableId> {
+        if let Ok(name) = variable.extract::<String>() {
+            let var = self.0.as_network().as_graph().find_variable(name.as_str());
+            var.map(|var| var.into())
+                .ok_or_else(|| PyTypeError::new_err(format!("Unknown variable `{}`.", name)))
+        } else {
+            variable.extract::<VariableId>()
+        }
     }
 }
 
