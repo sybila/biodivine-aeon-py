@@ -7,7 +7,7 @@ name = "biodivine_aeon"
 repository = "https://github.com/sybila/biodivine-bindings-py/aeon"
 documentation = "https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_aeon.ipynb"
 description = "Python bindings for the Biodivine tool Aeon."
-version = "0.0.6"
+version = "0.0.7"
 requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Rust",
