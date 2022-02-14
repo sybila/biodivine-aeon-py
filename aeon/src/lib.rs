@@ -129,6 +129,29 @@ pub fn classify_attractor(
     Ok(result.to_object(py))
 }
 
+#[pyclass]
+pub struct PerturbationGraph(biodivine_pbn_control::perturbation::PerturbationGraph);
+
+#[pymethods]
+impl PerturbationGraph {
+    /// Create a new Boolean network with no functions using a regulatory graph.
+    #[new]
+    pub fn new(network: &BooleanNetwork) -> PerturbationGraph {
+        let bn = network.into();
+        PerturbationGraph(biodivine_pbn_control::perturbation::PerturbationGraph::new(bn)).into()
+    }
+
+    pub fn as_original(&self) -> &SymbolicAsyncGraph {
+        self.0.original_graph.into()
+    }
+
+    pub fn strong_basin(&self, target: &ArrayBitVector) -> GraphColoredVertices {
+        self.0.strong_basin(target).into()
+    }
+
+}
+
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
@@ -140,6 +163,7 @@ fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<ColorSet>()?;
     module.add_class::<VertexSet>()?;
     module.add_class::<ColoredVertexSet>()?;
+    module.add_class::<PerturbationGraph>()?;
     // Re-export everything here as well, because the types are incompatible in Python :/
     module.add_class::<Bdd>()?;
     module.add_class::<BddVariable>()?;
