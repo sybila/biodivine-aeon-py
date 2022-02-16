@@ -4,6 +4,8 @@ use biodivine_boolean_networks::{
     BooleanNetwork, ColorSet, ColoredVertexSet, ParameterId, RegulatoryGraph, SymbolicAsyncGraph,
     VariableId, VertexSet,
 };
+use biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector;
+use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -132,21 +134,35 @@ pub fn classify_attractor(
 #[pyclass]
 pub struct PerturbationGraph(biodivine_pbn_control::perturbation::PerturbationGraph);
 
+impl From<PerturbationGraph> for biodivine_pbn_control::perturbation::PerturbationGraph {
+    fn from(value: PerturbationGraph) -> Self {
+        value.0
+    }
+}
+
+impl From<biodivine_pbn_control::perturbation::PerturbationGraph> for PerturbationGraph {
+    fn from(value: biodivine_pbn_control::perturbation::PerturbationGraph) -> Self {
+        PerturbationGraph(value)
+    }
+}
+
 #[pymethods]
 impl PerturbationGraph {
+
     /// Create a new Boolean network with no functions using a regulatory graph.
     #[new]
-    pub fn new(network: &BooleanNetwork) -> PerturbationGraph {
+    pub fn new(network: BooleanNetwork) -> PerturbationGraph {
         let bn = network.into();
-        PerturbationGraph(biodivine_pbn_control::perturbation::PerturbationGraph::new(bn)).into()
+        biodivine_pbn_control::perturbation::PerturbationGraph::new(&bn).into()
     }
 
-    pub fn as_original(&self) -> &SymbolicAsyncGraph {
-        self.0.original_graph.into()
+    pub fn as_original(&self) -> SymbolicAsyncGraph {
+        self.0.as_original().clone().into()
     }
 
-    pub fn strong_basin(&self, target: &ArrayBitVector) -> GraphColoredVertices {
-        self.0.strong_basin(target).into()
+    pub fn strong_basin(&self, target: Vec<bool>) -> ColoredVertexSet {
+        let target = ArrayBitVector::from_bool_vector(target);
+        self.0.strong_basin(&target).into()
     }
 
 }
