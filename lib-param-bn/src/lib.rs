@@ -522,6 +522,20 @@ impl ColorSet {
             .into())
     }
 
+    /// Get an approximate memory consumption of this symbolic set in bytes.
+    ///
+    /// (real value may be different due to OS and allocation specifics)
+    pub fn symbolic_size(&self) -> usize {
+        self.0.symbolic_size() * 10 // There are 10 byte in a single BDD node.
+    }
+
+    /// Compute a `.dot` string representing the underlying BDD graph.
+    ///
+    /// Needs a reference to the underlying symbolic graph to resolve variable names
+    pub fn to_dot(&self, graph: &SymbolicAsyncGraph) -> String {
+        self.0.to_dot_string(graph.0.symbolic_context())
+    }
+
     /// Get an approximate count of elements in this set.
     pub fn cardinality(&self) -> f64 {
         self.0.approx_cardinality()
@@ -607,6 +621,20 @@ impl VertexSet {
         self.0.approx_cardinality()
     }
 
+    /// Get an approximate memory consumption of this symbolic set in bytes.
+    ///
+    /// (real value may be different due to OS and allocation specifics)
+    pub fn symbolic_size(&self) -> usize {
+        self.0.symbolic_size() * 10
+    }
+
+    /// Compute a `.dot` string representing the underlying BDD graph.
+    ///
+    /// Needs a reference to the underlying symbolic graph to resolve variable names
+    pub fn to_dot(&self, graph: &SymbolicAsyncGraph) -> String {
+        self.0.to_dot_string(graph.0.symbolic_context())
+    }
+
     /// Compute a union of two sets.
     pub fn union(&self, other: &Self) -> Self {
         self.0.union(&other.0).into()
@@ -630,6 +658,13 @@ impl VertexSet {
     /// Returns true if this set is a subset.
     pub fn is_subset(&self, other: &Self) -> bool {
         self.0.is_subset(&other.0)
+    }
+
+    /// Pick a single vertex from this set, and returns it as a singleton set.
+    ///
+    /// If the set is empty, also returns an empty set.
+    pub fn pick_singleton(&self) -> Self {
+        self.0.pick_singleton().into()
     }
 
     /// Turn this symbolic set into an explicit list of vertices (each represented as a Boolean
@@ -692,6 +727,20 @@ impl ColoredVertexSet {
         self.0.approx_cardinality()
     }
 
+    /// Get an approximate memory consumption of this symbolic set in bytes.
+    ///
+    /// (real value may be different due to OS and allocation specifics)
+    pub fn symbolic_size(&self) -> usize {
+        self.0.symbolic_size() * 10
+    }
+
+    /// Compute a `.dot` string representing the underlying BDD graph.
+    ///
+    /// Needs a reference to the underlying symbolic graph to resolve variable names
+    pub fn to_dot(&self, graph: &SymbolicAsyncGraph) -> String {
+        self.0.to_dot_string(graph.0.symbolic_context())
+    }
+
     /// Compute a union of two sets.
     pub fn union(&self, other: &Self) -> Self {
         self.0.union(&other.0).into()
@@ -750,6 +799,16 @@ impl ColoredVertexSet {
     /// Keep only colours in the given set for all vertices.
     pub fn intersect_colors(&self, other: &ColorSet) -> Self {
         self.0.intersect_colors(&other.0).into()
+    }
+
+    /// Remove vertices from the given set for any color.
+    pub fn minus_vertices(&self, other: &VertexSet) -> Self {
+        self.0.minus_vertices(&other.0).into()
+    }
+
+    /// Retain only vertices from the given set, for any color.
+    pub fn intersect_vertices(&self, other: &VertexSet) -> Self {
+        self.0.intersect_vertices(&other.0).into()
     }
 
     fn __str__(&self) -> PyResult<String> {
