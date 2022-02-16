@@ -884,6 +884,92 @@ impl SymbolicAsyncGraph {
             .into()
     }
 
+    /// Create a set of colors in which a particular logical parameter is fixed to a specific
+    /// value. A logical parameter is any parameter of arity 0.
+    pub fn fix_parameter(&self, parameter: &PyAny, value: bool) -> PyResult<ColorSet> {
+        // Find parameter and validate.
+        let id = self.resolve_parameter(parameter)?;
+        let param = self.0.as_network().get_parameter(id.into());
+        if param.get_arity() != 0 {
+            return Err(PyTypeError::new_err(format!(
+                "Parameter {} has non-zero arity.",
+                param.get_name()
+            )));
+        }
+        // Make a BDD using symbolic context.
+        let ctx = self.0.symbolic_context();
+        let bdd = ctx.mk_uninterpreted_function_is_true(id.into(), &[]);
+        // Apply desired value.
+        let bdd = if value { bdd } else { bdd.not() };
+        // Export as colour set.
+        let unit_bdd = self.0.unit_colors().as_bdd();
+        Ok(self.0.empty_colors().copy(bdd.and(unit_bdd)).into())
+    }
+
+    /// Create a subset of the unit color set which fixes the value of exactly one row in an
+    /// explicit uninterpreted function.
+    ///
+    /// That is, given a (here binary) function `f`, input vector `[True, False]` and
+    /// a Boolean `value`, the resulting set will only have colours `f(True, False) = value`
+    /// which are otherwise valid.
+    pub fn fix_explicit_function(
+        &self,
+        parameter: &PyAny,
+        inputs: Vec<bool>,
+        value: bool,
+    ) -> PyResult<ColorSet> {
+        let id = self.resolve_parameter(parameter)?;
+        let param = self.0.as_network().get_parameter(id.into());
+        if (param.get_arity() as usize) != inputs.len() {
+            return Err(PyTypeError::new_err(format!(
+                "Artiy mismatch for parameter {}.",
+                param.get_name()
+            )));
+        }
+        let ctx = self.0.symbolic_context();
+        let table = ctx.get_explicit_function_table(id.into());
+        let mut bdd = ctx.mk_constant(false);
+        for (row, bdd_var) in table {
+            if row == inputs {
+                bdd = ctx.bdd_variable_set().mk_literal(bdd_var, value);
+            }
+        }
+        let unit_bdd = self.0.unit_colors().as_bdd();
+        Ok(self.0.empty_colors().copy(bdd.and(unit_bdd)).into())
+    }
+
+    /// Create a subset of the unit color set which fixed the output value of exactly one row in
+    /// an implicit update function.
+    ///
+    /// That is, assume a network variable `x` which has an implicit update function and two
+    /// regulators. Now, given function row `[True, False]` and a Boolean `value`, the result
+    /// will be a subset of the unit color set where `f_x(True, False) = value`.
+    pub fn fix_implicit_function(
+        &self,
+        variable: &PyAny,
+        inputs: Vec<bool>,
+        value: bool,
+    ) -> PyResult<ColorSet> {
+        let id = self.resolve_variable(variable)?;
+        if self.0.as_network().regulators(id.into()).len() != inputs.len() {
+            let name = self.0.as_network().get_variable_name(id.into());
+            return Err(PyTypeError::new_err(format!(
+                "Artiy mismatch for variable {}.",
+                name
+            )));
+        }
+        let ctx = self.0.symbolic_context();
+        let table = ctx.get_implicit_function_table(id.into());
+        let mut bdd = ctx.mk_constant(false);
+        for (row, bdd_var) in table {
+            if row == inputs {
+                bdd = ctx.bdd_variable_set().mk_literal(bdd_var, value);
+            }
+        }
+        let unit_bdd = self.0.unit_colors().as_bdd();
+        Ok(self.0.empty_colors().copy(bdd.and(unit_bdd)).into())
+    }
+
     /// Create a Boolean network which matches this graph, but its parameters are fully specified,
     /// and the specification is picked from the given color set.
     pub fn pick_witness(&self, colors: &ColorSet) -> BooleanNetwork {
@@ -1062,7 +1148,7 @@ impl SymbolicAsyncGraph {
         Ok(self.0.var_can_post_out(id.into(), &set.0).into())
     }
 
-    /// Resolve a variable that is either a string or a numeric value
+    /// Resolve a variable that is either a string or a numeric id
     fn resolve_variable(&self, variable: &PyAny) -> PyResult<VariableId> {
         if let Ok(name) = variable.extract::<String>() {
             let var = self.0.as_network().as_graph().find_variable(name.as_str());
@@ -1070,6 +1156,18 @@ impl SymbolicAsyncGraph {
                 .ok_or_else(|| PyTypeError::new_err(format!("Unknown variable `{}`.", name)))
         } else {
             variable.extract::<VariableId>()
+        }
+    }
+
+    /// Resolve a parameter that is either a string or a numeric id
+    fn resolve_parameter(&self, parameter: &PyAny) -> PyResult<ParameterId> {
+        if let Ok(name) = parameter.extract::<String>() {
+            let param = self.0.as_network().find_parameter(name.as_str());
+            param
+                .map(|param| param.into())
+                .ok_or_else(|| PyTypeError::new_err(format!("Unknown parameter `{}`.", name)))
+        } else {
+            parameter.extract::<ParameterId>()
         }
     }
 }
