@@ -133,6 +133,56 @@ pub fn classify_attractor(
 }
 
 #[pyclass]
+pub struct ControlMap(biodivine_pbn_control::control::ControlMap);
+
+impl From<ControlMap> for biodivine_pbn_control::control::ControlMap {
+    fn from(value: ControlMap) -> Self {
+        value.0
+    }
+}
+
+impl From<biodivine_pbn_control::control::ControlMap> for ControlMap {
+    fn from(value: biodivine_pbn_control::control::ControlMap) -> Self {
+        ControlMap(value)
+    }
+}
+
+#[pymethods]
+impl ControlMap {
+    /// Remove from this control map any results that *do not* perturb `variable`.
+    /// If `value` is given, only keep perturbations which result in this value.
+    pub fn require_perturbation(&mut self, variable: VariableId, value: Option<bool>) {
+        self.0.require_perturbation(variable.into(), value);
+    }
+
+    /// Remove from this control map any results that perturb `variable`. If `value` is given,
+    /// only remove perturbations which result in this value.
+    pub fn exclude_perturbation(&mut self, variable: VariableId, value: Option<bool>) {
+        self.0.exclude_perturbation(variable.into(), value);
+    }
+
+    pub fn as_bdd(&self) -> Bdd {
+        self.0.as_bdd().clone().into()
+    }
+
+    pub fn as_colored_vertices(&self) -> ColoredVertexSet {
+        self.0.as_colored_vertices().clone().into()
+    }
+
+    pub fn controllable_colors(&self) -> Bdd {
+        self.0.controllable_colors().into()
+    }
+
+    pub fn controllable_colors_cardinality(&self) -> f64 {
+        self.0.controllable_colors_cardinality()
+    }
+
+    pub fn jump_vertices(&self) -> f64 {
+        self.0.jump_vertices()
+    }
+}
+
+#[pyclass]
 pub struct PerturbationGraph(biodivine_pbn_control::perturbation::PerturbationGraph);
 
 impl From<PerturbationGraph> for biodivine_pbn_control::perturbation::PerturbationGraph {
@@ -146,6 +196,8 @@ impl From<biodivine_pbn_control::perturbation::PerturbationGraph> for Perturbati
         PerturbationGraph(value)
     }
 }
+
+
 
 #[pymethods]
 impl PerturbationGraph {
@@ -255,6 +307,30 @@ impl PerturbationGraph {
         let source_ = ArrayBitVector::from_bool_vector(source);
         self.0.post_perturbation(&source_, &target.into()).clone().into()
     }
+
+    pub fn one_step_control(&self, source: Vec<bool>, target: Vec<bool>, compute_params: ColorSet) -> ControlMap {
+        let source_ = ArrayBitVector::from_bool_vector(source);
+        let target_ = ArrayBitVector::from_bool_vector(target);
+        let compute_params_ = &compute_params.into();
+
+        self.0.one_step_control(&source_, &target_, &compute_params_).into()
+    }
+
+    pub fn temporary_control(&self, source: Vec<bool>, target: Vec<bool>, compute_params: ColorSet) -> ControlMap {
+        let source_ = ArrayBitVector::from_bool_vector(source);
+        let target_ = ArrayBitVector::from_bool_vector(target);
+        let compute_params_ = &compute_params.into();
+
+        self.0.temporary_control(&source_, &target_, &compute_params_).into()
+    }
+
+    pub fn permanent_control(&self, source: Vec<bool>, target: Vec<bool>, compute_params: ColorSet) -> ControlMap {
+        let source_ = ArrayBitVector::from_bool_vector(source);
+        let target_ = ArrayBitVector::from_bool_vector(target);
+        let compute_params_ = &compute_params.into();
+
+        self.0.permanent_control(&source_, &target_, &compute_params_).into()
+    }
 }
 
 
@@ -269,6 +345,7 @@ fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<ColorSet>()?;
     module.add_class::<VertexSet>()?;
     module.add_class::<ColoredVertexSet>()?;
+    module.add_class::<ControlMap>()?;
     module.add_class::<PerturbationGraph>()?;
     // Re-export everything here as well, because the types are incompatible in Python :/
     module.add_class::<Bdd>()?;
