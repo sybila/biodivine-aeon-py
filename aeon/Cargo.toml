@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 pyo3 = { version = "0.15.1", features = ["extension-module"] }
 biodivine-lib-param-bn = "0.2.4"
 biodivine-lib-bdd = "0.3.0"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control.git" }
+biodivine-pbn-control = "0.1.1"
 biodivine-lib-bdd-py = { path = "../lib-bdd" }
 biodivine-lib-param-bn-py = { path = "../lib-param-bn" }
 
