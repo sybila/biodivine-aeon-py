@@ -8,6 +8,7 @@ use biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector;
 use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use pyo3::exceptions::PyTypeError;
 
 mod internal;
 
