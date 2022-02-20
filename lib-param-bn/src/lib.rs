@@ -13,7 +13,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
 #[pyclass]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct VariableId(biodivine_lib_param_bn::VariableId);
 
 impl From<VariableId> for biodivine_lib_param_bn::VariableId {
