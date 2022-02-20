@@ -6,9 +6,9 @@ use biodivine_boolean_networks::{
 };
 use biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector;
 use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
+use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use pyo3::exceptions::PyTypeError;
 
 mod internal;
 
@@ -196,8 +196,6 @@ impl From<biodivine_pbn_control::perturbation::PerturbationGraph> for Perturbati
     }
 }
 
-
-
 #[pymethods]
 impl PerturbationGraph {
     /// Create a new Boolean network with no functions using a regulatory graph.
@@ -209,10 +207,19 @@ impl PerturbationGraph {
 
     /// Create a new perturbation graph for a given Boolean network.
     #[staticmethod]
-    pub fn with_restricted_variables(network: BooleanNetwork, perturb: Vec<VariableId>) -> PerturbationGraph {
+    pub fn with_restricted_variables(
+        network: BooleanNetwork,
+        perturb: Vec<VariableId>,
+    ) -> PerturbationGraph {
         let network_ = network.into();
-        let perturb_ = &perturb.into_iter().map(|i| i.into()).collect::<Vec<biodivine_lib_param_bn::VariableId>>()[..];
-        biodivine_pbn_control::perturbation::PerturbationGraph::with_restricted_variables(&network_, perturb_).into()
+        let perturb_ = &perturb
+            .into_iter()
+            .map(|i| i.into())
+            .collect::<Vec<biodivine_lib_param_bn::VariableId>>()[..];
+        biodivine_pbn_control::perturbation::PerturbationGraph::with_restricted_variables(
+            &network_, perturb_,
+        )
+        .into()
     }
 
     pub fn as_original(&self) -> SymbolicAsyncGraph {
@@ -236,10 +243,12 @@ impl PerturbationGraph {
         if let Some(result) = self.0.get_perturbation_parameter(variable.into()) {
             Ok(result.into())
         } else {
-            Err(PyTypeError::new_err(format!("Variable {:?} not found", variable)))
+            Err(PyTypeError::new_err(format!(
+                "Variable {:?} not found",
+                variable
+            )))
         }
     }
-
 
     /*
         WARNING: The unit color set in the perturbed graph is not correct! It enforces
@@ -283,12 +292,8 @@ impl PerturbationGraph {
     /// If no value is given, return vertices and colors where the variable is perturbed.
     ///
     /// If the value cannot be perturbed, return empty set.
-    pub fn fix_perturbation(
-        &self,
-        variable: VariableId,
-        value: Option<bool>,
-    ) -> ColoredVertexSet {
-        return self.0.fix_perturbation(variable.into(), value).into()
+    pub fn fix_perturbation(&self, variable: VariableId, value: Option<bool>) -> ColoredVertexSet {
+        return self.0.fix_perturbation(variable.into(), value).into();
     }
 
     /// Return a subset of colors for which the given `variable` is not perturbed.
@@ -303,34 +308,57 @@ impl PerturbationGraph {
         target: ColoredVertexSet,
     ) -> ColoredVertexSet {
         let source_ = ArrayBitVector::from_bool_vector(source);
-        self.0.post_perturbation(&source_, &target.into()).clone().into()
+        self.0
+            .post_perturbation(&source_, &target.into())
+            .clone()
+            .into()
     }
 
-    pub fn one_step_control(&self, source: Vec<bool>, target: Vec<bool>, compute_params: ColorSet) -> ControlMap {
+    pub fn one_step_control(
+        &self,
+        source: Vec<bool>,
+        target: Vec<bool>,
+        compute_params: ColorSet,
+    ) -> ControlMap {
         let source_ = ArrayBitVector::from_bool_vector(source);
         let target_ = ArrayBitVector::from_bool_vector(target);
         let compute_params_ = &compute_params.into();
 
-        self.0.one_step_control(&source_, &target_, &compute_params_).into()
+        self.0
+            .one_step_control(&source_, &target_, &compute_params_)
+            .into()
     }
 
-    pub fn temporary_control(&self, source: Vec<bool>, target: Vec<bool>, compute_params: ColorSet) -> ControlMap {
+    pub fn temporary_control(
+        &self,
+        source: Vec<bool>,
+        target: Vec<bool>,
+        compute_params: ColorSet,
+    ) -> ControlMap {
         let source_ = ArrayBitVector::from_bool_vector(source);
         let target_ = ArrayBitVector::from_bool_vector(target);
         let compute_params_ = &compute_params.into();
 
-        self.0.temporary_control(&source_, &target_, &compute_params_).into()
+        self.0
+            .temporary_control(&source_, &target_, &compute_params_)
+            .into()
     }
 
-    pub fn permanent_control(&self, source: Vec<bool>, target: Vec<bool>, compute_params: ColorSet) -> ControlMap {
+    pub fn permanent_control(
+        &self,
+        source: Vec<bool>,
+        target: Vec<bool>,
+        compute_params: ColorSet,
+    ) -> ControlMap {
         let source_ = ArrayBitVector::from_bool_vector(source);
         let target_ = ArrayBitVector::from_bool_vector(target);
         let compute_params_ = &compute_params.into();
 
-        self.0.permanent_control(&source_, &target_, &compute_params_).into()
+        self.0
+            .permanent_control(&source_, &target_, &compute_params_)
+            .into()
     }
 }
-
 
 /// A Python module implemented in Rust.
 #[pymodule]
