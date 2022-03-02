@@ -266,7 +266,7 @@ impl PerturbationGraph {
     }
 
     pub fn mk_unit_colors(&self) -> ColorSet {
-        self.0.empty_colors().clone().into()
+        self.0.mk_unit_colors().into()
     }
 
     pub fn mk_unit_colored_vertices(&self) -> ColoredVertexSet {
