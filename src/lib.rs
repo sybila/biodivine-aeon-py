@@ -32,6 +32,7 @@ mod internal;
 #[pymodule]
 fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
     bindings::lib_bdd::register(module)?;
+    bindings::lib_param_bn::register(module)?;
     Ok(())
 }
 
