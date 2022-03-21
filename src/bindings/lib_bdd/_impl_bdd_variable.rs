@@ -1,6 +1,6 @@
+use crate::bindings::lib_bdd::PyBddVariable;
 use biodivine_lib_bdd::BddVariable;
 use pyo3::prelude::*;
-use crate::bindings::lib_bdd::PyBddVariable;
 
 impl From<BddVariable> for PyBddVariable {
     fn from(value: BddVariable) -> Self {

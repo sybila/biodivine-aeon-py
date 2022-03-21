@@ -1,7 +1,7 @@
+use crate::bindings::lib_bdd::PyBooleanExpression;
+use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression;
 use pyo3::prelude::*;
-use crate::{AsNative, throw_runtime_error};
-use crate::bindings::lib_bdd::PyBooleanExpression;
 
 impl From<BooleanExpression> for PyBooleanExpression {
     fn from(value: BooleanExpression) -> Self {
@@ -18,6 +18,10 @@ impl From<PyBooleanExpression> for BooleanExpression {
 impl AsNative<BooleanExpression> for PyBooleanExpression {
     fn as_native(&self) -> &BooleanExpression {
         &self.0
+    }
+
+    fn as_native_mut(&mut self) -> &mut BooleanExpression {
+        &mut self.0
     }
 }
 
@@ -41,5 +45,4 @@ impl PyBooleanExpression {
             Err(message) => throw_runtime_error(message),
         }
     }
-
 }

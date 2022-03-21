@@ -1,6 +1,6 @@
+use super::PyParameterId;
 use biodivine_lib_param_bn::ParameterId;
 use pyo3::prelude::*;
-use super::PyParameterId;
 
 impl From<PyParameterId> for ParameterId {
     fn from(value: PyParameterId) -> Self {

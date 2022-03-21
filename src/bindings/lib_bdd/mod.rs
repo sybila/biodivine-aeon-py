@@ -1,13 +1,13 @@
-use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet, BddVariableSetBuilder};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression;
+use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet, BddVariableSetBuilder};
 use pyo3::prelude::*;
 use pyo3::PyResult;
 
 mod _impl_bdd;
 mod _impl_bdd_variable;
 mod _impl_bdd_variable_set;
-mod _impl_boolean_expression;
 mod _impl_bdd_variable_set_builder;
+mod _impl_boolean_expression;
 
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<PyBdd>()?;

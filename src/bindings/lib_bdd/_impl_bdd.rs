@@ -1,9 +1,9 @@
-use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
-use crate::AsNative;
 use super::PyBdd;
+use crate::bindings::lib_bdd::{PyBddVariable, PyBddVariableSet, PyBooleanExpression};
+use crate::AsNative;
+use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
-use crate::bindings::lib_bdd::{PyBddVariable, PyBddVariableSet, PyBooleanExpression};
 
 impl From<Bdd> for PyBdd {
     fn from(value: Bdd) -> Self {
@@ -21,12 +21,20 @@ impl AsNative<Bdd> for PyBdd {
     fn as_native(&self) -> &Bdd {
         &self.0
     }
+
+    fn as_native_mut(&mut self) -> &mut Bdd {
+        &mut self.0
+    }
 }
 
 #[pymethods]
 impl PyBdd {
     fn __str__(&self) -> PyResult<String> {
-        Ok(format!("Bdd(size={}, cardinality={})", self.node_count(), self.cardinality()))
+        Ok(format!(
+            "Bdd(size={}, cardinality={})",
+            self.node_count(),
+            self.cardinality()
+        ))
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -209,9 +217,14 @@ impl PyBdd {
     /// The first argument is a `BddVariableSet` that supplies the variable names. If it is not
     /// given, then default names (`x_0`, `x_1`, ...) are used.
     #[args(variables = "None")]
-    pub fn to_boolean_expression(&self, variables: Option<&PyBddVariableSet>) -> PyBooleanExpression {
+    pub fn to_boolean_expression(
+        &self,
+        variables: Option<&PyBddVariableSet>,
+    ) -> PyBooleanExpression {
         if let Some(variables) = variables {
-            self.as_native().to_boolean_expression(variables.as_native()).into()
+            self.as_native()
+                .to_boolean_expression(variables.as_native())
+                .into()
         } else {
             let variables = BddVariableSet::new_anonymous(self.as_native().num_vars());
             self.as_native().to_boolean_expression(&variables).into()

@@ -1,9 +1,9 @@
-use biodivine_lib_bdd::{BddPartialValuation, BddVariable, BddVariableSet, BddVariableSetBuilder};
 use super::PyBddVariableSet;
+use crate::bindings::lib_bdd::{PyBdd, PyBddVariable, PyBooleanExpression};
+use crate::{throw_runtime_error, throw_type_error, AsNative};
+use biodivine_lib_bdd::{BddPartialValuation, BddVariable, BddVariableSet, BddVariableSetBuilder};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
-use crate::{AsNative, throw_runtime_error, throw_type_error};
-use crate::bindings::lib_bdd::{PyBdd, PyBddVariable, PyBooleanExpression};
 
 impl From<BddVariableSet> for PyBddVariableSet {
     fn from(value: BddVariableSet) -> Self {
@@ -21,12 +21,18 @@ impl AsNative<BddVariableSet> for PyBddVariableSet {
     fn as_native(&self) -> &BddVariableSet {
         &self.0
     }
+
+    fn as_native_mut(&mut self) -> &mut BddVariableSet {
+        &mut self.0
+    }
 }
 
 #[pymethods]
 impl PyBddVariableSet {
     fn __str__(&self) -> PyResult<String> {
-        let names = self.as_native().variables()
+        let names = self
+            .as_native()
+            .variables()
             .into_iter()
             .map(|v| self.as_native().name_of(v))
             .collect::<Vec<_>>();
@@ -52,7 +58,9 @@ impl PyBddVariableSet {
             }
             Ok(builder.build().into())
         } else {
-            throw_type_error("Expected a number of (anonymous) variables or a list of variable names.")
+            throw_type_error(
+                "Expected a number of (anonymous) variables or a list of variable names.",
+            )
         }
     }
 
@@ -62,9 +70,15 @@ impl PyBddVariableSet {
     /// Note that the method panics when the string cannot be correctly parsed.
     pub fn eval_expression(&self, expression: &PyAny) -> PyResult<PyBdd> {
         if let Ok(expression) = expression.extract::<String>() {
-            Ok(self.as_native().eval_expression_string(expression.as_str()).into())
+            Ok(self
+                .as_native()
+                .eval_expression_string(expression.as_str())
+                .into())
         } else if let Ok(expression) = expression.extract::<PyBooleanExpression>() {
-            Ok(self.as_native().eval_expression(expression.as_native()).into())
+            Ok(self
+                .as_native()
+                .eval_expression(expression.as_native())
+                .into())
         } else {
             throw_type_error("Expected String or BooleanExpression.")
         }
@@ -77,7 +91,8 @@ impl PyBddVariableSet {
 
     /// Get the full list of `BddVariable` identifiers managed by this `BddVariableSet`.
     pub fn all_variables(&self, py: Python) -> PyObject {
-        let variables: Vec<PyBddVariable> = self.as_native()
+        let variables: Vec<PyBddVariable> = self
+            .as_native()
             .variables()
             .into_iter()
             .map(|v| v.into())
@@ -141,7 +156,10 @@ impl PyBddVariableSet {
             partial_valuation.set_value(var, value);
         }
 
-        Ok(self.as_native().mk_conjunctive_clause(&partial_valuation).into())
+        Ok(self
+            .as_native()
+            .mk_conjunctive_clause(&partial_valuation)
+            .into())
     }
 
     /// Create a `Bdd` representing a disjunctive clause from a partial valuation of variables.
@@ -158,7 +176,10 @@ impl PyBddVariableSet {
             partial_valuation.set_value(var, value);
         }
 
-        Ok(self.as_native().mk_disjunctive_clause(&partial_valuation).into())
+        Ok(self
+            .as_native()
+            .mk_disjunctive_clause(&partial_valuation)
+            .into())
     }
 
     /// Create a CNF formula. The formula is given as a list of disjunctive clauses.

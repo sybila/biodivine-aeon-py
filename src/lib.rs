@@ -1,6 +1,6 @@
+use pyo3::exceptions::{PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
 use pyo3::{PyResult, Python};
-use pyo3::exceptions::{PyRuntimeError, PyTypeError};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
 ///
@@ -44,20 +44,30 @@ fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
 /// is copied anyway and references do not do much.
 trait AsNative<T> {
     fn as_native(&self) -> &T;
+    fn as_native_mut(&mut self) -> &mut T;
 }
 
 /// Helper function to quickly throw a type error.
-fn throw_type_error<T>(message: &str) -> PyResult<T> {
-    Err(PyTypeError::new_err(message.to_string()))
+fn throw_type_error<T, A: 'static>(message: A) -> PyResult<T>
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
+    Err(PyTypeError::new_err(message))
 }
 
 /// Helper function to quickly throw a runtime error.
-fn throw_runtime_error<T, A: 'static>(message: A) -> PyResult<T> where A: Send + Sync + IntoPy<Py<PyAny>> {
+fn throw_runtime_error<T, A: 'static>(message: A) -> PyResult<T>
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
     Err(runtime_error::<T, A>(message))
 }
 
 /// Helper function to quickly create a runtime error.
-fn runtime_error<T, A: 'static>(message: A) -> PyErr where A: Send + Sync + IntoPy<Py<PyAny>>{
+fn runtime_error<T, A: 'static>(message: A) -> PyErr
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
     PyRuntimeError::new_err(message)
 }
 

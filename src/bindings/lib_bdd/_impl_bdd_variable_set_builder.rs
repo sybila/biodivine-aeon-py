@@ -1,7 +1,7 @@
+use crate::bindings::lib_bdd::{PyBddVariable, PyBddVariableSet, PyBddVariableSetBuilder};
 use biodivine_lib_bdd::BddVariableSetBuilder;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use crate::bindings::lib_bdd::{PyBddVariable, PyBddVariableSet, PyBddVariableSetBuilder};
 
 #[pymethods]
 impl PyBddVariableSetBuilder {

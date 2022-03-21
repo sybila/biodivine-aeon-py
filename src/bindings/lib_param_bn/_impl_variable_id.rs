@@ -1,6 +1,6 @@
+use crate::bindings::lib_param_bn::PyVariableId;
 use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
-use crate::bindings::lib_param_bn::PyVariableId;
 
 impl From<PyVariableId> for VariableId {
     fn from(value: PyVariableId) -> Self {
