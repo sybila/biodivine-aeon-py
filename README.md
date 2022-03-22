@@ -1,6 +1,6 @@
 # Biodivine/AEON.py
 
-This repository contains Python bindings for the AEON tool, which can be used for symbolic analysis of (partially specified) Boolean networks. In particular, it allows solving attractor detection and source-target control problems on large, non-trivial networks.
+This repository contains AEON.py, the Python bindings for the AEON tool, which can be used for symbolic analysis of (partially specified) Boolean networks. In particular, it allows solving attractor detection and source-target control problems on large, non-trivial networks. Furthermore, these problems can be addressed even in networks with logical parameters or partially unknown dynamics.
 
 ### Installation
 
@@ -12,7 +12,7 @@ pip install biodivine-aeon
 
 ### Documentation
 
-For new users, we recommend familiarising with the three Jupyter notebooks below, which summarise most of tha major functionality of AEON.py:
+For new users, we recommend familiarising with the three Jupyter notebooks below, which summarise most of the major functionality of AEON.py:
  - [Symbolic computation using BDDs](https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_bdd.ipynb)
  - [Working with parametrised Boolean networks](https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_bn.ipynb)
  - [AEON.py example project](https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_aeon.ipynb)

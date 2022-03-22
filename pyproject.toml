@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "biodivine_aeon"
 repository = "https://github.com/sybila/biodivine-aeon-py/"
-documentation = "https://deepnote.com/project/Aeonpy-Examples-CR33GbmyS2e4tqqZCcCwjA/%2Fexample_aeon.ipynb"
+documentation = "https://biodivine.fi.muni.cz/docs/aeon-py/v0.1.0/"
 description = "Python bindings for the tool AEON."
 version = "0.1.0"
 requires-python = ">=3.6"
