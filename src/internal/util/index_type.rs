@@ -1,5 +1,3 @@
-// TODO: Use procedural macros to generate implementations for most of this.
-
 /// Structs that implement this type declare that they serve as indices
 /// into some collection of `T` values.
 pub trait IndexType<T, Collection>: Sized {

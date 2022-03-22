@@ -33,6 +33,7 @@ mod internal;
 fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
     bindings::lib_bdd::register(module)?;
     bindings::lib_param_bn::register(module)?;
+    bindings::aeon::register(module)?;
     Ok(())
 }
 
@@ -70,10 +71,3 @@ where
 {
     PyRuntimeError::new_err(message)
 }
-
-/*
-/// Helper function to quickly throw a general exception.
-fn throw_error<T, A: 'static>(message: A) -> PyResult<T> where A: Send + Sync + IntoPy<Py<PyAny>> {
-    Err(PyException::new_err(message))
-}
-*/
