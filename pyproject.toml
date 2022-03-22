@@ -7,7 +7,7 @@ name = "biodivine_aeon"
 repository = "https://github.com/sybila/biodivine-aeon-py/"
 documentation = "https://biodivine.fi.muni.cz/docs/aeon-py/v0.1.0/"
 description = "Python bindings for the tool AEON."
-version = "0.1.0"
+version = "0.1.1"
 requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Rust",
