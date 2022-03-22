@@ -1,10 +1,10 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use crate::bindings::lib_bdd::PyBooleanExpression;
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 impl From<BooleanExpression> for PyBooleanExpression {
     fn from(value: BooleanExpression) -> Self {

@@ -1,5 +1,3 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use super::PyBdd;
 use crate::bindings::lib_bdd::{PyBddVariable, PyBddVariableSet, PyBooleanExpression};
 use crate::{throw_runtime_error, AsNative};
@@ -7,6 +5,8 @@ use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 impl From<Bdd> for PyBdd {
     fn from(value: Bdd) -> Self {

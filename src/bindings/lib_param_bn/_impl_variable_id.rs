@@ -1,10 +1,10 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use crate::bindings::lib_param_bn::PyVariableId;
 use crate::throw_runtime_error;
 use biodivine_lib_param_bn::VariableId;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 impl From<PyVariableId> for VariableId {
     fn from(value: PyVariableId) -> Self {
