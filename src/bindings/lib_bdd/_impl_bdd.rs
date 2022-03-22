@@ -1,7 +1,8 @@
 use super::PyBdd;
 use crate::bindings::lib_bdd::{PyBddVariable, PyBddVariableSet, PyBooleanExpression};
-use crate::AsNative;
+use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
+use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
@@ -29,6 +30,17 @@ impl AsNative<Bdd> for PyBdd {
 
 #[pymethods]
 impl PyBdd {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(self == other),
+            CompareOp::Ne => Ok(self != other),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
             "Bdd(size={}, cardinality={})",

@@ -1,5 +1,7 @@
 use crate::bindings::lib_bdd::PyBddVariable;
+use crate::throw_runtime_error;
 use biodivine_lib_bdd::BddVariable;
+use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 
 impl From<BddVariable> for PyBddVariable {
@@ -16,6 +18,17 @@ impl From<PyBddVariable> for BddVariable {
 
 #[pymethods]
 impl PyBddVariable {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(self == other),
+            CompareOp::Ne => Ok(self != other),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(format!("BddVariable({})", self.0))
     }

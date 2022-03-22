@@ -1,6 +1,7 @@
 use crate::bindings::lib_bdd::PyBooleanExpression;
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression;
+use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 
 impl From<BooleanExpression> for PyBooleanExpression {
@@ -27,6 +28,17 @@ impl AsNative<BooleanExpression> for PyBooleanExpression {
 
 #[pymethods]
 impl PyBooleanExpression {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(self == other),
+            CompareOp::Ne => Ok(self != other),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(format!("{}", self.0))
     }
