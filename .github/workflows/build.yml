@@ -1,11 +1,11 @@
-name: aeon
+name: build
 
 on:
   push:
   pull_request:
 
 jobs:
-  aeon-linux:
+  linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,50 +13,50 @@ jobs:
         with:
           manylinux: auto
           command: build
-          args: --release -o aeon/dist -m aeon/Cargo.toml
+          args: --release -o dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
-          name: wheels-aeon
-          path: aeon/dist
+          name: wheels
+          path: dist
 
-  aeon-windows:
+  windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - uses: messense/maturin-action@v1
         with:
           command: build
-          args: --release --no-sdist -o aeon/dist -m aeon/Cargo.toml
+          args: --release --no-sdist -o dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
-          name: wheels-aeon
-          path: aeon/dist
+          name: wheels
+          path: dist
 
-  aeon-macos:
+  macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: messense/maturin-action@v1
         with:
           command: build
-          args: --release --no-sdist -o aeon/dist --universal2 -m aeon/Cargo.toml
+          args: --release --no-sdist -o dist --universal2
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
-          name: wheels-aeon
-          path: aeon/dist
+          name: wheels
+          path: dist
 
-  aeon-release:
+  release:
     name: Release
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ aeon-macos, aeon-windows, aeon-linux ]
+    needs: [ macos, windows, linux ]
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: wheels-aeon
+          name: wheels
       - name: Publish to PyPI
         uses: messense/maturin-action@v1
         env:
