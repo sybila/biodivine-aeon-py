@@ -59,7 +59,7 @@ impl PyGraphColors {
     ///
     /// Needs a reference to the underlying symbolic graph to resolve variable names.
     /// If you are ok with an anonymous BDD graph, convert the set to `Bdd` and then use
-    /// anonymous function on this object.
+    /// anonymous `.dot` conversion function on the result.
     pub fn to_dot(&self, graph: &PySymbolicAsyncGraph) -> String {
         self.as_native()
             .to_dot_string(graph.as_native().symbolic_context())
