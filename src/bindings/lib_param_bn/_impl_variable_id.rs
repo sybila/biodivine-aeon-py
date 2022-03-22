@@ -1,3 +1,5 @@
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use crate::bindings::lib_param_bn::PyVariableId;
 use crate::throw_runtime_error;
 use biodivine_lib_param_bn::VariableId;
@@ -27,6 +29,12 @@ impl PyVariableId {
             CompareOp::Gt => throw_runtime_error("Unsupported operation."),
             CompareOp::Ge => throw_runtime_error("Unsupported operation."),
         }
+    }
+
+    fn __hash__(&self) -> isize {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish() as isize
     }
 
     fn __str__(&self) -> PyResult<String> {
