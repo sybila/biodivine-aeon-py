@@ -25,34 +25,43 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
+/// A unique identifier of a single variable in a `BooleanNetwork` or `RegulatoryGraph`.
 #[pyclass(name = "VariableId")]
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct PyVariableId(VariableId);
 
+/// A unique identifier of a single parameter in a `BooleanNetwork`.
 #[pyclass(name = "ParameterId")]
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct PyParameterId(ParameterId);
 
+/// A directed graph describing regulations between Boolean variables.
 #[pyclass(name = "RegulatoryGraph")]
 #[derive(Clone)]
 pub struct PyRegulatoryGraph(RegulatoryGraph);
 
+/// A representation of a (possibly parametrised) Boolean network.
 #[pyclass(name = "BooleanNetwork")]
 #[derive(Clone)]
 pub struct PyBooleanNetwork(BooleanNetwork);
 
+/// A symbolically represented set of colors (Boolean network parameter valuations).
 #[pyclass(name = "ColorSet")]
 #[derive(Clone)]
 pub struct PyGraphColors(GraphColors);
 
+/// A symbolically represented set of vertices (Boolean network states).
 #[pyclass(name = "VertexSet")]
 #[derive(Clone)]
 pub struct PyGraphVertices(GraphVertices);
 
+/// A symbolically represented relation over colors and vertices (a possibly different set
+/// of Boolean network states for each parameter valuation).
 #[pyclass(name = "ColoredVertexSet")]
 #[derive(Clone)]
 pub struct PyGraphColoredVertices(GraphColoredVertices);
 
+/// A symbolic asynchronous state-transition graph of a parametrised Boolean network.
 #[pyclass(name = "SymbolicAsyncGraph")]
 #[derive(Clone)]
 pub struct PySymbolicAsyncGraph(SymbolicAsyncGraph);
