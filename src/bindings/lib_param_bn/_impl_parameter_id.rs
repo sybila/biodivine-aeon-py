@@ -38,7 +38,7 @@ impl PyParameterId {
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(format!("BnParameterId({:?})", self.0))
+        Ok(format!("{:?}", self.0))
     }
 
     fn __repr__(&self) -> PyResult<String> {

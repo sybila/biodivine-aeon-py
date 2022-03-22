@@ -38,7 +38,7 @@ impl PyVariableId {
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(format!("BnVariableId({})", self.0))
+        Ok(format!("{:?}", self.0))
     }
 
     fn __repr__(&self) -> PyResult<String> {
