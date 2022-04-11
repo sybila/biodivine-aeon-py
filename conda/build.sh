@@ -3,9 +3,11 @@
 set -ex
 
 if [ `uname` == Darwin ]; then
-  export HOME=`mktemp -d`
+  maturin build --release --interpreter python --no-sdist -o dist #--universal2    
 fi
 
-maturin build --interpreter python --release
+if [ `uname` == Linux ]; then
+  maturin build --release --interpreter python -o dist
+fi
 
-$PYTHON -m pip install target/wheels/*.whl --no-deps --ignore-installed -vv
+pip install dist/*.whl --no-deps --ignore-installed
