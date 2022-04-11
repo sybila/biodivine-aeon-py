@@ -1,0 +1,34 @@
+{% set name = "biodivine_aeon" %}
+{% set version = "0.1.1" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  path: ..
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - pip
+    - rust
+    - maturin
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - biodivine_aeon
+
+about:
+  home: https://github.com/sybila/biodivine-aeon-py
+  license: MIT License
+  license_family: MIT
+  license_file: LICENSE
+  summary: "Python/Rust library for symbolic manipulation of Boolean networks."
