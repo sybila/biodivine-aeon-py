@@ -203,7 +203,7 @@ impl PyPerturbationGraph {
     pub fn one_step_control(
         &self,
         source: Vec<bool>,
-        target: Vec<bool>,
+        target: &PyGraphColoredVertices,
         compute_params: Option<&PyGraphColors>,
     ) -> PyControlMap {
         let compute_params = compute_params
@@ -212,7 +212,7 @@ impl PyPerturbationGraph {
         self.as_native()
             .one_step_control(
                 &ArrayBitVector::from_bool_vector(source),
-                &ArrayBitVector::from_bool_vector(target),
+                target.as_native(),
                 compute_params.as_native(),
             )
             .into()
@@ -227,7 +227,7 @@ impl PyPerturbationGraph {
     pub fn temporary_control(
         &self,
         source: Vec<bool>,
-        target: Vec<bool>,
+        target: &PyGraphColoredVertices,
         compute_params: Option<&PyGraphColors>,
     ) -> PyControlMap {
         let compute_params = compute_params
@@ -236,7 +236,7 @@ impl PyPerturbationGraph {
         self.as_native()
             .temporary_control(
                 &ArrayBitVector::from_bool_vector(source),
-                &ArrayBitVector::from_bool_vector(target),
+                target.as_native(),
                 compute_params.as_native(),
             )
             .into()
@@ -251,7 +251,7 @@ impl PyPerturbationGraph {
     pub fn permanent_control(
         &self,
         source: Vec<bool>,
-        target: Vec<bool>,
+        target: &PyGraphColoredVertices,
         compute_params: Option<&PyGraphColors>,
     ) -> PyControlMap {
         let compute_params = compute_params
@@ -260,7 +260,7 @@ impl PyPerturbationGraph {
         self.as_native()
             .permanent_control(
                 &ArrayBitVector::from_bool_vector(source),
-                &ArrayBitVector::from_bool_vector(target),
+                target.as_native(),
                 compute_params.as_native(),
             )
             .into()
