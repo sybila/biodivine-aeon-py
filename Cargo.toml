@@ -4,7 +4,7 @@ version = "0.1.1"
 edition = "2021"
 
 [lib]
-name = "biodivine-aeon"
+name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
