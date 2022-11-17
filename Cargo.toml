@@ -8,10 +8,10 @@ name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-pyo3 = { version = "0.15.1", features = ["extension-module"] }
-biodivine-lib-param-bn = "0.2.4"
-biodivine-lib-bdd = "0.3.0"
-biodivine-pbn-control = "0.1.1"
+pyo3 = { version = "0.17.3", features = ["extension-module"] }
+biodivine-lib-param-bn = "0.3.0"
+biodivine-lib-bdd = "0.4.1"
+biodivine-pbn-control = { git="https://github.com/sybila/biodivine-pbn-control", branch="v0.2" }
 
 [build-dependencies]
-pyo3-build-config = "0.15.1"
+pyo3-build-config = "0.17.3"
