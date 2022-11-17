@@ -1,11 +1,4 @@
 name: build
-env:
-  # Fixed versions used for testing, so that the builds don't
-  # spontaneously break after a few years.
-  # Make sure to update this from time to time.
-  RUST_VERSION: "1.65.0"
-  PYTHON_VERSION: "3.9"
-
 on:
   push:
   pull_request:
@@ -14,21 +7,16 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: 3.9
           architecture: x64
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.RUST_VERSION }}
-          override: true
       - uses: PyO3/maturin-action@v1
         with:
+          target: x86_64
           manylinux: auto
-          command: build
-          args: --release -o target/dist
+          args: --release --out target/dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -38,21 +26,16 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: 3.9
           architecture: x64
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.RUST_VERSION }}
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
       - uses: PyO3/maturin-action@v1
         with:
-          command: build
           target: x64
-          args: --release --no-sdist -o target/dist
+          args: --release --out target/dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -62,20 +45,16 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: 3.9
           architecture: x64
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.RUST_VERSION }}
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --no-sdist -o target/dist --universal2
+          args: --release --out target/dist --universal2
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
