@@ -163,6 +163,29 @@ impl PyBdd {
         Ok(self.as_native().restrict(&valuation).into())
     }
 
+    /// List all valuations that satisfy this BDD. Note that all valuations will be returned
+    /// as one list (i.e. this is not an iterator). So a large number of valuations can require
+    /// a significant amount of memory.
+    pub fn list_sat_valuations(&self) -> Vec<Vec<bool>> {
+        self.as_native().sat_valuations()
+            .map(|it| it.vector())
+            .collect()
+    }
+
+    /// List all clauses of this BDD (paths to `1` literal). Note that all clauses are returned
+    /// as one list (i.e. this is not an iterator). So a large number of clauses can require
+    /// a significant amount of memory.
+    pub fn list_sat_clauses(&self) -> Vec<Vec<(PyBddVariable, bool)>> {
+        self.as_native().sat_clauses()
+            .map(|it| {
+                it.to_values()
+                    .into_iter()
+                    .map(|(a, b)| (a.into(), b))
+                    .collect()
+            })
+            .collect()
+    }
+
     /// Print this `Bdd` to a `.dot` file that can be visualised using e.g. `graphviz`.
     ///
     /// Variable names are resolved from the given `BddVariableSet`. If not given, the names
