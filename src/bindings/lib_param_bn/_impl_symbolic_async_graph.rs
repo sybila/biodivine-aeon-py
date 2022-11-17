@@ -448,6 +448,36 @@ impl PySymbolicAsyncGraph {
             .into())
     }
 
+    /// Compute the set of forward-reachable vertices from the given initial set.
+    ///
+    /// In other words, the result is the smallest forward-closed superset of initial.
+    pub fn reach_forward(&self, initial: &PyGraphColoredVertices) -> PyGraphColoredVertices {
+        self.as_native().reach_forward(initial.as_native()).into()
+    }
+
+    /// Compute the set of backward-reachable vertices from the given `initial` set.
+    ///
+    /// In other words, the result is the smallest backward-closed superset of `initial`.
+    pub fn reach_backward(&self, initial: &PyGraphColoredVertices) -> PyGraphColoredVertices {
+        self.as_native().reach_backward(initial.as_native()).into()
+    }
+
+    /// Compute the subset of `initial` vertices that can only reach other vertices within
+    /// the `initial` set.
+    ///
+    /// In other words, the result is the largest forward-closed subset of `initial`.
+    pub fn trap_forward(&self, initial: &PyGraphColoredVertices) -> PyGraphColoredVertices {
+        self.as_native().trap_forward(initial.as_native()).into()
+    }
+
+    /// Compute the subset of `initial` vertices that can only be reached from vertices within
+    /// the `initial` set.
+    ///
+    /// In other words, the result is the largest backward-closed subset of `initial`.
+    pub fn trap_backward(&self, initial: &PyGraphColoredVertices) -> PyGraphColoredVertices {
+        self.as_native().trap_backward(initial.as_native()).into()
+    }
+
     /// Resolve a `VariableId` for a variable given either as a string or as a `VariableId`.
     fn resolve_variable(&self, variable: &PyAny) -> PyResult<PyVariableId> {
         if let Ok(name) = variable.extract::<String>() {
