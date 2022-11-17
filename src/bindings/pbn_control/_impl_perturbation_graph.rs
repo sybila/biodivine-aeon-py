@@ -91,7 +91,7 @@ impl PyPerturbationGraph {
         if let Some(id) = self.as_native().get_perturbation_parameter(variable) {
             Ok(id.into())
         } else {
-            return throw_runtime_error(format!("Variable {:?} not found", variable));
+            throw_runtime_error(format!("Variable {:?} not found", variable))
         }
     }
 
@@ -207,13 +207,13 @@ impl PyPerturbationGraph {
         compute_params: Option<&PyGraphColors>,
     ) -> PyControlMap {
         let compute_params = compute_params
-            .map(|it| it.clone())
-            .unwrap_or_else(|| self.unit_colors());
+            .map(|it| it.as_native())
+            .unwrap_or_else(|| self.as_native().unit_colors());
         self.as_native()
             .one_step_control(
                 &ArrayBitVector::from_bool_vector(source),
                 &ArrayBitVector::from_bool_vector(target),
-                compute_params.as_native(),
+                compute_params,
             )
             .into()
     }
@@ -231,13 +231,13 @@ impl PyPerturbationGraph {
         compute_params: Option<&PyGraphColors>,
     ) -> PyControlMap {
         let compute_params = compute_params
-            .map(|it| it.clone())
-            .unwrap_or_else(|| self.unit_colors());
+            .map(|it| it.as_native())
+            .unwrap_or_else(|| self.as_native().unit_colors());
         self.as_native()
             .temporary_control(
                 &ArrayBitVector::from_bool_vector(source),
                 &ArrayBitVector::from_bool_vector(target),
-                compute_params.as_native(),
+                compute_params,
             )
             .into()
     }
@@ -255,13 +255,13 @@ impl PyPerturbationGraph {
         compute_params: Option<&PyGraphColors>,
     ) -> PyControlMap {
         let compute_params = compute_params
-            .map(|it| it.clone())
-            .unwrap_or_else(|| self.unit_colors());
+            .map(|it| it.as_native())
+            .unwrap_or_else(|| self.as_native().unit_colors());
         self.as_native()
             .permanent_control(
                 &ArrayBitVector::from_bool_vector(source),
                 &ArrayBitVector::from_bool_vector(target),
-                compute_params.as_native(),
+                compute_params,
             )
             .into()
     }

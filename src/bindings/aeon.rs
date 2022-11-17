@@ -47,11 +47,11 @@ pub fn xie_beerel_attractors(
         .variables()
         .collect::<Vec<_>>();
     let states = states
-        .map(|it| it.clone())
-        .unwrap_or_else(|| graph.unit_colored_vertices());
+        .map(|it| it.as_native())
+        .unwrap_or_else(|| graph.as_native().unit_colored_vertices());
     let result = crate::internal::scc::algo_xie_beerel::xie_beerel_attractors(
         graph.as_native(),
-        states.as_native(),
+        states,
         &variables,
     );
     result.into_iter().map(|it| it.into()).collect()
@@ -72,13 +72,13 @@ pub fn reach_fwd(
         .variables()
         .collect::<Vec<_>>();
     let universe = universe
-        .map(|it| it.clone())
-        .unwrap_or_else(|| graph.unit_colored_vertices());
+        .map(|it| it.as_native())
+        .unwrap_or_else(|| graph.as_native().unit_colored_vertices());
 
     crate::internal::scc::algo_saturated_reachability::reach_fwd(
         graph.as_native(),
         states.as_native(),
-        universe.as_native(),
+        universe,
         &variables,
     )
     .into()
@@ -99,13 +99,13 @@ pub fn reach_bwd(
         .variables()
         .collect::<Vec<_>>();
     let universe = universe
-        .map(|it| it.clone())
-        .unwrap_or_else(|| graph.unit_colored_vertices());
+        .map(|it| it.as_native())
+        .unwrap_or_else(|| graph.as_native().unit_colored_vertices());
 
     crate::internal::scc::algo_saturated_reachability::reach_bwd(
         graph.as_native(),
         states.as_native(),
-        universe.as_native(),
+        universe,
         &variables,
     )
     .into()

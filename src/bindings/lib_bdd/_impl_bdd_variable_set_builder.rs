@@ -3,6 +3,12 @@ use biodivine_lib_bdd::BddVariableSetBuilder;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
+impl Default for PyBddVariableSetBuilder {
+    fn default() -> Self {
+        PyBddVariableSetBuilder::new()
+    }
+}
+
 #[pymethods]
 impl PyBddVariableSetBuilder {
     /// Create a new, empty `BddVariableSetBuilder`.

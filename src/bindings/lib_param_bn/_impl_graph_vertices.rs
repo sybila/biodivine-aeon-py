@@ -43,10 +43,7 @@ impl PyGraphVertices {
 
     /// Populate a new `VertexSet` using a raw `Bdd` represented as a string.
     pub fn copy_with_raw_string(&self, bdd: String) -> PyResult<Self> {
-        Ok(self
-            .as_native()
-            .copy(Bdd::from_string(bdd.as_str()).into())
-            .into())
+        Ok(self.as_native().copy(Bdd::from_string(bdd.as_str())).into())
     }
 
     /// Get an approximate count of elements in this set.

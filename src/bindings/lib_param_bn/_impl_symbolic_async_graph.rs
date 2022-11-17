@@ -99,7 +99,7 @@ impl PySymbolicAsyncGraph {
     pub fn fix_subnetwork_colors(&self, network: &PyBooleanNetwork) -> PyResult<PyGraphColors> {
         match self.as_native().mk_subnetwork_colors(network.as_native()) {
             Ok(colors) => Ok(colors.into()),
-            Err(error) => throw_runtime_error(error)
+            Err(error) => throw_runtime_error(error),
         }
     }
 

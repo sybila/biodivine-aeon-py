@@ -201,7 +201,7 @@ impl PyBooleanNetwork {
         self.as_native()
             .implicit_parameters()
             .into_iter()
-            .map(|it| PyVariableId::from(it))
+            .map(PyVariableId::from)
             .collect()
     }
 
@@ -230,7 +230,7 @@ impl PyBooleanNetwork {
         } else if let Ok(id) = parameter.extract::<PyParameterId>() {
             Ok(id)
         } else {
-            throw_type_error(format!("Expected parameter name."))
+            throw_type_error("Expected parameter name.".to_string())
         }
     }
 

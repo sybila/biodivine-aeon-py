@@ -167,7 +167,8 @@ impl PyBdd {
     /// as one list (i.e. this is not an iterator). So a large number of valuations can require
     /// a significant amount of memory.
     pub fn list_sat_valuations(&self) -> Vec<Vec<bool>> {
-        self.as_native().sat_valuations()
+        self.as_native()
+            .sat_valuations()
             .map(|it| it.vector())
             .collect()
     }
@@ -176,7 +177,8 @@ impl PyBdd {
     /// as one list (i.e. this is not an iterator). So a large number of clauses can require
     /// a significant amount of memory.
     pub fn list_sat_clauses(&self) -> Vec<Vec<(PyBddVariable, bool)>> {
-        self.as_native().sat_clauses()
+        self.as_native()
+            .sat_clauses()
             .map(|it| {
                 it.to_values()
                     .into_iter()
