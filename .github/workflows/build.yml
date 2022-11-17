@@ -51,6 +51,7 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
+          target: x64
           args: --release --no-sdist -o target/dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
