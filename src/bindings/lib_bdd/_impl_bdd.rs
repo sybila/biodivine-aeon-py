@@ -62,37 +62,37 @@ impl PyBdd {
     }
 
     /// Compute a logical negation of this `Bdd`.
-    pub fn not(&self) -> PyBdd {
+    pub fn l_not(&self) -> PyBdd {
         self.as_native().not().into()
     }
 
     /// Compute a logical conjunction of two formulas.
-    pub fn and(&self, other: &PyBdd) -> PyBdd {
+    pub fn l_and(&self, other: &PyBdd) -> PyBdd {
         self.as_native().and(other.as_native()).into()
     }
 
     /// Compute a logical disjunction of two formulas.
-    pub fn or(&self, other: &PyBdd) -> PyBdd {
+    pub fn l_or(&self, other: &PyBdd) -> PyBdd {
         self.as_native().or(other.as_native()).into()
     }
 
     /// Compute a logical implication of two formulas.
-    pub fn imp(&self, other: &PyBdd) -> PyBdd {
+    pub fn l_imp(&self, other: &PyBdd) -> PyBdd {
         self.as_native().imp(other.as_native()).into()
     }
 
     /// Compute a logical equivalence of two formulas.
-    pub fn iff(&self, other: &PyBdd) -> PyBdd {
+    pub fn l_iff(&self, other: &PyBdd) -> PyBdd {
         self.as_native().iff(other.as_native()).into()
     }
 
     /// Compute a logical xor of two formulas.
-    pub fn xor(&self, other: &PyBdd) -> PyBdd {
+    pub fn l_xor(&self, other: &PyBdd) -> PyBdd {
         self.as_native().xor(other.as_native()).into()
     }
 
     /// Compute a logical conjunction of this formula with a negated second formula.
-    pub fn and_not(&self, other: &PyBdd) -> PyBdd {
+    pub fn l_and_not(&self, other: &PyBdd) -> PyBdd {
         self.as_native().and_not(other.as_native()).into()
     }
 
@@ -145,6 +145,22 @@ impl PyBdd {
             valuation.push((key.into(), value));
         }
         Ok(self.as_native().select(&valuation).into())
+    }
+
+    /// Same as `var_select`, but eliminates the variable after selection.
+    pub fn var_restrict(&self, var: PyBddVariable, value: bool) -> PyBdd {
+        self.as_native().var_restrict(var.into(), value).into()
+    }
+
+    /// Same as `select`, but eliminates the variables after selection.
+    pub fn restrict(&self, values: &PyDict) -> PyResult<PyBdd> {
+        let mut valuation: Vec<(BddVariable, bool)> = Vec::new();
+        for (k, v) in values {
+            let key = k.extract::<PyBddVariable>()?;
+            let value = v.extract::<bool>()?;
+            valuation.push((key.into(), value));
+        }
+        Ok(self.as_native().restrict(&valuation).into())
     }
 
     /// Print this `Bdd` to a `.dot` file that can be visualised using e.g. `graphviz`.
