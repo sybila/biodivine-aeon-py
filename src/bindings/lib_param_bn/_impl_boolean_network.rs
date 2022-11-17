@@ -85,8 +85,9 @@ impl PyBooleanNetwork {
     ///
     /// Note that this conversion may fail when the network contains uninterpreted functions
     /// or unsupported variable names.
-    pub fn to_bnet(&self) -> PyResult<String> {
-        match self.as_native().to_bnet() {
+    pub fn to_bnet(&self, rename_if_necessary: Option<bool>) -> PyResult<String> {
+        let rename_if_necessary = rename_if_necessary.unwrap_or(false);
+        match self.as_native().to_bnet(rename_if_necessary) {
             Ok(data) => Ok(data),
             Err(error) => throw_runtime_error(error),
         }
@@ -171,6 +172,11 @@ impl PyBooleanNetwork {
         self.as_native().num_parameters()
     }
 
+    /// Get the number of variables without update functions (i.e. implicit parameters).
+    pub fn num_implicit_parameters(&self) -> usize {
+        self.as_native().num_implicit_parameters()
+    }
+
     /// Get a list of `VariableId` objects representing the variables of this `BooleanNetwork`.
     pub fn variables(&self) -> Vec<PyVariableId> {
         self.as_native()
@@ -187,6 +193,15 @@ impl PyBooleanNetwork {
             .parameters()
             .into_iter()
             .map(|it| it.into())
+            .collect()
+    }
+
+    /// Get a list of `VariableId` objects corresponding to variables without update functions.
+    pub fn implicit_parameters(&self) -> Vec<PyVariableId> {
+        self.as_native()
+            .implicit_parameters()
+            .into_iter()
+            .map(|it| PyVariableId::from(it))
             .collect()
     }
 
@@ -285,6 +300,17 @@ impl PyBooleanNetwork {
             .set_variable_name(id.into(), name)
         {
             Ok(()) => Ok(()),
+            Err(error) => throw_runtime_error(error),
+        }
+    }
+
+    /// Infer a new `BooleanNetwork` with identical update functions and a regulatory graph
+    /// that is maximally consistent with these functions.
+    ///
+    /// See also original rust documentation in `lib-param-bn`.
+    pub fn infer_regulatory_graph(&self) -> PyResult<PyBooleanNetwork> {
+        match self.as_native().infer_valid_graph() {
+            Ok(bn) => Ok(bn.into()),
             Err(error) => throw_runtime_error(error),
         }
     }

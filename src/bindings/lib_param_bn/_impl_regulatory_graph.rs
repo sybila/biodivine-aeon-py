@@ -259,6 +259,14 @@ impl PyRegulatoryGraph {
         }
         Ok(result)
     }
+
+    /// Export this regulatory graph to a `.dot` format.
+    ///
+    /// In the representation, we use red and green color to distinguish positive and negative
+    /// regulations. Dashed edges show regulations without observability requirement.
+    pub fn to_dot(&self) -> String {
+        self.as_native().to_dot()
+    }
 }
 
 fn regulation_to_python(py: Python, reg: &Regulation) -> PyResult<PyObject> {

@@ -6,7 +6,9 @@ use crate::bindings::lib_param_bn::{
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;
+use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 impl From<PySymbolicAsyncGraph> for SymbolicAsyncGraph {
     fn from(value: PySymbolicAsyncGraph) -> Self {
@@ -75,6 +77,30 @@ impl PySymbolicAsyncGraph {
         self.as_native()
             .vertex(&ArrayBitVector::from_bool_vector(vertex))
             .into()
+    }
+
+    /// Takes a dictionary which maps variables (name or id) to Boolean values. Produces
+    /// a `ColoredVertexSet` of states which agree with the given restriction.
+    pub fn fix_subspace(&self, space: &PyDict) -> PyResult<PyGraphColoredVertices> {
+        let mut valuation: Vec<(VariableId, bool)> = Vec::new();
+        for (k, v) in space {
+            let key = self.resolve_variable(k)?;
+            let value = v.extract::<bool>()?;
+            valuation.push((key.into(), value));
+        }
+        Ok(self.as_native().mk_subspace(&valuation).into())
+    }
+
+    /// Compute the set of all possible colours (instantiations) of this (main) network that
+    /// are represented by the supplied more specific sub-network.
+    ///
+    /// The two networks must be *compatible* for this to work. See the original Rust method
+    /// for conditions that must be satisfied by compatible networks.
+    pub fn fix_subnetwork_colors(&self, network: &PyBooleanNetwork) -> PyResult<PyGraphColors> {
+        match self.as_native().mk_subnetwork_colors(network.as_native()) {
+            Ok(colors) => Ok(colors.into()),
+            Err(error) => throw_runtime_error(error)
+        }
     }
 
     /// Create a `ColorSet` in which a logical parameter is fixed to the given constant value.
