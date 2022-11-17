@@ -1,6 +1,6 @@
 [package]
 name = "biodivine-aeon-py"
-version = "0.1.1"
+version = "0.2.0-alpha"
 edition = "2021"
 
 [lib]
