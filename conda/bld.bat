@@ -1,3 +1,3 @@
-maturin build --release --no-sdist -o dist
+maturin build --release -o dist
 dir dist
 pip install "dist/*.whl"
