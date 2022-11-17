@@ -13,12 +13,12 @@ jobs:
         with:
           manylinux: auto
           command: build
-          args: --release -o dist
+          args: --release -o target/dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/dist
 
   windows:
     runs-on: windows-latest
@@ -27,12 +27,12 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --no-sdist -o dist
+          args: --release --no-sdist -o target/dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/dist
 
   macos:
     runs-on: macos-latest
@@ -41,12 +41,12 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --no-sdist -o dist --universal2
+          args: --release --no-sdist -o target/dist --universal2
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/dist
 
   release:
     name: Release
