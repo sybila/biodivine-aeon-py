@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 pyo3 = { version = "0.17.3", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = "0.3.0"
 biodivine-lib-bdd = "0.4.1"
-biodivine-pbn-control = { git="https://github.com/sybila/biodivine-pbn-control", branch="v0.2" }
+biodivine-pbn-control = "0.2.0"
 
 [build-dependencies]
 pyo3-build-config = "0.17.3"
