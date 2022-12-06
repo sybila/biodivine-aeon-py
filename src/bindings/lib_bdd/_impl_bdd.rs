@@ -291,4 +291,22 @@ impl PyBdd {
             self.as_native().to_boolean_expression(&variables).into()
         }
     }
+
+    /// Compute the subset of variables which actually appear in this `Bdd`.
+    pub fn support_set(&self) -> HashSet<PyBddVariable> {
+        self.as_native()
+            .support_set()
+            .into_iter()
+            .map(|it| PyBddVariable::from(it))
+            .collect()
+    }
+
+    /// Compute the contributions of individual variables towards the size of the Bdd
+    /// (in terms of nodes).
+    pub fn size_per_variable(&self) -> HashMap<PyBddVariable, usize> {
+        self.as_native().size_per_variable()
+            .into_iter()
+            .map(|(k,v)| (PyBddVariable::from(k), v))
+            .collect()
+    }
 }
