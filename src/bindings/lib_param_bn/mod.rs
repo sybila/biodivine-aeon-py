@@ -27,12 +27,12 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
 
 /// A unique identifier of a single variable in a `BooleanNetwork` or `RegulatoryGraph`.
 #[pyclass(name = "VariableId")]
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct PyVariableId(VariableId);
 
 /// A unique identifier of a single parameter in a `BooleanNetwork`.
 #[pyclass(name = "ParameterId")]
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct PyParameterId(ParameterId);
 
 /// A directed graph describing regulations between Boolean variables.

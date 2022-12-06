@@ -1,9 +1,10 @@
 use super::PyRegulatoryGraph;
 use crate::bindings::lib_param_bn::PyVariableId;
 use crate::{throw_runtime_error, throw_type_error, AsNative};
-use biodivine_lib_param_bn::{Monotonicity, Regulation, RegulatoryGraph};
+use biodivine_lib_param_bn::{Monotonicity, Regulation, RegulatoryGraph, Sign, VariableId};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use std::collections::HashSet;
 
 impl From<PyRegulatoryGraph> for RegulatoryGraph {
     fn from(value: PyRegulatoryGraph) -> Self {
@@ -216,7 +217,7 @@ impl PyRegulatoryGraph {
     /// objects. Note that the entities may be returned in arbitrary order.
     pub fn transitive_regulators(&self, target: &PyAny) -> PyResult<Vec<PyVariableId>> {
         let id = self.find_variable(target)?;
-        let list = self.0.transitive_regulators(id.into());
+        let list = self.as_native().transitive_regulators(id.into());
         Ok(list.into_iter().map(|it| it.into()).collect())
     }
 
@@ -233,6 +234,7 @@ impl PyRegulatoryGraph {
     /// Returns a list of strongly connected components of this `RegulatoryGraph`, where each
     /// component is represented as a list of its nodes (`VariableId` objects).
     pub fn components(&self) -> Vec<Vec<PyVariableId>> {
+        #[allow(deprecated)]
         self.as_native()
             .components()
             .into_iter()
@@ -266,6 +268,104 @@ impl PyRegulatoryGraph {
     /// regulations. Dashed edges show regulations without observability requirement.
     pub fn to_dot(&self) -> String {
         self.as_native().to_dot()
+    }
+
+    /// Compute all non-trivial strongly connected components of the regulatory graph.
+    /// The result is sorted by component size.
+    #[args(restriction = "None")]
+    pub fn strongly_connected_components(
+        &self,
+        restriction: Option<Vec<&PyAny>>,
+    ) -> PyResult<Vec<Vec<PyVariableId>>> {
+        let components = if let Some(restriction) = restriction {
+            let mut transformed: HashSet<VariableId> = HashSet::new();
+            for it in restriction {
+                transformed.insert(self.find_variable(it)?.into());
+            }
+            self.as_native()
+                .restricted_strongly_connected_components(&transformed)
+        } else {
+            self.as_native().strongly_connected_components()
+        };
+        Ok(components
+            .into_iter()
+            .map(|c| {
+                let mut vector = c
+                    .into_iter()
+                    .map(PyVariableId::from)
+                    .collect::<Vec<PyVariableId>>();
+                vector.sort();
+                vector
+            })
+            .collect())
+    }
+
+    /// Compute shortest cycle originating in the given `pivot`. When optional `parity` is
+    /// specified, the method only looks for a `positive` / `negative` cycle.
+    ///
+    /// Returns `None` when no such cycle exists.
+    #[args(parity = "None")]
+    pub fn shortest_cycle(
+        &self,
+        pivot: &PyAny,
+        parity: Option<&str>,
+    ) -> PyResult<Option<Vec<PyVariableId>>> {
+        let pivot: VariableId = self.find_variable(pivot)?.into();
+        let cycle = if let Some(parity) = parity {
+            let parity = parse_parity(parity)?;
+            self.as_native().shortest_parity_cycle(pivot, parity)
+        } else {
+            self.as_native().shortest_cycle(pivot)
+        };
+        Ok(cycle.map(|c| c.into_iter().map(PyVariableId::from).collect()))
+    }
+
+    /// Approximate the minimum feedback vertex set of this graph. When optional `parity` is
+    /// specified, the method only considers `positive` / `negative` cycles.
+    #[args(parity = "None")]
+    pub fn feedback_vertex_set(&self, parity: Option<&str>) -> PyResult<Vec<PyVariableId>> {
+        let fvs = if let Some(parity) = parity {
+            let parity = parse_parity(parity)?;
+            self.as_native().parity_feedback_vertex_set(parity)
+        } else {
+            self.as_native().feedback_vertex_set()
+        };
+        let mut fvs = fvs.into_iter().map(PyVariableId::from).collect::<Vec<_>>();
+        fvs.sort();
+        Ok(fvs)
+    }
+
+    /// Approximate the maximum set of independent cycles of this graph. When optional `parity`
+    /// is specified, the method only considers `positive` / `negative` cycles.
+    #[args(parity = "None")]
+    pub fn independent_cycles(&self, parity: Option<&str>) -> PyResult<Vec<Vec<PyVariableId>>> {
+        let cycles = if let Some(parity) = parity {
+            let parity = parse_parity(parity)?;
+            self.as_native().independent_parity_cycles(parity)
+        } else {
+            self.as_native().independent_cycles()
+        };
+        let cycles = cycles
+            .into_iter()
+            .map(|cycle| {
+                cycle
+                    .into_iter()
+                    .map(PyVariableId::from)
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+        Ok(cycles)
+    }
+}
+
+fn parse_parity(parity: &str) -> PyResult<Sign> {
+    match parity {
+        "positive" | "+" => Ok(Sign::Positive),
+        "negative" | "-" => Ok(Sign::Negative),
+        _ => throw_runtime_error(format!(
+            "Unknown parity. Expected `positive`/`negative`, got {}.",
+            parity
+        )),
     }
 }
 

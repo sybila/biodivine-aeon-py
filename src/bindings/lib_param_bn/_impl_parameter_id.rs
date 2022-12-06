@@ -44,4 +44,13 @@ impl PyParameterId {
     fn __repr__(&self) -> PyResult<String> {
         self.__str__()
     }
+
+    #[staticmethod]
+    pub fn from_index(value: usize) -> PyParameterId {
+        ParameterId::from_index(value).into()
+    }
+
+    pub fn as_index(&self) -> usize {
+        self.0.to_index()
+    }
 }

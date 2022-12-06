@@ -76,6 +76,16 @@ impl PyBooleanNetwork {
         }
     }
 
+    /// Load a Boolean model from a file, picking the appropriate file format
+    /// based on the extension.
+    #[staticmethod]
+    pub fn from_file(path: String) -> PyResult<PyBooleanNetwork> {
+        match BooleanNetwork::try_from_file(path) {
+            Ok(model) => Ok(model.into()),
+            Err(e) => throw_runtime_error(e),
+        }
+    }
+
     /// Convert this `BooleanNetwork` into an `.sbml` model string.
     pub fn to_sbml(&self) -> String {
         self.as_native().to_sbml(None)
@@ -205,6 +215,17 @@ impl PyBooleanNetwork {
             .collect()
     }
 
+    /// Get a list of variables whose update functions use the given parameter.
+    pub fn parameter_appears_in(&self, parameter: &PyAny) -> PyResult<Vec<PyVariableId>> {
+        let parameter = self.find_parameter(parameter)?;
+        Ok(self
+            .as_native()
+            .parameter_appears_in(parameter.into())
+            .into_iter()
+            .map(PyVariableId::from)
+            .collect())
+    }
+
     /// Obtain a string expression representing the update function of the given variable.
     ///
     /// Variable can be given as a name, or as `VariableId`. The result is `None` when
@@ -313,5 +334,11 @@ impl PyBooleanNetwork {
             Ok(bn) => Ok(bn.into()),
             Err(error) => throw_runtime_error(error),
         }
+    }
+
+    /// A "best effort" method which converts as many variables into parameters without impacting
+    /// the behaviour of the resulting network.
+    pub fn inline_inputs(&self) -> PyBooleanNetwork {
+        self.as_native().inline_inputs().into()
     }
 }

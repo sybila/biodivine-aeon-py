@@ -44,4 +44,13 @@ impl PyVariableId {
     fn __repr__(&self) -> PyResult<String> {
         self.__str__()
     }
+
+    #[staticmethod]
+    pub fn from_index(value: usize) -> PyVariableId {
+        VariableId::from_index(value).into()
+    }
+
+    pub fn as_index(&self) -> usize {
+        self.0.to_index()
+    }
 }

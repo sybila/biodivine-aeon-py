@@ -1,6 +1,6 @@
 use crate::bindings::lib_bdd::PyBdd;
 use crate::bindings::lib_param_bn::{
-    PyGraphColoredVertices, PyGraphColors, PyGraphVertices, PySymbolicAsyncGraph,
+    PyGraphColoredVertices, PyGraphColors, PyGraphVertices, PySymbolicAsyncGraph, PyVariableId,
 };
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd;
@@ -92,6 +92,43 @@ impl PyGraphColoredVertices {
     /// Returns true if this `ColoredVertexSet` is a subset of the argument `ColoredVertexSet`.
     pub fn is_subset(&self, other: &Self) -> bool {
         self.as_native().is_subset(other.as_native())
+    }
+
+    /// Check if this symbolic set is a subspace (i.e. a hypercube).
+    pub fn is_subspace(&self) -> bool {
+        self.as_native().is_subspace()
+    }
+
+    /// Check if this symbolic set represents a singleton.
+    pub fn is_singleton(&self) -> bool {
+        self.as_native().is_singleton()
+    }
+
+    /// Return a subset of this set where the `variable` is set to the given `value`.
+    ///
+    /// Note: You can only use numeric IDs, not variable names.
+    pub fn fix_network_variable(
+        &self,
+        variable: PyVariableId,
+        value: bool,
+    ) -> PyGraphColoredVertices {
+        self.as_native()
+            .fix_network_variable(variable.into(), value)
+            .into()
+    }
+
+    /// Make a subset of this set where the `variable` is set to the given `value`, and then
+    /// erase the value from the set.
+    ///
+    /// Note: You can only use numeric IDs, not variable names.
+    pub fn restrict_network_variable(
+        &self,
+        variable: PyVariableId,
+        value: bool,
+    ) -> PyGraphColoredVertices {
+        self.as_native()
+            .restrict_network_variable(variable.into(), value)
+            .into()
     }
 
     /// Return a `VertexSet` of vertices that appear in this

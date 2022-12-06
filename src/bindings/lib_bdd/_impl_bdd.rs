@@ -72,7 +72,8 @@ impl PyBdd {
     pub fn l_and(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
-            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::and);
+            let result =
+                Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::and);
             if let Some(result) = result {
                 Ok(result.into())
             } else {
@@ -88,7 +89,8 @@ impl PyBdd {
     pub fn l_or(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
-            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::or);
+            let result =
+                Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::or);
             if let Some(result) = result {
                 Ok(result.into())
             } else {
@@ -104,7 +106,8 @@ impl PyBdd {
     pub fn l_imp(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
-            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::imp);
+            let result =
+                Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::imp);
             if let Some(result) = result {
                 Ok(result.into())
             } else {
@@ -120,7 +123,8 @@ impl PyBdd {
     pub fn l_iff(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
-            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::iff);
+            let result =
+                Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::iff);
             if let Some(result) = result {
                 Ok(result.into())
             } else {
@@ -136,7 +140,8 @@ impl PyBdd {
     pub fn l_xor(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
-            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::xor);
+            let result =
+                Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::xor);
             if let Some(result) = result {
                 Ok(result.into())
             } else {
@@ -152,7 +157,12 @@ impl PyBdd {
     pub fn l_and_not(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
-            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::and_not);
+            let result = Bdd::binary_op_with_limit(
+                limit,
+                left,
+                right,
+                biodivine_lib_bdd::op_function::and_not,
+            );
             if let Some(result) = result {
                 Ok(result.into())
             } else {
@@ -368,28 +378,29 @@ impl PyBdd {
         self.as_native()
             .support_set()
             .into_iter()
-            .map(|it| PyBddVariable::from(it))
+            .map(PyBddVariable::from)
             .collect()
     }
 
     /// Compute the contributions of individual variables towards the size of the Bdd
     /// (in terms of nodes).
     pub fn size_per_variable(&self) -> HashMap<PyBddVariable, usize> {
-        self.as_native().size_per_variable()
+        self.as_native()
+            .size_per_variable()
             .into_iter()
-            .map(|(k,v)| (PyBddVariable::from(k), v))
+            .map(|(k, v)| (PyBddVariable::from(k), v))
             .collect()
     }
 
     /// Computes the most restrictive conjunctive clause that is still satisfied by all valuations
     /// of this `Bdd`. The clause is returned as dictionary mapping  `BddVariables` to Booleans.
     pub fn necessary_clause(&self) -> Option<HashMap<PyBddVariable, bool>> {
-        self.as_native().necessary_clause()
-            .map(|valuation| {
-                valuation.to_values()
-                    .into_iter()
-                    .map(|(k,v)| (PyBddVariable::from(k), v))
-                    .collect()
-            })
+        self.as_native().necessary_clause().map(|valuation| {
+            valuation
+                .to_values()
+                .into_iter()
+                .map(|(k, v)| (PyBddVariable::from(k), v))
+                .collect()
+        })
     }
 }

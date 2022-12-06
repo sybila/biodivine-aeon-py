@@ -1,5 +1,5 @@
 use crate::bindings::lib_bdd::PyBdd;
-use crate::bindings::lib_param_bn::{PyGraphVertices, PySymbolicAsyncGraph};
+use crate::bindings::lib_param_bn::{PyGraphVertices, PySymbolicAsyncGraph, PyVariableId};
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd;
 use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
@@ -97,6 +97,39 @@ impl PyGraphVertices {
     /// If the set is empty, returns an empty set.
     pub fn pick_singleton(&self) -> Self {
         self.as_native().pick_singleton().into()
+    }
+
+    /// Check if this symbolic set is a subspace (i.e. a hypercube).
+    pub fn is_subspace(&self) -> bool {
+        self.as_native().is_subspace()
+    }
+
+    /// Check if this symbolic set represents a singleton.
+    pub fn is_singleton(&self) -> bool {
+        self.as_native().is_singleton()
+    }
+
+    /// Return a subset of this set where the `variable` is set to the given `value`.
+    ///
+    /// Note: You can only use numeric IDs, not variable names.
+    pub fn fix_network_variable(&self, variable: PyVariableId, value: bool) -> PyGraphVertices {
+        self.as_native()
+            .fix_network_variable(variable.into(), value)
+            .into()
+    }
+
+    /// Make a subset of this set where the `variable` is set to the given `value`, and then
+    /// erase the value from the set.
+    ///
+    /// Note: You can only use numeric IDs, not variable names.
+    pub fn restrict_network_variable(
+        &self,
+        variable: PyVariableId,
+        value: bool,
+    ) -> PyGraphVertices {
+        self.as_native()
+            .restrict_network_variable(variable.into(), value)
+            .into()
     }
 
     /// Instantiate this `VertexSet` into an explicit list of vertices.

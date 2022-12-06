@@ -98,6 +98,16 @@ impl PyGraphColors {
         self.as_native().is_subset(&other.0)
     }
 
+    /// Check if this symbolic set is a subspace (i.e. a hypercube).
+    pub fn is_subspace(&self) -> bool {
+        self.as_native().is_subspace()
+    }
+
+    /// Check if this symbolic set represents a singleton.
+    pub fn is_singleton(&self) -> bool {
+        self.as_native().is_singleton()
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
             "ColorSet(cardinality={})",

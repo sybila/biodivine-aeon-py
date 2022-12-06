@@ -1,7 +1,7 @@
 use crate::bindings::lib_bdd::PyBddVariableSet;
 use crate::bindings::lib_param_bn::{
-    PyBooleanNetwork, PyGraphColoredVertices, PyGraphColors, PyParameterId, PySymbolicAsyncGraph,
-    PyVariableId,
+    PyBooleanNetwork, PyGraphColoredVertices, PyGraphColors, PyGraphVertices, PyParameterId,
+    PySymbolicAsyncGraph, PyVariableId,
 };
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
@@ -9,6 +9,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;
 use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use std::collections::HashMap;
 
 impl From<PySymbolicAsyncGraph> for SymbolicAsyncGraph {
     fn from(value: PySymbolicAsyncGraph) -> Self {
@@ -68,6 +69,67 @@ impl PySymbolicAsyncGraph {
         Ok(self
             .as_native()
             .fix_network_variable(id.into(), value)
+            .into())
+    }
+
+    /// Create a `VertexSet` that contains every vertex with a specified
+    /// Boolean network variable fixed to the given constant.
+    ///
+    /// The variable can be given either as a `VariableId` object, or as a name.
+    pub fn fix_variable_in_vertices(
+        &self,
+        variable: &PyAny,
+        value: bool,
+    ) -> PyResult<PyGraphVertices> {
+        let id = self.resolve_variable(variable)?;
+        Ok(self
+            .as_native()
+            .fix_vertices_with_network_variable(id.into(), value)
+            .into())
+    }
+
+    /// Compute the smallest subspace that still contains all vertices in the provided
+    /// `VertexSet`.
+    pub fn wrap_in_subspace(&self, vertices: &PyGraphVertices) -> HashMap<PyVariableId, bool> {
+        let space = self.as_native().wrap_in_subspace(vertices.as_native());
+        let mut result = HashMap::new();
+        for k in self.as_native().as_network().variables() {
+            if let Some(value) = space[k].try_as_bool() {
+                result.insert(k.into(), value);
+            }
+        }
+        result
+    }
+
+    /// The same as `wrap_in_subspace`, but the input can be any symbolic set, and only the
+    /// vertex component is expanded into a (symbolically represented) subspace.
+    pub fn wrap_in_symbolic_subspace(
+        &self,
+        set: &PyGraphColoredVertices,
+    ) -> PyGraphColoredVertices {
+        self.as_native()
+            .wrap_in_symbolic_subspace(set.as_native())
+            .into()
+    }
+
+    /// Test if the given set is a trap set.
+    pub fn is_trap_set(&self, set: &PyGraphColoredVertices) -> bool {
+        self.as_native().is_trap_set(set.as_native())
+    }
+
+    /// Create a new graph where the update functions are restricted to the given variable
+    /// subspace. Note that this completely eliminates any dependence on this variable in the
+    /// remaining update functions, but does not remove the variable from the underlying network
+    /// (i.e. the sets of states are still compatible, just the dynamics of the network is altered)
+    pub fn restrict_variable_in_graph(
+        &self,
+        variable: &PyAny,
+        value: bool,
+    ) -> PyResult<PySymbolicAsyncGraph> {
+        let variable = self.network().find_variable(variable)?;
+        Ok(self
+            .as_native()
+            .restrict_variable_in_graph(variable.into(), value)
             .into())
     }
 
