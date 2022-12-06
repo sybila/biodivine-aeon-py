@@ -8,6 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: 4.11.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v4
         with:
           python-version: 3.9
@@ -27,6 +34,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: 4.11.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v4
         with:
           python-version: 3.9
@@ -46,6 +60,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: 4.11.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v4
         with:
           python-version: 3.9
