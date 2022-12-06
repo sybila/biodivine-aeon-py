@@ -68,33 +68,99 @@ impl PyBdd {
     }
 
     /// Compute a logical conjunction of two formulas.
-    pub fn l_and(&self, other: &PyBdd) -> PyBdd {
-        self.as_native().and(other.as_native()).into()
+    #[args(limit = "None")]
+    pub fn l_and(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
+        if let Some(limit) = limit {
+            let (left, right) = (self.as_native(), other.as_native());
+            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::and);
+            if let Some(result) = result {
+                Ok(result.into())
+            } else {
+                throw_runtime_error("BDD size limit exceeded.")
+            }
+        } else {
+            Ok(self.as_native().and(other.as_native()).into())
+        }
     }
 
     /// Compute a logical disjunction of two formulas.
-    pub fn l_or(&self, other: &PyBdd) -> PyBdd {
-        self.as_native().or(other.as_native()).into()
+    #[args(limit = "None")]
+    pub fn l_or(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
+        if let Some(limit) = limit {
+            let (left, right) = (self.as_native(), other.as_native());
+            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::or);
+            if let Some(result) = result {
+                Ok(result.into())
+            } else {
+                throw_runtime_error("BDD size limit exceeded.")
+            }
+        } else {
+            Ok(self.as_native().or(other.as_native()).into())
+        }
     }
 
     /// Compute a logical implication of two formulas.
-    pub fn l_imp(&self, other: &PyBdd) -> PyBdd {
-        self.as_native().imp(other.as_native()).into()
+    #[args(limit = "None")]
+    pub fn l_imp(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
+        if let Some(limit) = limit {
+            let (left, right) = (self.as_native(), other.as_native());
+            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::imp);
+            if let Some(result) = result {
+                Ok(result.into())
+            } else {
+                throw_runtime_error("BDD size limit exceeded.")
+            }
+        } else {
+            Ok(self.as_native().imp(other.as_native()).into())
+        }
     }
 
     /// Compute a logical equivalence of two formulas.
-    pub fn l_iff(&self, other: &PyBdd) -> PyBdd {
-        self.as_native().iff(other.as_native()).into()
+    #[args(limit = "None")]
+    pub fn l_iff(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
+        if let Some(limit) = limit {
+            let (left, right) = (self.as_native(), other.as_native());
+            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::iff);
+            if let Some(result) = result {
+                Ok(result.into())
+            } else {
+                throw_runtime_error("BDD size limit exceeded.")
+            }
+        } else {
+            Ok(self.as_native().iff(other.as_native()).into())
+        }
     }
 
     /// Compute a logical xor of two formulas.
-    pub fn l_xor(&self, other: &PyBdd) -> PyBdd {
-        self.as_native().xor(other.as_native()).into()
+    #[args(limit = "None")]
+    pub fn l_xor(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
+        if let Some(limit) = limit {
+            let (left, right) = (self.as_native(), other.as_native());
+            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::xor);
+            if let Some(result) = result {
+                Ok(result.into())
+            } else {
+                throw_runtime_error("BDD size limit exceeded.")
+            }
+        } else {
+            Ok(self.as_native().xor(other.as_native()).into())
+        }
     }
 
     /// Compute a logical conjunction of this formula with a negated second formula.
-    pub fn l_and_not(&self, other: &PyBdd) -> PyBdd {
-        self.as_native().and_not(other.as_native()).into()
+    #[args(limit = "None")]
+    pub fn l_and_not(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
+        if let Some(limit) = limit {
+            let (left, right) = (self.as_native(), other.as_native());
+            let result = Bdd::binary_op_with_limit(limit, left, right, biodivine_lib_bdd::op_function::and_not);
+            if let Some(result) = result {
+                Ok(result.into())
+            } else {
+                throw_runtime_error("BDD size limit exceeded.")
+            }
+        } else {
+            Ok(self.as_native().and_not(other.as_native()).into())
+        }
     }
 
     /// Compute a projection over the given `Bdd` variable.
@@ -167,6 +233,7 @@ impl PyBdd {
     /// List all valuations that satisfy this BDD. Note that all valuations will be returned
     /// as one list (i.e. this is not an iterator). So a large number of valuations can require
     /// a significant amount of memory.
+    #[args(limit = "None")]
     pub fn list_sat_valuations(&self, limit: Option<usize>) -> Vec<Vec<bool>> {
         self.as_native()
             .sat_valuations()
@@ -178,6 +245,7 @@ impl PyBdd {
     /// List all clauses of this BDD (paths to `1` literal). Note that all clauses are returned
     /// as one list (i.e. this is not an iterator). So a large number of clauses can require
     /// a significant amount of memory.
+    #[args(limit = "None")]
     pub fn list_sat_clauses(&self, limit: Option<usize>) -> Vec<Vec<(PyBddVariable, bool)>> {
         self.as_native()
             .sat_clauses()
@@ -311,5 +379,17 @@ impl PyBdd {
             .into_iter()
             .map(|(k,v)| (PyBddVariable::from(k), v))
             .collect()
+    }
+
+    /// Computes the most restrictive conjunctive clause that is still satisfied by all valuations
+    /// of this `Bdd`. The clause is returned as dictionary mapping  `BddVariables` to Booleans.
+    pub fn necessary_clause(&self) -> Option<HashMap<PyBddVariable, bool>> {
+        self.as_native().necessary_clause()
+            .map(|valuation| {
+                valuation.to_values()
+                    .into_iter()
+                    .map(|(k,v)| (PyBddVariable::from(k), v))
+                    .collect()
+            })
     }
 }
