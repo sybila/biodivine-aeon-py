@@ -6,6 +6,7 @@ use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::collections::hash_map::DefaultHasher;
+use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 
 impl From<Bdd> for PyBdd {
@@ -166,9 +167,10 @@ impl PyBdd {
     /// List all valuations that satisfy this BDD. Note that all valuations will be returned
     /// as one list (i.e. this is not an iterator). So a large number of valuations can require
     /// a significant amount of memory.
-    pub fn list_sat_valuations(&self) -> Vec<Vec<bool>> {
+    pub fn list_sat_valuations(&self, limit: Option<usize>) -> Vec<Vec<bool>> {
         self.as_native()
             .sat_valuations()
+            .take(limit.unwrap_or(usize::MAX))
             .map(|it| it.vector())
             .collect()
     }
@@ -176,9 +178,10 @@ impl PyBdd {
     /// List all clauses of this BDD (paths to `1` literal). Note that all clauses are returned
     /// as one list (i.e. this is not an iterator). So a large number of clauses can require
     /// a significant amount of memory.
-    pub fn list_sat_clauses(&self) -> Vec<Vec<(PyBddVariable, bool)>> {
+    pub fn list_sat_clauses(&self, limit: Option<usize>) -> Vec<Vec<(PyBddVariable, bool)>> {
         self.as_native()
             .sat_clauses()
+            .take(limit.unwrap_or(usize::MAX))
             .map(|it| {
                 it.to_values()
                     .into_iter()
