@@ -5,6 +5,7 @@ use biodivine_lib_param_bn::{BooleanNetwork, ParameterId, RegulatoryGraph, Varia
 use pyo3::prelude::*;
 
 mod _impl_boolean_network;
+mod _impl_fixed_points;
 mod _impl_graph_colored_vertices;
 mod _impl_graph_colors;
 mod _impl_graph_vertices;
@@ -22,6 +23,7 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<PyGraphVertices>()?;
     module.add_class::<PyGraphColoredVertices>()?;
     module.add_class::<PySymbolicAsyncGraph>()?;
+    module.add_class::<PyFixedPoints>()?;
     Ok(())
 }
 
@@ -65,3 +67,13 @@ pub struct PyGraphColoredVertices(GraphColoredVertices);
 #[pyclass(name = "SymbolicAsyncGraph")]
 #[derive(Clone)]
 pub struct PySymbolicAsyncGraph(SymbolicAsyncGraph);
+
+/// A collection of algorithms for detecting network fixed-points.
+///
+/// TODO:
+///     Right now, we can't expose the iterator API because it uses lifetimes, which pyO3
+///     can't use. Try to make a version that can be copied/arc-ed in the future?
+///     However, a bigger issue is that we can't use Z3 either :/ We must figure out
+///     how to do that...
+#[pyclass(name = "FixedPoints")]
+pub struct PyFixedPoints();
