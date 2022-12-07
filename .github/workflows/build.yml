@@ -38,34 +38,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: x86_64
-          manylinux: auto
-          container: off
-          args: --release --out target/dist
-      - name: Upload wheels
-        uses: actions/upload-artifact@v2
-        with:
-          name: wheels
-          path: target/dist
-
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Z3.
-        id: z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: 4.11.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
-          architecture: x64
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: PyO3/maturin-action@v1
-        with:
-          target: x64
+          manylinux: auto          
           args: --release --out target/dist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
@@ -76,19 +49,22 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout.
+        uses: actions/checkout@v3
       - name: Setup Z3.
         id: z3
         uses: cda-tum/setup-z3@v1
         with:
-          version: 4.11.2
+          version: ${{ env.Z3_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain.
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
+      - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV
       - uses: PyO3/maturin-action@v1
         with:
           command: build
@@ -98,49 +74,4 @@ jobs:
         with:
           name: wheels
           path: target/dist
-
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ macos, windows, linux ]
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: wheels
-      - name: Publish to PyPI
-        uses: PyO3/maturin-action@v1
-        env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        with:
-          command: upload
-          args: --skip-existing *
-
-  conda_deployment_with_new_tag:
-    name: Conda deployment (${{ matrix.os }})
-    if: "startsWith(github.ref, 'refs/tags/')"
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        # For now, windows builds are broken...
-        os: [macos-latest, ubuntu-latest]
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: 3.9
-          environment-file: conda_env.yaml
-          auto-update-conda: false
-          auto-activate-base: false
-          show-channel-urls: true
-      - name: Build and upload the conda packages
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.1-beta.1
-        with:
-          python-version: 3.9
-          meta_yaml_dir: "conda"
-          user: daemontus
-          label: main
-          overwrite: false
-          token: ${{ secrets.ANACONDA_TOKEN }}
+  
