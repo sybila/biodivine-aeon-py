@@ -78,13 +78,14 @@ jobs:
       # Explicitly add z3 to include path (probably some setup-z3 bug).
       - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV      
       # The considered version of z3 needs at least this version of macOS.
-      - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
+      #- run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
       - run: echo "CMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
-          command: build          
-          args: "--release --universal2 --features static-z3 --out='target/dist'"
+          command: build   
+          # --universal2       
+          args: "--release --features static-z3 --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
