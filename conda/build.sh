@@ -3,7 +3,8 @@
 set -ex
 
 if [ `uname` == Darwin ]; then
-  maturin build --release --interpreter python -o dist --universal2 --features static-z3
+  #  --universal2 (disabled for now)
+  maturin build --release --interpreter python -o dist --features static-z3
 fi
 
 if [ `uname` == Linux ]; then

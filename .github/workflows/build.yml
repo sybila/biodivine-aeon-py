@@ -61,8 +61,11 @@ jobs:
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
-          command: build             
-          args: "--release --universal2 --features static-z3 --out='target/dist'"
+          command: build
+          # For now, universal builds are disabled, because there is something
+          # wrong with building z3 on arm in this way :/  
+          # --universal2           
+          args: "--release --features static-z3 --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -117,7 +120,7 @@ jobs:
     strategy:
       matrix:
         # For now, windows builds are broken...
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v2
