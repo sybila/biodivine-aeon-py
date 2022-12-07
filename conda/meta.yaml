@@ -19,7 +19,6 @@ requirements:
     - rust
     - maturin
     - python    
-    - z3
   run:
     - python
 
