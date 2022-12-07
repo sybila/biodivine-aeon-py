@@ -19,35 +19,12 @@ jobs:
     steps:
       - name: Checkout.
         uses: actions/checkout@v3
-      - name: Setup Z3.
-        id: z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ env.Z3_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup Python.
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          architecture: x64
-      - name: Setup Rust toolchain.
-        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
-      # Seems that libclang is needed for z3 to work on linux?
-      - name: Set up Clang
-        uses: egor-tensin/setup-clang@v1
-        with:
-          version: 13
-          platform: x64 
-      # For now, we are building with container:off, because the
-      # manylinux contrainer does not have the dependencies to 
-      # build with Z3 enabled. We can later modify this and use
-      # our own fork of manylinux.
+      # On linux, everything is installed in the container,
+      # so we don't really need any dependencies here.
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
           target: x86_64
-          #manylinux: 2_24
           container: daemontus/manylinux-aeon:latest                   
           args: "--release --features static-z3 --compatibility manylinux_2_28 --out='target/dist'"
       - name: Upload wheels
@@ -60,7 +37,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3      
       - name: Setup Z3.
         id: z3
         uses: cda-tum/setup-z3@v1
@@ -75,7 +52,8 @@ jobs:
           architecture: x64
       - name: Setup Rust toolchain.
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
-      # Explicitly add z3 to include path (probably some setup-z3 bug).
+      # Explicitly add z3 to include path (probably some bug in either 
+      # `setup-z3` or `z3-sys` crate, because this should not be necessary).
       - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV      
       # The considered version of z3 needs at least this version of macOS.
       - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
@@ -83,9 +61,8 @@ jobs:
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
-          command: build   
-          # --universal2       
-          args: "--release --features static-z3 --out='target/dist'"
+          command: build             
+          args: "--release --universal2 --features static-z3 --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -97,13 +74,6 @@ jobs:
     steps:
       - name: Checkout.
         uses: actions/checkout@v3
-      - name: Setup Z3.
-        id: z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ env.Z3_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Python.
         uses: actions/setup-python@v4
         with:
@@ -111,6 +81,7 @@ jobs:
           architecture: x64
       - name: Setup Rust toolchain.
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}            
+      # Surprisingly, windows is the easiest. Just build the thing.
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
@@ -141,12 +112,12 @@ jobs:
 
   conda_deployment_with_new_tag:
     name: Conda deployment (${{ matrix.os }})
-    if: "startsWith(github.ref, 'refs/tags/')"
+    #if: "startsWith(github.ref, 'refs/tags/')"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # For now, windows builds are broken...
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v2

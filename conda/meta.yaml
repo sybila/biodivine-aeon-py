@@ -13,13 +13,13 @@ build:
 
 requirements:
   build:
-    - {{ compiler('c') }}
-    - z3
+    - {{ compiler('c') }}    
   host:
     - pip
     - rust
     - maturin
     - python    
+    - z3
   run:
     - python
 
