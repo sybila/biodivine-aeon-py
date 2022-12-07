@@ -1,5 +1,5 @@
 {% set name = "biodivine_aeon" %}
-{% set version = "0.2.0-alpha" %}
+{% set version = "0.2.0a0" %}
 
 package:
   name: "{{ name|lower }}"
@@ -13,13 +13,12 @@ build:
 
 requirements:
   build:
-    - {{ compiler('c') }}
+    - {{ compiler('c') }}    
   host:
     - pip
     - rust
     - maturin
-    - python
-    - z3
+    - python    
   run:
     - python
 
