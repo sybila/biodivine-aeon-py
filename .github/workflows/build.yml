@@ -84,7 +84,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: "--release --universal2 --features static-z3 --out='target/dist' -DMACOSX_DEPLOYMENT_TARGET=11.0"
+          args: "--release --universal2 --features static-z3 --out='target/dist' -- -DMACOSX_DEPLOYMENT_TARGET=11.0"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
