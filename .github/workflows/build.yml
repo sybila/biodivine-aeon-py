@@ -34,11 +34,11 @@ jobs:
       - name: Setup Rust toolchain.
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
       # Seems that libclang is needed for z3 to work on linux?
-      #- name: Set up Clang
-      #  uses: egor-tensin/setup-clang@v1
-      #  with:
-      #    version: 13
-      #    platform: x64 
+      - name: Set up Clang
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: 13
+          platform: x64 
       # For now, we are building with container:off, because the
       # manylinux contrainer does not have the dependencies to 
       # build with Z3 enabled. We can later modify this and use
@@ -86,7 +86,8 @@ jobs:
         with:
           command: build
           # --features static-z3  -- -v -D MACOSX_DEPLOYMENT_TARGET=11.0
-          args: "--release --universal2  --out='target/dist'"
+          # --universal2
+          args: "--release --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
