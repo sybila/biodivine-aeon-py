@@ -78,17 +78,18 @@ jobs:
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
       # Explicitly add z3 to include path (probably some setup-z3 bug).
       - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV
-      - run: echo "LD_LIBRARY_PATH=$Z3_ROOT/lib" >> $GITHUB_ENV
+      - run: echo "LD_LIBRARY_PATH=$Z3_ROOT/lib" >> $GITHUB_ENV      
       # The considered version of z3 needs at least this version of macOS.
       # If you update z3-sys, you might need to increase this as well.
-      #- run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV      
+      - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV      
+      - run: echo "CMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
           command: build
           # --features static-z3  -- -v -D MACOSX_DEPLOYMENT_TARGET=11.0
           # --universal2
-          args: "--release --out='target/dist'"
+          args: "--release --features static-z3 --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
