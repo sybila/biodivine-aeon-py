@@ -5,4 +5,5 @@
 # consult https://github.com/phusion/baseimage-docker
 FROM quay.io/pypa/manylinux_2_24_x86_64:latest
 
-RUN apt-get install --no-install-recommends clang z3
+RUN apt-get update
+RUN apt-get install --yes --no-install-recommends clang z3

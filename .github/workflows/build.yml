@@ -47,10 +47,9 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: x86_64
-          manylinux: auto
-          #container: off 
-          # --features static-z3 --compatibility manylinux_2_24         
-          args: "--release --out='target/dist'"
+          manylinux: 2_24
+          container: daemontus/manylinux-aeon:latest                   
+          args: "--release --features static-z3 --compatibility manylinux_2_24 --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
