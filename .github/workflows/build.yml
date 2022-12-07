@@ -49,7 +49,7 @@ jobs:
           target: x86_64
           #manylinux: 2_24
           container: daemontus/manylinux-aeon:latest                   
-          args: "--release --features static-z3 --compatibility manylinux_2_24 --out='target/dist'"
+          args: "--release --features static-z3 --compatibility manylinux_2_28 --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
