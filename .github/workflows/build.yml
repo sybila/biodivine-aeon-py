@@ -113,6 +113,7 @@ jobs:
           architecture: x64
       - name: Setup Rust toolchain.
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}      
+      - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV        
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
