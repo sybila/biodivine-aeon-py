@@ -7,7 +7,10 @@ env:
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
   RUST_VERSION: "1.65.0"
-  Z3_VERSION: "4.11.2"
+  # This is the version currently used by `z3-sys`.
+  # If this even changes, you might also need to increase
+  # minimum macOS version below.
+  Z3_VERSION: "4.8.12"
   PYTHON_VERSION: "3.9"
 jobs:
   linux:
@@ -22,12 +25,12 @@ jobs:
           version: ${{ env.Z3_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install Python.
+      - name: Setup Python.
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-      - name: Install Rust toolchain.
+      - name: Setup Rust toolchain.
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
       # Seems that libclang is needed for z3 to work on linux?
       - name: Set up Clang
@@ -45,7 +48,7 @@ jobs:
           target: x86_64
           manylinux: auto
           container: off          
-          args: --release --out target/dist
+          args: --release --cargo-extra-args="--features static-z3" --out="target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -64,17 +67,28 @@ jobs:
           version: ${{ env.Z3_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-python@v4
+      - name: Setup Python.
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-      - name: Install Rust toolchain.
+      - name: Setup Rust toolchain.
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
+      # Seems that libclang is needed for z3 to work on macos?
+      - name: Set up Clang
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: 13
+          platform: x64 
+      # Explicitly add z3 to include path (probably some setup-z3 bug).
       - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV
+      # The considered version of z3 needs at least this version of macOS.
+      # If you update z3-sys, you might need to increase this as well.
+      - run: echo "MACOSX_DEPLOYMENT_TARGET=10.16" >> $GITHUB_ENV
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --out target/dist --universal2
+          args: --release --universal2 --cargo-extra-args="--features static-z3" --out="target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:

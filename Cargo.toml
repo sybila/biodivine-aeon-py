@@ -7,12 +7,24 @@ edition = "2021"
 name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
+[features]
+# For releases, we want to include Z3 statically, so that users
+# don't have to install it (or break compatibility with new versions).
+# So for CI builds, this feature is enabled, but for local builds,
+# you don't need it as long as you have Z3 installed (because your
+# build may take >30min if you enable it).
+static-z3 = ["z3/static-link-z3"]
+
 [dependencies]
 pyo3 = { version = "0.17.3", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = "0.4.1"
 biodivine-lib-bdd = "0.4.2"
 biodivine-pbn-control = { git="https://github.com/sybila/biodivine-pbn-control", rev="1847a6290cadf964fecc9e75d6821907cc715109" }
-z3 = { version="0.11.2", features = ["static-link-z3"] }
+
+# Include Z3 dependencies as strictly as possible, we don't want
+# this to change because it might break our release builds.
+z3="^0.11.2"
+z3-sys = "^0.7.1"
 
 [build-dependencies]
 pyo3-build-config = "0.17.3"
