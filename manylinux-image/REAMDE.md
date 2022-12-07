@@ -1,0 +1,1 @@
+Because we need `libclang` and `z3` during build, we can't use the default manylinux docker. Here, we define a docker image that derives from manylinux but actually has the dependencies to build Z3.
