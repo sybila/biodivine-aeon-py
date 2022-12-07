@@ -48,7 +48,7 @@ jobs:
           target: x86_64
           manylinux: auto
           container: off          
-          args: --release --cargo-extra-args="--features static-z3" --out="target/dist"
+          args: --release --cargo-extra-args=\"--features static-z3\" --out=\"target/dist\"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -74,12 +74,6 @@ jobs:
           architecture: x64
       - name: Setup Rust toolchain.
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
-      # Seems that libclang is needed for z3 to work on macos?
-      - name: Set up Clang
-        uses: egor-tensin/setup-clang@v1
-        with:
-          version: 13
-          platform: x64 
       # Explicitly add z3 to include path (probably some setup-z3 bug).
       - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV
       # The considered version of z3 needs at least this version of macOS.
@@ -88,7 +82,7 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --universal2 --cargo-extra-args="--features static-z3" --out="target/dist"
+          args: --release --universal2 --cargo-extra-args=\"--features static-z3\" --out=\"target/dist\"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
