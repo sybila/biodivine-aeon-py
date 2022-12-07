@@ -48,7 +48,7 @@ jobs:
           target: x86_64
           manylinux: auto
           container: off          
-          args: --release --cargo-extra-args=\"--features static-z3\" --out=\"target/dist\"
+          args: "--release --cargo-extra-args=\"--features static-z3\" --out=\"target/dist\""
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -82,7 +82,7 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --universal2 --cargo-extra-args=\"--features static-z3\" --out=\"target/dist\"
+          args: "--release --universal2 --cargo-extra-args=\"--features static-z3\" --out=\"target/dist\""
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
