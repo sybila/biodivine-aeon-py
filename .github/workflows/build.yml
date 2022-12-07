@@ -2,24 +2,35 @@ name: build
 on:
   push:
   pull_request:
-
+env:
+  # A fixed version used for testing, so that the builds don't
+  # spontaneously break after a few years.
+  # Make sure to update this from time to time.
+  RUST_VERSION: "1.65.0"
+  Z3_VERSION: "4.11.2"
+  PYTHON_VERSION: "3.9"
 jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout.
+        uses: actions/checkout@v3
       - name: Setup Z3.
         id: z3
         uses: cda-tum/setup-z3@v1
         with:
-          version: 4.11.2
+          version: ${{ env.Z3_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-python@v4
+      - name: Install Python.
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-      - uses: PyO3/maturin-action@v1
+      - name: Install Rust toolchain.
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
+      - name: Maturin build.
+        uses: PyO3/maturin-action@v1
         with:
           target: x86_64
           manylinux: auto
