@@ -11,7 +11,7 @@ env:
   # If this ever changes, you might also need to increase
   # the minimum macOS version below.
   Z3_VERSION: "4.8.12"
-  MACOS_TARGET: "10.16"
+  MACOS_TARGET: "11.0"
   PYTHON_VERSION: "3.9"
 jobs:
   linux:
@@ -49,7 +49,7 @@ jobs:
           target: x86_64
           manylinux: auto
           container: off          
-          args: "--release --features static-z3 --out='target/dist'"
+          args: "--release --features static-z3 --compatibility manylinux_2_24 --out='target/dist'"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -79,12 +79,12 @@ jobs:
       - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV
       # The considered version of z3 needs at least this version of macOS.
       # If you update z3-sys, you might need to increase this as well.
-      - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
+      - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV      
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: "--release --universal2 --features static-z3 --out='target/dist'"
+          args: "--release --universal2 --features static-z3 --out='target/dist' -DMACOSX_DEPLOYMENT_TARGET=11.0"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
