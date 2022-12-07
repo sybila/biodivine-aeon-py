@@ -78,6 +78,7 @@ jobs:
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
       # Explicitly add z3 to include path (probably some setup-z3 bug).
       - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LD_LIBRARY_PATH=$Z3_ROOT/lib" >> $GITHUB_ENV
       # The considered version of z3 needs at least this version of macOS.
       # If you update z3-sys, you might need to increase this as well.
       #- run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV      
