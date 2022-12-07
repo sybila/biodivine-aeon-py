@@ -108,7 +108,7 @@ impl PyFixedPoints {
             FixedPoints::symbolic_iterator(stg.as_native(), restriction, size_limit)
         };
         it.take(item_limit)
-            .map(|x| PyGraphColoredVertices::from(x))
+            .map(PyGraphColoredVertices::from)
             .collect()
     }
 }
