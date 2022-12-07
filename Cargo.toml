@@ -12,7 +12,7 @@ pyo3 = { version = "0.17.3", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = "0.4.1"
 biodivine-lib-bdd = "0.4.2"
 biodivine-pbn-control = { git="https://github.com/sybila/biodivine-pbn-control", rev="1847a6290cadf964fecc9e75d6821907cc715109" }
-# z3 = { version="0.11.2", features = ["static-link-z3"] }
+z3 = { version="0.11.2", features = ["static-link-z3"] }
 
 [build-dependencies]
 pyo3-build-config = "0.17.3"
