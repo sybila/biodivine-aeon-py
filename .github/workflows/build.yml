@@ -26,7 +26,7 @@ jobs:
         with:
           target: x86_64
           container: daemontus/manylinux-aeon:latest                   
-          args: "--release --features static-z3 --compatibility manylinux_2_28 --out='target/dist'"
+          args: "--release --features static-z3 --compatibility manylinux_2_28 --out=target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -59,13 +59,10 @@ jobs:
       - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
       - run: echo "CMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
       - name: Maturin build.
-        uses: PyO3/maturin-action@v1
+        uses: PyO3/maturin-action@v1.32.1
         with:
           command: build
-          # For now, universal builds are disabled, because there is something
-          # wrong with building z3 on arm in this way :/  
-          # --universal2           
-          args: "--release --features static-z3 --out='target/dist'"
+          args: "--release --universal2 --features static-z3 --out=target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
@@ -89,7 +86,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: x64
-          args: "--release --features static-z3 --out='target/dist'"
+          args: "--release --features static-z3 --out=target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
