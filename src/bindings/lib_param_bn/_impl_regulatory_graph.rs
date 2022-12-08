@@ -1,7 +1,9 @@
 use super::PyRegulatoryGraph;
 use crate::bindings::lib_param_bn::PyVariableId;
 use crate::{throw_runtime_error, throw_type_error, AsNative};
-use biodivine_lib_param_bn::{Monotonicity, Regulation, RegulatoryGraph, Sign, VariableId};
+use biodivine_lib_param_bn::{
+    Monotonicity, Regulation, RegulatoryGraph, SdGraph, Sign, VariableId,
+};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashSet;
@@ -323,12 +325,29 @@ impl PyRegulatoryGraph {
     /// Approximate the minimum feedback vertex set of this graph. When optional `parity` is
     /// specified, the method only considers `positive` / `negative` cycles.
     #[args(parity = "None")]
-    pub fn feedback_vertex_set(&self, parity: Option<&str>) -> PyResult<Vec<PyVariableId>> {
+    #[args(restriction = "None")]
+    pub fn feedback_vertex_set(
+        &self,
+        parity: Option<&str>,
+        restriction: Option<Vec<&PyAny>>,
+    ) -> PyResult<Vec<PyVariableId>> {
+        let sd_graph = SdGraph::from(self.as_native());
+        let restriction = {
+            if let Some(restriction) = restriction {
+                let mut set: HashSet<VariableId> = HashSet::new();
+                for var in restriction {
+                    set.insert(self.find_variable(var)?.into());
+                }
+                set
+            } else {
+                sd_graph.mk_all_vertices()
+            }
+        };
         let fvs = if let Some(parity) = parity {
             let parity = parse_parity(parity)?;
-            self.as_native().parity_feedback_vertex_set(parity)
+            sd_graph.restricted_parity_feedback_vertex_set(&restriction, parity)
         } else {
-            self.as_native().feedback_vertex_set()
+            sd_graph.restricted_feedback_vertex_set(&restriction)
         };
         let mut fvs = fvs.into_iter().map(PyVariableId::from).collect::<Vec<_>>();
         fvs.sort();
@@ -338,12 +357,28 @@ impl PyRegulatoryGraph {
     /// Approximate the maximum set of independent cycles of this graph. When optional `parity`
     /// is specified, the method only considers `positive` / `negative` cycles.
     #[args(parity = "None")]
-    pub fn independent_cycles(&self, parity: Option<&str>) -> PyResult<Vec<Vec<PyVariableId>>> {
+    pub fn independent_cycles(
+        &self,
+        parity: Option<&str>,
+        restriction: Option<Vec<&PyAny>>,
+    ) -> PyResult<Vec<Vec<PyVariableId>>> {
+        let sd_graph = SdGraph::from(self.as_native());
+        let restriction = {
+            if let Some(restriction) = restriction {
+                let mut set: HashSet<VariableId> = HashSet::new();
+                for var in restriction {
+                    set.insert(self.find_variable(var)?.into());
+                }
+                set
+            } else {
+                sd_graph.mk_all_vertices()
+            }
+        };
         let cycles = if let Some(parity) = parity {
             let parity = parse_parity(parity)?;
-            self.as_native().independent_parity_cycles(parity)
+            sd_graph.restricted_independent_parity_cycles(&restriction, parity)
         } else {
-            self.as_native().independent_cycles()
+            sd_graph.restricted_independent_cycles(&restriction)
         };
         let cycles = cycles
             .into_iter()
