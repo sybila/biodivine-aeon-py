@@ -541,7 +541,7 @@ impl PySymbolicAsyncGraph {
     }
 
     /// Resolve a `VariableId` for a variable given either as a string or as a `VariableId`.
-    fn resolve_variable(&self, variable: &PyAny) -> PyResult<PyVariableId> {
+    pub(crate) fn resolve_variable(&self, variable: &PyAny) -> PyResult<PyVariableId> {
         if let Ok(name) = variable.extract::<String>() {
             let var = self
                 .as_native()
@@ -559,7 +559,7 @@ impl PySymbolicAsyncGraph {
     }
 
     /// Resolve a `ParameterId` for a parameter given either as a string or as a `ParameterId`.
-    fn resolve_parameter(&self, parameter: &PyAny) -> PyResult<PyParameterId> {
+    pub(crate) fn resolve_parameter(&self, parameter: &PyAny) -> PyResult<PyParameterId> {
         if let Ok(name) = parameter.extract::<String>() {
             let param = self.as_native().as_network().find_parameter(name.as_str());
             if let Some(param) = param {
