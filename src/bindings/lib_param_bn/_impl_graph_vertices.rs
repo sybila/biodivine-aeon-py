@@ -139,7 +139,7 @@ impl PyGraphVertices {
     ///
     /// Each vertex is returned as a list of Boolean values that can be subsequently interpreted
     /// as symbolic sets using e.g. `SymbolicAsyncGraph`.
-    #[args(limit = "None")]
+    #[pyo3(signature = (limit = None))]
     pub fn list_vertices(&self, limit: Option<usize>) -> Vec<Vec<bool>> {
         self.as_native()
             .materialize()

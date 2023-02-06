@@ -1,6 +1,6 @@
 [package]
 name = "biodivine-aeon-py"
-version = "0.2.0-alpha4"
+version = "0.2.0-alpha5"
 edition = "2021"
 
 [lib]
@@ -16,8 +16,8 @@ crate-type = ["cdylib", "rlib"]
 static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
-pyo3 = { version = "0.17.3", features = ["abi3-py37", "extension-module"] }
-biodivine-lib-param-bn = "0.4.1"
+pyo3 = { version = "0.18.0", features = ["abi3-py37", "extension-module"] }
+biodivine-lib-param-bn = { version="0.4.3", features=["solver-z3"] }
 biodivine-lib-bdd = "0.4.2"
 biodivine-pbn-control = { git="https://github.com/sybila/biodivine-pbn-control", rev="1847a6290cadf964fecc9e75d6821907cc715109" }
 
@@ -27,4 +27,4 @@ z3="^0.11.2"
 z3-sys = "^0.7.1"
 
 [build-dependencies]
-pyo3-build-config = "0.17.3"
+pyo3-build-config = "0.18.0"

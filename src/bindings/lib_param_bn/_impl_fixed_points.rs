@@ -15,7 +15,7 @@ impl PyFixedPoints {
     /// A naive symbolic algorithm that computes the fixed points by gradual
     /// elimination of all states with outgoing transitions.
     #[staticmethod]
-    #[args(restriction = "None")]
+    #[pyo3(signature = (stg, restriction = None))]
     pub fn naive_symbolic(
         stg: &PySymbolicAsyncGraph,
         restriction: Option<&PyGraphColoredVertices>,
@@ -34,7 +34,7 @@ impl PyFixedPoints {
     // Only fixed-points from the restriction set are returned. However, the state has to be a
     // global fixed point, not just a fixed-point within the restriction set.
     #[staticmethod]
-    #[args(restriction = "None")]
+    #[pyo3(signature = (stg, restriction = None))]
     pub fn symbolic(
         stg: &PySymbolicAsyncGraph,
         restriction: Option<&PyGraphColoredVertices>,
@@ -51,7 +51,7 @@ impl PyFixedPoints {
     /// parameter valuation. That is, for every returned vertex, there is at least one color
     /// for which the vertex is a fixed-point.
     #[staticmethod]
-    #[args(restriction = "None")]
+    #[pyo3(signature = (stg, restriction = None))]
     pub fn symbolic_vertices(
         stg: &PySymbolicAsyncGraph,
         restriction: Option<&PyGraphColoredVertices>,
@@ -67,7 +67,7 @@ impl PyFixedPoints {
     /// Similar to `Self::symbolic_vertices`, but only returns colors for which there exists
     /// at least one fixed-point within restriction.
     #[staticmethod]
-    #[args(restriction = "None")]
+    #[pyo3(signature = (stg, restriction = None))]
     pub fn symbolic_colors(
         stg: &PySymbolicAsyncGraph,
         restriction: Option<&PyGraphColoredVertices>,
@@ -98,7 +98,7 @@ impl PyFixedPoints {
     /// this as an iterator, and instead you can use `limit` argument to set a limit on the number
     /// of returned items.
     #[staticmethod]
-    #[args(restriction = "None")]
+    #[pyo3(signature = (stg, size_limit, limit = None, restriction = None))]
     pub fn symbolic_list(
         stg: &PySymbolicAsyncGraph,
         size_limit: usize,
@@ -127,9 +127,7 @@ impl PyFixedPoints {
     ///
     /// WARNING: Due to technical issues, right now this is only a list, not an iterator.
     #[staticmethod]
-    #[args(limit = "None")]
-    #[args(positive_restriction = "None")]
-    #[args(negative_restriction = "None")]
+    #[pyo3(signature = (stg, limit = None, positive_restriction = None, negative_restriction = None))]
     pub fn solver_list(
         stg: &PySymbolicAsyncGraph,
         limit: Option<usize>,
@@ -180,9 +178,7 @@ impl PyFixedPoints {
     ///
     /// WARNING: Due to technical issues, right now this is only a list, not an iterator.
     #[staticmethod]
-    #[args(limit = "None")]
-    #[args(positive_restriction = "None")]
-    #[args(negative_restriction = "None")]
+    #[pyo3(signature = (stg, limit = None, positive_restriction = None, negative_restriction = None))]
     pub fn solver_vertex_list(
         stg: &PySymbolicAsyncGraph,
         limit: Option<usize>,
@@ -246,9 +242,7 @@ impl PyFixedPoints {
     ///
     /// WARNING: Due to technical issues, right now this is only a list, not an iterator.
     #[staticmethod]
-    #[args(limit = "None")]
-    #[args(positive_restriction = "None")]
-    #[args(negative_restriction = "None")]
+    #[pyo3(signature = (stg, limit = None, positive_restriction = None, negative_restriction = None))]
     pub fn solver_color_list(
         stg: &PySymbolicAsyncGraph,
         limit: Option<usize>,

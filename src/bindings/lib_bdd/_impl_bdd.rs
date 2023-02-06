@@ -68,7 +68,7 @@ impl PyBdd {
     }
 
     /// Compute a logical conjunction of two formulas.
-    #[args(limit = "None")]
+    #[pyo3(signature = (other, limit = None))]
     pub fn l_and(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
@@ -85,7 +85,7 @@ impl PyBdd {
     }
 
     /// Compute a logical disjunction of two formulas.
-    #[args(limit = "None")]
+    #[pyo3(signature = (other, limit = None))]
     pub fn l_or(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
@@ -102,7 +102,7 @@ impl PyBdd {
     }
 
     /// Compute a logical implication of two formulas.
-    #[args(limit = "None")]
+    #[pyo3(signature = (other, limit = None))]
     pub fn l_imp(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
@@ -119,7 +119,7 @@ impl PyBdd {
     }
 
     /// Compute a logical equivalence of two formulas.
-    #[args(limit = "None")]
+    #[pyo3(signature = (other, limit = None))]
     pub fn l_iff(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
@@ -136,7 +136,7 @@ impl PyBdd {
     }
 
     /// Compute a logical xor of two formulas.
-    #[args(limit = "None")]
+    #[pyo3(signature = (other, limit = None))]
     pub fn l_xor(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
@@ -153,7 +153,7 @@ impl PyBdd {
     }
 
     /// Compute a logical conjunction of this formula with a negated second formula.
-    #[args(limit = "None")]
+    #[pyo3(signature = (other, limit = None))]
     pub fn l_and_not(&self, other: &PyBdd, limit: Option<usize>) -> PyResult<PyBdd> {
         if let Some(limit) = limit {
             let (left, right) = (self.as_native(), other.as_native());
@@ -243,7 +243,7 @@ impl PyBdd {
     /// List all valuations that satisfy this BDD. Note that all valuations will be returned
     /// as one list (i.e. this is not an iterator). So a large number of valuations can require
     /// a significant amount of memory.
-    #[args(limit = "None")]
+    #[pyo3(signature = (limit = None))]
     pub fn list_sat_valuations(&self, limit: Option<usize>) -> Vec<Vec<bool>> {
         self.as_native()
             .sat_valuations()
@@ -255,7 +255,7 @@ impl PyBdd {
     /// List all clauses of this BDD (paths to `1` literal). Note that all clauses are returned
     /// as one list (i.e. this is not an iterator). So a large number of clauses can require
     /// a significant amount of memory.
-    #[args(limit = "None")]
+    #[pyo3(signature = (limit = None))]
     pub fn list_sat_clauses(&self, limit: Option<usize>) -> Vec<Vec<(PyBddVariable, bool)>> {
         self.as_native()
             .sat_clauses()
@@ -273,7 +273,7 @@ impl PyBdd {
     ///
     /// Variable names are resolved from the given `BddVariableSet`. If not given, the names
     /// default to `x_0`, `x_1`, etc.
-    #[args(variables = "None")]
+    #[pyo3(signature = (variables = None))]
     pub fn to_dot(&self, variables: Option<&PyBddVariableSet>) -> String {
         if let Some(variables) = variables {
             self.as_native().to_dot_string(variables.as_native(), true)
@@ -358,7 +358,7 @@ impl PyBdd {
     ///
     /// The first argument is a `BddVariableSet` that supplies the variable names. If it is not
     /// given, then default names (`x_0`, `x_1`, ...) are used.
-    #[args(variables = "None")]
+    #[pyo3(signature = (variables = None))]
     pub fn to_boolean_expression(
         &self,
         variables: Option<&PyBddVariableSet>,

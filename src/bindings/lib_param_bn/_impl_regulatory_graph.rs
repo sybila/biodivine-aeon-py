@@ -81,7 +81,7 @@ impl PyRegulatoryGraph {
                 Ok(()) => Ok(()),
                 Err(e) => throw_runtime_error(e),
             }
-        } else if let Ok(dict) = regulation.cast_as::<PyDict>() {
+        } else if let Ok(dict) = regulation.downcast::<PyDict>() {
             let source = if let Some(source) = dict.get_item("source") {
                 self.get_variable_name(source)?
             } else {
@@ -274,7 +274,7 @@ impl PyRegulatoryGraph {
 
     /// Compute all non-trivial strongly connected components of the regulatory graph.
     /// The result is sorted by component size.
-    #[args(restriction = "None")]
+    #[pyo3(signature = (restriction = None))]
     pub fn strongly_connected_components(
         &self,
         restriction: Option<Vec<&PyAny>>,
@@ -306,7 +306,7 @@ impl PyRegulatoryGraph {
     /// specified, the method only looks for a `positive` / `negative` cycle.
     ///
     /// Returns `None` when no such cycle exists.
-    #[args(parity = "None")]
+    #[pyo3(signature = (pivot, parity = None))]
     pub fn shortest_cycle(
         &self,
         pivot: &PyAny,
@@ -324,8 +324,7 @@ impl PyRegulatoryGraph {
 
     /// Approximate the minimum feedback vertex set of this graph. When optional `parity` is
     /// specified, the method only considers `positive` / `negative` cycles.
-    #[args(parity = "None")]
-    #[args(restriction = "None")]
+    #[pyo3(signature = (parity = None, restriction = None))]
     pub fn feedback_vertex_set(
         &self,
         parity: Option<&str>,
@@ -356,7 +355,7 @@ impl PyRegulatoryGraph {
 
     /// Approximate the maximum set of independent cycles of this graph. When optional `parity`
     /// is specified, the method only considers `positive` / `negative` cycles.
-    #[args(parity = "None")]
+    #[pyo3(signature = (parity = None, restriction = None))]
     pub fn independent_cycles(
         &self,
         parity: Option<&str>,
