@@ -36,7 +36,7 @@ impl PyBddVariableSet {
             .into_iter()
             .map(|v| self.as_native().name_of(v))
             .collect::<Vec<_>>();
-        Ok(format!("BddVariableSet{:?}", names))
+        Ok(format!("BddVariableSet{names:?}"))
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -112,7 +112,7 @@ impl PyBddVariableSet {
             if let Some(variable) = self.as_native().var_by_name(name.as_str()) {
                 Ok(variable.into())
             } else {
-                throw_runtime_error(format!("Variable {} not found.", name))
+                throw_runtime_error(format!("Variable {name} not found."))
             }
         } else {
             throw_type_error("Expected name or BddVariable.")

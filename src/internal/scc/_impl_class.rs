@@ -29,10 +29,7 @@ impl Display for Class {
         write!(
             f,
             "{:?}",
-            self.0
-                .iter()
-                .map(|c| format!("{:?}", c))
-                .collect::<Vec<_>>()
+            self.0.iter().map(|c| format!("{c:?}")).collect::<Vec<_>>()
         )
     }
 }

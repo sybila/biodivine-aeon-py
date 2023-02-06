@@ -91,7 +91,7 @@ impl PyPerturbationGraph {
         if let Some(id) = self.as_native().get_perturbation_parameter(variable) {
             Ok(id.into())
         } else {
-            throw_runtime_error(format!("Variable {:?} not found", variable))
+            throw_runtime_error(format!("Variable {variable:?} not found"))
         }
     }
 
@@ -273,7 +273,7 @@ impl PyPerturbationGraph {
             if let Some(var) = network.as_graph().find_variable(name.as_str()) {
                 Ok(var.into())
             } else {
-                throw_runtime_error(format!("Variable {} not found.", name))
+                throw_runtime_error(format!("Variable {name} not found."))
             }
         } else {
             variable.extract::<PyVariableId>()

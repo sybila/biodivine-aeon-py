@@ -254,7 +254,7 @@ impl PySymbolicAsyncGraph {
         let id = self.resolve_variable(variable)?;
         if self.as_native().as_network().regulators(id.into()).len() != inputs.len() {
             let name = self.as_native().as_network().get_variable_name(id.into());
-            return throw_runtime_error(format!("Artiy mismatch for variable {}.", name));
+            return throw_runtime_error(format!("Artiy mismatch for variable {name}."));
         }
         let ctx = self.as_native().symbolic_context();
         let table = ctx.get_implicit_function_table(id.into());
@@ -551,7 +551,7 @@ impl PySymbolicAsyncGraph {
             if let Some(var) = var {
                 Ok(var.into())
             } else {
-                throw_runtime_error(format!("Unknown variable `{}`.", name))
+                throw_runtime_error(format!("Unknown variable `{name}`."))
             }
         } else {
             variable.extract::<PyVariableId>()
@@ -565,7 +565,7 @@ impl PySymbolicAsyncGraph {
             if let Some(param) = param {
                 Ok(param.into())
             } else {
-                throw_runtime_error(format!("Unknown parameter `{}`.", name))
+                throw_runtime_error(format!("Unknown parameter `{name}`."))
             }
         } else {
             parameter.extract::<PyParameterId>()

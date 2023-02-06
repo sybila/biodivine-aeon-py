@@ -246,7 +246,7 @@ impl PyBooleanNetwork {
             if let Some(id) = id {
                 Ok(id.into())
             } else {
-                throw_runtime_error(format!("Parameter {} unknown.", name))
+                throw_runtime_error(format!("Parameter {name} unknown."))
             }
         } else if let Ok(id) = parameter.extract::<PyParameterId>() {
             Ok(id)
@@ -294,7 +294,7 @@ impl PyBooleanNetwork {
             if let Some(id) = id {
                 Ok(id.into())
             } else {
-                throw_runtime_error(format!("Variable {} unknown.", name))
+                throw_runtime_error(format!("Variable {name} unknown."))
             }
         } else if let Ok(id) = variable.extract::<PyVariableId>() {
             Ok(id)

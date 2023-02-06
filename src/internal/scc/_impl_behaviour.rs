@@ -9,7 +9,7 @@ impl TryFrom<&str> for Behaviour {
             "S" => Ok(Behaviour::Stability),
             "D" => Ok(Behaviour::Disorder),
             "O" => Ok(Behaviour::Oscillation),
-            _ => Err(format!("Invalid behaviour string `{}`.", value)),
+            _ => Err(format!("Invalid behaviour string `{value}`.")),
         }
     }
 }

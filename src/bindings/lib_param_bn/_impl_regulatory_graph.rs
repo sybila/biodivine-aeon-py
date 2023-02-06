@@ -104,7 +104,7 @@ impl PyRegulatoryGraph {
                 .map(|str| match str.as_str() {
                     "activation" => Ok(Monotonicity::Activation),
                     "inhibition" => Ok(Monotonicity::Inhibition),
-                    _ => throw_type_error(format!("Unknown monotonicity: {}", str)),
+                    _ => throw_type_error(format!("Unknown monotonicity: {str}")),
                 })
                 .transpose()?;
 
@@ -134,7 +134,7 @@ impl PyRegulatoryGraph {
             if let Some(id) = id {
                 Ok(id.into())
             } else {
-                throw_runtime_error(format!("Variable {} unknown.", name))
+                throw_runtime_error(format!("Variable {name} unknown."))
             }
         } else if let Ok(id) = variable.extract::<PyVariableId>() {
             Ok(id)
@@ -397,8 +397,7 @@ fn parse_parity(parity: &str) -> PyResult<Sign> {
         "positive" | "+" => Ok(Sign::Positive),
         "negative" | "-" => Ok(Sign::Negative),
         _ => throw_runtime_error(format!(
-            "Unknown parity. Expected `positive`/`negative`, got {}.",
-            parity
+            "Unknown parity. Expected `positive`/`negative`, got {parity}."
         )),
     }
 }
