@@ -1,31 +1,12 @@
 use super::PyBddVariableSet;
-use crate::bindings::lib_bdd::{PyBdd, PyBddVariable, PyBooleanExpression};
+use crate::bindings::lib_bdd::{
+    PyBdd, PyBddPartialValuation, PyBddValuation, PyBddVariable, PyBooleanExpression,
+};
 use crate::{throw_runtime_error, throw_type_error, AsNative};
-use biodivine_lib_bdd::{BddPartialValuation, BddVariable, BddVariableSet, BddVariableSetBuilder};
+use biodivine_lib_bdd::boolean_expression::BooleanExpression;
+use biodivine_lib_bdd::{BddVariable, BddVariableSet, BddVariableSetBuilder};
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
-
-impl From<BddVariableSet> for PyBddVariableSet {
-    fn from(value: BddVariableSet) -> Self {
-        PyBddVariableSet(value)
-    }
-}
-
-impl From<PyBddVariableSet> for BddVariableSet {
-    fn from(value: PyBddVariableSet) -> Self {
-        value.0
-    }
-}
-
-impl AsNative<BddVariableSet> for PyBddVariableSet {
-    fn as_native(&self) -> &BddVariableSet {
-        &self.0
-    }
-
-    fn as_native_mut(&mut self) -> &mut BddVariableSet {
-        &mut self.0
-    }
-}
+use pyo3::types::PyList;
 
 #[pymethods]
 impl PyBddVariableSet {
@@ -43,8 +24,6 @@ impl PyBddVariableSet {
         self.__str__()
     }
 
-    /// Create a new `BddVariableSet` by supplying either a number of variables (that will be
-    /// automatically named `x_0`, `x_1`, etc.), or a list of string names.
     #[new]
     pub fn new(arg1: &PyAny) -> PyResult<PyBddVariableSet> {
         if let Ok(num_vars) = arg1.extract::<u16>() {
@@ -64,67 +43,61 @@ impl PyBddVariableSet {
         }
     }
 
-    /// Evaluate the given `BooleanExpression` into a `Bdd`. If the argument is a `String`, it is
-    /// first parsed into an expression and then evaluated.
-    ///
-    /// Note that the method panics when the string cannot be correctly parsed.
     pub fn eval_expression(&self, expression: &PyAny) -> PyResult<PyBdd> {
         if let Ok(expression) = expression.extract::<String>() {
-            Ok(self
-                .as_native()
-                .eval_expression_string(expression.as_str())
-                .into())
+            match BooleanExpression::try_from(expression.as_str()) {
+                Ok(ex) => {
+                    if let Some(bdd) = self.as_native().safe_eval_expression(&ex) {
+                        Ok(bdd.into())
+                    } else {
+                        throw_runtime_error("Expression contains unknown variables.")
+                    }
+                }
+                Err(err) => throw_runtime_error(format!("Invalid expression: {err}.")),
+            }
         } else if let Ok(expression) = expression.extract::<PyBooleanExpression>() {
-            Ok(self
+            if let Some(bdd) = self
                 .as_native()
-                .eval_expression(expression.as_native())
-                .into())
+                .safe_eval_expression(expression.as_native())
+            {
+                Ok(bdd.into())
+            } else {
+                throw_runtime_error("Expression contains unknown variables.")
+            }
         } else {
             throw_type_error("Expected String or BooleanExpression.")
         }
     }
 
-    /// Get the total number of variables in this `BddVariableSet`.
     pub fn var_count(&self) -> u16 {
         self.as_native().num_vars()
     }
 
-    /// Get the full list of `BddVariable` identifiers managed by this `BddVariableSet`.
-    pub fn all_variables(&self, py: Python) -> PyObject {
-        let variables: Vec<PyBddVariable> = self
-            .as_native()
+    pub fn all_variables(&self) -> Vec<PyBddVariable> {
+        self.as_native()
             .variables()
             .into_iter()
-            .map(|v| v.into())
-            .collect();
-        variables.into_py(py)
+            .map(|it| it.into())
+            .collect()
     }
 
-    /// Get a `BddVariable` identifier based on variable name. Raises an exception if a variable
-    /// with the given name does not exist.
-    ///
-    /// For convenience during type conversion, you can also supply a `BddVariable`, in which case
-    /// you get the same `BddVariable` as a result.
-    pub fn find_variable(&self, variable: &PyAny) -> PyResult<PyBddVariable> {
+    pub fn find_variable(&self, variable: &PyAny) -> PyResult<Option<PyBddVariable>> {
         if let Ok(variable) = variable.extract::<PyBddVariable>() {
-            Ok(variable)
+            Ok(Some(variable))
         } else if let Ok(name) = variable.extract::<String>() {
-            if let Some(variable) = self.as_native().var_by_name(name.as_str()) {
-                Ok(variable.into())
-            } else {
-                throw_runtime_error(format!("Variable {name} not found."))
-            }
+            Ok(self
+                .as_native()
+                .var_by_name(name.as_str())
+                .map(|it| it.into()))
         } else {
             throw_type_error("Expected name or BddVariable.")
         }
     }
 
-    /// Return the name of the given `BddVariable` identifier in this `BddVariableSet`.
     pub fn name_of(&self, variable: PyBddVariable) -> String {
         self.as_native().name_of(variable.into())
     }
 
-    /// Create a `Bdd` corresponding to a constant function `True` or `False`.
     pub fn mk_const(&self, value: bool) -> PyBdd {
         if value {
             self.as_native().mk_true().into()
@@ -133,77 +106,51 @@ impl PyBddVariableSet {
         }
     }
 
-    /// Create a `Bdd` corresponding to a literal, i.e. `x` or `!x` for a particular
-    /// variable `x`.
-    ///
-    /// The variable can be specified either using its name, or a `BddVariable` identifier.
     pub fn mk_literal(&self, variable: &PyAny, value: bool) -> PyResult<PyBdd> {
-        let bdd_var: BddVariable = self.find_variable(variable)?.into();
+        let bdd_var: BddVariable = self.find_variable(variable)?.unwrap().into();
         Ok(self.as_native().mk_literal(bdd_var, value).into())
     }
 
-    /// Create a `Bdd` representing a conjunctive clause from a partial valuation of variables.
-    ///
-    /// This partial valuation is a dictionary mapping variables (either a name or a `BddVariable`
-    /// identifier) to a Boolean value.
-    ///
-    /// Variables that do not appear in the dictionary do not appear in the clause.
-    pub fn mk_conjunctive_clause(&self, items: &PyDict) -> PyResult<PyBdd> {
-        let mut partial_valuation = BddPartialValuation::empty();
-        for (key, value) in items {
-            let var: BddVariable = self.find_variable(key)?.into();
-            let value = value.extract::<bool>()?;
-            partial_valuation.set_value(var, value);
+    pub fn mk_valuation(&self, valuation: &PyAny) -> PyResult<PyBdd> {
+        let valuation = PyBddValuation::from_python(valuation)?;
+        let mut result = self.as_native().mk_true();
+        for var in self.as_native().variables() {
+            let value = valuation.as_native().value(var);
+            let literal = self.as_native().mk_literal(var, value);
+            result = result.and(&literal);
         }
+        Ok(result.into())
+    }
 
+    pub fn mk_conjunctive_clause(&self, clause: &PyAny) -> PyResult<PyBdd> {
+        let clause = PyBddPartialValuation::from_python(clause)?;
         Ok(self
             .as_native()
-            .mk_conjunctive_clause(&partial_valuation)
+            .mk_conjunctive_clause(clause.as_native())
             .into())
     }
 
-    /// Create a `Bdd` representing a disjunctive clause from a partial valuation of variables.
-    ///
-    /// This partial valuation is a dictionary mapping variables (either a name or a `BddVariable`
-    /// identifier) to a Boolean value.
-    ///
-    /// Variables that do not appear in the dictionary do not appear in the clause.
-    pub fn mk_disjunctive_clause(&self, items: &PyDict) -> PyResult<PyBdd> {
-        let mut partial_valuation = biodivine_lib_bdd::BddPartialValuation::empty();
-        for (key, value) in items {
-            let var: BddVariable = self.find_variable(key)?.into();
-            let value = value.extract::<bool>()?;
-            partial_valuation.set_value(var, value);
-        }
-
+    pub fn mk_disjunctive_clause(&self, clause: &PyAny) -> PyResult<PyBdd> {
+        let clause = PyBddPartialValuation::from_python(clause)?;
         Ok(self
             .as_native()
-            .mk_disjunctive_clause(&partial_valuation)
+            .mk_disjunctive_clause(clause.as_native())
             .into())
     }
 
-    /// Create a CNF formula. The formula is given as a list of disjunctive clauses.
-    ///
-    /// Each clause is given as a dictionary, mapping variables (either a name or a `BddVariable`
-    /// identifier) to Boolean values.
-    ///
     pub fn mk_cnf(&self, clauses: &PyList) -> PyResult<PyBdd> {
         let mut result = self.as_native().mk_true();
         for clause in clauses {
-            let clause = self.mk_disjunctive_clause(clause.extract()?)?.into();
+            let clause = self.mk_disjunctive_clause(clause)?.into();
             result = result.and(&clause);
         }
         Ok(result.into())
     }
 
-    /// Create a DNF formula. The formula is given as a list of conjunctive clauses.
-    ///
-    /// Each clause is given as a dictionary, mapping variables (either a name or a `BddVariable`
-    /// identifier) to Boolean values.
     pub fn mk_dnf(&self, clauses: &PyList) -> PyResult<PyBdd> {
         let mut result = self.as_native().mk_false();
         for clause in clauses {
-            let clause = self.mk_conjunctive_clause(clause.extract()?)?.into();
+            let clause = self.mk_disjunctive_clause(clause)?.into();
             result = result.or(&clause);
         }
         Ok(result.into())
