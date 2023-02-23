@@ -3,30 +3,7 @@ use crate::bindings::lib_param_bn::{PyGraphColors, PySymbolicAsyncGraph};
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
 use pyo3::prelude::*;
-
-impl From<PyGraphColors> for GraphColors {
-    fn from(value: PyGraphColors) -> Self {
-        value.0
-    }
-}
-
-impl From<GraphColors> for PyGraphColors {
-    fn from(value: GraphColors) -> Self {
-        PyGraphColors(value)
-    }
-}
-
-impl AsNative<GraphColors> for PyGraphColors {
-    fn as_native(&self) -> &GraphColors {
-        &self.0
-    }
-
-    fn as_native_mut(&mut self) -> &mut GraphColors {
-        &mut self.0
-    }
-}
 
 #[pymethods]
 impl PyGraphColors {

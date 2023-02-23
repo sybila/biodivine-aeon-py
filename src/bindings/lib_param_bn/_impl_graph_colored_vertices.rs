@@ -5,30 +5,7 @@ use crate::bindings::lib_param_bn::{
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use pyo3::prelude::*;
-
-impl From<PyGraphColoredVertices> for GraphColoredVertices {
-    fn from(value: PyGraphColoredVertices) -> Self {
-        value.0
-    }
-}
-
-impl From<GraphColoredVertices> for PyGraphColoredVertices {
-    fn from(value: GraphColoredVertices) -> Self {
-        PyGraphColoredVertices(value)
-    }
-}
-
-impl AsNative<GraphColoredVertices> for PyGraphColoredVertices {
-    fn as_native(&self) -> &GraphColoredVertices {
-        &self.0
-    }
-
-    fn as_native_mut(&mut self) -> &mut GraphColoredVertices {
-        &mut self.0
-    }
-}
 
 #[pymethods]
 impl PyGraphColoredVertices {

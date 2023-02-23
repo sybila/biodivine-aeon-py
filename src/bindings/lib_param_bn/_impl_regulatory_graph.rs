@@ -8,26 +8,14 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashSet;
 
-impl From<PyRegulatoryGraph> for RegulatoryGraph {
-    fn from(value: PyRegulatoryGraph) -> Self {
-        value.0
-    }
-}
+/*
+   WARNING: `BooleanNetwork` inherits from `RegulatoryGraph`, so if you are adding new
+   methods that can modify the regulatory graph, you should override them in Boolean network
+   and ensure both the regulatory graph managed by PyO3 and the regulatory graph *inside*
+   the network receive the same updates.
 
-impl From<RegulatoryGraph> for PyRegulatoryGraph {
-    fn from(value: RegulatoryGraph) -> Self {
-        PyRegulatoryGraph(value)
-    }
-}
-
-impl AsNative<RegulatoryGraph> for PyRegulatoryGraph {
-    fn as_native(&self) -> &RegulatoryGraph {
-        &self.0
-    }
-    fn as_native_mut(&mut self) -> &mut RegulatoryGraph {
-        &mut self.0
-    }
-}
+   For now, this only includes `add_regulation` and `set_variable_name`.
+*/
 
 #[pymethods]
 impl PyRegulatoryGraph {
@@ -43,16 +31,11 @@ impl PyRegulatoryGraph {
         self.__str__()
     }
 
-    /// Create a new `RegulatoryGraph` using a given list of variable names.
     #[new]
     pub fn new(variables: Vec<String>) -> Self {
         RegulatoryGraph::new(variables).into()
     }
 
-    /// Create a `RegulatoryGraph` by parsing a list of `.aeon` regulation strings.
-    ///
-    /// The variables created in the graph are exactly the ones used by some regulation
-    /// (i.e. they do not need to be declared separately).
     #[staticmethod]
     pub fn from_regulations(lines: Vec<String>) -> PyResult<Self> {
         let graph = RegulatoryGraph::try_from_string_regulations(lines);
@@ -62,19 +45,6 @@ impl PyRegulatoryGraph {
         }
     }
 
-    /// Create a new regulation in this `RegulatoryGraph` with the given properties.
-    ///
-    /// The function takes one argument. When this argument is a string, the string is interpreted
-    /// as a regulation line in the AEON text format. Alternatively, the argument can be
-    /// a dictionary, in which case the function constructs a regulation based on `source`,
-    /// `target`, `monotonicity`, and `observable` keys from this dictionary.
-    ///
-    /// Both `source` and `target` are either names or `VariableId` objects. Furthermore,
-    /// the `observable` key is a Boolean, and `monotonicity` is either `activation`, `inhibition`
-    /// (i.e. strings), or is missing (i.e. the value is `None`).
-    ///
-    /// Both `source` and `target` are mandatory, `observability` is optional and defaults to
-    /// `True`, and `monotonicity` is also optional, defaulting to non-monotonous.
     pub fn add_regulation(&mut self, regulation: &PyAny) -> PyResult<()> {
         if let Ok(string) = regulation.extract::<String>() {
             match self.as_native_mut().add_string_regulation(string.as_str()) {
@@ -82,31 +52,9 @@ impl PyRegulatoryGraph {
                 Err(e) => throw_runtime_error(e),
             }
         } else if let Ok(dict) = regulation.downcast::<PyDict>() {
-            let source = if let Some(source) = dict.get_item("source") {
-                self.get_variable_name(source)?
-            } else {
-                return throw_type_error("Missing regulation source variable.");
-            };
-            let target = if let Some(target) = dict.get_item("target") {
-                self.get_variable_name(target)?
-            } else {
-                return throw_type_error("Missing regulation target variable.");
-            };
-            let observable = dict
-                .get_item("observable")
-                .map(|it| it.extract::<bool>())
-                .unwrap_or(Ok(true))?;
-            let monotonicity = dict
-                .get_item("monotonicity")
-                .map(|it| it.extract::<String>())
-                .transpose()?;
-            let monotonicity = monotonicity
-                .map(|str| match str.as_str() {
-                    "activation" => Ok(Monotonicity::Activation),
-                    "inhibition" => Ok(Monotonicity::Inhibition),
-                    _ => throw_type_error(format!("Unknown monotonicity: {str}")),
-                })
-                .transpose()?;
+            let (source, target, observable, monotonicity) = regulation_from_python(dict)?;
+            let source = self.get_variable_name(source)?;
+            let target = self.get_variable_name(target)?;
 
             let result = self.as_native_mut().add_regulation(
                 source.as_str(),
@@ -124,36 +72,24 @@ impl PyRegulatoryGraph {
         }
     }
 
-    /// Find a `VariableId` based on a variable name.
-    ///
-    /// For convenience, this function also accepts `VariableId`, in which case it is returned
-    /// unmodified.
-    pub fn find_variable(&self, variable: &PyAny) -> PyResult<PyVariableId> {
+    pub fn find_variable(&self, variable: &PyAny) -> PyResult<Option<PyVariableId>> {
         if let Ok(name) = variable.extract::<String>() {
-            let id = self.as_native().find_variable(name.as_str());
-            if let Some(id) = id {
-                Ok(id.into())
-            } else {
-                throw_runtime_error(format!("Variable {name} unknown."))
-            }
+            Ok(self
+                .as_native()
+                .find_variable(name.as_str())
+                .map(|it| it.into()))
         } else if let Ok(id) = variable.extract::<PyVariableId>() {
-            Ok(id)
+            Ok(Some(id))
         } else {
             throw_type_error("Expected variable name as argument.")
         }
     }
 
-    /// Get a variable given its `VariableId`.
-    ///
-    /// For convenience, the function also accepts a variable name and returns the same name.
     pub fn get_variable_name(&self, id: &PyAny) -> PyResult<String> {
-        let id = self.find_variable(id)?;
+        let id = self.find_variable(id)?.expect("Unknown variable.");
         Ok(self.as_native().get_variable_name(id.into()).clone())
     }
 
-    /// Set the variable name of a given `VariableId`.
-    ///
-    /// Throws an exception if the name is invalid or already in use.
     pub fn set_variable_name(&mut self, id: PyVariableId, name: &str) -> PyResult<()> {
         match self.as_native_mut().set_variable_name(id.into(), name) {
             Ok(()) => Ok(()),
@@ -161,101 +97,56 @@ impl PyRegulatoryGraph {
         }
     }
 
-    /// Get the number of variables in this regulatory graph.
     pub fn num_vars(&self) -> usize {
         self.as_native().num_vars()
     }
 
-    /// Find information about a regulation in the graph if it exists. If the regulation is not
-    /// found, throws a runtime exception.
-    ///
-    /// The regulation is specified by its `source` and `target`, both of which are either names
-    /// or `VariableId` objects. The result is a dictionary with the `source` and `target` key
-    /// giving the `VariableId` of the respective entities. Furthermore, `observable` key states
-    /// the observability of the regulation (value is Boolean), and `monotonicity` key states
-    /// whether the regulation is an `activation` or an `inhibition`. If the regulation is
-    /// not monotonous, the key is undefined.
     pub fn find_regulation(
         &self,
         py: Python,
         source: &PyAny,
         target: &PyAny,
-    ) -> PyResult<PyObject> {
-        let source = self.find_variable(source)?;
-        let target = self.find_variable(target)?;
+    ) -> PyResult<Option<PyObject>> {
+        let source = self.find_variable(source)?.expect("Unknown variable.");
+        let target = self.find_variable(target)?.expect("Unknown variable.");
         if let Some(reg) = self
             .as_native()
             .find_regulation(source.into(), target.into())
         {
-            Ok(regulation_to_python(py, reg)?)
+            Ok(Some(regulation_to_python(py, reg)?))
         } else {
-            throw_runtime_error("Unknown regulation.")
+            Ok(None)
         }
     }
 
-    /// Get a list of all regulators that influence the given `target`.
-    ///
-    /// Target can be a variable name or `VariableId`. Result is always a list of `VariableId`
-    /// objects. Note that the entities may be returned in arbitrary order.
-    pub fn regulators(&self, target: &PyAny) -> PyResult<Vec<PyVariableId>> {
-        let target = self.find_variable(target)?;
+    pub fn regulators(&self, target: &PyAny) -> PyResult<HashSet<PyVariableId>> {
+        let target = self.find_variable(target)?.expect("Unknown variable.");
         let regulators = self.0.regulators(target.into());
         Ok(regulators.into_iter().map(|it| it.into()).collect())
     }
 
-    /// Get a list of all targets that are influenced by the given `source` regulator.
-    ///
-    /// Source can be a variable name or `VariableId`. Result is always a list of `VariableId`
-    /// objects. Note that the entities may be returned in arbitrary order.
-    pub fn targets(&self, source: &PyAny) -> PyResult<Vec<PyVariableId>> {
-        let source = self.find_variable(source)?;
+    pub fn targets(&self, source: &PyAny) -> PyResult<HashSet<PyVariableId>> {
+        let source = self.find_variable(source)?.expect("Unknown variable.");
         let targets = self.as_native().targets(source.into());
         Ok(targets.into_iter().map(|it| it.into()).collect())
     }
 
-    /// Get a list of all variables that the given `target` depends on, even transitively.
-    ///
-    /// Target can be a variable name or `VariableId`. Result is always a list of `VariableId`
-    /// objects. Note that the entities may be returned in arbitrary order.
-    pub fn transitive_regulators(&self, target: &PyAny) -> PyResult<Vec<PyVariableId>> {
-        let id = self.find_variable(target)?;
+    pub fn regulators_transitive(&self, target: &PyAny) -> PyResult<HashSet<PyVariableId>> {
+        let id = self.find_variable(target)?.expect("Unknown variable.");
         let list = self.as_native().transitive_regulators(id.into());
         Ok(list.into_iter().map(|it| it.into()).collect())
     }
 
-    /// Get a list of all variables that are regulated by the given `source`, even transitively.
-    ///
-    /// Source can be a variable name or `VariableId`. Result is always a list of `VariableId`
-    /// objects. Note that the entities may be returned in arbitrary order.
-    pub fn transitive_targets(&self, source: &PyAny) -> PyResult<Vec<PyVariableId>> {
-        let id = self.find_variable(source)?;
+    pub fn targets_transitive(&self, source: &PyAny) -> PyResult<HashSet<PyVariableId>> {
+        let id = self.find_variable(source)?.expect("Unknown variable.");
         let list = self.as_native().transitive_targets(id.into());
         Ok(list.into_iter().map(|it| it.into()).collect())
     }
 
-    /// Returns a list of strongly connected components of this `RegulatoryGraph`, where each
-    /// component is represented as a list of its nodes (`VariableId` objects).
-    pub fn components(&self) -> Vec<Vec<PyVariableId>> {
-        #[allow(deprecated)]
-        self.as_native()
-            .components()
-            .into_iter()
-            .map(|c| c.into_iter().map(|it| it.into()).collect())
-            .collect()
-    }
-
-    /// Get a list of all variables represented by their `VariableId` objects.
     pub fn variables(&self) -> Vec<PyVariableId> {
         self.as_native().variables().map(|it| it.into()).collect()
     }
 
-    /// Get a list of all regulations in this `RegulatoryGraph`.
-    ///
-    /// Each member of the list is a dictionary with the `source` and `target` key giving
-    /// the `VariableId` of the respective entities. Furthermore, `observable` key states
-    /// the observability of the regulation (value is Boolean), and `monotonicity` key states
-    /// whether the regulation is an `activation` or an `inhibition`. If the regulation is
-    /// not monotonous, the key is undefined.
     pub fn regulations(&self, py: Python) -> PyResult<Vec<PyObject>> {
         let mut result = Vec::new();
         for reg in self.as_native().regulations() {
@@ -264,55 +155,38 @@ impl PyRegulatoryGraph {
         Ok(result)
     }
 
-    /// Export this regulatory graph to a `.dot` format.
-    ///
-    /// In the representation, we use red and green color to distinguish positive and negative
-    /// regulations. Dashed edges show regulations without observability requirement.
     pub fn to_dot(&self) -> String {
         self.as_native().to_dot()
     }
 
-    /// Compute all non-trivial strongly connected components of the regulatory graph.
-    /// The result is sorted by component size.
     #[pyo3(signature = (restriction = None))]
     pub fn strongly_connected_components(
         &self,
         restriction: Option<Vec<&PyAny>>,
-    ) -> PyResult<Vec<Vec<PyVariableId>>> {
+    ) -> PyResult<Vec<HashSet<PyVariableId>>> {
         let components = if let Some(restriction) = restriction {
-            let mut transformed: HashSet<VariableId> = HashSet::new();
-            for it in restriction {
-                transformed.insert(self.find_variable(it)?.into());
-            }
+            let restriction = read_restriction(self, restriction)?;
             self.as_native()
-                .restricted_strongly_connected_components(&transformed)
+                .restricted_strongly_connected_components(&restriction)
         } else {
             self.as_native().strongly_connected_components()
         };
         Ok(components
             .into_iter()
-            .map(|c| {
-                let mut vector = c
-                    .into_iter()
-                    .map(PyVariableId::from)
-                    .collect::<Vec<PyVariableId>>();
-                vector.sort();
-                vector
-            })
+            .map(|c| c.into_iter().map(|it| it.into()).collect())
             .collect())
     }
 
-    /// Compute shortest cycle originating in the given `pivot`. When optional `parity` is
-    /// specified, the method only looks for a `positive` / `negative` cycle.
-    ///
-    /// Returns `None` when no such cycle exists.
     #[pyo3(signature = (pivot, parity = None))]
     pub fn shortest_cycle(
         &self,
         pivot: &PyAny,
         parity: Option<&str>,
     ) -> PyResult<Option<Vec<PyVariableId>>> {
-        let pivot: VariableId = self.find_variable(pivot)?.into();
+        let pivot: VariableId = self
+            .find_variable(pivot)?
+            .expect("Unknown variable.")
+            .into();
         let cycle = if let Some(parity) = parity {
             let parity = parse_parity(parity)?;
             self.as_native().shortest_parity_cycle(pivot, parity)
@@ -322,25 +196,17 @@ impl PyRegulatoryGraph {
         Ok(cycle.map(|c| c.into_iter().map(PyVariableId::from).collect()))
     }
 
-    /// Approximate the minimum feedback vertex set of this graph. When optional `parity` is
-    /// specified, the method only considers `positive` / `negative` cycles.
     #[pyo3(signature = (parity = None, restriction = None))]
     pub fn feedback_vertex_set(
         &self,
         parity: Option<&str>,
         restriction: Option<Vec<&PyAny>>,
-    ) -> PyResult<Vec<PyVariableId>> {
+    ) -> PyResult<HashSet<PyVariableId>> {
         let sd_graph = SdGraph::from(self.as_native());
-        let restriction = {
-            if let Some(restriction) = restriction {
-                let mut set: HashSet<VariableId> = HashSet::new();
-                for var in restriction {
-                    set.insert(self.find_variable(var)?.into());
-                }
-                set
-            } else {
-                sd_graph.mk_all_vertices()
-            }
+        let restriction = if let Some(restriction) = restriction {
+            read_restriction(self, restriction)?
+        } else {
+            sd_graph.mk_all_vertices()
         };
         let fvs = if let Some(parity) = parity {
             let parity = parse_parity(parity)?;
@@ -348,9 +214,7 @@ impl PyRegulatoryGraph {
         } else {
             sd_graph.restricted_feedback_vertex_set(&restriction)
         };
-        let mut fvs = fvs.into_iter().map(PyVariableId::from).collect::<Vec<_>>();
-        fvs.sort();
-        Ok(fvs)
+        Ok(fvs.into_iter().map(PyVariableId::from).collect())
     }
 
     /// Approximate the maximum set of independent cycles of this graph. When optional `parity`
@@ -362,16 +226,10 @@ impl PyRegulatoryGraph {
         restriction: Option<Vec<&PyAny>>,
     ) -> PyResult<Vec<Vec<PyVariableId>>> {
         let sd_graph = SdGraph::from(self.as_native());
-        let restriction = {
-            if let Some(restriction) = restriction {
-                let mut set: HashSet<VariableId> = HashSet::new();
-                for var in restriction {
-                    set.insert(self.find_variable(var)?.into());
-                }
-                set
-            } else {
-                sd_graph.mk_all_vertices()
-            }
+        let restriction = if let Some(restriction) = restriction {
+            read_restriction(self, restriction)?
+        } else {
+            sd_graph.mk_all_vertices()
         };
         let cycles = if let Some(parity) = parity {
             let parity = parse_parity(parity)?;
@@ -402,6 +260,17 @@ fn parse_parity(parity: &str) -> PyResult<Sign> {
     }
 }
 
+fn read_restriction(
+    graph: &PyRegulatoryGraph,
+    restriction: Vec<&PyAny>,
+) -> PyResult<HashSet<VariableId>> {
+    let mut set: HashSet<VariableId> = HashSet::new();
+    for var in restriction {
+        set.insert(graph.find_variable(var)?.expect("Unknown variable.").into());
+    }
+    Ok(set)
+}
+
 fn regulation_to_python(py: Python, reg: &Regulation) -> PyResult<PyObject> {
     let dict = PyDict::new(py);
     dict.set_item("source", PyVariableId(reg.get_regulator()).into_py(py))?;
@@ -415,4 +284,32 @@ fn regulation_to_python(py: Python, reg: &Regulation) -> PyResult<PyObject> {
     }
     dict.set_item("observable", reg.is_observable())?;
     Ok(dict.to_object(py))
+}
+
+pub(crate) fn regulation_from_python(
+    dict: &PyDict,
+) -> PyResult<(&PyAny, &PyAny, bool, Option<Monotonicity>)> {
+    let Some(source) = dict.get_item("source") else {
+        return throw_type_error("Missing regulation source variable.");
+    };
+    let Some(target) = dict.get_item("target") else {
+        return throw_type_error("Missing regulation target variable.");
+    };
+    let observable = dict
+        .get_item("observable")
+        .map(|it| it.extract::<bool>())
+        .unwrap_or(Ok(true))?;
+    let monotonicity = dict
+        .get_item("monotonicity")
+        .map(|it| it.extract::<String>())
+        .transpose()?;
+    let monotonicity = monotonicity
+        .map(|str| match str.as_str() {
+            "activation" => Ok(Monotonicity::Activation),
+            "inhibition" => Ok(Monotonicity::Inhibition),
+            _ => throw_type_error(format!("Unknown monotonicity: {str}")),
+        })
+        .transpose()?;
+
+    Ok((source, target, observable, monotonicity))
 }

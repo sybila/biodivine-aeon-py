@@ -1,33 +1,20 @@
 use super::PyParameterId;
-use crate::throw_runtime_error;
 use biodivine_lib_param_bn::ParameterId;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
-impl From<PyParameterId> for ParameterId {
-    fn from(value: PyParameterId) -> Self {
-        value.0
-    }
-}
-
-impl From<ParameterId> for PyParameterId {
-    fn from(value: ParameterId) -> Self {
-        PyParameterId(value)
-    }
-}
-
 #[pymethods]
 impl PyParameterId {
     fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
         match op {
-            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
-            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Lt => Ok(self < other),
+            CompareOp::Le => Ok(self <= other),
             CompareOp::Eq => Ok(self == other),
             CompareOp::Ne => Ok(self != other),
-            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
-            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+            CompareOp::Gt => Ok(self > other),
+            CompareOp::Ge => Ok(self >= other),
         }
     }
 
@@ -50,7 +37,8 @@ impl PyParameterId {
         ParameterId::from_index(value).into()
     }
 
-    pub fn as_index(&self) -> usize {
+    #[allow(clippy::wrong_self_convention)]
+    pub fn into_index(&self) -> usize {
         self.0.to_index()
     }
 }

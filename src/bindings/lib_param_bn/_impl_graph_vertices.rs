@@ -4,30 +4,7 @@ use crate::AsNative;
 use biodivine_lib_bdd::Bdd;
 use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
-use biodivine_lib_param_bn::symbolic_async_graph::GraphVertices;
 use pyo3::prelude::*;
-
-impl From<PyGraphVertices> for GraphVertices {
-    fn from(value: PyGraphVertices) -> Self {
-        value.0
-    }
-}
-
-impl From<GraphVertices> for PyGraphVertices {
-    fn from(value: GraphVertices) -> Self {
-        PyGraphVertices(value)
-    }
-}
-
-impl AsNative<GraphVertices> for PyGraphVertices {
-    fn as_native(&self) -> &GraphVertices {
-        &self.0
-    }
-
-    fn as_native_mut(&mut self) -> &mut GraphVertices {
-        &mut self.0
-    }
-}
 
 #[pymethods]
 impl PyGraphVertices {

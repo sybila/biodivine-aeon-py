@@ -608,6 +608,14 @@ class RegulationDict(TypedDict):
     monotonicity: str | None
 
 
+class ParameterDict(TypedDict):
+    """
+    A dictionary that describes a single explicit parameter of a `BooleanNetwork`.
+    """
+    name: str
+    arity: int
+
+
 VariableType: TypeAlias = str | VariableId
 """A network variable can be identified either using its `str` name, or its `VariableId`."""
 ParameterType: TypeAlias = str | ParameterId
@@ -733,7 +741,8 @@ class RegulatoryGraph:
          - If `parity` is specified, the algorithm only considers `positive` or `negative` cycles.
         """
 
-    def feedback_vertex_set(self, parity: str | None = None, restriction: list[VariableType] | None = None) -> set[VariableId]:
+    def feedback_vertex_set(self, parity: str | None = None, restriction: list[VariableType] | None = None) -> set[
+        VariableId]:
         """
         Compute a feedback vertex (FVS) set of this `RegulatoryGraph`.
 
@@ -748,7 +757,8 @@ class RegulatoryGraph:
             induced by the `restriction`.
         """
 
-    def independent_cycles(self, parity: str | None = None, restriction: list[VariableType] | None = None) -> list[list[VariableId]]:
+    def independent_cycles(self, parity: str | None = None, restriction: list[VariableType] | None = None) -> list[
+        list[VariableId]]:
         """
         Compute the independent cycles (IC) of this `RegulatoryGraph`.
 
@@ -763,14 +773,161 @@ class RegulatoryGraph:
         """
 
 
-class BooleanNetwork:
+class BooleanNetwork(RegulatoryGraph):
     """
     `BooleanNetwork` represents a single logical model based on a specific `RegulatoryGraph`. The model describes
-     update functions for individual variables.
+     update functions for individual variables. It inherits all methods from the `RegulatoryGraph`.
 
-    The model can contain **explicit** and **implicit parameters**. Explicit parameters are *uninterpreted functions*
-    of fixed arity that can appear in the individual update functions. Implicit parameters come from "erased" update
-    functions which are completely unknown.
+    The model can also contain **explicit** and **implicit parameters**. Explicit parameters are *uninterpreted
+    functions* of fixed arity that can appear in the individual update functions. Implicit parameters come from
+    "erased" update functions which are completely unknown.
 
     The model can be loaded and saved using `.aeon`, `.bnet` or `.sbml` format.
     """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, rg: RegulatoryGraph):
+        """
+        Creates a new `BooleanNetwork` whose internally structure is based on the provided `RegulatoryGraph`.
+
+        Initially, all update functions are implicit parameters (i.e. they are unknown).
+        """
+
+    @staticmethod
+    def from_aeon(model: str) -> BooleanNetwork:
+        """
+        Read a `BooleanNetwork` from the string contents of an `.aeon` model.
+        """
+
+    @staticmethod
+    def from_bnet(model: str) -> BooleanNetwork:
+        """
+        Read a `BooleanNetwork` from the string contents of a `.bnet` model.
+        """
+
+    @staticmethod
+    def from_sbml(model: str) -> BooleanNetwork:
+        """
+        Read a `BooleanNetwork` from the string contents of an `.sbml` model.
+        """
+
+    @staticmethod
+    def from_file(path: str) -> BooleanNetwork:
+        """
+        Read a `BooleanNetwork` from the given file path. The format is automatically inferred from
+        the file extension.
+        """
+
+    def to_sbml(self) -> str:
+        """
+        Convert this `BooleanNetwork` to a string representation using the `.sbml` model format.
+        """
+
+    def to_bnet(self, rename_if_necessary: bool = True) -> str:
+        """
+        Convert this `BooleanNetwork` to a string representation using the `.bnet` model format.
+
+        If the network contains names that are not supported in the `.bnet` format, the names are automatically
+        prefixed with `_`, which should resolve the incompatibility. You can disable this behaviour using
+        `rename_if_necessary=False`.
+
+        Also note that this conversion fails when the network contains explicit or implicit parameters,
+        as these are not supported in `.bnet`.
+        """
+
+    def to_aeon(self) -> str:
+        """
+        Convert this `BooleanNetwork` to a string representation using the `.aeon` model format.
+        """
+
+    def graph(self) -> RegulatoryGraph:
+        """
+        Obtain a copy of the underlying `RegulatoryGraph`.
+        """
+
+    def set_update_function(self, variable: VariableType, expression: str | None):
+        """
+        Set the update function of the given `variable` to the provided expression. You can "clear" the update
+        function by setting `expression=None`, which turns the update function into an implicit parameter.
+        """
+
+    def add_parameter(self, parameter: ParameterDict) -> ParameterId:
+        """
+        Create a new explicit parameter in this `BooleanNetwork`.
+
+        Fails if the parameter already exists.
+        """
+
+    def num_parameters(self) -> int:
+        """
+        Return the number of explicit parameters (uninterpreted functions) in this `BooleanNetwork`.
+        """
+
+    def num_implicit_parameters(self) -> int:
+        """
+        Return the number of implicit parameters (erased update functions) in this `BooleanNetwork`.
+        """
+
+    def parameters(self) -> list[ParameterId]:
+        """
+        Get a list of all `ParameterId` objects tracked by this `BooleanNetwork`.
+        """
+
+    def implicit_parameters(self) -> list[VariableId]:
+        """
+        Get a list of variables whose update functions are unknown (i.e. implicit parameters).
+        """
+
+    def parameter_appears_in(self, parameter: ParameterType) -> list[VariableId]:
+        """
+        Get a list of variables whose update functions contain a specific parameter.
+
+        Note: The inclusion test is purely syntactic. The fact that a function *contains* a parameter
+        does not necessarily mean that the function's output *depends* on said parameter.
+        """
+
+    def get_update_function(self, variable: VariableType) -> str | None:
+        """
+        Get the update function of the given `variable`, or `None` if the update function is unknown.
+        """
+
+    def find_parameter(self, parameter: ParameterType) -> ParameterId | None:
+        """
+        Resolve a parameter name into a `VariableId`, or `None` if such parameter does not exist.
+        """
+
+    def get_parameter(self, parameter: ParameterType) -> ParameterDict:
+        """
+        Get the data for a particular explicit `parameter`.
+        """
+
+    def get_parameter_name(self, parameter: ParameterType) -> str:
+        """
+        Get the name of a particular explicit `parameter`.
+        """
+
+    def get_parameter_arity(self, parameter: ParameterType) -> int:
+        """
+        Get the arity of a particular explicit `parameter`.
+        """
+
+    def infer_regulatory_graph(self) -> BooleanNetwork:
+        """
+        Infer a new `BooleanNetwork` with identical update functions and a regulatory graph
+        that is maximally consistent with these functions.
+
+         > This method can be used to "force resolve" any consistency errors reported by `SymbolicAsyncGraph`.
+        However, note that it also uses symbolic operations, and as such can take non-trivial amount of time
+        to finish on networks with functions of large arity.
+        """
+
+    def inline_inputs(self) -> BooleanNetwork:
+        """
+        A "best effort" method which converts as many variables into parameters without impacting
+        the behaviour of the resulting network (i.e. the result should have an isomorphic asynchronous
+        state-transition graph).
+
+         > Turning constant variables into parameters can help to significantly improve the speed of some analysis
+        methods. However, keep in mind that the network is to some extent different from the original. For example,
+        you can no longer use such "inlined variables" in atomic propositions during model checkin.
+        """

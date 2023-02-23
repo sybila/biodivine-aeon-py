@@ -47,12 +47,12 @@ impl PyPerturbationGraph {
     /// The list can specify these variables either using names or `VariableId` objects.
     #[staticmethod]
     pub fn with_restricted_variables(
-        network: PyBooleanNetwork,
+        network: PyRef<'_, PyBooleanNetwork>,
         perturb: &PyList,
     ) -> PyResult<PyPerturbationGraph> {
         let mut perturb_vars = Vec::new();
         for var in perturb.iter() {
-            perturb_vars.push(network.find_variable(var)?.into());
+            perturb_vars.push(network.as_ref().find_variable(var)?.unwrap().into());
         }
 
         Ok(PerturbationGraph::with_restricted_variables(network.as_native(), &perturb_vars).into())

@@ -11,28 +11,6 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashMap;
 
-impl From<PySymbolicAsyncGraph> for SymbolicAsyncGraph {
-    fn from(value: PySymbolicAsyncGraph) -> Self {
-        value.0
-    }
-}
-
-impl From<SymbolicAsyncGraph> for PySymbolicAsyncGraph {
-    fn from(value: SymbolicAsyncGraph) -> Self {
-        PySymbolicAsyncGraph(value)
-    }
-}
-
-impl AsNative<SymbolicAsyncGraph> for PySymbolicAsyncGraph {
-    fn as_native(&self) -> &SymbolicAsyncGraph {
-        &self.0
-    }
-
-    fn as_native_mut(&mut self) -> &mut SymbolicAsyncGraph {
-        &mut self.0
-    }
-}
-
 #[pymethods]
 impl PySymbolicAsyncGraph {
     /// Create a new `SymbolicAsyncGraph` from a `BooleanNetwork`.
@@ -45,10 +23,12 @@ impl PySymbolicAsyncGraph {
         }
     }
 
+    /*
     /// Obtain a copy of the underlying `BooleanNetwork` used by this `SymbolicAsyncGraph`.
     pub fn network(&self) -> PyBooleanNetwork {
         self.as_native().as_network().clone().into()
     }
+     */
 
     /// Obtain a copy of the `BddVariableSet` used during symbolic encoding
     /// in this `SymbolicAsyncGraph`.
@@ -116,7 +96,7 @@ impl PySymbolicAsyncGraph {
     pub fn is_trap_set(&self, set: &PyGraphColoredVertices) -> bool {
         self.as_native().is_trap_set(set.as_native())
     }
-
+    /*
     /// Create a new graph where the update functions are restricted to the given variable
     /// subspace. Note that this completely eliminates any dependence on this variable in the
     /// remaining update functions, but does not remove the variable from the underlying network
@@ -131,7 +111,7 @@ impl PySymbolicAsyncGraph {
             .as_native()
             .restrict_variable_in_graph(variable.into(), value)
             .into())
-    }
+    }*/
 
     /// Create a `ColoredVertexSet` that contains every color-vertex pair where the vertex
     /// corresponds to the list of Boolean values supplied as argument.
@@ -274,8 +254,14 @@ impl PySymbolicAsyncGraph {
 
     /// Create a `BooleanNetwork` that matches this graph, but its parameters are fully specified,
     /// and the specification is picked from the provided `ColorSet`.
-    pub fn pick_witness(&self, colors: &PyGraphColors) -> PyBooleanNetwork {
-        self.as_native().pick_witness(colors.as_native()).into()
+    pub fn pick_witness<'a>(
+        &self,
+        py: Python<'a>,
+        colors: &PyGraphColors,
+    ) -> PyResult<Py<PyBooleanNetwork>> {
+        let network = self.as_native().pick_witness(colors.as_native());
+        let network = PyBooleanNetwork::from(network);
+        network.export_to_python(py)
     }
 
     /// Make an empty `ColorSet`.
