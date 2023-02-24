@@ -160,7 +160,10 @@ impl PyBooleanNetwork {
         variable: &PyAny,
         function: Option<String>,
     ) -> PyResult<()> {
-        let id = self_.as_ref().find_variable(variable)?.expect("Unknown variable.");
+        let id = self_
+            .as_ref()
+            .find_variable(variable)?
+            .expect("Unknown variable.");
 
         // Clear previous update function.
         self_
@@ -237,10 +240,18 @@ impl PyBooleanNetwork {
             .collect())
     }
 
-    pub fn get_update_function(self_: PyRef<'_, Self>, variable: &PyAny) -> PyResult<Option<String>> {
-        let variable = self_.as_ref().find_variable(variable)?.expect("Unknown variable.");
+    pub fn get_update_function(
+        self_: PyRef<'_, Self>,
+        variable: &PyAny,
+    ) -> PyResult<Option<String>> {
+        let variable = self_
+            .as_ref()
+            .find_variable(variable)?
+            .expect("Unknown variable.");
         let function = self_.as_native().get_update_function(variable.into());
-        Ok(function.as_ref().map(|fun| fun.to_string(self_.as_native())))
+        Ok(function
+            .as_ref()
+            .map(|fun| fun.to_string(self_.as_native())))
     }
 
     pub fn find_parameter(&self, parameter: &PyAny) -> PyResult<Option<PyParameterId>> {

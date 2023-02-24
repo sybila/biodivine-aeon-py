@@ -254,9 +254,9 @@ impl PySymbolicAsyncGraph {
 
     /// Create a `BooleanNetwork` that matches this graph, but its parameters are fully specified,
     /// and the specification is picked from the provided `ColorSet`.
-    pub fn pick_witness<'a>(
+    pub fn pick_witness(
         &self,
-        py: Python<'a>,
+        py: Python,
         colors: &PyGraphColors,
     ) -> PyResult<Py<PyBooleanNetwork>> {
         let network = self.as_native().pick_witness(colors.as_native());

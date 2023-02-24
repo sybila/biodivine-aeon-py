@@ -741,8 +741,11 @@ class RegulatoryGraph:
          - If `parity` is specified, the algorithm only considers `positive` or `negative` cycles.
         """
 
-    def feedback_vertex_set(self, parity: str | None = None, restriction: list[VariableType] | None = None) -> set[
-        VariableId]:
+    def feedback_vertex_set(
+            self,
+            parity: str | None = None,
+            restriction: list[VariableType] | None = None
+    ) -> set[VariableId]:
         """
         Compute a feedback vertex (FVS) set of this `RegulatoryGraph`.
 
@@ -757,8 +760,11 @@ class RegulatoryGraph:
             induced by the `restriction`.
         """
 
-    def independent_cycles(self, parity: str | None = None, restriction: list[VariableType] | None = None) -> list[
-        list[VariableId]]:
+    def independent_cycles(
+            self,
+            parity: str | None = None,
+            restriction: list[VariableType] | None = None
+    ) -> list[list[VariableId]]:
         """
         Compute the independent cycles (IC) of this `RegulatoryGraph`.
 
@@ -932,6 +938,7 @@ class BooleanNetwork(RegulatoryGraph):
         you can no longer use such "inlined variables" in atomic propositions during model checkin.
         """
 
+
 class ModelAnnotation:
     """
     Annotations represent structured model metadata stored within the `.aeon` file comments.
@@ -939,12 +946,15 @@ class ModelAnnotation:
     Each annotation can store a multi-line value plus a subtree of associated annotations.
     To learn more about the format, see the
     [tutorial](https://docs.rs/biodivine-lib-param-bn/latest/biodivine_lib_param_bn/tutorial/p05_model_annotations/index.html)
-    in the original Rust library.
+    in the underlying Rust library.
+
     """
 
-    def __init__(self):
+    # noinspection PyUnusedLocal
+    def __init__(self, value: str | None = None):
         """
-        Create a new empty annotation tree.
+        ---
+        A new tree is empty by default, but can be initialized with a string `value`.
         """
 
     @staticmethod
@@ -957,4 +967,65 @@ class ModelAnnotation:
     def from_model_path(path: str) -> ModelAnnotation:
         """
         Parse the `ModelAnnotation` tree from a file at a given `path`.
+        """
+
+    def get_value(self, path: list[str]) -> str | None:
+        """
+        Read an annotation value at the given tree `path`, or `None` if either the child does not exist,
+        or its value is not set.
+        """
+
+    def ensure_value(self, path: list[str], value: str) -> bool:
+        """
+        Ensure that the given string `value` is present at the given tree `path`. If the `path` does not exist,
+        it is created. If a value already exists at that `path`, it is overwritten.
+
+        Returns `True` if the tree changed (i.e. a value was created or updated).
+        """
+
+    def clear_value(self, path: list[str]) -> str | None:
+        """
+        Erase any value that is present at the given tree `path`.
+
+        Returns the erased value, or `None` if no value was present at the given `path`.
+        """
+
+    def append_value(self, path: list[str], extra: str):
+        """
+        Append the `extra` string to any value that is present at the given tree `path`. If there is initially
+        no value at that `path`, a new empty value is created.
+
+        Note that this method does not add any newline characters to the value: if you want to separate
+        the appended value onto a new line, you must add `\\n` manually.
+        """
+
+    def clone_child(self, path: list[str]) -> ModelAnnotation | None:
+        """
+        Obtain a copy of a child `ModelAnnotation` at the given tree `path`, or `None` if such child does not exist.
+        """
+
+    def ensure_child(self, path: list[str], child: ModelAnnotation) -> bool:
+        """
+        Ensure that the given `child` tree is present at the given tree `path`.
+
+        Returns `true` if the tree was modified (i.e. a new annotation was created or is different from the previous
+        value).
+        """
+
+    def clear_child(self, path: list[str]) -> ModelAnnotation | None:
+        """
+        Erase the model annotation subtree that is present at the given `path`.
+
+        Returns the erased subtree, or `None` if there was no such subtree. Also note that the method will fail
+        if given an empty path, as the tree root cannot be erased.
+        """
+
+    def value(self) -> str | None:
+        """
+        Obtain a copy of the value in this annotation node, or `None` if no value is present.
+        """
+
+    def clone_children(self) -> dict[str, ModelAnnotation]:
+        """
+        Obtain a copy of all direct children in this annotation node.
         """
