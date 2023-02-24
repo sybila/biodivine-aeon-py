@@ -792,12 +792,13 @@ class BooleanNetwork(RegulatoryGraph):
     """
 
     # noinspection PyUnusedLocal
-    def __init__(self, rg: RegulatoryGraph):
+    def __init__(self, rg: RegulatoryGraph, variables: list[str]):
         """
         Creates a new `BooleanNetwork` whose internally structure is based on the provided `RegulatoryGraph`.
 
         Initially, all update functions are implicit parameters (i.e. they are unknown).
         """
+        super().__init__(variables)
 
     @staticmethod
     def from_aeon(model: str) -> BooleanNetwork:
@@ -1029,3 +1030,567 @@ class ModelAnnotation:
         """
         Obtain a copy of all direct children in this annotation node.
         """
+
+
+class GraphColors:
+    """
+    A `Bdd`-backed symbolic representation of a set of `SymbolicAsyncGraph` colors:
+    i.e. a subset of parameter valuations.
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, graph: SymbolicAsyncGraph, bdd: Bdd):
+        """
+        ---
+        `GraphColors` can be initialized using a `SymbolicAsyncGraph` and a "raw" `Bdd`.
+
+        **WARNING:** This constructor performs basic integrity checks, but it cannot ensure that
+        the given `bdd` always represents a valid set of colors within the given `graph`. Whenever possible, try
+        to avoid using this method directly and use the factory methods on `SymbolicAsyncGraph` instead.
+        """
+
+    def to_bdd(self) -> Bdd:
+        """
+        Obtain a copy of the underlying `Bdd`.
+        """
+
+    def copy_with(self, bdd: Bdd) -> GraphColors:
+        """
+        Create a new copy of this set using a raw `Bdd`.
+        This method has the same integrity caveats as the constructor.
+        """
+
+    def copy_with_raw_string(self, string_value: Bdd) -> GraphColors:
+        """
+        Create a new copy of this set using a raw `Bdd` parsed from the given `str` value using `Bdd.from_raw_string`.
+        This method has the same integrity caveats as the constructor.
+        """
+
+    def symbolic_size(self) -> int:
+        """
+        Get the approximate memory consumption of this set (in bytes).
+        """
+
+    def to_dot(self, graph: SymbolicAsyncGraph) -> str:
+        """
+        Obtain a Graphviz-compatible `.dot` representation of the underlying `Bdd` graph.
+
+        The method needs the `SymbolicAsyncGraph` to properly resolve parameter names.
+        """
+
+    def cardinality(self) -> float:
+        """
+        Compute the approximate size of this set (the number of elements).
+
+        Since the result is a floating-point number, it may not be precise for large values, or it can be even infinite.
+        """
+
+    def pick_singleton(self) -> GraphColors:
+        """
+        Return `GraphColors` set that contains a single value from this set. If this set is empty, the result
+        is also empty.
+        """
+
+    def union(self, other: GraphColors) -> GraphColors:
+        """
+        Union of two symbolic sets.
+        """
+
+    def intersect(self, other: GraphColors) -> GraphColors:
+        """
+        Intersection of two symbolic sets.
+        """
+
+    def minus(self, other: GraphColors) -> GraphColors:
+        """
+        A difference of two symbolic sets.
+        """
+
+    def is_empty(self) -> bool:
+        """
+        True if this symbolic set is empty.
+        """
+
+    def is_subset(self, other: GraphColors) -> bool:
+        """
+        True if this set is the subset of the `other` set.
+        """
+
+    def is_subspace(self) -> bool:
+        """
+        True if this set represents a subspace, i.e. a hypercube in the parameter space.
+        """
+
+    def is_singleton(self) -> bool:
+        """
+        True if this set contains a single value from the parameter space.
+        """
+
+
+class GraphVertices:
+    """
+    A `Bdd`-backed symbolic representation of a set of `SymbolicAsyncGraph` vertices:
+    i.e. a subset of variable valuations.
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, graph: SymbolicAsyncGraph, bdd: Bdd):
+        """
+        ---
+        `GraphVertices` can be initialized using a `SymbolicAsyncGraph` and a "raw" `Bdd`.
+
+        **WARNING:** This constructor performs basic integrity checks, but it cannot ensure that
+        the given `bdd` always represents a valid set of vertices within the given `graph`. Whenever possible, try
+        to avoid using this method directly and use the factory methods on `SymbolicAsyncGraph` instead.
+        """
+
+    def to_bdd(self) -> Bdd:
+        """
+        Obtain a copy of the underlying `Bdd`.
+        """
+
+    def copy_with(self, bdd: Bdd) -> GraphVertices:
+        """
+        Create a new copy of this set using a raw `Bdd`.
+        This method has the same integrity caveats as the constructor.
+        """
+
+    def copy_with_raw_string(self, string_value: Bdd) -> GraphVertices:
+        """
+        Create a new copy of this set using a raw `Bdd` parsed from the given `str` value using `Bdd.from_raw_string`.
+        This method has the same integrity caveats as the constructor.
+        """
+
+    def symbolic_size(self) -> int:
+        """
+        Get the approximate memory consumption of this set (in bytes).
+        """
+
+    def to_dot(self, graph: SymbolicAsyncGraph) -> str:
+        """
+        Obtain a Graphviz-compatible `.dot` representation of the underlying `Bdd` graph.
+
+        The method needs the `SymbolicAsyncGraph` to properly resolve parameter names.
+        """
+
+    def cardinality(self) -> float:
+        """
+        Compute the approximate size of this set (the number of elements).
+
+        Since the result is a floating-point number, it may not be precise for large values, or it can be even infinite.
+        """
+
+    def pick_singleton(self) -> GraphVertices:
+        """
+        Return `GraphColors` set that contains a single value from this set. If this set is empty, the result
+        is also empty.
+        """
+
+    def union(self, other: GraphVertices) -> GraphVertices:
+        """
+        Union of two symbolic sets.
+        """
+
+    def intersect(self, other: GraphVertices) -> GraphVertices:
+        """
+        Intersection of two symbolic sets.
+        """
+
+    def minus(self, other: GraphVertices) -> GraphVertices:
+        """
+        A difference of two symbolic sets.
+        """
+
+    def is_empty(self) -> bool:
+        """
+        True if this symbolic set is empty.
+        """
+
+    def is_subset(self, other: GraphVertices) -> bool:
+        """
+        True if this set is the subset of the `other` set.
+        """
+
+    def is_subspace(self) -> bool:
+        """
+        True if this set represents a subspace, i.e. a hypercube in the parameter space.
+        """
+
+    def is_singleton(self) -> bool:
+        """
+        True if this set contains a single value from the parameter space.
+        """
+
+    def fix_network_variable(self, variable: VariableId, value: bool) -> GraphVertices:
+        """
+        Return a subset of this set where `variable=value`.
+        """
+
+    def restrict_network_variable(self, variable: VariableId, value: bool) -> GraphVertices:
+        """
+        Restrict the set to `variable=value` and then eliminate `variable` from the set.
+
+        The result `Y` is a superset of the original set `X`, where `x ∈ Y` iff `x[variable=value] ∈ X`.
+        """
+
+    def iterator(self) -> GraphVertexIterator:
+        """
+        Create an iterator over all vertices in this symbolic set (each vertex is a `list[bool]` indexed by
+        the variables of the original `BooleanNetwork`).
+        """
+
+
+class GraphVertexIterator:
+    """
+    An iterator over all vertices in a specific `GraphVertices` set.
+
+    Each vertex is represented as a `list[bool]` and can be indexed using `VariableId.into_index` values.
+    """
+
+
+class GraphColoredVertices:
+    """
+    A `Bdd`-backed symbolic representation of a relation over vertices and colors of a `SymbolicAsyncGraph`.
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, graph: SymbolicAsyncGraph, bdd: Bdd):
+        """
+        ---
+        `GraphColoredVertices` can be initialized using a `SymbolicAsyncGraph` and a "raw" `Bdd`.
+
+        **WARNING:** This constructor performs basic integrity checks, but it cannot ensure that
+        the given `bdd` always represents a valid colored vertex relation within the given `graph`. Whenever
+        possible, try to avoid using this method directly and use the factory methods on `SymbolicAsyncGraph` instead.
+        """
+
+    def to_bdd(self) -> Bdd:
+        """
+        Obtain a copy of the underlying `Bdd`.
+        """
+
+    def copy_with(self, bdd: Bdd) -> GraphColoredVertices:
+        """
+        Create a new copy of this set using a raw `Bdd`.
+        This method has the same integrity caveats as the constructor.
+        """
+
+    def copy_with_raw_string(self, string_value: Bdd) -> GraphColoredVertices:
+        """
+        Create a new copy of this set using a raw `Bdd` parsed from the given `str` value using `Bdd.from_raw_string`.
+        This method has the same integrity caveats as the constructor.
+        """
+
+    def symbolic_size(self) -> int:
+        """
+        Get the approximate memory consumption of this set (in bytes).
+        """
+
+    def to_dot(self, graph: SymbolicAsyncGraph) -> str:
+        """
+        Obtain a Graphviz-compatible `.dot` representation of the underlying `Bdd` graph.
+
+        The method needs the `SymbolicAsyncGraph` to properly resolve parameter names.
+        """
+
+    def cardinality(self) -> float:
+        """
+        Compute the approximate size of this set (the number of elements).
+
+        Since the result is a floating-point number, it may not be precise for large values, or it can be even infinite.
+        """
+
+    def pick_singleton(self) -> GraphColoredVertices:
+        """
+        Return `GraphColors` set that contains a single value from this set. If this set is empty, the result
+        is also empty.
+        """
+
+    def union(self, other: GraphColoredVertices) -> GraphColoredVertices:
+        """
+        Union of two symbolic sets.
+        """
+
+    def intersect(self, other: GraphColoredVertices) -> GraphColoredVertices:
+        """
+        Intersection of two symbolic sets.
+        """
+
+    def minus(self, other: GraphColoredVertices) -> GraphColoredVertices:
+        """
+        A difference of two symbolic sets.
+        """
+
+    def is_empty(self) -> bool:
+        """
+        True if this symbolic set is empty.
+        """
+
+    def is_subset(self, other: GraphColoredVertices) -> bool:
+        """
+        True if this set is the subset of the `other` set.
+        """
+
+    def is_subspace(self) -> bool:
+        """
+        True if this set represents a subspace, i.e. a hypercube in the parameter space.
+        """
+
+    def is_singleton(self) -> bool:
+        """
+        True if this set contains a single value from the parameter space.
+        """
+
+    def fix_network_variable(self, variable: VariableId, value: bool) -> GraphColoredVertices:
+        """
+        Return a subset of this relation where `variable=value`.
+        """
+
+    def restrict_network_variable(self, variable: VariableId, value: bool) -> GraphColoredVertices:
+        """
+        Restrict the relation to `variable=value` and then eliminate `variable` from the set.
+
+        The result `Y` is a superset of the original relation `X`, where `x ∈ Y` iff `x[variable=value] ∈ X`.
+        """
+
+    def vertices(self) -> GraphVertices:
+        """
+        Compute an existential projection of this relation to the set of underlying `GraphVertices`.
+
+        That is, a vertex appears in the result if it appears in this relation for *at least one* color.
+        """
+
+    def colors(self) -> GraphColors:
+        """
+        Compute an existential projection of this relation to the set of underlying `GraphColors`.
+
+        That is, a color appears in the result if it appears in this relation for *at least one* vertex.
+        """
+
+    def pick_color(self) -> GraphColoredVertices:
+        """
+        Compute a subset of this relation that contains exactly one color for each vertex in the original relation.
+        """
+
+    def pick_vertex(self) -> GraphColoredVertices:
+        """
+        Compute a subset of this relation that contains exactly one vertex for each color in the original relation.
+        """
+
+    def minus_colors(self, color_set: GraphColors) -> GraphColoredVertices:
+        """
+        Remove all color-vertex pairs from this set where the color appears in the given `color_set`.
+        """
+
+    def intersect_colors(self, color_set: GraphColors) -> GraphColoredVertices:
+        """
+        Retain only those color-vertex pairs from this set where the color appears in the given `color_set`.
+        """
+
+    def minus_vertices(self, vertex_set: GraphVertices) -> GraphColoredVertices:
+        """
+        Remove all color-vertex pairs from this set where the vertex appears in the given `vertex_set`.
+        """
+
+    def intersect_vertices(self, vertex_set: GraphVertices) -> GraphColoredVertices:
+        """
+        Retain only those color-vertex pairs from this set where the vertex appears in the given `vertex_set`.
+        """
+
+
+# FunctionTable: TypeAlias = list[tuple[list[bool], BddVariable]]
+# """
+# Function table maps the truth values of function's inputs to the symbolic variables that represent the function
+# output for this input.
+
+# At the moment, this type alis is broken due to https://github.com/pdoc3/pdoc/issues/286. Once that bug is fixed,
+# we can actually use the alias.
+# """
+
+class SymbolicContext:
+    """
+    `SymbolicContext` implements a mapping between the variables and parameters of `BooleanNetwork` and `BddVariable`
+    objects in a symbolic encoding. It provides various low-level methods for safely creating `Bdd` objects
+    that represent various parts of the underlying `BooleanNetwork`.
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, network: BooleanNetwork, extra_state_variables: dict[VariableId, int] | None = None):
+        """
+        ---
+        `SymbolicContext` is created from a `BooleanNetwork`, but additionally, it can also contain "extra"
+        symbolic variables associated with individual network variable. These extra state variables are "anonymous"
+        and can be accessed using their associated `VariableId` and *offset*.
+        """
+
+    def num_state_variables(self) -> int:
+        """
+        The number of symbolic variables used for encoding `BooleanNetwork` variables.
+        """
+
+    def num_parameter_variables(self) -> int:
+        """
+        The number of symbolic variables used for encoding `BooleanNetwork` parameters
+        (both implicit and explicit).
+        """
+
+    def num_extra_state_variables(self) -> int:
+        """
+        The number of symbolic variables used for encoding extra state variables.
+        """
+
+    def bdd_variable_set(self) -> BddVariableSet:
+        """
+        Return a copy of the `BddVariableSet` used by the underlying encoding.
+        """
+
+    def state_variables(self) -> list[BddVariable]:
+        """
+        The list of symbolic variables used for encoding `BooleanNetwork` variables.
+        """
+
+    def all_extra_state_variables(self) -> list[BddVariable]:
+        """
+        The list of symbolic variables used for encoding the extra state variables supplied in the constructor.
+        """
+
+    def extra_state_variables(self, variable: VariableId) -> list[BddVariable]:
+        """
+        The list of symbolic variables used for encoding the extra state variables of
+        a specific `BooleanNetwork` variable.
+        """
+
+    def extra_state_variables_by_offset(self, offset: int) -> list[tuple[VariableId, BddVariable]]:
+        """
+        Symbolic variables used for encoding the extra state variables at a particular offset. For network variables
+        that have fewer than `offset` extra state variables, nothing is returned.
+        """
+
+    def get_state_variable(self, variable: VariableId) -> BddVariable:
+        """
+        The symbolic variable that corresponds to a particular `BooleanNetwork` variable.
+        """
+
+    def get_extra_state_variable(self, variable: VariableId, offset: int) -> BddVariable:
+        """
+        The symbolic variable that corresponds to the extra state variable at a given offset.
+
+        The method fails if the offset is larger than the number of state variables declared for this network variable.
+        """
+
+    def get_implicit_function_table(self, variable: VariableId) -> list[tuple[list[bool], BddVariable]]:
+        """
+        The `FunctionTable` that is used to encode the implicit parameter corresponding to the given `variable`.
+
+        The method fails if the given `variable` does not have an implicit parameter (i.e. erased update function).
+        """
+
+    def get_explicit_function_table(self, parameter: ParameterId) -> list[tuple[list[bool], BddVariable]]:
+        """
+        The `FunctionTable` that is used to encode the explicit parameter corresponding to the given `parameter`.
+        """
+
+    def mk_constant(self, value: bool) -> Bdd:
+        """
+        Build a constant `True`/`False` function `Bdd`.
+        """
+
+    def mk_state_variable_is_true(self, variable: VariableId) -> Bdd:
+        """
+        Build a `Bdd` function that is true if and only if the given state variable is true.
+        """
+
+    def mk_extra_state_variable_is_true(self, variable: VariableId, offset: int) -> Bdd:
+        """
+        Build a `Bdd` function that is true if and only if the specified extra state variable is true.
+
+        The function fails if the `offset` is out of range.
+        """
+
+    def mk_uninterpreted_function_is_true(self, parameter: ParameterId, arguments: list[VariableId]) -> Bdd:
+        """
+        Build a `Bdd` function that is true if and only if the specified explicit parameter function is true
+        for the given argument list.
+        """
+
+    def mk_implicit_function_is_true(self, variable: VariableId, arguments: list[VariableId]) -> Bdd:
+        """
+        Build a `Bdd` function that is true if and only if the specified implicit parameter function is true
+        for the given argument list.
+        """
+
+    def mk_update_function_is_true(self, function: UpdateFunction) -> Bdd:
+        """
+        Build a `Bdd` function that is true exactly for the valuations of state and parameter variables
+        where the given `function` evaluates to `True`.
+        """
+
+    def instantiate_implicit_function(
+            self,
+            valuation: BddValuationType | BddPartialValuationType,
+            variable: VariableId,
+            arguments: list[VariableId]
+    ) -> Bdd:
+        """
+        Build a `Bdd` function which corresponds to the *instantiation* of the given implicit parameter function
+        (under the given function arguments).
+
+        A function *instantiation* is a concrete function that only depends on the argument variables, i.e. it is
+        no longer parametrised. This method can be therefore used for example to enumerate the specific functions
+        that correspond to individual color valuations of some `Bdd` (or a `Bdd`-encoded set).
+
+        If the supplied `valuation` is a partial valuation, then it must specify the values of all BDD variables
+        in the corresponding implicit function table (see `SymbolicContext.get_implicit_function_table`).
+        """
+
+    def instantiate_uninterpreted_function(
+            self,
+            valuation: BddValuationType | BddPartialValuationType,
+            variable: VariableId,
+            arguments: list[VariableId]
+    ) -> Bdd:
+        """
+        Build a `Bdd` function which corresponds to the *instantiation* of the given explicit uninterpreted function
+        (under the given function arguments).
+
+        A function *instantiation* is a concrete function that only depends on the argument variables, i.e. it is
+        no longer parametrised. This method can be therefore used for example to enumerate the specific functions
+        that correspond to individual color valuations of some `Bdd` (or a `Bdd`-encoded set).
+
+        If the supplied `valuation` is a partial valuation, then it must specify the values of all BDD variables
+        in the corresponding explicit function table (see `SymbolicContext.get_explicit_function_table`).
+        """
+
+    def instantiate_fn_update(
+            self,
+            valuation: BddValuationType | BddPartialValuationType,
+            function: UpdateFunction
+    ) -> Bdd:
+        """
+        Build a `Bdd` function which corresponds to the *instantiation* of the given update function
+        (under the given function arguments).
+
+        A function *instantiation* is a concrete function that only depends on the argument variables, i.e. it is
+        no longer parametrised. This method can be therefore used for example to enumerate the specific functions
+        that correspond to individual color valuations of some `Bdd` (or a `Bdd`-encoded set).
+
+        If the supplied `valuation` is a partial valuation, then it must specify the values of all BDD variables
+        that are used within the function tables of all explicit parameters that appear in the given update function
+        (i.e. the BDD variables which appear in `SymbolicContext.get_explicit_function_table` for each used
+        uninterpreted function).
+
+        If the supplied `function` does not depend on any parameters, the result of this function is equivalent
+        to `SymbolicContext.mk_update_function_is_true`.
+        """
+
+
+class UpdateFunction:
+    """
+    TODO
+    """
+
+
+class SymbolicAsyncGraph:
+    """
+    TODO
+    """
