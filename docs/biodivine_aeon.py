@@ -931,3 +931,30 @@ class BooleanNetwork(RegulatoryGraph):
         methods. However, keep in mind that the network is to some extent different from the original. For example,
         you can no longer use such "inlined variables" in atomic propositions during model checkin.
         """
+
+class ModelAnnotation:
+    """
+    Annotations represent structured model metadata stored within the `.aeon` file comments.
+
+    Each annotation can store a multi-line value plus a subtree of associated annotations.
+    To learn more about the format, see the
+    [tutorial](https://docs.rs/biodivine-lib-param-bn/latest/biodivine_lib_param_bn/tutorial/p05_model_annotations/index.html)
+    in the original Rust library.
+    """
+
+    def __init__(self):
+        """
+        Create a new empty annotation tree.
+        """
+
+    @staticmethod
+    def from_model_string(model: str) -> ModelAnnotation:
+        """
+        Parse the `ModelAnnotation` tree from an AEON model string.
+        """
+
+    @staticmethod
+    def from_model_path(path: str) -> ModelAnnotation:
+        """
+        Parse the `ModelAnnotation` tree from a file at a given `path`.
+        """

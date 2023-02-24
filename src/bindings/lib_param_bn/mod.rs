@@ -12,6 +12,7 @@ mod _impl_fixed_points;
 mod _impl_graph_colored_vertices;
 mod _impl_graph_colors;
 mod _impl_graph_vertices;
+mod _impl_model_annotation;
 mod _impl_parameter_id;
 mod _impl_regulatory_graph;
 mod _impl_symbolic_async_graph;

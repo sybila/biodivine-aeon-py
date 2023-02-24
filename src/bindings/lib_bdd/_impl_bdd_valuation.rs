@@ -8,6 +8,12 @@ use pyo3::types::{PyDict, PyList, PyTuple};
 use pyo3::{pymethods, PyAny, PyResult};
 use std::collections::HashMap;
 
+impl Default for PyBddPartialValuation {
+    fn default() -> Self {
+        PyBddPartialValuation::new()
+    }
+}
+
 impl PyBddValuation {
     /// Try to read a BDD valuation from a dynamic Python type. This can be either:
     ///
