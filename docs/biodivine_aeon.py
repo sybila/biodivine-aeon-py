@@ -220,57 +220,6 @@ class BddClauseIterator:
         pass
 
 
-class BooleanExpression:
-    """
-    An abstract syntax tree of a Boolean expression.
-    """
-
-    # noinspection PyUnusedLocal
-    def __init__(self, expression: str):
-        """
-        Parse the `BooleanExpression` form a provided string representation.
-        """
-
-    @staticmethod
-    def from_constant(value: bool) -> BooleanExpression:
-        """
-        Create a new constant expression.
-        """
-
-    @staticmethod
-    def from_variable(variable: str) -> BooleanExpression:
-        """
-        Create a new variable expression from the given variable name.
-        """
-
-    @staticmethod
-    def from_formula(operator: str, arguments: list[BooleanExpression]) -> BooleanExpression:
-        """
-        Create a new Boolean formula. Operator can be either `not`, `and`, `or`, `imp`, `iff`, or `xor`. The arguments
-        represent either a single argument (in the case of `not`), or two arguments (for the remaining operators).
-
-        Keep in mind that the "left" argument is the one on index zero. Also note that right now, we do not
-        support `and`/`or` operators with multiple arguments.
-        """
-
-    def as_constant(self) -> bool | None:
-        """
-        If this `BooleanExpression` is a constant expression, return its value, otherwise return `None`.
-        """
-
-    def as_variable(self) -> str | None:
-        """
-        If this `BooleanExpression` is a variable expression, return the variable name, otherwise return `None`.
-        """
-
-    def as_formula(self) -> tuple[str, list[BooleanExpression]]:
-        """
-        If this `BooleanExpression` is a complex expression, return the operator name and its arguments.
-        See `BooleanExpression.from_formula` for the list of supported operators.
-
-        Keep in mind that the "left" argument is the one on index zero.
-        """
-
 
 class Bdd:
     """
@@ -1586,8 +1535,33 @@ class SymbolicContext:
 
 class UpdateFunction:
     """
-    TODO
+    A syntactic representation of an update function within a `BooleanNetwork`.
+
+    This is similar to the `BooleanExpression`, but it has two main differences:
+
+      - An update function can contain uninterpreted functions (explicit parameters). A `BooleanExpression` only
+      admits variables and logical connectives.
+      - All entities in an update function are directly tied to some `BooleanNetwork` (i.e. they use `VariableId`
+      and `ParameterId` instead of string names).
+
+    ---
+    You cannot construct an `UpdateFunction` directly. Instead, you should use one of the constructor methods (`mk_*`
+    and `from_*`).
     """
+
+    @staticmethod
+    def from_expression(
+            expression: str | BooleanExpression,
+            network: BooleanNetwork | RegulatoryGraph
+    ) -> UpdateFunction:
+        """
+        Translate the string representation of an update function into the `UpdateFunction` object, using the provided
+        `BooleanNetwork` as context.
+
+         - Alternatively, you can provide a `BooleanExpression` instead of a raw string.
+         - If the expression does not contain any parameters (uninterpreted functions), it is also sufficient to
+         provide a `RegulatoryGraph` instead of a `BooleanNetwork`.
+        """
 
 
 class SymbolicAsyncGraph:

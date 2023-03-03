@@ -648,6 +648,10 @@ We do not export these iterators directly, because the API is quite low level an
         </tr>
         <tr>
             <td></td>
+            <td><code>BddClauseIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>BddClauseIterator.__next__</code></td>
         </tr>
         <tr>
@@ -661,6 +665,10 @@ We do not export these iterators directly, because the API is quite low level an
         <tr>
             <td></td>
             <td><code>BddValuationIterator.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuationIterator.__iter__</code></td>
         </tr>
         <tr>
             <td></td>
