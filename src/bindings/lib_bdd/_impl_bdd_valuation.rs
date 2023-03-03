@@ -5,25 +5,22 @@ use crate::bindings::lib_bdd::{PyBddPartialValuation, PyBddValuation, PyBddVaria
 use crate::{throw_type_error, AsNative};
 use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable};
 use pyo3::types::{PyDict, PyList, PyTuple};
-use pyo3::{pymethods, PyAny, PyResult};
-use std::collections::HashMap;
-
-impl Default for PyBddPartialValuation {
-    fn default() -> Self {
-        PyBddPartialValuation::new()
-    }
-}
+use pyo3::{pymethods, Py, PyAny, PyResult, Python};
+use std::collections::hash_map::DefaultHasher;
+use std::collections::{HashMap, HashSet};
+use std::hash::{Hash, Hasher};
 
 impl PyBddValuation {
-    /// Try to read a BDD valuation from a dynamic Python type. This can be either:
+    /// Try to read a `PyBddValuation` from a dynamic Python object. This can be either:
     ///
     ///  - `PyBddValuation` itself;
     ///  - A list of Boolean values.
-    pub(crate) fn from_python(any: &PyAny) -> PyResult<PyBddValuation> {
-        if let Ok(val) = any.extract::<PyBddValuation>() {
+    pub(crate) fn from_python_type(any: &PyAny) -> PyResult<Py<PyBddValuation>> {
+        let py = any.py();
+        if let Ok(val) = any.extract::<Py<PyBddValuation>>() {
             Ok(val)
         } else if let Ok(list) = any.extract::<Vec<bool>>() {
-            Ok(PyBddValuation::from_list(list))
+            Py::new(py, PyBddValuation(BddValuation::new(list)))
         } else {
             throw_type_error("Expected a Bdd valuation.")
         }
@@ -37,35 +34,39 @@ impl PyBddPartialValuation {
     ///  - A dictionary that maps BDD variables to bools;
     ///  - A list of variable-bool pairs;
     ///  - A single variable-bool pair.
-    pub(crate) fn from_python(any: &PyAny) -> PyResult<PyBddPartialValuation> {
-        if let Ok(val) = any.extract::<PyBddPartialValuation>() {
+    pub(crate) fn from_python_type(any: &PyAny) -> PyResult<Py<PyBddPartialValuation>> {
+        let py = any.py();
+        if let Ok(val) = any.extract::<Py<PyBddPartialValuation>>() {
             Ok(val)
-        } else if let Ok(dict) = any.downcast::<PyDict>() {
-            let mut vars = BddPartialValuation::empty();
-            for (k, v) in dict {
-                let k: BddVariable = k.extract::<PyBddVariable>()?.into();
-                let v = v.extract::<bool>()?;
-                vars.set_value(k, v);
-            }
-            Ok(PyBddPartialValuation(vars))
-        } else if let Ok(list) = any.downcast::<PyList>() {
-            let mut vars = BddPartialValuation::empty();
-            for tuple in list {
-                if let Ok(tuple) = tuple.downcast::<PyTuple>() {
-                    let (k, v) = Self::extract_valuation_pair(tuple)?;
-                    vars.set_value(k, v)
-                } else {
-                    return throw_type_error("Expected a list of tuples.");
-                }
-            }
-            Ok(PyBddPartialValuation(vars))
-        } else if let Ok(tuple) = any.downcast::<PyTuple>() {
-            let mut vars = BddPartialValuation::empty();
-            let (k, v) = Self::extract_valuation_pair(tuple)?;
-            vars.set_value(k, v);
-            Ok(PyBddPartialValuation(vars))
         } else {
-            throw_type_error("Expected a partial Bdd valuation.")
+            let native = if let Ok(dict) = any.downcast::<PyDict>() {
+                let mut vars = BddPartialValuation::empty();
+                for (k, v) in dict {
+                    let k: BddVariable = k.extract::<PyBddVariable>()?.into();
+                    let v = v.extract::<bool>()?;
+                    vars.set_value(k, v);
+                }
+                vars
+            } else if let Ok(list) = any.downcast::<PyList>() {
+                let mut vars = BddPartialValuation::empty();
+                for tuple in list {
+                    if let Ok(tuple) = tuple.downcast::<PyTuple>() {
+                        let (k, v) = Self::extract_valuation_pair(tuple)?;
+                        vars.set_value(k, v)
+                    } else {
+                        return throw_type_error("Expected a list of tuples.");
+                    }
+                }
+                vars
+            } else if let Ok(tuple) = any.downcast::<PyTuple>() {
+                let mut vars = BddPartialValuation::empty();
+                let (k, v) = Self::extract_valuation_pair(tuple)?;
+                vars.set_value(k, v);
+                vars
+            } else {
+                return throw_type_error("Expected a partial Bdd valuation.");
+            };
+            Py::new(py, PyBddPartialValuation(native))
         }
     }
 
@@ -83,29 +84,14 @@ impl PyBddPartialValuation {
 #[pymethods]
 impl PyBddValuation {
     #[new]
-    pub fn new(variables: u16) -> PyBddValuation {
-        BddValuation::all_false(variables).into()
-    }
-
-    pub fn __str__(&self) -> PyResult<String> {
-        Ok(format!("{:?}", self.as_native()))
-    }
-
-    pub fn __repr__(&self) -> PyResult<String> {
-        self.__str__()
-    }
-
-    #[staticmethod]
-    pub fn from_list(values: Vec<bool>) -> PyBddValuation {
-        BddValuation::new(values).into()
-    }
-
-    pub fn into_list(&self) -> Vec<bool> {
-        self.as_native().clone().vector()
-    }
-
-    pub fn __len__(&self) -> usize {
-        self.as_native().num_vars() as usize
+    pub fn new(data: &PyAny) -> PyResult<PyBddValuation> {
+        if let Ok(num_vars) = data.extract::<u16>() {
+            Ok(BddValuation::all_false(num_vars).into())
+        } else if let Ok(values) = data.extract::<Vec<bool>>() {
+            Ok(BddValuation::new(values).into())
+        } else {
+            throw_type_error("Expected integer or list of Boolean values.")
+        }
     }
 
     pub fn __getitem__(&self, index: PyBddVariable) -> bool {
@@ -116,12 +102,43 @@ impl PyBddValuation {
         self.as_native_mut().set_value(index.into(), value);
     }
 
-    pub fn __iter__(&self) -> Vec<bool> {
-        self.into_list()
+    pub fn __len__(&self) -> usize {
+        self.as_native().num_vars() as usize
     }
 
-    pub fn extends(&self, partial_valuation: &PyAny) -> PyResult<bool> {
-        let partial_valuation = PyBddPartialValuation::from_python(partial_valuation)?;
+    pub fn __eq__(&self, other: &PyBddValuation) -> bool {
+        self.as_native().eq(other.as_native())
+    }
+
+    pub fn __hash__(&self) -> isize {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish() as isize
+    }
+
+    pub fn __str__(&self) -> String {
+        let values = self
+            .as_native()
+            .clone()
+            .vector()
+            .into_iter()
+            .map(|val| if val { "True" } else { "False" })
+            .collect::<Vec<_>>();
+        let values = values.join(",");
+        format!("[{values}]")
+    }
+
+    pub fn __repr__(&self) -> String {
+        format!("BddValuation({})", self.__str__())
+    }
+
+    pub fn to_list(&self) -> Vec<bool> {
+        self.as_native().clone().vector()
+    }
+
+    pub fn extends(&self, py: Python, partial_valuation: &PyAny) -> PyResult<bool> {
+        let partial_valuation = PyBddPartialValuation::from_python_type(partial_valuation)?;
+        let partial_valuation = partial_valuation.borrow(py);
         Ok(self.as_native().extends(partial_valuation.as_native()))
     }
 }
@@ -129,16 +146,24 @@ impl PyBddValuation {
 #[pymethods]
 impl PyBddPartialValuation {
     #[new]
-    pub fn new() -> PyBddPartialValuation {
-        BddPartialValuation::empty().into()
+    pub fn new(py: Python, data: &PyAny) -> PyResult<PyBddPartialValuation> {
+        if data.is_none() {
+            Ok(BddPartialValuation::empty().into())
+        } else {
+            let data = PyBddPartialValuation::from_python_type(data)?;
+            data.extract::<PyBddPartialValuation>(py)
+        }
     }
 
-    pub fn __str__(&self) -> PyResult<String> {
-        Ok(format!("{:?}", self.as_native()))
+    pub fn __str__(&self) -> String {
+        // TODO:
+        //  If we ever get this into a state where it should output valid Python,
+        //  this needs to change true/false to True/False.
+        format!("BddPartialValuation({:?})", self.as_native().to_values())
     }
 
-    pub fn __repr__(&self) -> PyResult<String> {
-        self.__str__()
+    pub fn __repr__(&self) -> String {
+        format!("<{}>", self.__str__())
     }
 
     pub fn __len__(&self) -> usize {
@@ -149,12 +174,8 @@ impl PyBddPartialValuation {
         self.as_native().get_value(index.into())
     }
 
-    pub fn __setitem__(&mut self, index: PyBddVariable, value: Option<bool>) {
-        if let Some(value) = value {
-            self.as_native_mut().set_value(index.into(), value);
-        } else {
-            self.as_native_mut().unset_value(index.into());
-        }
+    pub fn __setitem__(&mut self, index: PyBddVariable, value: bool) {
+        self.as_native_mut().set_value(index.into(), value);
     }
 
     pub fn __delitem__(&mut self, index: PyBddVariable) {
@@ -165,16 +186,43 @@ impl PyBddPartialValuation {
         self.as_native().has_value(index.into())
     }
 
-    pub fn __iter__(&self) -> Vec<(PyBddVariable, bool)> {
-        self.into_list()
+    pub fn __iter__(&self) -> Vec<PyBddVariable> {
+        self.as_native()
+            .to_values()
+            .into_iter()
+            .map(|(k, _)| k.into())
+            .collect::<Vec<_>>()
     }
 
-    pub fn extends(&self, partial_valuation: &PyAny) -> PyResult<bool> {
-        let partial_valuation = PyBddPartialValuation::from_python(partial_valuation)?;
+    pub fn __hash__(&self) -> isize {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish() as isize
+    }
+
+    pub fn __eq__(&self, other: &PyBddPartialValuation) -> bool {
+        self.as_native().eq(other.as_native())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.as_native().is_empty()
+    }
+
+    pub fn extends(&self, py: Python, partial_valuation: &PyAny) -> PyResult<bool> {
+        let partial_valuation = PyBddPartialValuation::from_python_type(partial_valuation)?;
+        let partial_valuation = partial_valuation.borrow(py);
         Ok(self.as_native().extends(partial_valuation.as_native()))
     }
 
-    pub fn into_list(&self) -> Vec<(PyBddVariable, bool)> {
+    pub fn support_set(&self) -> HashSet<PyBddVariable> {
+        self.as_native()
+            .to_values()
+            .into_iter()
+            .map(|(k, _)| k.into())
+            .collect()
+    }
+
+    pub fn to_dict(&self) -> HashMap<PyBddVariable, bool> {
         self.as_native()
             .to_values()
             .into_iter()
@@ -182,16 +230,11 @@ impl PyBddPartialValuation {
             .collect()
     }
 
-    pub fn into_dict(&self) -> HashMap<PyBddVariable, bool> {
+    pub fn to_list(&self) -> Vec<(PyBddVariable, bool)> {
         self.as_native()
             .to_values()
             .into_iter()
             .map(|(k, v)| (k.into(), v))
             .collect()
-    }
-
-    #[staticmethod]
-    pub fn from_data(data: &PyAny) -> PyResult<PyBddPartialValuation> {
-        PyBddPartialValuation::from_python(data)
     }
 }

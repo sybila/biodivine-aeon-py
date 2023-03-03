@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeAlias, TypedDict, Callable
+from typing import TypeAlias, Callable
 
 
 ###
@@ -803,28 +803,204 @@ class BddValuation:
         """
 
 
-class BddVariable:
-    """
-    TODO
-    """
-
-
-class BddVariableSet:
-    """
-    TODO
-    """
-
-
 class BddClauseIterator:
     """
-    TODO
+    Iterates through the `BddPartialValuation` objects representing individual satisfying conjunctive clauses
+    of the provided `Bdd`. The iterator is lazy.
     """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, bdd: Bdd):
+        pass
+
+    def __str__(self):
+        pass
+
+    def __repr__(self):
+        pass
+
+    def __iter__(self) -> BddClauseIterator:
+        pass
+
+    def __next__(self) -> BddPartialValuation:
+        pass
 
 
 class BddValuationIterator:
     """
-    TODO
+    Iterates through the `BddValuation` objects representing individual satisfying valuations
+    of the provided `Bdd`. The iterator is lazy.
     """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, bdd: Bdd):
+        pass
+
+    def __str__(self):
+        pass
+
+    def __repr__(self):
+        pass
+
+    def __iter__(self) -> BddValuationIterator:
+        pass
+
+    def __next__(self) -> BddValuation:
+        pass
+
+
+class BddVariable:
+    """
+    References a single BDD variable that is managed by some `BddVariableSet`. Variables are sorted based on the
+    order in which they appear in a BDD.
+    """
+
+    def __hash__(self):
+        pass
+
+    def __eq__(self, other: BddVariable) -> bool:
+        pass
+
+    def __str__(self):
+        pass
+
+    def __repr__(self):
+        pass
+
+    def __lt__(self, other: BddVariable) -> bool:
+        pass
+
+    def __gt__(self, other: BddVariable) -> bool:
+        pass
+
+    def __le__(self, other: BddVariable) -> bool:
+        pass
+
+    def __ge__(self, other: BddVariable) -> bool:
+        pass
+
+
+class BddVariableSet:
+    """
+    A "variable manager" that keeps track of how individual `BddVariable` objects are named and where they appear in the
+    variable ordering.
+
+    It can be created by providing a list of variable names or the variable count, in which case it uses default names
+    (`x_0`, `x_1`, ...). It can be also created using a `BddVariableSetBuilder`.
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, variables: int | list[str]):
+        pass
+
+    def __str__(self):
+        """
+        The same as `__repr__`.
+        """
+
+    def __repr__(self):
+        """
+        Returns a `BddVariableSet(<variables>)` string, where `<variables>` is the list of variable names.
+        """
+
+    def eval_expression(self, expression: str | BooleanExpression) -> Bdd:
+        """
+        Create a `Bdd` function representation based on a `BooleanExpression`
+        (or a string that is parsed as an expression).
+        """
+
+    def mk_const(self, value: bool) -> Bdd:
+        """
+        Create a constant `Bdd` function.
+        """
+
+    def mk_true(self) -> Bdd:
+        """
+        A tautology.
+        """
+
+    def mk_false(self) -> Bdd:
+        """
+        A contradiction.
+        """
+
+    def mk_literal(self, variable: BddVariableType, value: bool) -> Bdd:
+        """
+        Create a `Bdd` corresponding to the positive or negative literal of the given `variable` (so either `var` or
+        `!var`).
+        """
+
+    def mk_conjunctive_clause(self, partial_valuation: BddPartialValuationType) -> Bdd:
+        """
+        Create a `Bdd` representing a single conjunctive clause described by a partial valuation.
+        """
+
+    def mk_disjunctive_clause(self, partial_valuation: BddPartialValuationType) -> Bdd:
+        """
+        Create a `Bdd` representing a single disjunctive clause described by a partial valuation.
+        """
+
+    def mk_cnf(self, formula: list[BddPartialValuationType]) -> Bdd:
+        """
+        Create a `Bdd` of a conjunctive-normal-form formula based on a list of clauses (given as partial valuations).
+        """
+
+    def mk_dnf(self, formula: list[BddPartialValuationType]) -> Bdd:
+        """
+        Create a `Bdd` of a disjunctive-normal-form formula based on a list of clauses (given as partial valuations).
+        """
+
+    def var_count(self) -> int:
+        """
+        Return the number of variables managed by this `BddVariableSet`.
+        """
+
+    def find_variable(self, variable: BddVariableType) -> BddVariable | None:
+        """
+        Find a `BddVariable` corresponding to the given name, or `None` if the variable does not exist.
+        """
+
+    def get_variable_name(self, variable: BddVariable) -> str:
+        """
+        Return the name of the given `BddVariable`.
+        """
+    def all_variables(self) -> list[BddVariable]:
+        """
+        Return the list of all `BddVariable` objects managed by this `BddVariableSet`.
+        """
+
+
+class BddVariableSetBuilder:
+    """
+    A simpler "builder" object that can be used to gradually construct a `BddVariableSet`.
+
+    You can optionally supply the constructor with a list of initial variables.
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, variables: list[str] | None = None):
+        pass
+
+    def __str__(self):
+        pass
+
+    def __repr__(self):
+        pass
+
+    def make(self, variable: str) -> BddVariable:
+        """
+        Declare a single new `BddVariable`.
+        """
+
+    def make_all(self, variables: list[str]) -> list[BddVariable]:
+        """
+        Declare all variables in the given list.
+        """
+
+    def build(self) -> BddVariableSet:
+        """
+        Turn the builder object into the actual `BddVariableSet`.
+        """
 
 
 ###
@@ -871,4 +1047,16 @@ BddPartialValuationType: TypeAlias = BddPartialValuation | tuple[BddVariable, bo
 """
 Either a `BddPartialValuation`, or a `dict[BddVariable, bool]`, `list[tuple[BddVariable, bool]]`,
 or a single `tuple[BddVariable, bool]`.
+"""
+
+BddVariableType: TypeAlias = BddVariable | str
+"""
+A BDD variable type used by the `BddVariableSet` can be either a `BddVariable`, or a `str` representation of its name.
+
+Note that `Bdd` objects cannot use this type, because they do not have information about variable names. 
+"""
+
+BddValuationType: TypeAlias = BddValuation | list[bool]
+"""
+Either a `BddValuation`, or a `list[bool]`.
 """

@@ -32,7 +32,7 @@ impl PyBdd {
         hasher.finish() as isize
     }
 
-    fn __str__(&self) -> PyResult<String> {
+    pub fn __str__(&self) -> PyResult<String> {
         Ok(format!(
             "Bdd(size={}, cardinality={})",
             self.node_count(),
@@ -197,31 +197,26 @@ impl PyBdd {
         }
     }
 
-    pub fn select(&self, values: &PyAny) -> PyResult<PyBdd> {
-        let valuation = PyBddPartialValuation::from_python(values)?;
+    pub fn select(&self, py: Python, values: &PyAny) -> PyResult<PyBdd> {
+        let valuation = PyBddPartialValuation::from_python_type(values)?;
+        let valuation = valuation.borrow(py);
         Ok(self
             .as_native()
             .select(&valuation.as_native().to_values())
             .into())
     }
 
-    pub fn restrict(&self, values: &PyDict) -> PyResult<PyBdd> {
-        let valuation = PyBddPartialValuation::from_python(values)?;
+    pub fn restrict(&self, py: Python, values: &PyDict) -> PyResult<PyBdd> {
+        let valuation = PyBddPartialValuation::from_python_type(values)?;
+        let valuation = valuation.borrow(py);
         Ok(self
             .as_native()
             .restrict(&valuation.as_native().to_values())
             .into())
     }
 
-    pub fn valuation_iterator(&self) -> PyBddValuationIterator {
-        // This hack allows us to "launder" lifetimes between Rust and Python.
-        // It is only safe because we copy the `Bdd` and attach it to the "laundered" reference,
-        // so there is no (realistic) way the reference can outlive the copy of the `Bdd`.
-        // Fortunately, the iterator items are clones and do not reference the `Bdd` directly,
-        // so the "laundered" references do not spread beyond the internal code of the iterator.
-        let copy = self.as_native().clone();
-        let copy_ref: &'static Bdd = unsafe { (&copy as *const Bdd).as_ref().unwrap() };
-        PyBddValuationIterator(copy_ref.sat_valuations(), copy)
+    pub fn valuation_iterator(self_: Py<PyBdd>, py: Python) -> PyBddValuationIterator {
+        PyBddValuationIterator::new(py, self_)
     }
 
     pub fn valuation_witness(&self) -> Option<PyBddValuation> {
@@ -242,11 +237,8 @@ impl PyBdd {
         }
     }
 
-    pub fn clause_iterator(&self) -> PyBddClauseIterator {
-        // See `iter_valuations` for safety discussion.
-        let copy = self.as_native().clone();
-        let copy_ref: &'static Bdd = unsafe { (&copy as *const Bdd).as_ref().unwrap() };
-        PyBddClauseIterator(copy_ref.sat_clauses(), copy)
+    pub fn clause_iterator(self_: Py<PyBdd>, py: Python) -> PyBddClauseIterator {
+        PyBddClauseIterator::new(py, self_)
     }
 
     pub fn clause_witness(&self) -> Option<PyBddPartialValuation> {

@@ -4,15 +4,29 @@ use pyo3::prelude::*;
 
 impl Default for PyBddVariableSetBuilder {
     fn default() -> Self {
-        PyBddVariableSetBuilder::new()
+        PyBddVariableSetBuilder::new(None)
     }
 }
 
 #[pymethods]
 impl PyBddVariableSetBuilder {
     #[new]
-    pub fn new() -> Self {
-        PyBddVariableSetBuilder(BddVariableSetBuilder::new(), Vec::new())
+    #[pyo3(signature = (variables = None))]
+    pub fn new(variables: Option<Vec<String>>) -> Self {
+        let variables = variables.unwrap_or_default();
+        let mut builder = BddVariableSetBuilder::new();
+        for var in &variables {
+            builder.make_variable(var.as_str());
+        }
+        PyBddVariableSetBuilder(builder, variables)
+    }
+
+    pub fn __str__(&self) -> String {
+        format!("BddVariableSetBuilder({:?})", self.1)
+    }
+
+    pub fn __repr__(&self) -> String {
+        self.__str__()
     }
 
     pub fn make(&mut self, name: &str) -> PyBddVariable {
@@ -21,12 +35,12 @@ impl PyBddVariableSetBuilder {
         var
     }
 
-    pub fn make_all(&mut self, names: Vec<&str>) -> PyResult<Vec<PyBddVariable>> {
+    pub fn make_all(&mut self, names: Vec<&str>) -> Vec<PyBddVariable> {
         let mut result: Vec<PyBddVariable> = Vec::new();
         for name in names {
             result.push(self.make(name));
         }
-        Ok(result)
+        result
     }
 
     pub fn build(&self) -> PyBddVariableSet {

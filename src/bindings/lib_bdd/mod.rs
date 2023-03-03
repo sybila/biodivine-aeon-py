@@ -16,55 +16,52 @@ mod _impl_bdd_variable_set_builder;
 mod _impl_boolean_expression;
 
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
+    module.add_class::<PyBooleanExpression>()?;
     module.add_class::<PyBdd>()?;
+    module.add_class::<PyBddPartialValuation>()?;
+    module.add_class::<PyBddValuation>()?;
+    module.add_class::<PyBddClauseIterator>()?;
+    module.add_class::<PyBddValuationIterator>()?;
     module.add_class::<PyBddVariable>()?;
     module.add_class::<PyBddVariableSet>()?;
-    module.add_class::<PyBooleanExpression>()?;
     module.add_class::<PyBddVariableSetBuilder>()?;
     Ok(())
 }
+
+#[pyclass(name = "BooleanExpression")]
+#[derive(Clone, Eq, PartialEq, Wrapper)]
+pub struct PyBooleanExpression(BooleanExpression);
 
 #[pyclass(name = "Bdd")]
 #[derive(Clone, Eq, PartialEq, Hash, Wrapper)]
 pub struct PyBdd(Bdd);
 
-#[pyclass(name = "BddValuationIterator")]
-pub struct PyBddValuationIterator(BddSatisfyingValuations<'static>, Bdd);
-#[pyclass(name = "BddClauseIterator")]
-pub struct PyBddClauseIterator(BddPathIterator<'static>, Bdd);
-
-#[pyclass(name = "BddValuation")]
-#[derive(Clone, Eq, PartialEq, Hash, Wrapper)]
-pub struct PyBddValuation(BddValuation);
 #[pyclass(name = "BddPartialValuation")]
 #[derive(Clone, Eq, PartialEq, Hash, Wrapper)]
 pub struct PyBddPartialValuation(BddPartialValuation);
 
-/// An identifier of a Boolean decision variable used within a `Bdd`.
+#[pyclass(name = "BddValuation")]
+#[derive(Clone, Eq, PartialEq, Hash, Wrapper)]
+pub struct PyBddValuation(BddValuation);
+
+#[pyclass(name = "BddClauseIterator")]
+pub struct PyBddClauseIterator(Py<PyBdd>, BddPathIterator<'static>);
+
+#[pyclass(name = "BddValuationIterator")]
+pub struct PyBddValuationIterator(Py<PyBdd>, BddSatisfyingValuations<'static>);
+
 #[pyclass(name = "BddVariable")]
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Wrapper)]
 pub struct PyBddVariable(BddVariable);
 
-/// An object which manages a set of `Bdd` decision variables and makes it possible to
-/// create new `Bdd` objects using these variables.
-///
-/// In particular, it maps `BddVariable` identifiers to actual variable names.
 #[pyclass(name = "BddVariableSet")]
 #[derive(Clone, Wrapper)]
 pub struct PyBddVariableSet(BddVariableSet);
 
-/// Abstract syntax tree of an expression which describes a particular Boolean formula.
-///
-/// TODO: This class currently has no API except for conversion from and into `String`.
-#[pyclass(name = "BooleanExpression")]
-#[derive(Clone, Eq, PartialEq, Wrapper)]
-pub struct PyBooleanExpression(BooleanExpression);
+// The string vector in `PyBddVariableSetBuilder` is used to track all created variables.
+// The reason for it that `BddVariableSetBuilder` cannot be cloned and since we cannot own it
+// in a PyO3 mapped function, we cannot transform it into `BddVariableSet`. Hence we create
+// the `BddVariableSet` from the string vector instead.
 
-/// A builder object that lets you gradually construct a `BddVariableSet` instead of supplying
-/// all variable names at once.
 #[pyclass(name = "BddVariableSetBuilder")]
 pub struct PyBddVariableSetBuilder(BddVariableSetBuilder, Vec<String>);
-
-// Note that above, the string vector is necessary because `BddVariableSetBuilder` does not
-// implement clone and there is no way to actually destroy it during final conversion
-// to `BddVariableSet`. Hence we have to make a copy of the builder using the saved variable names.

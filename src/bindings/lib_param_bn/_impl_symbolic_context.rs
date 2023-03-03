@@ -5,7 +5,7 @@ use crate::bindings::lib_param_bn::{
     PyBooleanNetwork, PyFnUpdate, PyParameterId, PySymbolicContext, PyVariableId,
 };
 use crate::{throw_runtime_error, throw_type_error, AsNative};
-use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable, BddVariableSet};
+use biodivine_lib_bdd::{BddValuation, BddVariable, BddVariableSet};
 use biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext;
 use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
@@ -26,13 +26,14 @@ fn read_valuation(
     variables: &[BddVariable],
     valuation: &PyAny,
 ) -> PyResult<BddValuation> {
-    if let Ok(valuation) = PyBddValuation::from_python(valuation) {
-        Ok(valuation.into())
-    } else if let Ok(valuation) = PyBddPartialValuation::from_python(valuation) {
-        let valuation: BddPartialValuation = valuation.into();
+    let py = valuation.py();
+    if let Ok(valuation) = PyBddValuation::from_python_type(valuation) {
+        Ok(valuation.borrow(py).as_native().clone())
+    } else if let Ok(valuation) = PyBddPartialValuation::from_python_type(valuation) {
+        let valuation = valuation.borrow(py);
         let mut result = BddValuation::all_false(vars.num_vars());
         for var in variables {
-            if let Some(value) = valuation.get_value(*var) {
+            if let Some(value) = valuation.as_native().get_value(*var) {
                 result.set_value(*var, value)
             } else {
                 return throw_type_error(

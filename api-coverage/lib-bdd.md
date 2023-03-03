@@ -474,6 +474,14 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
             <td><code>BddPartialValuation::from_values</code></td> 
         </tr>
         <tr>
+            <td></td>
+            <td><code>BddPartialValuation.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddPartialValuation.__repr__</code></td>
+        </tr>
+        <tr>
             <td><code>BddPartialValuation::cardinality</code></td>
             <td><code>BddPartialValuation.__len__</code></td>
         </tr>
@@ -696,11 +704,8 @@ BDD variables can be only created/managed through a `BddVariableSet`. However, t
             <td><code>BddVariable.__repr__</code></td>
         </tr>
         <tr>
-            <td rowspan="2"><code>BddVariable::eq</code></td>
+            <td><code>BddVariable::eq</code></td>
             <td><code>BddVariable.__eq__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddVariable.__ne__</code></td>
         </tr>
         <tr>
             <td rowspan="4"><code>BddVariable::cmp</code></td>
@@ -768,6 +773,10 @@ Once created, the variable set is immutable.
         <tr>
             <td><code>BddVariableSet::mk_true</code></td>
             <td><code>BddVariableSet.mk_true</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddVariableSet.mk_const</code></td>
         </tr>
         <tr>
             <td><code>BddVariableSet::mk_literal</code></td>
