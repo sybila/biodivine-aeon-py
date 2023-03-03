@@ -635,6 +635,7 @@ class Bdd:
         not only tracks the variable names used within the given `expression`, but also the total number of
         symbolic variables admissible in the resulting `Bdd`.
         """
+
     def to_raw_string(self) -> str:
         """
         Export the underlying directed graph into a "raw string" representation that can be later
@@ -668,6 +669,7 @@ class Bdd:
         **WARNING:** There are only minimal safety checks on the integrity of the imported `Bdd`. If the
         data is corrupted, it is possible to create a `Bdd` that results in undefined behaviour.
         """
+
     def to_dot_string(self, var_set: BddVariableSet | None = None, zero_pruned: bool = True) -> str:
         """
         Export the underlying directed graph of this `Bdd` as a **Graphviz-compatible `.dot` file**.
@@ -679,6 +681,128 @@ class Bdd:
         """
 
 
+class BddPartialValuation:
+    """
+    Maps `BddVariable` keys to `bool` values just like a dictionary (meaning you can use standard indexing operations
+    through `__getitem__`, `__setitem__`, `__delitem__`, `__contains__` and `__iter__`). It also implements standard
+    hashing and equality functionality. However, compared to the standard dictionary, it admits missing elements,
+    where it returns `None` instead of throwing an exception.
+
+    By default, the constructor creates an empty map, but you can supply it with list/dictionary data.
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, data: BddPartialValuationType | None = None):
+        pass
+
+    def __len__(self) -> int:
+        """
+        The number of BDD variables that are fixed in this valuation.
+        """
+
+    def __getitem__(self, item: BddVariable) -> bool | None:
+        pass
+
+    def __setitem__(self, key: BddVariable, value: bool):
+        pass
+
+    def __delitem__(self, key: BddVariable):
+        pass
+
+    def __contains__(self, item: BddVariable) -> bool:
+        pass
+
+    def __iter__(self) -> list[BddVariable]:
+        """
+        Iterate through all BDD variables that have a fixed value in this valuation.
+        """
+
+    def __hash__(self):
+        pass
+
+    def __eq__(self, other: BddPartialValuation):
+        pass
+
+    def is_empty(self) -> bool:
+        """
+        Returns `True` if there are no variables fixed in this valuation.
+        """
+
+    def extends(self, partial_valuation: BddPartialValuationType) -> bool:
+        """
+        Check if this partial valuation agrees in all variables with the given partial valuation. In other words,
+        if this valuation implies the given valuation.
+        """
+
+    def support_set(self) -> set[BddVariable]:
+        """
+        Return the set of BDD variables that are fixed in this valuation.
+        """
+
+    def to_dict(self) -> dict[BddVariable, bool]:
+        """
+        Export the values stored in this `BddPartialValuation` as a dictionary.
+        """
+
+    def to_list(self) -> list[tuple[BddVariable, bool]]:
+        """
+        Export the values stored in this `BddPartialValuation` as a list.
+        """
+
+
+class BddValuation:
+    """
+    Maps fixed sequence of `BddVariable` keys to `bool` values. Supports normal dictionary-like access through
+    indexing, plus the `len` method. Always assumes a fixed number of variables and defaults to `False`
+    for unknown values.
+
+    A valuation can be created by giving a variable count (in which case the values default to `False`),
+    an explicit list of Boolean values, or a `BddPartialValuation` (in such case, the partial valuation must
+    fixe all BDD variables in a continuous range).
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(self, data: int | list[bool] | BddPartialValuation):
+        pass
+
+    def __getitem__(self, item: BddVariable) -> bool:
+        pass
+
+    def __setitem__(self, key: BddVariable, value: bool):
+        pass
+
+    def __len__(self) -> int:
+        pass
+
+    def __eq__(self, other: BddValuation) -> bool:
+        pass
+
+    def __hash__(self):
+        pass
+
+    def __str__(self):
+        """
+        Represents the valuation as a list of Boolean values.
+        """
+
+    def __repr__(self):
+        """
+        Represents the valuation as `BddValuation(<str>)`, where `<str>` is the vector string produced by the `__str__`
+        method.
+        """
+
+    def to_list(self) -> list[bool]:
+        """
+        Convert this `BddValuation` to a list of "raw" Boolean values.
+        """
+
+    def extends(self, partial_valuation: BddPartialValuationType) -> bool:
+        """
+        Check if this valuation agrees in all variables with the given partial valuation. In other words, if this
+        valuation implies the given partial valuation.
+        """
+
+
 class BddVariable:
     """
     TODO
@@ -686,18 +810,6 @@ class BddVariable:
 
 
 class BddVariableSet:
-    """
-    TODO
-    """
-
-
-class BddPartialValuation:
-    """
-    TODO
-    """
-
-
-class BddValuation:
     """
     TODO
     """

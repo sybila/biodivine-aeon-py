@@ -502,11 +502,8 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
             <td><code>BddPartialValuation.__hash__</code></td>
         </tr>
         <tr>
-            <td rowspan="2"><code>BddPartialValuation::eq</code></td>
+            <td><code>BddPartialValuation::eq</code></td>
             <td><code>BddPartialValuation.__eq__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation.__ne__</code></td>
         </tr>
         <tr><td colspan="2" align="center">Introspection</td></tr> 
         <tr>
@@ -590,11 +587,8 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
             <td><code>BddValuation.__hash__</code></td>
         </tr>
         <tr>
-            <td rowspan="2"><code>BddValuation::eq</code></td>
+            <td><code>BddValuation::eq</code></td>
             <td><code>BddValuation.__eq__</code></td>
-        </tr>
-        <tr> 
-            <td><code>BddValuation.__ne__</code></td>
         </tr>
         <tr>
             <td><code>BddValuation::cmp</code></td>
@@ -617,13 +611,6 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         <tr>
             <td rowspan="2"><code>BddValuation::vector</code></td>
             <td><code>BddValuation.to_list</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation.to_dict</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::from</code></td>
-            <td><code>BddValuation.to_bdd</code></td>
         </tr>
     </tbody>
 </table>
