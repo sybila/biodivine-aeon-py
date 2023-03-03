@@ -33,11 +33,8 @@ Logical operations on `BooleanExpression` and `Bdd` objects can be also performe
             <td><code>BooleanExpression.__call__</code></td>
         </tr>
         <tr>
-            <td rowspan="2"><code>BooleanExpression::eq</code></td>
+            <td><code>BooleanExpression::eq</code></td>
             <td><code>BooleanExpression.__eq__</code></td>
-        </tr>
-        <tr> 
-            <td><code>BooleanExpression.__ne__</code></td>
         </tr>
         <tr><td colspan="2" align="center">Pattern constructors</td></tr>
         <tr>
@@ -105,6 +102,14 @@ Logical operations on `BooleanExpression` and `Bdd` objects can be also performe
             <td></td>
             <td><code>BooleanExpression.is_xor</code></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.is_literal</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.is_binary</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Pattern destructors</td></tr>
         <tr>
             <td></td>
@@ -137,6 +142,14 @@ Logical operations on `BooleanExpression` and `Bdd` objects can be also performe
         <tr>
             <td></td>
             <td><code>BooleanExpression.as_xor</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.as_literal</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.as_binary</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
