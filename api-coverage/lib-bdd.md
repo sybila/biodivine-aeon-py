@@ -180,22 +180,11 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         <tr><td colspan="2" align="center">Special methods</td></tr>
         <tr>
             <td></td>
-            <td><code>Bdd.__init__</code></td>
-        </tr>
-        <tr>
-            <td></td>
             <td><code>Bdd.__str__</code></td>
         </tr>
         <tr>
             <td></td>
             <td><code>Bdd.__repr__</code></td>
-        </tr>
-        <tr>
-            <td rowspan="2"><code>Bdd::eq</code></td>
-            <td><code>Bdd.__eq__</code></td>
-        </tr>
-        <tr> 
-            <td><code>Bdd.__ne__</code></td>
         </tr>
         <tr>
             <td><code>Bdd::hash</code></td>
@@ -204,6 +193,14 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         <tr>
             <td><code>Bdd::eval_in</code></td>
             <td><code>Bdd.__call__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__eq__</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::eq</code></td>
+            <td><code>Bdd.graph_eq</code></td>
         </tr>
         <tr><td colspan="2" align="center">Boolean operations</td></tr>
         <tr>
@@ -233,10 +230,6 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         <tr>
             <td><code>Bdd::xor</code></td>
             <td><code>Bdd.l_xor</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.l_eq</code></td>
         </tr>
         <tr>
             <td><code>Bdd::binary_op</code></td>
