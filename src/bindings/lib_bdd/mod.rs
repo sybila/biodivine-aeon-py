@@ -32,6 +32,24 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
 #[derive(Clone, Eq, PartialEq, Wrapper)]
 pub struct PyBooleanExpression(BooleanExpression);
 
+/*
+   “Pretend to be good always and even God will be fooled.”
+                                   — Kurt Vonnegut
+
+   Since we cannot properly return references to BooleanExpression subtrees to Python,
+   we instead use this reference type, which has the same API as BooleanExpression, but
+   additionally holds a reference to the "root" expression. This ensures the root expression
+   lives long enough. Since the API is the same, anyone using if from Python should not
+   notice anything unusual about it.
+*/
+
+#[pyclass(name = "BooleanExpressionRef")]
+#[derive(Clone)]
+pub struct PyBooleanExpressionRef {
+    root: Py<PyBooleanExpression>,
+    reference: &'static BooleanExpression,
+}
+
 #[pyclass(name = "Bdd")]
 #[derive(Clone, Eq, PartialEq, Hash, Wrapper)]
 pub struct PyBdd(Bdd);

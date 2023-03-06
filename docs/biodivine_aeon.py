@@ -69,7 +69,7 @@ class BooleanExpression:
         Outputs the string representation of this expression.
         """
 
-    def __call__(self, valuation: None | dict[str, bool], **kwargs):
+    def __call__(self, valuation: None | dict[str, bool], **kwargs) -> bool:
         """
         Evaluates this `BooleanExpression` to `True`/`False` based on the provided variable valuation.
 

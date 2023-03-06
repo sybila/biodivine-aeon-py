@@ -5,6 +5,8 @@ use crate::bindings::lib_bdd::{
 };
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
+use num_bigint::BigInt;
+use num_traits::cast::FromPrimitive;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyList};
@@ -13,8 +15,6 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 use std::io::Cursor;
-use num_bigint::BigInt;
-use num_traits::cast::FromPrimitive;
 
 struct OpFunction2(Vec<Option<bool>>);
 struct OpFunction3(Vec<Option<bool>>);
