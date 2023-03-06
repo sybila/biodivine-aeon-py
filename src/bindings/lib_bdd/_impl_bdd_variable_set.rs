@@ -130,12 +130,7 @@ impl PyBddVariableSet {
         if let Ok(variable) = variable.extract::<PyBddVariable>() {
             Ok(Some(variable))
         } else if let Ok(name) = variable.extract::<&str>() {
-            let variable = if let Some(variable) = self.as_native().var_by_name(name) {
-                Some(variable.into())
-            } else {
-                None
-            };
-            Ok(variable)
+            Ok(self.as_native().var_by_name(name).map(|x| x.into()))
         } else {
             throw_type_error("Expected name or BddVariable.")
         }

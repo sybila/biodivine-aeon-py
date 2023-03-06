@@ -25,7 +25,7 @@ impl PyBddValuationIterator {
 
     pub fn __str__(&self, py: Python) -> PyResult<String> {
         let bdd_ref = self.0.extract::<PyRef<PyBdd>>(py)?;
-        Ok(format!("BddValuationIterator({})", bdd_ref.__str__()?))
+        Ok(format!("BddValuationIterator({})", bdd_ref.__str__()))
     }
 
     pub fn __repr__(&self, py: Python) -> PyResult<String> {
@@ -57,7 +57,7 @@ impl PyBddClauseIterator {
 
     pub fn __str__(&self, py: Python) -> PyResult<String> {
         let bdd_ref = self.0.extract::<PyRef<PyBdd>>(py)?;
-        Ok(format!("BddClauseIterator({})", bdd_ref.__str__()?))
+        Ok(format!("BddClauseIterator({})", bdd_ref.__str__()))
     }
 
     pub fn __repr__(&self, py: Python) -> PyResult<String> {

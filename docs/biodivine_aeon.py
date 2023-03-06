@@ -268,7 +268,7 @@ class Bdd:
     bdd = (EXISTS | a | (~bdd /OR/ b))
     ```
 
-    ### BDD Equality
+    ### BDD equality and partial order
 
     There are two notions of BDD equality. For the most part, two BDDs represent an equivalent
     Boolean function if their underlying graphs are equal, because BDD operations produce *canonical* BDDs. However,
@@ -278,7 +278,15 @@ class Bdd:
     As such, the `Bdd` class overrides `__eq__` using the (slower) true semantic equivalence, but you can also use
     `Bdd.graph_eq` to use the (faster) graph equivalence. In general, you can always safely use `==` and only replace
     it with `graph_eq` in cases where you find it to be a significant performance bottleneck, and you are sure both
-    arguments are always canonical.
+    arguments are always canonical. Note that the `__eq__` implementation should still be faster than computing
+    `Bdd.l_iff` directly.
+
+    Furthermore, for applications like subset testing (when a BDD represents a set), we'd often like to have a partial
+    order between BDDs based on implication. So `A <= B` when `A` implies `B`, `A < B` when `A` implies `B` but they
+    are not equivalent, and so on. Currently, we provide these checks using a similar mechanism to the `__eq__` method,
+    hence you can "semantically" compare BDDs using normal comparison operators (and this should be faster than
+    `Bdd.l_imp`). However, keep in mind that this is only a partial order, so it is easy to find BDDs where
+    `(A <= B) == (B <= A) == False`.
 
     """
 
@@ -301,7 +309,10 @@ class Bdd:
     def graph_eq(self, other: Bdd) -> bool:
         """
         Returns `true` if two `Bdd` objects share the same underlying acyclic graph. On canonical BDDs, this
-        is the same as semantic equivalence.
+        is the same as semantic equivalence, but faster.
+
+        Any logical or relational operation in this library always creates canonical BDDs. Hence, you can use this
+        method in performance critical code assuming you ensure canonic BDDs.
         """
 
     def __hash__(self):
@@ -364,7 +375,7 @@ class Bdd:
     def apply2(
             left: Bdd,
             right: Bdd,
-            function: str | OpFunction2,
+            function: OpFunction2,
             flip_left: BddVariable | None = None,
             flip_right: BddVariable | None = None,
             flip_output: BddVariable | None = None,
@@ -374,8 +385,7 @@ class Bdd:
         Compute a custom logical operation on two `Bdd` arguments.
 
          - Argument `function` is a custom function that will be applied to BDD leaf nodes (see `OpFunction2`
-         for the requirements that such function must satisfy). Alternatively, you can also supply one of `and`, `or`,
-         `and_not`, `imp`, `iff` and `xor`, in which case the corresponding predefined function is applied.
+         for the requirements that such function must satisfy).
          - If you specify `flip_left`, `flip_right`, or `flip_output`, the validity of the given variable will be
          negated in the left, right, or output BDD respectively.
          - The `limit` argument works the same way as in the other logical operations: If the resulting `Bdd` exceeds
@@ -402,7 +412,7 @@ class Bdd:
     def check2(
             left: Bdd,
             right: Bdd,
-            function: str | OpFunction2,
+            function: OpFunction2,
             flip_left: BddVariable | None = None,
             flip_right: BddVariable | None = None,
             flip_output: BddVariable | None = None,
@@ -473,11 +483,11 @@ class Bdd:
         Returns the number of BDD variables that are tracked within this `Bdd`.
         """
 
-    def set_var_count(self, new_count: int):
-        """
-        Force update the number of variables tracked within this `Bdd`. Note that this is a very low-level operation
-        that should not be used unless absolutely necessary, as it can easily create inconsistencies between BDDs.
-        """
+    # def set_var_count(self, new_count: int):
+    #    """
+    #    Force update the number of variables tracked within this `Bdd`. Note that this is a very low-level operation
+    #    that should not be used unless absolutely necessary, as it can easily create inconsistencies between BDDs.
+    #    """
 
     def support_set(self) -> set[BddVariable]:
         """
@@ -512,7 +522,7 @@ class Bdd:
         """
         Returns the number of satisfying valuations of this `Bdd` function.
 
-        Note that the values resulting from this operation often substantially exceed the bounds of a 64-bit integer.
+        Note that the values resulting from this operation often substantially exceed the bounds of a 64-bit domain.
         This requires the use of arbitrary-precision integers which aren't exactly fast.
 
         As such, the default implementation uses an approximate method based on floating point numbers which is
@@ -629,7 +639,7 @@ class Bdd:
         """
 
     @staticmethod
-    def from_expression(expression: str | BooleanExpression, var_set: BddVariableSet) -> Bdd:
+    def from_expression(var_set: BddVariableSet, expression: str | BooleanExpression) -> Bdd:
         """
         Create a `Bdd` corresponding to the given `BooleanExpression`. The `var_set` argument is mandatory, as it
         not only tracks the variable names used within the given `expression`, but also the total number of
@@ -964,6 +974,7 @@ class BddVariableSet:
         """
         Return the name of the given `BddVariable`.
         """
+
     def all_variables(self) -> list[BddVariable]:
         """
         Return the list of all `BddVariable` objects managed by this `BddVariableSet`.

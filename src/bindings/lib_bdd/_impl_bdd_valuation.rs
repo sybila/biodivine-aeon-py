@@ -2,8 +2,9 @@
 #![allow(clippy::wrong_self_convention)]
 
 use crate::bindings::lib_bdd::{PyBddPartialValuation, PyBddValuation, PyBddVariable};
-use crate::{throw_type_error, AsNative};
+use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable};
+use pyo3::basic::CompareOp;
 use pyo3::types::{PyDict, PyList, PyTuple};
 use pyo3::{pymethods, Py, PyAny, PyResult, Python};
 use std::collections::hash_map::DefaultHasher;
@@ -110,6 +111,17 @@ impl PyBddValuation {
         self.as_native().eq(other.as_native())
     }
 
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unimplemented"),
+            CompareOp::Le => throw_runtime_error("Unimplemented"),
+            CompareOp::Eq => Ok(self.__eq__(other)),
+            CompareOp::Ne => Ok(!self.__eq__(other)),
+            CompareOp::Gt => throw_runtime_error("Unimplemented"),
+            CompareOp::Ge => throw_runtime_error("Unimplemented"),
+        }
+    }
+
     pub fn __hash__(&self) -> isize {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
@@ -202,6 +214,17 @@ impl PyBddPartialValuation {
 
     pub fn __eq__(&self, other: &PyBddPartialValuation) -> bool {
         self.as_native().eq(other.as_native())
+    }
+
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unimplemented"),
+            CompareOp::Le => throw_runtime_error("Unimplemented"),
+            CompareOp::Eq => Ok(self.__eq__(other)),
+            CompareOp::Ne => Ok(!self.__eq__(other)),
+            CompareOp::Gt => throw_runtime_error("Unimplemented"),
+            CompareOp::Ge => throw_runtime_error("Unimplemented"),
+        }
     }
 
     pub fn is_empty(&self) -> bool {

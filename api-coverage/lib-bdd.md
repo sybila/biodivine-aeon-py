@@ -163,7 +163,7 @@ Logical operations on `BooleanExpression` and `Bdd` objects can be also performe
 
 Currently, it does not really make sense to export the functions from this module into Python just to receive them back as references. Instead, we use a different approach:
 
-`Bdd` methods that in Rust accept arbitrary "op function" can accept a function name string. This uses the standard names from the `op_function` module: `and`, `or`, `and_not`, `iff`, `imp`, and `xor`. However, one can also pass an arbitrary callable Python object. In such case, this object is used to build a function table (just an exhaustive lookup table). The original Rust method is then called with a function that is based on this lookup table. Since the lookup tables are small, the overhead is acceptable for any sufficiently large BDD.
+`Bdd` methods that in Rust accept arbitrary "op function" can accept an arbitrary callable Python object. In such case, this object is used to build a function table (just an exhaustive lookup table). The original Rust method is then called with a function that is based on this lookup table. Since the lookup tables are small, the overhead is acceptable for any sufficiently large BDD.
 
 # `Bdd`
 
@@ -197,6 +197,26 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         <tr>
             <td></td>
             <td><code>Bdd.__eq__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__ne__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__lt__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__gt__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__le__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__ge__</code></td>
         </tr>
         <tr>
             <td><code>Bdd::eq</code></td>
@@ -302,10 +322,6 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         <tr>
             <td><code>Bdd::num_vars</code></td>
             <td><code>Bdd.var_count</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::set_num_vars</code></td>
-            <td><code>Bdd.set_var_count</code></td>
         </tr>
         <tr>
             <td><code>Bdd::support_set</code></td>
