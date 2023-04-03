@@ -19,7 +19,7 @@ static-z3 = ["z3/static-link-z3"]
 num-bigint = "0.4.3"
 num-traits = "0.2.15"
 pyo3 = { version = "0.18.1", features = ["extension-module", "num-bigint"] }
-biodivine-lib-param-bn = { version="0.4.3", features=["solver-z3"] }
+biodivine-lib-param-bn = { version="0.4.4", features=["solver-z3"] }
 biodivine-lib-bdd = "0.4.2"
 biodivine-pbn-control = "0.2.1"
 rand = "0.8.5"

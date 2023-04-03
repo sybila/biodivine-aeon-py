@@ -32,3 +32,7 @@ If you are building a "release" version, we recommend running the build with `--
 scripts on how to do this). This will "bake in" the Z3 library into the final package, which takes a lot more 
 time to build (~30min), but it means you don't need a local Z3 installation to run `AEON.py`. Also, the users 
 cannot break the library by having an outdated or otherwise incompatible Z3 installed.
+
+```
+python3 -m pdoc --html --force docs/biodivine_aeon.py
+```

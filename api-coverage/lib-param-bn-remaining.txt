@@ -1,0 +1,1194 @@
+pub mod biodivine_lib_param_bn::fixed_points
+pub mod biodivine_lib_param_bn::fixed_points::solver_iterator
+pub struct biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+impl<'z3> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::new(context: &'z3 biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>) -> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::new_with_solver(context: &'z3 biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>, solver: biodivine_lib_param_bn::solver_context::BnSolver<'z3>) -> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+impl<'z3> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::Item = biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'z3> !core::marker::Send for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+impl<'z3> !core::marker::Sync for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+impl<'z3> core::marker::Unpin for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+impl<'z3> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+impl<'z3> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::IntoIter = I
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator<'z3> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverColorIterator::vzip(self) -> V
+pub struct biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+impl<'z3> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::new(context: &'z3 biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>) -> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::new_with_solver(context: &'z3 biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>, solver: biodivine_lib_param_bn::solver_context::BnSolver<'z3>) -> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+impl<'z3> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::Item = biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'z3> !core::marker::Send for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+impl<'z3> !core::marker::Sync for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+impl<'z3> core::marker::Unpin for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+impl<'z3> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+impl<'z3> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::IntoIter = I
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator<'z3> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverIterator::vzip(self) -> V
+pub struct biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+impl<'z3> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::new(context: &'z3 biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>) -> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::new_with_solver(context: &'z3 biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>, solver: biodivine_lib_param_bn::solver_context::BnSolver<'z3>) -> biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+impl<'z3> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::Item = biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'z3> !core::marker::Send for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+impl<'z3> !core::marker::Sync for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+impl<'z3> core::marker::Unpin for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+impl<'z3> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+impl<'z3> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::IntoIter = I
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator<'z3> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::fixed_points::solver_iterator::SolverVertexIterator::vzip(self) -> V
+
+
+pub struct biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+impl<'a> biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::get_limit(&self) -> usize
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::new(stg: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, limit: usize) -> biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::set_limit(&mut self, limit: usize)
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::try_split(&mut self) -> core::option::Option<Self>
+impl<'a> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+pub type biodivine_lib_param_bn::fixed_points::SymbolicIterator::Item = biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a> core::clone::Clone for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::clone(&self) -> biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+impl<'a> core::marker::Send for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+impl<'a> core::marker::Sync for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::fixed_points::SymbolicIterator::IntoIter = I
+pub type biodivine_lib_param_bn::fixed_points::SymbolicIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::fixed_points::SymbolicIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::fixed_points::SymbolicIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where T: core::clone::Clone
+pub type biodivine_lib_param_bn::fixed_points::SymbolicIterator::Owned = T
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::fixed_points::SymbolicIterator::vzip(self) -> V
+pub mod biodivine_lib_param_bn::sbml
+pub mod biodivine_lib_param_bn::sbml::export
+pub mod biodivine_lib_param_bn::sbml::import
+pub type biodivine_lib_param_bn::sbml::Layout = std::collections::hash::map::HashMap<alloc::string::String, (f64, f64)>
+pub mod biodivine_lib_param_bn::solver_context
+pub struct biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+impl<'z3> biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::as_context(&self) -> &biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::as_z3(&self) -> &z3::Context
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::as_z3_solver(&self) -> &z3::Solver<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::assert_function_monotonicity(&self, function: &z3::FuncDecl<'z3>, i: usize, monotonicity: biodivine_lib_param_bn::Monotonicity)
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::assert_function_observability(&self, function: &z3::FuncDecl<'z3>, i: usize)
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::assert_not_within_spaces(&self, spaces: &[biodivine_lib_param_bn::Space])
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::assert_regulation_monotonicity(&self, source: biodivine_lib_param_bn::VariableId, target: biodivine_lib_param_bn::VariableId, monotonicity: biodivine_lib_param_bn::Monotonicity)
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::assert_regulation_observability(&self, source: biodivine_lib_param_bn::VariableId, target: biodivine_lib_param_bn::VariableId)
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::assert_within_spaces(&self, spaces: &[biodivine_lib_param_bn::Space])
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::check(&self) -> z3::SatResult
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::get_model(&self) -> core::option::Option<biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::get_z3_model(&self) -> core::option::Option<z3::Model<'z3>>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::pop(&self)
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::push(&self)
+impl<'z3> !core::marker::Send for biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+impl<'z3> !core::marker::Sync for biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+impl<'z3> core::marker::Unpin for biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+impl<'z3> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+impl<'z3> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::solver_context::BnSolver<'z3> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::solver_context::BnSolver<'z3> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::solver_context::BnSolver::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::solver_context::BnSolver<'z3> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::solver_context::BnSolver::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::solver_context::BnSolver<'z3> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::solver_context::BnSolver<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::solver_context::BnSolver<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::solver_context::BnSolver<'z3> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::solver_context::BnSolver::vzip(self) -> V
+pub struct biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+impl<'z3> biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::as_network(&self) -> &biodivine_lib_param_bn::BooleanNetwork
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::as_z3(&self) -> &z3::Context
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::declare_state_variables(&self, prefix: &str) -> alloc::vec::Vec<z3::FuncDecl<'z3>>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::get_explicit_parameter_constructor(&self, param: biodivine_lib_param_bn::ParameterId) -> &z3::FuncDecl<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::get_implicit_parameter_constructor(&self, var: biodivine_lib_param_bn::VariableId) -> &z3::FuncDecl<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::get_variable_constructor(&self, var: biodivine_lib_param_bn::VariableId) -> &z3::FuncDecl<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_empty_solver(&'z3 self) -> biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_explicit_const_parameter(&'z3 self, parameter: biodivine_lib_param_bn::ParameterId, args: &[bool]) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_explicit_parameter(&self, parameter: biodivine_lib_param_bn::ParameterId, args: &[biodivine_lib_param_bn::VariableId]) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_implicit_const_parameter(&'z3 self, var: biodivine_lib_param_bn::VariableId, args: &[bool]) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_implicit_parameter(&self, var: biodivine_lib_param_bn::VariableId) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_network_solver(&'z3 self) -> biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_space(&'z3 self, space: &biodivine_lib_param_bn::Space) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_update_function(&self, var: biodivine_lib_param_bn::VariableId) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::mk_var(&self, var: biodivine_lib_param_bn::VariableId) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::new(z3: &'z3 z3::Context, network: biodivine_lib_param_bn::BooleanNetwork) -> biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::translate_space(&'z3 self, space: &biodivine_lib_param_bn::Space, variable_constructors: &[z3::FuncDecl<'z3>]) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::translate_update_function(&self, update: &biodivine_lib_param_bn::FnUpdate, variable_constructors: &[z3::FuncDecl<'z3>], parameter_constructors: &[z3::FuncDecl<'z3>]) -> z3::ast::Bool<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::var(&self, var: biodivine_lib_param_bn::VariableId) -> &z3::ast::Bool<'z3>
+impl<'z3> !core::marker::Send for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+impl<'z3> !core::marker::Sync for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+impl<'z3> core::marker::Unpin for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+impl<'z3> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+impl<'z3> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::solver_context::BnSolverContext::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::solver_context::BnSolverContext::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::solver_context::BnSolverContext<'z3> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverContext::vzip(self) -> V
+pub struct biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+impl<'z3> biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::as_z3_model(&self) -> &z3::Model<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::get_raw_state(&self, variables: &[z3::ast::Bool<'z3>]) -> alloc::vec::Vec<bool>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::get_space(&self, positive_variables: &[z3::ast::Bool<'z3>], negative_variables: &[z3::ast::Bool<'z3>]) -> biodivine_lib_param_bn::Space
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::get_state(&self) -> biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::get_symbolic_colors(&self, symbolic: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::get_symbolic_model(&self, symbolic: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::get_symbolic_state(&self, symbolic: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::new(context: &'z3 biodivine_lib_param_bn::solver_context::BnSolverContext<'z3>, model: z3::Model<'z3>) -> biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+impl<'z3> core::fmt::Debug for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<'z3> !core::marker::Send for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+impl<'z3> !core::marker::Sync for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+impl<'z3> core::marker::Unpin for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+impl<'z3> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+impl<'z3> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::solver_context::BnSolverModel::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::solver_context::BnSolverModel::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::solver_context::BnSolverModel<'z3> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::solver_context::BnSolverModel::vzip(self) -> V
+pub struct biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+impl<'z3> biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::as_solver(&self) -> &biodivine_lib_param_bn::solver_context::BnSolver<'z3>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::as_z3(&self) -> &z3::Context
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::as_z3_solver(&self) -> &z3::Solver<'z3>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::enumeration_terms(&self) -> &alloc::vec::Vec<z3::ast::Bool<'_>>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::get_model(&self) -> core::option::Option<biodivine_lib_param_bn::solver_context::BnSolverModel<'z3>>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::get_z3_model(&self) -> core::option::Option<z3::Model<'z3>>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::new(solver: biodivine_lib_param_bn::solver_context::BnSolver<'z3>, enumeration_terms: alloc::vec::Vec<z3::ast::Bool<'z3>>) -> biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+impl<'z3> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+pub type biodivine_lib_param_bn::solver_context::RawBnModelIterator::Item = z3::Model<'z3>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'z3> !core::marker::Send for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+impl<'z3> !core::marker::Sync for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+impl<'z3> core::marker::Unpin for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+impl<'z3> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+impl<'z3> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::solver_context::RawBnModelIterator::IntoIter = I
+pub type biodivine_lib_param_bn::solver_context::RawBnModelIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::solver_context::RawBnModelIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::solver_context::RawBnModelIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::solver_context::RawBnModelIterator<'z3> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::solver_context::RawBnModelIterator::vzip(self) -> V
+pub mod biodivine_lib_param_bn::symbolic_async_graph
+pub mod biodivine_lib_param_bn::symbolic_async_graph::projected_iteration
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+impl<'a> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::iter<'b>(&'b self) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'b, 'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::new<'x>(retained: alloc::vec::Vec<biodivine_lib_param_bn::VariableId>, context: &'x biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, bdd: &biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'x>
+impl<'a> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+impl<'a> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection::vzip(self) -> V
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b>
+impl<'a, 'b> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::Item = alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, biodivine_lib_param_bn::FnUpdate), alloc::alloc::Global>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a, 'b> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b>
+impl<'a, 'b> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b>
+impl<'a, 'b> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where 'b
+impl<'a, 'b> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b>
+impl<'a, 'b> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::IntoIter = I
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator<'a, 'b> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjectionIterator::vzip(self) -> V
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+impl<'a> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::iter<'b>(&'b self) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'b, 'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::new<'x>(retained_state: alloc::vec::Vec<biodivine_lib_param_bn::VariableId>, retained_update: alloc::vec::Vec<biodivine_lib_param_bn::VariableId>, context: &'x biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, bdd: &biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'x>
+impl<'a> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+impl<'a> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b>
+impl<'a, 'b> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::Item = (alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, bool), alloc::alloc::Global>, alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, biodivine_lib_param_bn::FnUpdate), alloc::alloc::Global>)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a, 'b> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b>
+impl<'a, 'b> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b>
+impl<'a, 'b> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where 'b
+impl<'a, 'b> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b>
+impl<'a, 'b> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::IntoIter = I
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator<'a, 'b> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjectionIterator::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+impl biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::iter(&self) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'_>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::new(retained: alloc::vec::Vec<biodivine_lib_bdd::BddVariable>, bdd: &biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+impl<'a> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::Item = biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+impl<'a> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::IntoIter = I
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawSymbolicIterator::vzip(self) -> V
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+impl biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::iter(&self) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'_>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::new(retained: alloc::vec::Vec<biodivine_lib_param_bn::VariableId>, all_state_variables: &[biodivine_lib_bdd::BddVariable], bdd: &biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+impl<'a> core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::Item = alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, bool), alloc::alloc::Global>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+impl<'a> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::IntoIter = I
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjectionIterator::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::arity: u16
+impl biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::new(name: &str, arity: u16, bdd_builder: &mut biodivine_lib_bdd::BddVariableSetBuilder) -> biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::symbolic_variables(&self) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+impl<'a> core::iter::traits::collect::IntoIterator for &'a biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::IntoIter = biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::Item = (alloc::vec::Vec<bool, alloc::alloc::Global>, biodivine_lib_bdd::BddVariable)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::into_iter(self) -> Self::IntoIter
+impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+impl core::fmt::Debug for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where T: core::clone::Clone
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::Owned = T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTable where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTable::vzip(self) -> V
+
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+impl biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'_>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::new(table: &biodivine_lib_param_bn::symbolic_async_graph::FunctionTable) -> biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'_>
+impl core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'_>
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::Item = (alloc::vec::Vec<bool, alloc::alloc::Global>, biodivine_lib_bdd::BddVariable)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+impl<'a> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::IntoIter = I
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::FunctionTableIterator::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::approx_cardinality(&self) -> f64
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::copy(&self, bdd: biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::exact_cardinality(&self) -> num_bigint::bigint::BigInt
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::fix_network_variable(&self, variable: biodivine_lib_param_bn::VariableId, value: bool) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::fn_update_projection<'a>(&self, functions: &[biodivine_lib_param_bn::VariableId], context: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::into_bdd(self) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::is_singleton(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::is_subspace(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::mixed_projection<'a>(&self, variables: &[biodivine_lib_param_bn::VariableId], functions: &[biodivine_lib_param_bn::VariableId], context: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::new(bdd: biodivine_lib_bdd::Bdd, context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::raw_projection(&self, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::restrict_network_variable(&self, variable: biodivine_lib_param_bn::VariableId, value: bool) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::state_projection(&self, variables: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::symbolic_size(&self) -> usize
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::to_dot_string(&self, context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> alloc::string::String
+impl biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::colors(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::intersect_colors(&self, colors: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::intersect_vertices(&self, vertices: &biodivine_lib_param_bn::symbolic_async_graph::GraphVertices) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::minus_colors(&self, colors: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::minus_vertices(&self, vertices: &biodivine_lib_param_bn::symbolic_async_graph::GraphVertices) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::pick_color(&self) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::pick_singleton(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::pick_vertex(&self) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::vertices(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::cmp::Eq for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::cmp::PartialEq<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::eq(&self, other: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> bool
+impl core::fmt::Debug for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::hash<__H: core::hash::Hasher>(&self, state: &mut __H) -> ()
+impl core::marker::StructuralEq for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::marker::StructuralPartialEq for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where T: core::clone::Clone
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::Owned = T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::to_owned(&self) -> T
+impl<T> biodivine_lib_param_bn::biodivine_std::traits::Set for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where T: BddSet + core::clone::Clone
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::intersect(&self, other: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::is_empty(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::is_subset(&self, other: &T) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::minus(&self, other: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::union(&self, other: &T) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::approx_cardinality(&self) -> f64
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::copy(&self, bdd: biodivine_lib_bdd::Bdd) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::exact_cardinality(&self) -> num_bigint::bigint::BigInt
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::fn_update_projection<'a>(&self, functions: &[biodivine_lib_param_bn::VariableId], context: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::into_bdd(self) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::is_singleton(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::is_subspace(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::new(bdd: biodivine_lib_bdd::Bdd, context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::pick_singleton(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::raw_projection(&self, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::symbolic_size(&self) -> usize
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::to_dot_string(&self, context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> alloc::string::String
+impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::cmp::Eq for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::cmp::PartialEq<biodivine_lib_param_bn::symbolic_async_graph::GraphColors> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::eq(&self, other: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors) -> bool
+impl core::fmt::Debug for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::hash<__H: core::hash::Hasher>(&self, state: &mut __H) -> ()
+impl core::marker::StructuralEq for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::marker::StructuralPartialEq for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphColors::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphColors::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where T: core::clone::Clone
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphColors::Owned = T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::to_owned(&self) -> T
+impl<T> biodivine_lib_param_bn::biodivine_std::traits::Set for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where T: BddSet + core::clone::Clone
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::intersect(&self, other: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::is_empty(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::is_subset(&self, other: &T) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::minus(&self, other: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::union(&self, other: &T) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::GraphColors where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColors::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a>
+impl core::iter::traits::iterator::Iterator for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'_>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::Item = biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a> core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a>
+impl<'a> core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::IntoIter = I
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::approx_cardinality(&self) -> f64
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::copy(&self, bdd: biodivine_lib_bdd::Bdd) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::exact_cardinality(&self) -> num_bigint::bigint::BigInt
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::fix_network_variable(&self, variable: biodivine_lib_param_bn::VariableId, value: bool) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::into_bdd(self) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::is_singleton(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::is_subspace(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::materialize(&self) -> biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::new(bdd: biodivine_lib_bdd::Bdd, context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::pick_singleton(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::raw_projection(&self, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::restrict_network_variable(&self, variable: biodivine_lib_param_bn::VariableId, value: bool) -> Self
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::state_projection(&self, variables: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::StateProjection
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::symbolic_size(&self) -> usize
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::to_dot_string(&self, context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> alloc::string::String
+impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::cmp::Eq for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::cmp::PartialEq<biodivine_lib_param_bn::symbolic_async_graph::GraphVertices> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::eq(&self, other: &biodivine_lib_param_bn::symbolic_async_graph::GraphVertices) -> bool
+impl core::fmt::Debug for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::hash<__H: core::hash::Hasher>(&self, state: &mut __H) -> ()
+impl core::marker::StructuralEq for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::marker::StructuralPartialEq for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where T: core::clone::Clone
+pub type biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::Owned = T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::to_owned(&self) -> T
+impl<T> biodivine_lib_param_bn::biodivine_std::traits::Set for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where T: BddSet + core::clone::Clone
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::intersect(&self, other: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::is_empty(&self) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::is_subset(&self, other: &T) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::minus(&self, other: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::union(&self, other: &T) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::GraphVertices where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+impl biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::iter(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertexIterator<'_>
+impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where T: core::clone::Clone
+pub type biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::Owned = T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::IterableVertices where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::IterableVertices::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::as_network(&self) -> &biodivine_lib_param_bn::BooleanNetwork
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::empty_colors(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::empty_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::existential_extra_variable_projection<T: BddSet>(&self, set: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::fix_network_variable(&self, variable: biodivine_lib_param_bn::VariableId, value: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::fix_vertices_with_network_variable(&self, variable: biodivine_lib_param_bn::VariableId, value: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::is_trap_set(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> bool
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::mk_empty_colors(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::mk_empty_vertices(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::mk_partial_vertex(&self, state: &[core::option::Option<bool>]) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::mk_subspace(&self, values: &[(biodivine_lib_param_bn::VariableId, bool)]) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::mk_unit_colored_vertices(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::mk_unit_colors(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::pick_witness(&self, colors: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors) -> biodivine_lib_param_bn::BooleanNetwork
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::restrict(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::restrict_variable_in_graph(&self, var: biodivine_lib_param_bn::VariableId, value: bool) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::symbolic_context(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::unit_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::unit_colors(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::universal_extra_variable_projection<T: BddSet>(&self, set: &T) -> T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::vertex(&self, state: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::wrap_in_subspace(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphVertices) -> biodivine_lib_param_bn::Space
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::wrap_in_symbolic_subspace(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::can_post(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::can_post_out(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::can_post_within(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::can_pre(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::can_pre_out(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::can_pre_within(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::post(&self, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::pre(&self, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::will_post_out(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::will_post_within(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::will_pre_out(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::will_pre_within(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::mk_subnetwork_colors(&self, network: &biodivine_lib_param_bn::BooleanNetwork) -> core::result::Result<biodivine_lib_param_bn::symbolic_async_graph::GraphColors, alloc::string::String>
+impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::new(network: biodivine_lib_param_bn::BooleanNetwork) -> core::result::Result<biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, alloc::string::String>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::with_custom_context(network: biodivine_lib_param_bn::BooleanNetwork, context: biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, unit_bdd: biodivine_lib_bdd::Bdd) -> core::result::Result<biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, alloc::string::String>
+impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::reach_backward(&self, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::reach_forward(&self, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::trap_backward(&self, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::trap_forward(&self, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_can_post(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_can_post_out(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_can_post_within(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_can_pre(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_can_pre_out(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_can_pre_within(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_post(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_post_out(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_post_within(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_pre(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_pre_out(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::var_pre_within(&self, variable: biodivine_lib_param_bn::VariableId, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where T: core::clone::Clone
+pub type biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::Owned = T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::vzip(self) -> V
+
+
+
+pub struct biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::all_extra_state_variables(&self) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::bdd_variable_set(&self) -> &biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::extra_state_variables(&self, variable: biodivine_lib_param_bn::VariableId) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::extra_state_variables_by_offset(&self, offset: usize) -> alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable)>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_explicit_function_table(&self, parameter: biodivine_lib_param_bn::ParameterId) -> &biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_extra_state_variable(&self, variable: biodivine_lib_param_bn::VariableId, offset: usize) -> biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_implicit_function_table(&self, variable: biodivine_lib_param_bn::VariableId) -> &biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_state_variable(&self, variable: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::instantiate_fn_update(&self, valuation: &biodivine_lib_bdd::BddValuation, function: &biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::instantiate_implicit_function(&self, valuation: &biodivine_lib_bdd::BddValuation, variable: biodivine_lib_param_bn::VariableId, args: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::instantiate_uninterpreted_function(&self, valuation: &biodivine_lib_bdd::BddValuation, parameter: biodivine_lib_param_bn::ParameterId, args: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_constant(&self, value: bool) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_extra_state_variable_is_true(&self, variable: biodivine_lib_param_bn::VariableId, offset: usize) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_fn_update_true(&self, function: &biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_implicit_function_is_true(&self, variable: biodivine_lib_param_bn::VariableId, args: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_state_variable_is_true(&self, variable: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_uninterpreted_function_is_true(&self, parameter: biodivine_lib_param_bn::ParameterId, args: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::new(network: &biodivine_lib_param_bn::BooleanNetwork) -> core::result::Result<biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, alloc::string::String>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::num_extra_state_variables(&self) -> usize
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::num_parameter_variables(&self) -> usize
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::num_state_variables(&self) -> usize
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::parameter_variables(&self) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::state_variables(&self) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::with_extra_state_variables(network: &biodivine_lib_param_bn::BooleanNetwork, extra: &std::collections::hash::map::HashMap<biodivine_lib_param_bn::VariableId, u16>) -> core::result::Result<biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, alloc::string::String>
+impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+impl core::marker::Send for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+impl core::marker::Sync for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+impl core::marker::Unpin for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where T: core::clone::Clone
+pub type biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::Owned = T
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::vzip(self) -> V
+
+
+impl biodivine_lib_param_bn::FnUpdate
+pub fn biodivine_lib_param_bn::FnUpdate::build_from_bdd(context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, bdd: &biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::FnUpdate
+
+pub struct biodivine_lib_param_bn::ModelAnnotation
+impl biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::append_value(&mut self, path: &[&str], value: &str)
+pub fn biodivine_lib_param_bn::ModelAnnotation::children(&self) -> &std::collections::hash::map::HashMap<alloc::string::String, biodivine_lib_param_bn::ModelAnnotation>
+pub fn biodivine_lib_param_bn::ModelAnnotation::children_mut(&mut self) -> &mut std::collections::hash::map::HashMap<alloc::string::String, biodivine_lib_param_bn::ModelAnnotation>
+pub fn biodivine_lib_param_bn::ModelAnnotation::ensure_child<'a>(&'a mut self, path: &[&str]) -> &'a mut biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::ensure_value(&mut self, path: &[&str], value: &str) -> bool
+pub fn biodivine_lib_param_bn::ModelAnnotation::get_child<'a>(&'a self, path: &[&str]) -> core::option::Option<&'a biodivine_lib_param_bn::ModelAnnotation>
+pub fn biodivine_lib_param_bn::ModelAnnotation::get_mut_child<'a>(&'a mut self, path: &[&str]) -> core::option::Option<&'a mut biodivine_lib_param_bn::ModelAnnotation>
+pub fn biodivine_lib_param_bn::ModelAnnotation::get_value(&self, path: &[&str]) -> core::option::Option<&alloc::string::String>
+pub fn biodivine_lib_param_bn::ModelAnnotation::new() -> biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::value(&self) -> core::option::Option<&alloc::string::String>
+pub fn biodivine_lib_param_bn::ModelAnnotation::value_mut(&mut self) -> &mut core::option::Option<alloc::string::String>
+pub fn biodivine_lib_param_bn::ModelAnnotation::with_value(value: alloc::string::String) -> biodivine_lib_param_bn::ModelAnnotation
+impl biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::from_model_string(model: &str) -> biodivine_lib_param_bn::ModelAnnotation
+impl core::default::Default for biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::default() -> Self
+impl core::fmt::Debug for biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::clone::Clone for biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::clone(&self) -> biodivine_lib_param_bn::ModelAnnotation
+impl core::cmp::Eq for biodivine_lib_param_bn::ModelAnnotation
+impl core::cmp::PartialEq<biodivine_lib_param_bn::ModelAnnotation> for biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::eq(&self, other: &biodivine_lib_param_bn::ModelAnnotation) -> bool
+impl core::marker::StructuralEq for biodivine_lib_param_bn::ModelAnnotation
+impl core::marker::StructuralPartialEq for biodivine_lib_param_bn::ModelAnnotation
+impl core::marker::Send for biodivine_lib_param_bn::ModelAnnotation
+impl core::marker::Sync for biodivine_lib_param_bn::ModelAnnotation
+impl core::marker::Unpin for biodivine_lib_param_bn::ModelAnnotation
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::ModelAnnotation
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::ModelAnnotation
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::ModelAnnotation where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::ModelAnnotation::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::ModelAnnotation where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::ModelAnnotation::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::ModelAnnotation::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::ModelAnnotation where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::ModelAnnotation::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::ModelAnnotation::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::ModelAnnotation where T: core::clone::Clone
+pub type biodivine_lib_param_bn::ModelAnnotation::Owned = T
+pub fn biodivine_lib_param_bn::ModelAnnotation::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::ModelAnnotation::to_owned(&self) -> T
+impl<T> alloc::string::ToString for biodivine_lib_param_bn::ModelAnnotation where T: core::fmt::Display + core::marker::Sized
+pub fn biodivine_lib_param_bn::ModelAnnotation::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for biodivine_lib_param_bn::ModelAnnotation where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::ModelAnnotation::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::ModelAnnotation where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::ModelAnnotation::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::ModelAnnotation where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::ModelAnnotation::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::ModelAnnotation
+pub fn biodivine_lib_param_bn::ModelAnnotation::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::ModelAnnotation where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::ModelAnnotation::vzip(self) -> V
+
+
+pub struct biodivine_lib_param_bn::SdGraph
+impl biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::backward_reachable(&self, initial: std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
+pub fn biodivine_lib_param_bn::SdGraph::forward_reachable(&self, initial: std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
+pub fn biodivine_lib_param_bn::SdGraph::restricted_backward_reachable(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, initial: std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
+pub fn biodivine_lib_param_bn::SdGraph::restricted_forward_reachable(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, initial: std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
+impl biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::mk_all_vertices(&self) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
+impl biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::restricted_feedback_vertex_set(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
+pub fn biodivine_lib_param_bn::SdGraph::restricted_parity_feedback_vertex_set(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, parity: biodivine_lib_param_bn::Sign) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
+impl biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::restricted_independent_cycles(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> alloc::vec::Vec<alloc::vec::Vec<biodivine_lib_param_bn::VariableId>>
+pub fn biodivine_lib_param_bn::SdGraph::restricted_independent_parity_cycles(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, parity: biodivine_lib_param_bn::Sign) -> alloc::vec::Vec<alloc::vec::Vec<biodivine_lib_param_bn::VariableId>>
+impl biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::restricted_strongly_connected_components(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> alloc::vec::Vec<std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>>
+pub fn biodivine_lib_param_bn::SdGraph::strongly_connected_components(&self) -> alloc::vec::Vec<std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>>
+impl biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::restricted_weakly_connected_components(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>) -> alloc::vec::Vec<std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>>
+pub fn biodivine_lib_param_bn::SdGraph::weakly_connected_components(&self) -> alloc::vec::Vec<std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>>
+impl biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::shortest_cycle(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, pivot: biodivine_lib_param_bn::VariableId, upper_bound: usize) -> core::option::Option<alloc::vec::Vec<biodivine_lib_param_bn::VariableId>>
+pub fn biodivine_lib_param_bn::SdGraph::shortest_cycle_length(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, pivot: biodivine_lib_param_bn::VariableId, upper_bound: usize) -> core::option::Option<usize>
+pub fn biodivine_lib_param_bn::SdGraph::shortest_parity_cycle(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, pivot: biodivine_lib_param_bn::VariableId, target_parity: biodivine_lib_param_bn::Sign, upper_bound: usize) -> core::option::Option<alloc::vec::Vec<biodivine_lib_param_bn::VariableId>>
+pub fn biodivine_lib_param_bn::SdGraph::shortest_parity_cycle_length(&self, restriction: &std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>, pivot: biodivine_lib_param_bn::VariableId, target_parity: biodivine_lib_param_bn::Sign, upper_bound: usize) -> core::option::Option<usize>
+impl core::convert::From<&biodivine_lib_param_bn::RegulatoryGraph> for biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::from(rg: &biodivine_lib_param_bn::RegulatoryGraph) -> Self
+impl core::clone::Clone for biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::clone(&self) -> biodivine_lib_param_bn::SdGraph
+impl core::fmt::Debug for biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Send for biodivine_lib_param_bn::SdGraph
+impl core::marker::Sync for biodivine_lib_param_bn::SdGraph
+impl core::marker::Unpin for biodivine_lib_param_bn::SdGraph
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_param_bn::SdGraph
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_param_bn::SdGraph
+impl<T, U> core::convert::Into<U> for biodivine_lib_param_bn::SdGraph where U: core::convert::From<T>
+pub fn biodivine_lib_param_bn::SdGraph::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_param_bn::SdGraph where U: core::convert::Into<T>
+pub type biodivine_lib_param_bn::SdGraph::Error = core::convert::Infallible
+pub fn biodivine_lib_param_bn::SdGraph::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_param_bn::SdGraph where U: core::convert::TryFrom<T>
+pub type biodivine_lib_param_bn::SdGraph::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_param_bn::SdGraph::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_param_bn::SdGraph where T: core::clone::Clone
+pub type biodivine_lib_param_bn::SdGraph::Owned = T
+pub fn biodivine_lib_param_bn::SdGraph::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_param_bn::SdGraph::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_param_bn::SdGraph where T: 'static + core::marker::Sized
+pub fn biodivine_lib_param_bn::SdGraph::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_param_bn::SdGraph where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::SdGraph::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_param_bn::SdGraph where T: core::marker::Sized
+pub fn biodivine_lib_param_bn::SdGraph::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_param_bn::SdGraph
+pub fn biodivine_lib_param_bn::SdGraph::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_param_bn::SdGraph where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_param_bn::SdGraph::vzip(self) -> V

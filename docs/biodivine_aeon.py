@@ -1071,3 +1071,15 @@ BddValuationType: TypeAlias = BddValuation | list[bool]
 """
 Either a `BddValuation`, or a `list[bool]`.
 """
+
+
+
+###
+# [Section 2] lib-param-bn
+#
+# Use `api-coverage/lib-bdd.md` to map individual items to their Rust counterparts.
+###
+
+###
+# [Section 1.1] Classes
+###
