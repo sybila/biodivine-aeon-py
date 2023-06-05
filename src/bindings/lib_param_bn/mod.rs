@@ -30,6 +30,10 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<PyGraphVertices>()?;
     module.add_class::<PyGraphColoredVertices>()?;
     module.add_class::<PySymbolicAsyncGraph>()?;
+    module.add_class::<PyModelAnnotation>()?;
+    module.add_class::<PyGraphVertexIterator>()?;
+    module.add_class::<PySymbolicContext>()?;
+    module.add_class::<PyFnUpdate>()?;
     module.add_class::<PyFixedPoints>()?;
     Ok(())
 }
@@ -81,5 +85,5 @@ pub struct PyGraphVertexIterator(IterableVertices, GraphVertexIterator<'static>)
 pub struct PySymbolicContext(SymbolicContext);
 
 #[pyclass(name = "UpdateFunction")]
-#[derive(Clone, Wrapper)]
+#[derive(Clone, Wrapper, Eq, PartialEq, Hash)]
 pub struct PyFnUpdate(FnUpdate);

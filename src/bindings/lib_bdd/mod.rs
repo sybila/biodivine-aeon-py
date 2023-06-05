@@ -19,6 +19,10 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<PyBdd>()?;
     module.add_class::<PyBddVariable>()?;
     module.add_class::<PyBddVariableSet>()?;
+    module.add_class::<PyBddValuation>()?;
+    module.add_class::<PyBddPartialValuation>()?;
+    module.add_class::<PyBddValuationIterator>()?;
+    module.add_class::<PyBddClauseIterator>()?;
     module.add_class::<PyBooleanExpression>()?;
     module.add_class::<PyBddVariableSetBuilder>()?;
     Ok(())

@@ -1,6 +1,6 @@
 use crate::bindings::lib_param_bn::_impl_regulatory_graph::regulation_from_python;
 use crate::bindings::lib_param_bn::{
-    PyBooleanNetwork, PyParameterId, PyRegulatoryGraph, PyVariableId,
+    PyBooleanNetwork, PyFnUpdate, PyParameterId, PyRegulatoryGraph, PyVariableId,
 };
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_param_bn::BooleanNetwork;
@@ -158,7 +158,7 @@ impl PyBooleanNetwork {
     pub fn set_update_function(
         mut self_: PyRefMut<'_, Self>,
         variable: &PyAny,
-        function: Option<String>,
+        function: Option<&PyAny>,
     ) -> PyResult<()> {
         let id = self_
             .as_ref()
@@ -172,11 +172,19 @@ impl PyBooleanNetwork {
             .unwrap();
 
         if let Some(function) = function {
-            let name = self_.as_ref().get_variable_name(variable)?;
-            match self_
-                .as_native_mut()
-                .add_string_update_function(name.as_str(), function.as_str())
-            {
+            let result = if let Ok(function) = function.extract::<PyFnUpdate>() {
+                self_
+                    .as_native_mut()
+                    .set_update_function(id.into(), Some(function.into()))
+            } else if let Ok(function_str) = function.extract::<String>() {
+                let name = self_.as_ref().get_variable_name(variable)?;
+                self_
+                    .as_native_mut()
+                    .add_string_update_function(name.as_str(), function_str.as_str())
+            } else {
+                return throw_type_error("Expected `FnUpdate` or string.");
+            };
+            match result {
                 Ok(()) => Ok(()),
                 Err(e) => throw_runtime_error(e),
             }
@@ -243,15 +251,13 @@ impl PyBooleanNetwork {
     pub fn get_update_function(
         self_: PyRef<'_, Self>,
         variable: &PyAny,
-    ) -> PyResult<Option<String>> {
+    ) -> PyResult<Option<PyFnUpdate>> {
         let variable = self_
             .as_ref()
             .find_variable(variable)?
             .expect("Unknown variable.");
         let function = self_.as_native().get_update_function(variable.into());
-        Ok(function
-            .as_ref()
-            .map(|fun| fun.to_string(self_.as_native())))
+        Ok(function.clone().map(|x| x.into()))
     }
 
     pub fn find_parameter(&self, parameter: &PyAny) -> PyResult<Option<PyParameterId>> {

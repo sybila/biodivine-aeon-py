@@ -1,7 +1,7 @@
 use crate::bindings::lib_bdd::PyBddVariableSet;
 use crate::bindings::lib_param_bn::{
     PyBooleanNetwork, PyGraphColoredVertices, PyGraphColors, PyGraphVertices, PyParameterId,
-    PySymbolicAsyncGraph, PyVariableId,
+    PySymbolicAsyncGraph, PySymbolicContext, PyVariableId,
 };
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
@@ -23,12 +23,17 @@ impl PySymbolicAsyncGraph {
         }
     }
 
-    /*
     /// Obtain a copy of the underlying `BooleanNetwork` used by this `SymbolicAsyncGraph`.
-    pub fn network(&self) -> PyBooleanNetwork {
-        self.as_native().as_network().clone().into()
+    pub fn network(&self, py: Python) -> PyResult<Py<PyBooleanNetwork>> {
+        let network = self.as_native().as_network();
+        let network = PyBooleanNetwork::from(network.clone());
+        network.export_to_python(py)
     }
-     */
+
+    /// Obtain a copy of the `SymbolicContext` used by this symbolic encoding.
+    pub fn symbolic_context(&self) -> PySymbolicContext {
+        self.as_native().symbolic_context().clone().into()
+    }
 
     /// Obtain a copy of the `BddVariableSet` used during symbolic encoding
     /// in this `SymbolicAsyncGraph`.
