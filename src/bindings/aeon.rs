@@ -116,11 +116,16 @@ pub fn reach_bwd(
 /// Internally, this combines interleaved transition guided reduction and Xie-Beerel attractor
 /// detection algorithm into a single procedure.
 #[pyfunction]
-pub fn find_attractors(graph: &PySymbolicAsyncGraph) -> Vec<PyGraphColoredVertices> {
-    let (states, transitions) = interleaved_transition_guided_reduction(
-        graph.as_native(),
-        graph.as_native().mk_unit_colored_vertices(),
-    );
+pub fn find_attractors(
+    graph: &PySymbolicAsyncGraph,
+    states: Option<&PyGraphColoredVertices>,
+) -> Vec<PyGraphColoredVertices> {
+    let states = if let Some(states) = states {
+        states.as_native().clone()
+    } else {
+        graph.as_native().mk_unit_colored_vertices()
+    };
+    let (states, transitions) = interleaved_transition_guided_reduction(graph.as_native(), states);
     let result = crate::internal::scc::algo_xie_beerel::xie_beerel_attractors(
         graph.as_native(),
         &states,
