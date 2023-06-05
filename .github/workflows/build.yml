@@ -62,7 +62,7 @@ jobs:
         uses: PyO3/maturin-action@v1.32.1
         with:
           command: build
-          args: "--release --universal2 --features static-z3 --out=target/dist"
+          args: "--release --target universal2-apple-darwin --features static-z3 --out=target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
