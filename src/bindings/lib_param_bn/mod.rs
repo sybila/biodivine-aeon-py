@@ -78,7 +78,7 @@ pub struct PyModelAnnotation(ModelAnnotation);
 pub struct PyFixedPoints();
 
 #[pyclass(name = "GraphVertexIterator")]
-pub struct PyGraphVertexIterator(IterableVertices, GraphVertexIterator<'static>);
+pub struct PyGraphVertexIterator(Box<IterableVertices>, GraphVertexIterator<'static>);
 
 #[pyclass(name = "SymbolicContext")]
 #[derive(Clone, Wrapper)]

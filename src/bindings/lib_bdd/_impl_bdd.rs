@@ -210,8 +210,11 @@ impl PyBdd {
         // so there is no (realistic) way the reference can outlive the copy of the `Bdd`.
         // Fortunately, the iterator items are clones and do not reference the `Bdd` directly,
         // so the "laundered" references do not spread beyond the internal code of the iterator.
-        let copy = self.as_native().clone();
-        let copy_ref: &'static Bdd = unsafe { (&copy as *const Bdd).as_ref().unwrap() };
+        // The final piece of the puzzle is that the BDD must be inside a `Box` reference.
+        // Otherwise, parts of it are allocated on the stack and they are then *moved* into
+        // the iterator object. I.e. copy_ref would reference stack, not the heap.
+        let copy = Box::new(self.as_native().clone());
+        let copy_ref: &'static Bdd = unsafe { (copy.as_ref() as *const Bdd).as_ref().unwrap() };
         PyBddValuationIterator(copy_ref.sat_valuations(), copy)
     }
 
@@ -235,8 +238,8 @@ impl PyBdd {
 
     pub fn clause_iterator(&self) -> PyBddClauseIterator {
         // See `iter_valuations` for safety discussion.
-        let copy = self.as_native().clone();
-        let copy_ref: &'static Bdd = unsafe { (&copy as *const Bdd).as_ref().unwrap() };
+        let copy = Box::new(self.as_native().clone());
+        let copy_ref: &'static Bdd = unsafe { (copy.as_ref() as *const Bdd).as_ref().unwrap() };
         PyBddClauseIterator(copy_ref.sat_clauses(), copy)
     }
 

@@ -33,9 +33,9 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
 pub struct PyBdd(Bdd);
 
 #[pyclass(name = "BddValuationIterator")]
-pub struct PyBddValuationIterator(BddSatisfyingValuations<'static>, Bdd);
+pub struct PyBddValuationIterator(BddSatisfyingValuations<'static>, Box<Bdd>);
 #[pyclass(name = "BddClauseIterator")]
-pub struct PyBddClauseIterator(BddPathIterator<'static>, Bdd);
+pub struct PyBddClauseIterator(BddPathIterator<'static>, Box<Bdd>);
 
 #[pyclass(name = "BddValuation")]
 #[derive(Clone, Eq, PartialEq, Hash, Wrapper)]

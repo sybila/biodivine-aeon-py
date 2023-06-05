@@ -105,8 +105,12 @@ impl PyGraphVertices {
 
     pub fn iterator(&self) -> PyGraphVertexIterator {
         // See the discussion in `_impl_bdd_iterator.rs` on the safety of this approach.
-        let iterable = self.as_native().materialize();
-        let static_iterable = unsafe { (&iterable as *const IterableVertices).as_ref().unwrap() };
+        let iterable = Box::new(self.as_native().materialize());
+        let static_iterable = unsafe {
+            (iterable.as_ref() as *const IterableVertices)
+                .as_ref()
+                .unwrap()
+        };
         let iterator: GraphVertexIterator<'static> = static_iterable.iter();
         PyGraphVertexIterator(iterable, iterator)
     }
