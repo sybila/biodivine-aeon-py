@@ -155,7 +155,7 @@ impl PyBdd {
 
     pub fn project_exist(&self, variables: &PyAny) -> PyResult<PyBdd> {
         let variables = extract_variable_list(variables)?;
-        Ok(self.as_native().project(&variables).into())
+        Ok(self.as_native().exists(&variables).into())
     }
 
     pub fn project_for_all(&self, variables: &PyAny) -> PyResult<PyBdd> {
