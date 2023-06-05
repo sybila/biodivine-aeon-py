@@ -2,16 +2,30 @@ use crate::bindings::lib_bdd::PyBdd;
 use crate::bindings::lib_param_bn::{
     PyGraphVertexIterator, PyGraphVertices, PySymbolicAsyncGraph, PyVariableId,
 };
-use crate::AsNative;
+use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphVertexIterator, IterableVertices};
+use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use std::collections::HashSet;
 
 #[pymethods]
 impl PyGraphVertices {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        let a = self.as_native().as_bdd();
+        let b = other.as_native().as_bdd();
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(a.xor(b).is_false()),
+            CompareOp::Ne => Ok(a.iff(b).is_false()),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     #[new]
     pub fn new(graph: &PySymbolicAsyncGraph, bdd: PyBdd) -> PyGraphVertices {
         let ctx = graph.as_native().symbolic_context();

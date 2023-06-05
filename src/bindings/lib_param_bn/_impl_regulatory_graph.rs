@@ -4,6 +4,7 @@ use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_param_bn::{
     Monotonicity, Regulation, RegulatoryGraph, SdGraph, Sign, VariableId,
 };
+use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashSet;
@@ -19,6 +20,17 @@ use std::collections::HashSet;
 
 #[pymethods]
 impl PyRegulatoryGraph {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(self.as_native() == other.as_native()),
+            CompareOp::Ne => Ok(self.as_native() != other.as_native()),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
             "RegulatoryGraph(variables = {}, regulations = {})",

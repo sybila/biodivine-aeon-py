@@ -2,8 +2,9 @@
 #![allow(clippy::wrong_self_convention)]
 
 use crate::bindings::lib_bdd::{PyBddPartialValuation, PyBddValuation, PyBddVariable};
-use crate::{throw_type_error, AsNative};
+use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable};
+use pyo3::basic::CompareOp;
 use pyo3::types::{PyDict, PyList, PyTuple};
 use pyo3::{pymethods, PyAny, PyResult};
 use std::collections::HashMap;
@@ -82,6 +83,17 @@ impl PyBddPartialValuation {
 
 #[pymethods]
 impl PyBddValuation {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(self.as_native() == other.as_native()),
+            CompareOp::Ne => Ok(self.as_native() != other.as_native()),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     #[new]
     pub fn new(variables: u16) -> PyBddValuation {
         BddValuation::all_false(variables).into()
@@ -128,6 +140,17 @@ impl PyBddValuation {
 
 #[pymethods]
 impl PyBddPartialValuation {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(self.as_native() == other.as_native()),
+            CompareOp::Ne => Ok(self.as_native() != other.as_native()),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     #[new]
     pub fn new() -> PyBddPartialValuation {
         BddPartialValuation::empty().into()

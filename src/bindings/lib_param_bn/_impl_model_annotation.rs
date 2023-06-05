@@ -1,6 +1,7 @@
 use crate::bindings::lib_param_bn::PyModelAnnotation;
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::ModelAnnotation;
+use pyo3::basic::CompareOp;
 use pyo3::{pymethods, PyResult};
 use std::collections::HashMap;
 use std::mem::swap;
@@ -13,6 +14,17 @@ impl Default for PyModelAnnotation {
 
 #[pymethods]
 impl PyModelAnnotation {
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Lt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Le => throw_runtime_error("Unsupported operation."),
+            CompareOp::Eq => Ok(self.as_native() == other.as_native()),
+            CompareOp::Ne => Ok(self.as_native() != other.as_native()),
+            CompareOp::Gt => throw_runtime_error("Unsupported operation."),
+            CompareOp::Ge => throw_runtime_error("Unsupported operation."),
+        }
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(format!("{}", self.as_native()))
     }

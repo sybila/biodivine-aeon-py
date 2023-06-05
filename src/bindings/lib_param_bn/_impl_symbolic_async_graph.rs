@@ -285,6 +285,14 @@ impl PySymbolicAsyncGraph {
         self.as_native().mk_unit_colors().into()
     }
 
+    /// Return a `VertexSet` of all vertices valid in this graph.
+    pub fn unit_vertices(&self) -> PyGraphVertices {
+        self.as_native()
+            .mk_unit_colored_vertices()
+            .vertices()
+            .into()
+    }
+
     /// Return a `ColoredVertexSet` of all color-vertex pairs valid in this graph (i.e. satisfting
     /// structural constraints).
     pub fn unit_colored_vertices(&self) -> PyGraphColoredVertices {
