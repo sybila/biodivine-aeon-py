@@ -4,7 +4,7 @@ use crate::bindings::lib_bdd::{
 };
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression;
-use biodivine_lib_bdd::{BddVariable, BddVariableSet, BddVariableSetBuilder};
+use biodivine_lib_bdd::{BddPartialValuation, BddVariable, BddVariableSet, BddVariableSetBuilder};
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
@@ -139,20 +139,18 @@ impl PyBddVariableSet {
     }
 
     pub fn mk_cnf(&self, clauses: &PyList) -> PyResult<PyBdd> {
-        let mut result = self.as_native().mk_true();
+        let mut native_clauses: Vec<BddPartialValuation> = Vec::new();
         for clause in clauses {
-            let clause = self.mk_disjunctive_clause(clause)?.into();
-            result = result.and(&clause);
+            native_clauses.push(PyBddPartialValuation::from_python(clause)?.into());
         }
-        Ok(result.into())
+        Ok(self.as_native().mk_cnf(&native_clauses).into())
     }
 
     pub fn mk_dnf(&self, clauses: &PyList) -> PyResult<PyBdd> {
-        let mut result = self.as_native().mk_false();
+        let mut native_clauses: Vec<BddPartialValuation> = Vec::new();
         for clause in clauses {
-            let clause = self.mk_disjunctive_clause(clause)?.into();
-            result = result.or(&clause);
+            native_clauses.push(PyBddPartialValuation::from_python(clause)?.into());
         }
-        Ok(result.into())
+        Ok(self.as_native().mk_dnf(&native_clauses).into())
     }
 }

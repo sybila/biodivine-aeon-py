@@ -160,16 +160,7 @@ impl PyBdd {
 
     pub fn project_for_all(&self, variables: &PyAny) -> PyResult<PyBdd> {
         let variables = extract_variable_list(variables)?;
-        let mut result = self.as_native().clone();
-        for var in variables {
-            result = Bdd::fused_binary_flip_op(
-                (&result, None),
-                (&result, Some(var)),
-                None,
-                biodivine_lib_bdd::op_function::and,
-            );
-        }
-        Ok(result.into())
+        Ok(self.as_native().for_all(&variables).into())
     }
 
     pub fn pick(&self, variables: &PyAny) -> PyResult<PyBdd> {

@@ -54,8 +54,6 @@ pub struct PyBddVariable(BddVariable);
 pub struct PyBddVariableSet(BddVariableSet);
 
 /// Abstract syntax tree of an expression which describes a particular Boolean formula.
-///
-/// TODO: This class currently has no API except for conversion from and into `String`.
 #[pyclass(name = "BooleanExpression")]
 #[derive(Clone, Eq, PartialEq, Wrapper)]
 pub struct PyBooleanExpression(BooleanExpression);
@@ -63,8 +61,5 @@ pub struct PyBooleanExpression(BooleanExpression);
 /// A builder object that lets you gradually construct a `BddVariableSet` instead of supplying
 /// all variable names at once.
 #[pyclass(name = "BddVariableSetBuilder")]
-pub struct PyBddVariableSetBuilder(BddVariableSetBuilder, Vec<String>);
-
-// Note that above, the string vector is necessary because `BddVariableSetBuilder` does not
-// implement clone and there is no way to actually destroy it during final conversion
-// to `BddVariableSet`. Hence we have to make a copy of the builder using the saved variable names.
+#[derive(Clone, Wrapper)]
+pub struct PyBddVariableSetBuilder(BddVariableSetBuilder);
