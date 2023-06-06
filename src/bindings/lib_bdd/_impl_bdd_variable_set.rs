@@ -123,7 +123,7 @@ impl PyBddVariableSet {
     }
 
     pub fn mk_conjunctive_clause(&self, clause: &PyAny) -> PyResult<PyBdd> {
-        let clause = PyBddPartialValuation::from_python(clause)?;
+        let clause = PyBddPartialValuation::from_python(clause, Some(self))?;
         Ok(self
             .as_native()
             .mk_conjunctive_clause(clause.as_native())
@@ -131,7 +131,7 @@ impl PyBddVariableSet {
     }
 
     pub fn mk_disjunctive_clause(&self, clause: &PyAny) -> PyResult<PyBdd> {
-        let clause = PyBddPartialValuation::from_python(clause)?;
+        let clause = PyBddPartialValuation::from_python(clause, Some(self))?;
         Ok(self
             .as_native()
             .mk_disjunctive_clause(clause.as_native())
@@ -141,7 +141,7 @@ impl PyBddVariableSet {
     pub fn mk_cnf(&self, clauses: &PyList) -> PyResult<PyBdd> {
         let mut native_clauses: Vec<BddPartialValuation> = Vec::new();
         for clause in clauses {
-            native_clauses.push(PyBddPartialValuation::from_python(clause)?.into());
+            native_clauses.push(PyBddPartialValuation::from_python(clause, Some(self))?.into());
         }
         Ok(self.as_native().mk_cnf(&native_clauses).into())
     }
@@ -149,7 +149,7 @@ impl PyBddVariableSet {
     pub fn mk_dnf(&self, clauses: &PyList) -> PyResult<PyBdd> {
         let mut native_clauses: Vec<BddPartialValuation> = Vec::new();
         for clause in clauses {
-            native_clauses.push(PyBddPartialValuation::from_python(clause)?.into());
+            native_clauses.push(PyBddPartialValuation::from_python(clause, Some(self))?.into());
         }
         Ok(self.as_native().mk_dnf(&native_clauses).into())
     }

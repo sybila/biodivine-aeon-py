@@ -1,7 +1,7 @@
 // PyO3 does not allow ownership transfer, so we are forced to use references.
 #![allow(clippy::wrong_self_convention)]
 
-use crate::bindings::lib_bdd::{PyBddPartialValuation, PyBddValuation, PyBddVariable};
+use crate::bindings::lib_bdd::{PyBddPartialValuation, PyBddValuation, PyBddVariable, PyBddVariableSet};
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable};
 use pyo3::basic::CompareOp;
@@ -38,13 +38,17 @@ impl PyBddPartialValuation {
     ///  - A dictionary that maps BDD variables to bools;
     ///  - A list of variable-bool pairs;
     ///  - A single variable-bool pair.
-    pub(crate) fn from_python(any: &PyAny) -> PyResult<PyBddPartialValuation> {
+    pub(crate) fn from_python(any: &PyAny, names: Option<&PyBddVariableSet>) -> PyResult<PyBddPartialValuation> {
         if let Ok(val) = any.extract::<PyBddPartialValuation>() {
             Ok(val)
         } else if let Ok(dict) = any.downcast::<PyDict>() {
             let mut vars = BddPartialValuation::empty();
             for (k, v) in dict {
-                let k: BddVariable = k.extract::<PyBddVariable>()?.into();
+                let k: BddVariable = if let Some(names) = names {
+                    names.find_variable(k)?.unwrap().into()
+                } else {
+                    k.extract::<PyBddVariable>()?.into()
+                };
                 let v = v.extract::<bool>()?;
                 vars.set_value(k, v);
             }
@@ -53,7 +57,7 @@ impl PyBddPartialValuation {
             let mut vars = BddPartialValuation::empty();
             for tuple in list {
                 if let Ok(tuple) = tuple.downcast::<PyTuple>() {
-                    let (k, v) = Self::extract_valuation_pair(tuple)?;
+                    let (k, v) = Self::extract_valuation_pair(tuple, names)?;
                     vars.set_value(k, v)
                 } else {
                     return throw_type_error("Expected a list of tuples.");
@@ -62,7 +66,7 @@ impl PyBddPartialValuation {
             Ok(PyBddPartialValuation(vars))
         } else if let Ok(tuple) = any.downcast::<PyTuple>() {
             let mut vars = BddPartialValuation::empty();
-            let (k, v) = Self::extract_valuation_pair(tuple)?;
+            let (k, v) = Self::extract_valuation_pair(tuple, names)?;
             vars.set_value(k, v);
             Ok(PyBddPartialValuation(vars))
         } else {
@@ -70,11 +74,16 @@ impl PyBddPartialValuation {
         }
     }
 
-    fn extract_valuation_pair(tuple: &PyTuple) -> PyResult<(BddVariable, bool)> {
+    fn extract_valuation_pair(tuple: &PyTuple, names: Option<&PyBddVariableSet>) -> PyResult<(BddVariable, bool)> {
         if tuple.len() != 2 {
             throw_type_error("Expected a tuple of length two.")
         } else {
-            let var: BddVariable = tuple.get_item(0)?.extract::<PyBddVariable>()?.into();
+            let k = tuple.get_item(0)?;
+            let var: BddVariable = if let Some(names) = names {
+                names.find_variable(k)?.unwrap().into()
+            } else {
+                k.extract::<PyBddVariable>()?.into()
+            };
             let value = tuple.get_item(1)?.extract::<bool>()?;
             Ok((var, value))
         }
@@ -133,7 +142,7 @@ impl PyBddValuation {
     }
 
     pub fn extends(&self, partial_valuation: &PyAny) -> PyResult<bool> {
-        let partial_valuation = PyBddPartialValuation::from_python(partial_valuation)?;
+        let partial_valuation = PyBddPartialValuation::from_python(partial_valuation, None)?;
         Ok(self.as_native().extends(partial_valuation.as_native()))
     }
 }
@@ -193,7 +202,7 @@ impl PyBddPartialValuation {
     }
 
     pub fn extends(&self, partial_valuation: &PyAny) -> PyResult<bool> {
-        let partial_valuation = PyBddPartialValuation::from_python(partial_valuation)?;
+        let partial_valuation = PyBddPartialValuation::from_python(partial_valuation, None)?;
         Ok(self.as_native().extends(partial_valuation.as_native()))
     }
 
@@ -215,6 +224,6 @@ impl PyBddPartialValuation {
 
     #[staticmethod]
     pub fn from_data(data: &PyAny) -> PyResult<PyBddPartialValuation> {
-        PyBddPartialValuation::from_python(data)
+        PyBddPartialValuation::from_python(data, None)
     }
 }

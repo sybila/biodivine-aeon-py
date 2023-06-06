@@ -153,7 +153,7 @@ impl PyBdd {
         self == other || self.as_native().iff(other.as_native()).is_true()
     }
 
-    pub fn project_exist(&self, variables: &PyAny) -> PyResult<PyBdd> {
+    pub fn project_exists(&self, variables: &PyAny) -> PyResult<PyBdd> {
         let variables = extract_variable_list(variables)?;
         Ok(self.as_native().exists(&variables).into())
     }
@@ -189,7 +189,7 @@ impl PyBdd {
     }
 
     pub fn select(&self, values: &PyAny) -> PyResult<PyBdd> {
-        let valuation = PyBddPartialValuation::from_python(values)?;
+        let valuation = PyBddPartialValuation::from_python(values, None)?;
         Ok(self
             .as_native()
             .select(&valuation.as_native().to_values())
@@ -197,7 +197,7 @@ impl PyBdd {
     }
 
     pub fn restrict(&self, values: &PyDict) -> PyResult<PyBdd> {
-        let valuation = PyBddPartialValuation::from_python(values)?;
+        let valuation = PyBddPartialValuation::from_python(values, None)?;
         Ok(self
             .as_native()
             .restrict(&valuation.as_native().to_values())

@@ -28,7 +28,7 @@ fn read_valuation(
 ) -> PyResult<BddValuation> {
     if let Ok(valuation) = PyBddValuation::from_python(valuation) {
         Ok(valuation.into())
-    } else if let Ok(valuation) = PyBddPartialValuation::from_python(valuation) {
+    } else if let Ok(valuation) = PyBddPartialValuation::from_python(valuation, None) {
         let valuation: BddPartialValuation = valuation.into();
         let mut result = BddValuation::all_false(vars.num_vars());
         for var in variables {
