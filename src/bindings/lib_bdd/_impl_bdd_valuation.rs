@@ -1,7 +1,9 @@
 // PyO3 does not allow ownership transfer, so we are forced to use references.
 #![allow(clippy::wrong_self_convention)]
 
-use crate::bindings::lib_bdd::{PyBddPartialValuation, PyBddValuation, PyBddVariable, PyBddVariableSet};
+use crate::bindings::lib_bdd::{
+    PyBddPartialValuation, PyBddValuation, PyBddVariable, PyBddVariableSet,
+};
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable};
 use pyo3::basic::CompareOp;
@@ -38,7 +40,10 @@ impl PyBddPartialValuation {
     ///  - A dictionary that maps BDD variables to bools;
     ///  - A list of variable-bool pairs;
     ///  - A single variable-bool pair.
-    pub(crate) fn from_python(any: &PyAny, names: Option<&PyBddVariableSet>) -> PyResult<PyBddPartialValuation> {
+    pub(crate) fn from_python(
+        any: &PyAny,
+        names: Option<&PyBddVariableSet>,
+    ) -> PyResult<PyBddPartialValuation> {
         if let Ok(val) = any.extract::<PyBddPartialValuation>() {
             Ok(val)
         } else if let Ok(dict) = any.downcast::<PyDict>() {
@@ -74,7 +79,10 @@ impl PyBddPartialValuation {
         }
     }
 
-    fn extract_valuation_pair(tuple: &PyTuple, names: Option<&PyBddVariableSet>) -> PyResult<(BddVariable, bool)> {
+    fn extract_valuation_pair(
+        tuple: &PyTuple,
+        names: Option<&PyBddVariableSet>,
+    ) -> PyResult<(BddVariable, bool)> {
         if tuple.len() != 2 {
             throw_type_error("Expected a tuple of length two.")
         } else {
