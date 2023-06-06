@@ -1,0 +1,308 @@
+#position:Fas:230.59306536150268,317.5720372717507
+$Fas:((FasT & FasL) & !(sFas | Apoptosis))
+FasT -> Fas
+FasL -> Fas
+sFas -| Fas
+Apoptosis -| Fas
+#position:Ceramide:229.32050976006758,172.1062886509643
+$Ceramide:(Fas & !(S1P | Apoptosis))
+Fas -> Ceramide
+S1P -| Ceramide
+Apoptosis -| Ceramide
+#position:S1P:245.300957553069,244.47956197553174
+$S1P:(SPHK1 & !(Ceramide | Apoptosis))
+SPHK1 -> S1P
+Ceramide -| S1P
+Apoptosis -| S1P
+#position:Apoptosis:376.4814008103626,425.08720433919893
+$Apoptosis:(Apoptosis | Caspase)
+Caspase -> Apoptosis
+Apoptosis -> Apoptosis
+#position:ERK:466.01811413247134,344.1841521852665
+$ERK:((MEK & PI3K) & !Apoptosis)
+Apoptosis -| ERK
+MEK -> ERK
+PI3K -> ERK
+#position:MEK:500.4433830083956,232.0950145349446
+$MEK:(RAS & !Apoptosis)
+RAS -> MEK
+Apoptosis -| MEK
+#position:PI3K:320.314379008098,327.7749348351658
+$PI3K:((PDGFR & !Apoptosis) | (RAS & !Apoptosis))
+RAS -> PI3K
+PDGFR -> PI3K
+Apoptosis -| PI3K
+#position:IAP:171.2754042510171,527.0968328545847
+$IAP:(NFKB & !(BID | Apoptosis))
+BID -| IAP
+NFKB -> IAP
+Apoptosis -| IAP
+#position:NFKB:263.41792540991247,432.40850800171893
+$NFKB:((((FLIP & (IAP & TRADD)) & !Apoptosis) | (PI3K & !Apoptosis)) | (TPL2 & !Apoptosis))
+IAP -> NFKB
+FLIP -> NFKB
+TRADD -> NFKB
+TPL2 -> NFKB
+PI3K -> NFKB
+Apoptosis -| NFKB
+#position:FLIP:351.04974449777603,521.0573306456333
+$FLIP:((NFKB & !(Apoptosis | DISC)) | ((CREB & IFNG) & !(Apoptosis | DISC)))
+IFNG -> FLIP
+CREB -> FLIP
+NFKB -> FLIP
+Apoptosis -| FLIP
+DISC -| FLIP
+#position:TRADD:170.21385415749103,469.3281402560692
+$TRADD:(TNF & !((IAP | Apoptosis) | A20))
+IAP -| TRADD
+TNF -> TRADD
+Apoptosis -| TRADD
+A20 -| TRADD
+#position:TPL2:169.93914923859802,415.32421207234444
+$TPL2:((TAX & !Apoptosis) | ((PI3K & TNF) & !Apoptosis))
+TAX -> TPL2
+TNF -> TPL2
+Apoptosis -| TPL2
+PI3K -> TPL2
+#position:IL2:451.2523991160417,424.3207040075552
+$IL2:(((NFAT & !(TBET | Apoptosis)) | (NFKB & !(TBET | Apoptosis))) | (STAT3 & !(TBET | Apoptosis)))
+STAT3 -> IL2
+TBET -| IL2
+NFKB -> IL2
+NFAT -> IL2
+Apoptosis -| IL2
+#position:SOCS:575.0223756735916,545.1100246945297
+$SOCS:(JAK & !((Apoptosis | IL15) | IL2))
+IL2 -| SOCS
+JAK -> SOCS
+IL15 -| SOCS
+Apoptosis -| SOCS
+#position:JAK:502.5859392290563,462.92853378533636
+$JAK:((((IL2RA & !((Apoptosis | SOCS) | CD45)) | (IL2RB & !((Apoptosis | SOCS) | CD45))) | (IFNG & !((Apoptosis | SOCS) | CD45))) | (RANTES & !((Apoptosis | SOCS) | CD45)))
+IL2RB -> JAK
+IFNG -> JAK
+IL2RA -> JAK
+RANTES -> JAK
+CD45 -| JAK
+SOCS -| JAK
+Apoptosis -| JAK
+#position:IL15:677.1784127659546,488.47976269569324
+#position:IL2RB:531.4165207955166,495.66554074032933
+$IL2RB:((IL2RBT & (IL2 | IL15)) & !Apoptosis)
+IL2 -> IL2RB
+IL15 -> IL2RB
+Apoptosis -| IL2RB
+IL2RBT -> IL2RB
+#position:LCK:645.525590218948,655.5436543296967
+$LCK:(((IL2RB & !(Apoptosis | ZAP70)) | (TCR & !(Apoptosis | ZAP70))) | (CD45 & !Apoptosis))
+IL2RB -> LCK
+ZAP70 -| LCK
+CD45 -> LCK
+TCR -> LCK
+Apoptosis -| LCK
+#position:ZAP70:592.3302079341667,500.0315055969082
+$ZAP70:(LCK & !(Apoptosis | FYN))
+FYN -| ZAP70
+LCK -> ZAP70
+Apoptosis -| ZAP70
+#position:CD45:909.2949457587243,615.8252060640898
+#position:TCR:441.35496356221324,658.7587461325078
+$TCR:(Stimuli & !(Apoptosis | CTLA4))
+Stimuli -> TCR
+Apoptosis -| TCR
+CTLA4 -| TCR
+#position:TBET:484.24707144439043,526.4710560815557
+$TBET:((JAK & !Apoptosis) | (TBET & !Apoptosis))
+TBET -> TBET
+JAK -> TBET
+Apoptosis -| TBET
+#position:IL2RBT:592.6967767329614,405.02154828874586
+$IL2RBT:((ERK & TBET) & !Apoptosis)
+TBET -> IL2RBT
+ERK -> IL2RBT
+Apoptosis -| IL2RBT
+#position:GRB2:593.0017067157085,366.520474258356
+$GRB2:((IL2RB & !Apoptosis) | (ZAP70 & !Apoptosis))
+IL2RB -> GRB2
+ZAP70 -> GRB2
+Apoptosis -| GRB2
+#position:RAS:499.3788822548122,287.69300467083457
+$RAS:((GRB2 & !(GAP | Apoptosis)) | (PLCG1 & !(GAP | Apoptosis)))
+GRB2 -> RAS
+PLCG1 -> RAS
+GAP -| RAS
+Apoptosis -| RAS
+#position:PLCG1:586.3769663007528,238.3398054595615
+$PLCG1:((GRB2 & !Apoptosis) | (PDGFR & !Apoptosis))
+GRB2 -> PLCG1
+PDGFR -> PLCG1
+Apoptosis -| PLCG1
+#position:GAP:556.5014415055409,321.16423224633036
+$GAP:((RAS & !((IL2 | IL15) | Apoptosis)) | ((PDGFR & GAP) & !((IL2 | IL15) | Apoptosis)))
+IL2 -| GAP
+RAS -> GAP
+GAP -> GAP
+PDGFR -> GAP
+IL15 -| GAP
+Apoptosis -| GAP
+#position:RANTES:412.5982947461972,400.2729673066686
+$RANTES:(NFKB & !Apoptosis)
+NFKB -> RANTES
+Apoptosis -| RANTES
+#position:IFNG:484.4103000398368,580.7037577702883
+$IFNG:((((IL2 & IFNGT) & !((SMAD | P2) | Apoptosis)) | ((Stimuli & IFNGT) & !((SMAD | P2) | Apoptosis))) | ((IL15 & IFNGT) & !((SMAD | P2) | Apoptosis)))
+IL2 -> IFNG
+IFNGT -> IFNG
+Stimuli -> IFNG
+SMAD -| IFNG
+P2 -| IFNG
+IL15 -> IFNG
+Apoptosis -| IFNG
+#position:CREB:440.1661992371959,541.9377603652118
+$CREB:((ERK & IFNG) & !Apoptosis)
+IFNG -> CREB
+ERK -> CREB
+Apoptosis -| CREB
+#position:DISC:286.3957884919622,363.8551472317837
+$DISC:((FasT & ((Ceramide | (Fas & !FLIP)) | (IL2 & Fas))) & !Apoptosis)
+IL2 -> DISC
+Fas -> DISC
+FLIP -| DISC
+FasT -> DISC
+Ceramide -> DISC
+Apoptosis -| DISC
+#position:PDGFR:410.9167664278542,193.9858464246297
+$PDGFR:((PDGF & !Apoptosis) | (S1P & !Apoptosis))
+S1P -> PDGFR
+PDGF -> PDGFR
+Apoptosis -| PDGFR
+#position:IL2RA:395.2811057684297,547.585119562684
+$IL2RA:((IL2 & IL2RAT) & !(IL2RA | Apoptosis))
+IL2 -> IL2RA
+IL2RAT -> IL2RA
+IL2RA -| IL2RA
+Apoptosis -| IL2RA
+#position:IL2RAT:375.7100927553345,342.2260755901525
+$IL2RAT:((IL2 & (STAT3 | NFKB)) & !Apoptosis)
+IL2 -> IL2RAT
+STAT3 -> IL2RAT
+NFKB -> IL2RAT
+Apoptosis -| IL2RAT
+#position:FasT:177.51628110810378,290.2474658437393
+$FasT:(NFKB & !Apoptosis)
+NFKB -> FasT
+Apoptosis -| FasT
+#position:sFas:318.4298377789483,203.3200409974334
+$sFas:((FasT & S1P) & !Apoptosis)
+FasT -> sFas
+S1P -> sFas
+Apoptosis -| sFas
+#position:FYN:494.5708969492976,655.8565685228479
+$FYN:((TCR & !Apoptosis) | (IL2RB & !Apoptosis))
+IL2RB -> FYN
+TCR -> FYN
+Apoptosis -| FYN
+#position:Caspase:259.5235034601609,510.1642408523097
+$Caspase:(((DISC & !Apoptosis) | ((TRADD & BID) & !(Apoptosis | IAP))) | ((GZMB & BID) & !(Apoptosis | IAP)))
+IAP -| Caspase
+BID -> Caspase
+GZMB -> Caspase
+TRADD -> Caspase
+DISC -> Caspase
+Apoptosis -| Caspase
+#position:TAX:22.5,400.3342645947496
+#position:TNF:215.5999852817518,586.5780692869133
+$TNF:(NFKB & !Apoptosis)
+NFKB -> TNF
+Apoptosis -| TNF
+#position:STAT3:410.7955357763346,300.1103908970174
+$STAT3:(JAK & !Apoptosis)
+JAK -> STAT3
+Apoptosis -| STAT3
+#position:Proliferation:409.89735558659385,86.42021929912443
+$Proliferation:(STAT3 & !(Apoptosis | P27))
+STAT3 -> Proliferation
+P27 -| Proliferation
+Apoptosis -| Proliferation
+#position:P27:499.50204198363804,177.010145090965
+$P27:(STAT3 & !Apoptosis)
+STAT3 -> P27
+Apoptosis -| P27
+#position:Cytoskeleton_signaling:387.91928819760415,812.4176586969695
+$Cytoskeleton_signaling:(FYN & !Apoptosis)
+FYN -> Cytoskeleton_signaling
+Apoptosis -| Cytoskeleton_signaling
+#position:FasL:320.02041624281316,268.04650998771
+$FasL:((((NFKB & !Apoptosis) | (STAT3 & !Apoptosis)) | (ERK & !Apoptosis)) | (NFAT & !Apoptosis))
+STAT3 -> FasL
+NFKB -> FasL
+ERK -> FasL
+Apoptosis -| FasL
+NFAT -> FasL
+#position:NFAT:410.67483814537906,260.35199554135824
+$NFAT:(PI3K & !Apoptosis)
+Apoptosis -| NFAT
+PI3K -> NFAT
+#position:IFNGT:502.0566260367064,393.72736345022497
+$IFNGT:(((STAT3 & !Apoptosis) | (NFAT & !Apoptosis)) | (TBET & !Apoptosis))
+STAT3 -> IFNGT
+TBET -> IFNGT
+NFAT -> IFNGT
+Apoptosis -| IFNGT
+#position:Stimuli:568.0732329274566,758.4885264310225
+#position:SMAD:305.6155190864976,575.0175902673598
+$SMAD:(GPCR & !Apoptosis)
+GPCR -> SMAD
+Apoptosis -| SMAD
+#position:P2:91.08492000766877,809.1893571547383
+$P2:(IFNG & !(Stimuli2 | Apoptosis))
+IFNG -> P2
+Stimuli2 -| P2
+Apoptosis -| P2
+#position:BID:260.414128876958,587.8361828885899
+$BID:((GZMB & !((BclxL | MCL1) | Apoptosis)) | (Caspase & !((BclxL | MCL1) | Apoptosis)))
+BclxL -| BID
+GZMB -> BID
+MCL1 -| BID
+Caspase -> BID
+Apoptosis -| BID
+#position:Stimuli2:169.7179675340176,920.195344883944
+#position:GPCR:195.59000843625296,378.58684097935395
+$GPCR:(S1P & !Apoptosis)
+S1P -> GPCR
+Apoptosis -| GPCR
+#position:CTLA4:298.14084544320787,687.8776441063201
+$CTLA4:(TCR & !Apoptosis)
+TCR -> CTLA4
+Apoptosis -| CTLA4
+#position:PDGF:500.7955067920743,31
+#position:BclxL:285.6646993598584,448.490133173984
+$BclxL:((NFKB & !(((Apoptosis | BID) | DISC) | GZMB)) | (STAT3 & !(((Apoptosis | BID) | DISC) | GZMB)))
+BID -| BclxL
+GZMB -| BclxL
+STAT3 -> BclxL
+NFKB -> BclxL
+Apoptosis -| BclxL
+DISC -| BclxL
+#position:GZMB:351.7386389913518,606.6756886354946
+$GZMB:((TBET & !Apoptosis) | ((CREB & IFNG) & !Apoptosis))
+IFNG -> GZMB
+CREB -> GZMB
+TBET -> GZMB
+Apoptosis -| GZMB
+#position:MCL1:361.3926899803908,480.91281979950884
+$MCL1:((IL2RB & ((STAT3 & NFKB) & PI3K)) & !(DISC | Apoptosis))
+IL2RB -> MCL1
+STAT3 -> MCL1
+NFKB -> MCL1
+PI3K -> MCL1
+DISC -| MCL1
+Apoptosis -| MCL1
+#position:SPHK1:319.2429846360377,137.08051930395624
+$SPHK1:(PDGFR & !Apoptosis)
+PDGFR -> SPHK1
+Apoptosis -| SPHK1
+#position:A20:170.30780810864974,594.5225231824472
+$A20:(NFKB & !Apoptosis)
+NFKB -> A20
+Apoptosis -| A20
