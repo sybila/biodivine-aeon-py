@@ -1,0 +1,258 @@
+#position:NADH:680.3836256426401,1176.6144015419115
+#position:EtfAB:639.5426235130133,1028.475615593237
+$EtfAB:NADH
+NADH -> EtfAB
+#position:sigH:251.19084076625177,580.2670750170613
+$sigH:sigA
+sigA -> sigH
+AbrB -|? sigH
+#position:spoIIAA:153.80127965488919,508.4911783581241
+$spoIIAA:((spo0A_p & sigH) | spoIIE)
+sigH -> spoIIAA
+spoIIE -> spoIIAA
+spo0A_p -> spoIIAA
+#position:spoIIE:22.499999999999943,572.0922425785901
+#position:spo0A_p:354.1976913729517,576.4460943157012
+$spo0A_p:((((spo0A & phosphorylation) & !sporulation) | ((phosphorylation & spo0A) & !sporulation)) | ((sigA & (phosphorylation & spo0A)) & !sporulation))
+sporulation -| spo0A_p
+sigA ->? spo0A_p
+phosphorylation -> spo0A_p
+spo0A -> spo0A_p
+#position:sigE:265.1381956896693,633.3568404366025
+$sigE:(sigF | spo0A_p)
+spo0A_p -> sigE
+sigF -> sigE
+#position:sigG:286.1450709399761,510.8909311291145
+$sigG:sigE
+sigE -> sigG
+#position:sporulation:445.35909454359046,550.6858103203349
+$sporulation:(((((sigK & (!cell_membrane & sigA)) | (spo0A_p & !cell_membrane)) | (sigH & !cell_membrane)) | (sigG & (!cell_membrane & sigA))) | (sigE & (sigA & !cell_membrane)))
+sigA -> sporulation
+sigG -> sporulation
+sigE -> sporulation
+sigK -> sporulation
+sigH -> sporulation
+cell_membrane -| sporulation
+spo0A_p -> sporulation
+#position:ethanol:457.3284147026843,291.8229048340068
+$ethanol:(((adhA & !(ald | sporulation)) | (acetaldehyde & !(ald | sporulation))) | (adhB & !(ald | sporulation)))
+sporulation -| ethanol
+ald -| ethanol
+adhB -> ethanol
+adhA -> ethanol
+acetaldehyde -> ethanol
+#position:ald:502.8638795213482,476.15243085118277
+$ald:(spo0A_p | sigK)
+sigK -> ald
+spo0A_p -> ald
+#position:adhB:279.45280899480326,317.25112234913985
+$adhB:spo0A_p
+spo0A_p -> adhB
+#position:adhA:334.5365447406152,364.6352694820995
+$adhA:spo0A_p
+spo0A_p -> adhA
+#position:acetaldehyde:597.1129319299948,210.68689388632873
+$acetaldehyde:(acetyl_CoA | ald)
+acetyl_CoA -> acetaldehyde
+ald -> acetaldehyde
+#position:3_hydroxybutyryl_CoA:639.2237210111782,871.849461472763
+$3_hydroxybutyryl_CoA:((crt | hbd) | acetoacetyl_CoA)
+hbd -> 3_hydroxybutyryl_CoA
+acetoacetyl_CoA -> 3_hydroxybutyryl_CoA
+crt -> 3_hydroxybutyryl_CoA
+#position:crotonoyl_CoA:550.9285655649876,1005.276554355565
+$crotonoyl_CoA:((crt | 3_hydroxybutyryl_CoA) | ferredoxin)
+3_hydroxybutyryl_CoA -> crotonoyl_CoA
+crt -> crotonoyl_CoA
+ferredoxin -> crotonoyl_CoA
+#position:crt:460.5170948926085,801.6242920381981
+$crt:!(spo0A_p | sporulation)
+sporulation -| crt
+spo0A_p -| crt
+#position:ferredoxin:730.9444819816881,924.9068709551134
+$ferredoxin:Rnf
+EtfAB -|? ferredoxin
+Rnf -> ferredoxin
+#position:lactic_acid:644.933360889641,581.9362871164076
+$lactic_acid:(lactate & !sporulation)
+sporulation -| lactic_acid
+lactate -> lactic_acid
+#position:lactate:757.6297711577462,687.0919790086009
+$lactate:(pyruvate & !ferredoxin)
+pyruvate -> lactate
+ferredoxin -| lactate
+#position:butanol:368.34688425427703,295.27112397451003
+$butanol:(((((bdhAB & !sporulation) | (adhB & !sporulation)) | (butanal & !sporulation)) | (adhA & !sporulation)) | (NAD_P_H & !sporulation))
+sporulation -| butanol
+adhB -> butanol
+butanal -> butanol
+NAD_P_H -> butanol
+adhA -> butanol
+bdhAB -> butanol
+#position:butanal:376.6465382829919,511.38716850150803
+$butanal:((ald | butyryl_CoA) | bdhAB)
+ald -> butanal
+bdhAB -> butanal
+butyryl_CoA -> butanal
+#position:NAD_P_H:304.3705600161396,124.33568525460169
+#position:bdhAB:245.0244251960122,378.56503872221583
+$bdhAB:spo0A_p
+spo0A_p -> bdhAB
+#position:sigA:286.86524078162097,684.0142257991669
+#position:sigK:334.29302395059705,441.4020458581923
+$sigK:sigG
+sigG -> sigK
+#position:cell_membrane:513.0160486278903,343.9756907150275
+$cell_membrane:((glucose & !((acetone | butanol) | ethanol)) | (butyrate & !(acetone | ethanol)))
+ethanol -| cell_membrane
+glucose -> cell_membrane
+butyrate -> cell_membrane
+acetone -| cell_membrane
+butanol -| cell_membrane
+#position:adc:514.5757722325427,446.17809785345617
+$adc:spo0A_p
+spo0A_p -> adc
+#position:Rnf:844.6671478645026,999.6898652409361
+#position:butyryl_CoA:550.5873309120292,746.8053149214369
+$butyryl_CoA:((((bcd | crotonoyl_CoA) | (butyrate & acetoacetyl_CoA)) | EtfAB) | ald)
+bcd -> butyryl_CoA
+crotonoyl_CoA -> butyryl_CoA
+EtfAB -> butyryl_CoA
+ald -> butyryl_CoA
+acetoacetyl_CoA -> butyryl_CoA
+butyrate -> butyryl_CoA
+#position:glucose:508.09746866129535,133.11242979973542
+#position:butyrate:463.6370736657554,591.6184993661923
+$butyrate:(((buk1 & !butyrate) | (glucose___PTS & !butyrate)) | (ptb & !butyrate))
+buk1 -> butyrate
+butyrate -| butyrate
+glucose___PTS -> butyrate
+ptb -> butyrate
+#position:acetone:554.2166391608165,592.6854722628312
+$acetone:((adc & !sporulation) | (acetoacetate & !sporulation))
+sporulation -| acetone
+adc -> acetone
+acetoacetate -> acetone
+#position:hbd:553.0122958809935,663.753581000226
+$hbd:!(sporulation | spo0A_p)
+sporulation -| hbd
+spo0A_p -| hbd
+#position:thlA:553.6752874976773,548.1102628215538
+$thlA:spo0A_p
+butyryl_CoA -|? thlA
+spo0A_p -> thlA
+#position:sigF:106.91948817394729,670.8479073678658
+$sigF:((spoIIE & !(spoIIAB & !spoIIE)) | (sigH & !(spoIIAB & !spoIIE)))
+sigH -> sigF
+spoIIE -? sigF
+spoIIAB -| sigF
+#position:pyruvate:791.5849169100184,446.8991193673453
+$pyruvate:((((pyk | glucose___PTS) | pgi) | fba) | gap_pgk_tpi_pgm__X276_23705_eno)
+pyk -> pyruvate
+fba -> pyruvate
+gap_pgk_tpi_pgm__X276_23705_eno -> pyruvate
+glucose___PTS -> pyruvate
+pgi -> pyruvate
+#position:acetyl_CoA:697.4771422955316,450.6369989053822
+$acetyl_CoA:((((acetate & acetoacetyl_CoA) | thlA) | pyruvate) | pfo)
+pyruvate -> acetyl_CoA
+acetoacetyl_CoA -> acetyl_CoA
+acetate -> acetyl_CoA
+thlA -> acetyl_CoA
+pfo -> acetyl_CoA
+#position:acetoacetyl_CoA:643.2172690718209,691.9545503337487
+$acetoacetyl_CoA:(((ctfB | thlA) | hbd) | acetyl_CoA)
+acetyl_CoA -> acetoacetyl_CoA
+hbd -> acetoacetyl_CoA
+ctfB -> acetoacetyl_CoA
+thlA -> acetoacetyl_CoA
+#position:acetate:603.592023913259,473.46319766605217
+$acetate:(((pta & acetone) | (glucose___PTS & acetone)) | ack)
+pta -> acetate
+glucose___PTS -> acetate
+acetone -> acetate
+ack -> acetate
+#position:pfo:824.6204898751864,576.9300203640199
+#position:ctfA:370.9297476836982,780.807565543841
+$ctfA:spo0A_p
+spo0A_p -> ctfA
+#position:ptb:459.6517899686186,730.375785023367
+$ptb:!(spo0A_p | sporulation)
+sporulation -| ptb
+spo0A_p -| ptb
+#position:ctfB:463.0707414174487,685.1897697614359
+$ctfB:spo0A_p
+spo0A_p -> ctfB
+#position:butyric_acid:371.63247720494263,851.3226550436943
+$butyric_acid:((butyryl_p & butyrate) & !sporulation)
+sporulation -| butyric_acid
+butyrate -> butyric_acid
+butyryl_p -> butyric_acid
+#position:butyryl_p:460.53890202160045,980.0188115257265
+$butyryl_p:butyryl_CoA
+butyryl_CoA -> butyryl_p
+#position:acetoacetate:550.6298235847701,839.2465157336223
+$acetoacetate:((ctfB | acetoacetyl_CoA) | ctfA)
+acetoacetyl_CoA -> acetoacetate
+ctfB -> acetoacetate
+ctfA -> acetoacetate
+#position:bcd:372.978116290063,714.1696817013551
+$bcd:!(sporulation | spo0A_p)
+sporulation -| bcd
+spo0A_p -| bcd
+#position:spoIIA_p:62.469923161926545,402.43677024311523
+$spoIIA_p:(spoIIAB & spoIIAA)
+spoIIAA -> spoIIA_p
+spoIIAB -> spoIIA_p
+#position:spoIIAB:161.0752067224514,601.9051023069346
+$spoIIAB:((spo0A_p & sigH) & !(spoIIAA & spoIIE))
+spoIIE -| spoIIAB
+sigH -> spoIIAB
+spoIIAA -| spoIIAB
+spo0A_p -> spoIIAB
+#position:pta:425.07108942965476,392.0981053782149
+$pta:!(spo0A_p | sporulation)
+sporulation -| pta
+spo0A_p -| pta
+#position:glucose___PTS:603.4498776968156,386.0898256117729
+$glucose___PTS:(((PTS & (glucose & cell_membrane)) & !(sporulation & !cell_membrane)) | ((glucose & (cell_membrane & PTS)) & !(sporulation & !cell_membrane)))
+sporulation -|? glucose___PTS
+glucose -> glucose___PTS
+cell_membrane -? glucose___PTS
+PTS -> glucose___PTS
+#position:ack:424.38826911297724,438.8401891977121
+$ack:!(spo0A_p | sporulation)
+sporulation -| ack
+spo0A_p -| ack
+#position:pyk:931.2503470020222,331.74655833458206
+$pyk:pfk
+pfk -> pyk
+#position:fba:926.4740210852905,551.0910088732448
+#position:gap_pgk_tpi_pgm__X276_23705_eno:840.752422881551,128.5
+#position:pgi:894.227207335171,441.74650787805626
+#position:spo0A:242.25292957622628,450.1109247275083
+$spo0A:(sigK | spo0A_p)
+sigK -> spo0A
+spo0A_p -> spo0A
+#position:AbrB:195.33625332817894,705.1750112245267
+$AbrB:!spo0A_p
+spo0A_p -| AbrB
+#position:phosphorylation:270.75842608139254,858.8383748160044
+#position:acetyl_p:743.9970698867246,262.94963710552827
+$acetyl_p:acetyl_CoA
+acetyl_CoA -> acetyl_p
+#position:spoIIAB_p:135.11614779016656,831.1363654039686
+$spoIIAB_p:((spoIIAB & phosphorylation) | (phosphorylation & spoIIAB))
+phosphorylation -> spoIIAB_p
+spoIIAB -> spoIIAB_p
+#position:acetic_acid:604.0097782092022,314.309029125778
+$acetic_acid:((acetyl_p & acetate) & !sporulation)
+sporulation -| acetic_acid
+acetate -> acetic_acid
+acetyl_p -> acetic_acid
+#position:PTS:688.1022869784276,157.13916581780245
+#position:pfk:1052.0315459221683,280.0934949988183
+#position:buk1:373.08296050674744,656.0880501788607
+$buk1:!(sporulation | spo0A_p)
+sporulation -| buk1
+spo0A_p -| buk1
