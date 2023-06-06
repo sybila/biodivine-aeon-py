@@ -1,3 +1,7 @@
+use biodivine_lib_bdd::Bdd;
+use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
+    MixedProjection, MixedProjectionIterator,
+};
 use biodivine_lib_param_bn::symbolic_async_graph::{
     GraphColoredVertices, GraphColors, GraphVertexIterator, GraphVertices, IterableVertices,
     SymbolicAsyncGraph, SymbolicContext,
@@ -19,6 +23,7 @@ mod _impl_parameter_id;
 mod _impl_regulatory_graph;
 mod _impl_symbolic_async_graph;
 mod _impl_symbolic_context;
+mod _impl_symbolic_projection;
 mod _impl_variable_id;
 
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
@@ -35,6 +40,7 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<PySymbolicContext>()?;
     module.add_class::<PyFnUpdate>()?;
     module.add_class::<PyFixedPoints>()?;
+    module.add_class::<PySymbolicProjection>()?;
     Ok(())
 }
 
@@ -87,3 +93,11 @@ pub struct PySymbolicContext(SymbolicContext);
 #[pyclass(name = "UpdateFunction")]
 #[derive(Clone, Wrapper, Eq, PartialEq, Hash)]
 pub struct PyFnUpdate(FnUpdate);
+
+#[pyclass(name = "SymbolicProjection")]
+pub struct PySymbolicProjection(
+    Box<SymbolicAsyncGraph>,
+    Box<Bdd>,
+    Box<MixedProjection<'static>>,
+    MixedProjectionIterator<'static, 'static>,
+);
