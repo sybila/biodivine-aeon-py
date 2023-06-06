@@ -31,6 +31,18 @@ impl PyRegulatoryGraph {
         }
     }
 
+    fn __getstate__(&self) -> String {
+        self.0.to_string()
+    }
+
+    fn __setstate__(&mut self, state: &str) -> PyResult<()> {
+        let Ok(graph) = RegulatoryGraph::try_from(state) else {
+            return throw_runtime_error("Invalid serialized graph state.")
+        };
+        self.0 = graph;
+        Ok(())
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
             "RegulatoryGraph(variables = {}, regulations = {})",
@@ -44,7 +56,9 @@ impl PyRegulatoryGraph {
     }
 
     #[new]
-    pub fn new(variables: Vec<String>) -> Self {
+    #[pyo3(signature = (variables = None))]
+    pub fn new(variables: Option<Vec<String>>) -> Self {
+        let variables = variables.unwrap_or_default();
         RegulatoryGraph::new(variables).into()
     }
 

@@ -52,11 +52,11 @@ pub struct PyVariableId(VariableId);
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, Wrapper)]
 pub struct PyParameterId(ParameterId);
 
-#[pyclass(name = "RegulatoryGraph", subclass)]
+#[pyclass(name = "RegulatoryGraph", module = "biodivine_aeon", subclass)]
 #[derive(Clone, Wrapper)]
 pub struct PyRegulatoryGraph(RegulatoryGraph);
 
-#[pyclass(name = "BooleanNetwork", extends=PyRegulatoryGraph)]
+#[pyclass(name = "BooleanNetwork", module="biodivine_aeon", extends=PyRegulatoryGraph)]
 #[derive(Clone, Wrapper)]
 pub struct PyBooleanNetwork(BooleanNetwork);
 

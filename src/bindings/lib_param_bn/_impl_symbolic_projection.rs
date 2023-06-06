@@ -88,9 +88,7 @@ impl PySymbolicProjection {
         slf
     }
 
-    fn __next__(
-        mut slf: PyRefMut<'_, Self>,
-    ) -> Option<(StateData, FunctionData)> {
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(StateData, FunctionData)> {
         slf.3.next().map(|(a, b)| {
             let a: Vec<(PyVariableId, bool)> = a.into_iter().map(|(x, y)| (x.into(), y)).collect();
             let b: Vec<(PyVariableId, PyFnUpdate)> =

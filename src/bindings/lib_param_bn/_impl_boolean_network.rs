@@ -3,7 +3,7 @@ use crate::bindings::lib_param_bn::{
     PyBooleanNetwork, PyFnUpdate, PyParameterId, PyRegulatoryGraph, PyVariableId,
 };
 use crate::{throw_runtime_error, throw_type_error, AsNative};
-use biodivine_lib_param_bn::BooleanNetwork;
+use biodivine_lib_param_bn::{BooleanNetwork, RegulatoryGraph};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -35,6 +35,20 @@ impl PyBooleanNetwork {
             CompareOp::Gt => throw_runtime_error("Unsupported operation."),
             CompareOp::Ge => throw_runtime_error("Unsupported operation."),
         }
+    }
+
+    fn __getstate__(&self) -> String {
+        self.to_aeon()
+    }
+
+    fn __setstate__(mut self_: PyRefMut<'_, Self>, state: &str) -> PyResult<()> {
+        let Ok(model) = BooleanNetwork::try_from(state) else {
+            return throw_runtime_error("Invalid serialized network state.")
+        };
+        let rg: &mut PyRegulatoryGraph = self_.as_mut();
+        rg.0 = model.as_graph().clone();
+        self_.0 = model;
+        Ok(())
     }
 
     pub fn add_regulation(mut self_: PyRefMut<'_, Self>, regulation: &PyAny) -> PyResult<()> {
@@ -108,11 +122,19 @@ impl PyBooleanNetwork {
     }
 
     #[new]
-    pub fn new(graph: &PyRegulatoryGraph) -> (PyBooleanNetwork, PyRegulatoryGraph) {
-        (
-            BooleanNetwork::new(graph.as_native().clone()).into(),
-            graph.clone(),
-        )
+    #[pyo3(signature = (graph = None))]
+    pub fn new(graph: Option<&PyRegulatoryGraph>) -> (PyBooleanNetwork, PyRegulatoryGraph) {
+        if let Some(graph) = graph {
+            (
+                BooleanNetwork::new(graph.as_native().clone()).into(),
+                graph.clone(),
+            )
+        } else {
+            (
+                BooleanNetwork::new(RegulatoryGraph::new(Vec::default())).into(),
+                RegulatoryGraph::new(Vec::default()).into(),
+            )
+        }
     }
 
     #[staticmethod]
