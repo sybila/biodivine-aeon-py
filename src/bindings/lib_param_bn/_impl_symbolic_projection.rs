@@ -10,6 +10,9 @@ use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;
 use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
 
+type StateData = Vec<(PyVariableId, bool)>;
+type FunctionData = Vec<(PyVariableId, PyFnUpdate)>;
+
 #[pymethods]
 impl PySymbolicProjection {
     #[new]
@@ -20,18 +23,18 @@ impl PySymbolicProjection {
         retained_variables: Option<Vec<&PyAny>>,
         retained_functions: Option<Vec<&PyAny>>,
     ) -> PyResult<PySymbolicProjection> {
-        let retained_variables = retained_variables.unwrap_or_else(|| Vec::new());
+        let retained_variables = retained_variables.unwrap_or_default();
 
         let mut variables: Vec<VariableId> = Vec::new();
         for retained in retained_variables {
-            variables.push(graph.resolve_variable(&retained)?.into());
+            variables.push(graph.resolve_variable(retained)?.into());
         }
 
-        let retained_functions = retained_functions.unwrap_or_else(|| Vec::new());
+        let retained_functions = retained_functions.unwrap_or_default();
 
         let mut functions: Vec<VariableId> = Vec::new();
         for retained in retained_functions {
-            functions.push(graph.resolve_variable(&retained)?.into());
+            functions.push(graph.resolve_variable(retained)?.into());
         }
 
         let symbolic_set: Bdd = if let Ok(set) = symbolic_set.extract::<PyGraphColoredVertices>() {
@@ -87,7 +90,7 @@ impl PySymbolicProjection {
 
     fn __next__(
         mut slf: PyRefMut<'_, Self>,
-    ) -> Option<(Vec<(PyVariableId, bool)>, Vec<(PyVariableId, PyFnUpdate)>)> {
+    ) -> Option<(StateData, FunctionData)> {
         slf.3.next().map(|(a, b)| {
             let a: Vec<(PyVariableId, bool)> = a.into_iter().map(|(x, y)| (x.into(), y)).collect();
             let b: Vec<(PyVariableId, PyFnUpdate)> =
