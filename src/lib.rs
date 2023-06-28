@@ -35,6 +35,7 @@ fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
     bindings::lib_param_bn::register(module)?;
     bindings::aeon::register(module)?;
     bindings::pbn_control::register(module)?;
+    bindings::hctl_model_checker::register(module)?;
     Ok(())
 }
 
