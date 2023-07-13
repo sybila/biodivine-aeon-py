@@ -1,8 +1,10 @@
 use crate::bindings::lib_param_bn::{PyBooleanNetwork, PyGraphColoredVertices, PySymbolicAsyncGraph};
 use biodivine_hctl_model_checker::analysis::{analyse_formula, analyse_formulae};
+use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
 use biodivine_hctl_model_checker::model_checking::{
-    get_extended_symbolic_graph, model_check_multiple_formulae, model_check_formula
+    model_check_multiple_formulae, model_check_formula
 };
+use biodivine_hctl_model_checker::preprocessing::node::HctlTreeNode;
 use biodivine_hctl_model_checker::result_print::PrintOptions;
 
 use crate::{AsNative, throw_runtime_error};
@@ -11,13 +13,21 @@ use pyo3::prelude::*;
 use pyo3::PyResult;
 
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
+    module.add_class::<PyHctlTreeNode>()?;
+
     module.add_function(wrap_pyfunction!(model_check, module)?)?;
     module.add_function(wrap_pyfunction!(model_check_multiple, module)?)?;
     module.add_function(wrap_pyfunction!(mc_analysis, module)?)?;
     module.add_function(wrap_pyfunction!(mc_analysis_multiple, module)?)?;
     module.add_function(wrap_pyfunction!(get_extended_stg, module)?)?;
+
     Ok(())
 }
+
+/// Structure for a HCTL formula syntax tree.
+#[pyclass(name = "HctlTreeNode")]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct PyHctlTreeNode(HctlTreeNode);
 
 #[pyfunction]
 pub fn model_check(
@@ -71,7 +81,10 @@ pub fn mc_analysis_multiple(
 pub fn get_extended_stg(
     bn: PyBooleanNetwork,
     num_hctl_vars: u16,
-) -> PySymbolicAsyncGraph {
-    get_extended_symbolic_graph(&bn.as_native().clone(), num_hctl_vars).into()
+) -> PyResult<PySymbolicAsyncGraph> {
+    match get_extended_symbolic_graph(&bn.as_native().clone(), num_hctl_vars) {
+        Ok(result) => Ok(result.into()),
+        Err(error) => throw_runtime_error(error)
+    }
 }
 
