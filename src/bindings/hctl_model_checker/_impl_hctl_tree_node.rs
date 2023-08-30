@@ -3,10 +3,11 @@ use crate::bindings::hctl_model_checker::PyHctlTreeNode;
 use crate::bindings::lib_param_bn::PyBooleanNetwork;
 use crate::{throw_runtime_error, AsNative};
 
+use biodivine_hctl_model_checker::mc_utils::collect_unique_hctl_vars;
+use biodivine_hctl_model_checker::preprocessing::node::NodeType;
 use biodivine_hctl_model_checker::preprocessing::parser::{
     parse_and_minimize_hctl_formula, parse_hctl_formula
 };
-use biodivine_hctl_model_checker::mc_utils::collect_unique_hctl_vars;
 
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -48,6 +49,39 @@ impl PyHctlTreeNode {
     /// Collect all unique HCTL variables occurring in the quantifiers in the tree nodes.
     pub fn collect_unique_hctl_vars(&self) -> HashSet<String> {
         collect_unique_hctl_vars(self.as_native().clone(), HashSet::new())
+    }
+
+    /// Return child node(s). If there are two children, returns left first.
+    pub fn get_children(&self) -> Vec<PyHctlTreeNode> {
+        let mut children = Vec::new();
+        match self.0.node_type.clone() {
+            NodeType::TerminalNode(_) => (),
+            NodeType::UnaryNode(_, child) => {
+                children.push(PyHctlTreeNode(*child));
+            }
+            NodeType::BinaryNode(_, left, right) => {
+                children.push(PyHctlTreeNode(*left));
+                children.push(PyHctlTreeNode(*right));
+            }
+            NodeType::HybridNode(_, _, child) => {
+                children.push(PyHctlTreeNode(*child));
+            }
+        }
+
+        children
+    }
+
+    /// Return 'operator' that is represented by the node, in a string form.
+    /// For unary/binary nodes, simply returns the operator, such as "|".
+    /// For terminal nodes, returns name of the var/prop/constant, such as "{x}".
+    /// For hybrid nodes, returns operator string + name of the var, like "Bind {x}:".
+    pub fn get_operator(&self) -> String {
+        match self.0.node_type.clone() {
+            NodeType::TerminalNode(atom) => format!("{}", atom),
+            NodeType::UnaryNode(op, _) => format!("{}", op),
+            NodeType::BinaryNode(op, _, _) => format!("{}", op),
+            NodeType::HybridNode(op, var, _) => format!("{} {{{}}}:", op, var),
+        }
     }
 
     #[staticmethod]
