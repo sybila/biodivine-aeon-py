@@ -1,12 +1,12 @@
-use std::collections::HashSet;
 use crate::bindings::hctl_model_checker::PyHctlTreeNode;
 use crate::bindings::lib_param_bn::PyBooleanNetwork;
 use crate::{throw_runtime_error, AsNative};
+use std::collections::HashSet;
 
 use biodivine_hctl_model_checker::mc_utils::collect_unique_hctl_vars;
 use biodivine_hctl_model_checker::preprocessing::node::NodeType;
 use biodivine_hctl_model_checker::preprocessing::parser::{
-    parse_and_minimize_hctl_formula, parse_hctl_formula
+    parse_and_minimize_hctl_formula, parse_hctl_formula,
 };
 
 use pyo3::basic::CompareOp;
@@ -42,7 +42,7 @@ impl PyHctlTreeNode {
     pub fn new(formula: String, bn: &PyBooleanNetwork) -> PyResult<PyHctlTreeNode> {
         match parse_and_minimize_hctl_formula(bn.as_native(), formula.as_str()) {
             Ok(tree) => Ok(PyHctlTreeNode(tree)),
-            Err(error) => throw_runtime_error(error)
+            Err(error) => throw_runtime_error(error),
         }
     }
 
@@ -77,10 +77,10 @@ impl PyHctlTreeNode {
     /// For hybrid nodes, returns operator string + name of the var, like "Bind {x}:".
     pub fn get_operator(&self) -> String {
         match self.0.node_type.clone() {
-            NodeType::TerminalNode(atom) => format!("{}", atom),
-            NodeType::UnaryNode(op, _) => format!("{}", op),
-            NodeType::BinaryNode(op, _, _) => format!("{}", op),
-            NodeType::HybridNode(op, var, _) => format!("{} {{{}}}:", op, var),
+            NodeType::TerminalNode(atom) => format!("{atom}"),
+            NodeType::UnaryNode(op, _) => format!("{op}"),
+            NodeType::BinaryNode(op, _, _) => format!("{op}"),
+            NodeType::HybridNode(op, var, _) => format!("{op} {{{var}}}:"),
         }
     }
 
@@ -92,7 +92,7 @@ impl PyHctlTreeNode {
     pub fn build_exact_from_formula(formula: String) -> PyResult<PyHctlTreeNode> {
         match parse_hctl_formula(formula.as_str()) {
             Ok(tree) => Ok(PyHctlTreeNode(tree)),
-            Err(error) => throw_runtime_error(error)
+            Err(error) => throw_runtime_error(error),
         }
     }
 }

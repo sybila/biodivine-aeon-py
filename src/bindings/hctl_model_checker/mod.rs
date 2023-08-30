@@ -1,17 +1,19 @@
-use crate::bindings::lib_param_bn::{PyBooleanNetwork, PyGraphColoredVertices, PySymbolicAsyncGraph};
+use crate::bindings::lib_param_bn::{
+    PyBooleanNetwork, PyGraphColoredVertices, PySymbolicAsyncGraph,
+};
 use biodivine_hctl_model_checker::analysis::{analyse_formula, analyse_formulae};
 use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
 use biodivine_hctl_model_checker::model_checking::{
-    model_check_formula, model_check_multiple_formulae, model_check_tree, model_check_trees
+    model_check_formula, model_check_multiple_formulae, model_check_tree, model_check_trees,
 };
 use biodivine_hctl_model_checker::preprocessing::node::HctlTreeNode;
 use biodivine_hctl_model_checker::result_print::PrintOptions;
 
-use crate::{AsNative, throw_runtime_error};
+use crate::{throw_runtime_error, AsNative};
 
 use macros::Wrapper;
-use pyo3::PyResult;
 use pyo3::prelude::*;
+use pyo3::PyResult;
 
 mod _impl_hctl_tree_node;
 
@@ -41,7 +43,7 @@ pub fn get_extended_stg(
 ) -> PyResult<PySymbolicAsyncGraph> {
     match get_extended_symbolic_graph(&bn.as_native().clone(), num_hctl_vars) {
         Ok(result) => Ok(result.into()),
-        Err(error) => throw_runtime_error(error)
+        Err(error) => throw_runtime_error(error),
     }
 }
 
@@ -54,7 +56,7 @@ pub fn model_check(
 ) -> PyResult<PyGraphColoredVertices> {
     match model_check_formula(formula, stg.as_native()) {
         Ok(result) => Ok(result.into()),
-        Err(error) => throw_runtime_error(error)
+        Err(error) => throw_runtime_error(error),
     }
 }
 
@@ -66,10 +68,8 @@ pub fn model_check_multiple(
     stg: &PySymbolicAsyncGraph,
 ) -> PyResult<Vec<PyGraphColoredVertices>> {
     match model_check_multiple_formulae(formulae, stg.as_native()) {
-        Ok(results) => {
-            Ok(results.iter().map(|r| r.clone().into()).collect())
-        },
-        Err(error) => throw_runtime_error(error)
+        Ok(results) => Ok(results.iter().map(|r| r.clone().into()).collect()),
+        Err(error) => throw_runtime_error(error),
     }
 }
 
@@ -82,7 +82,7 @@ pub fn model_check_hctl_tree(
 ) -> PyResult<PyGraphColoredVertices> {
     match model_check_tree(tree.as_native().clone(), stg.as_native()) {
         Ok(result) => Ok(result.into()),
-        Err(error) => throw_runtime_error(error)
+        Err(error) => throw_runtime_error(error),
     }
 }
 
@@ -95,20 +95,14 @@ pub fn model_check_multiple_hctl_trees(
 ) -> PyResult<Vec<PyGraphColoredVertices>> {
     let native_trees = trees.iter().map(|r| r.as_native().clone()).collect();
     match model_check_trees(native_trees, stg.as_native()) {
-        Ok(results) => {
-            Ok(results.iter().map(|r| r.clone().into()).collect())
-        },
-        Err(error) => throw_runtime_error(error)
+        Ok(results) => Ok(results.iter().map(|r| r.clone().into()).collect()),
+        Err(error) => throw_runtime_error(error),
     }
 }
 
-
 #[pyfunction]
 /// Run the whole model checking analysis pipeline on a single formula.
-pub fn mc_analysis(
-    bn: PyBooleanNetwork,
-    formula: String,
-) -> PyResult<()> {
+pub fn mc_analysis(bn: PyBooleanNetwork, formula: String) -> PyResult<()> {
     let result = analyse_formula(&bn.as_native().clone(), formula, PrintOptions::MediumPrint);
     match result {
         Ok(()) => Ok(()),
@@ -118,10 +112,7 @@ pub fn mc_analysis(
 
 #[pyfunction]
 /// Run the whole model checking analysis pipeline on a list of several (individual) formulae.
-pub fn mc_analysis_multiple(
-    bn: PyBooleanNetwork,
-    formulae: Vec<String>,
-) -> PyResult<()> {
+pub fn mc_analysis_multiple(bn: PyBooleanNetwork, formulae: Vec<String>) -> PyResult<()> {
     let result = analyse_formulae(&bn.as_native().clone(), formulae, PrintOptions::MediumPrint);
     match result {
         Ok(()) => Ok(()),
