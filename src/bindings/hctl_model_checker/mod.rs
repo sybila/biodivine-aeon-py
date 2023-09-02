@@ -103,7 +103,7 @@ pub fn model_check_multiple_hctl_trees(
 #[pyfunction]
 /// Run the whole model checking analysis pipeline on a single formula.
 pub fn mc_analysis(bn: PyBooleanNetwork, formula: String) -> PyResult<()> {
-    let result = analyse_formula(&bn.as_native().clone(), formula, PrintOptions::MediumPrint);
+    let result = analyse_formula(&bn.as_native().clone(), formula, PrintOptions::WithProgress);
     match result {
         Ok(()) => Ok(()),
         Err(e) => throw_runtime_error(e),
@@ -113,7 +113,7 @@ pub fn mc_analysis(bn: PyBooleanNetwork, formula: String) -> PyResult<()> {
 #[pyfunction]
 /// Run the whole model checking analysis pipeline on a list of several (individual) formulae.
 pub fn mc_analysis_multiple(bn: PyBooleanNetwork, formulae: Vec<String>) -> PyResult<()> {
-    let result = analyse_formulae(&bn.as_native().clone(), formulae, PrintOptions::MediumPrint);
+    let result = analyse_formulae(&bn.as_native().clone(), formulae, PrintOptions::WithProgress);
     match result {
         Ok(()) => Ok(()),
         Err(e) => throw_runtime_error(e),
