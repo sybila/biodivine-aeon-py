@@ -10,6 +10,7 @@ Boolean networks with symbolic methods. In particular, AEON.py supports:
  - Competitive fixed-point enumeration methods.
  - Basic control/reprogramming approaches.
  - Arbitrary symbolic operations on sets of Boolean states/functions represented through BDDs.
+ - Symbolic model checking of HCTL properties.
 
 ### Installation
 

@@ -43,7 +43,7 @@ impl PyBooleanNetwork {
 
     fn __setstate__(mut self_: PyRefMut<'_, Self>, state: &str) -> PyResult<()> {
         let Ok(model) = BooleanNetwork::try_from(state) else {
-            return throw_runtime_error("Invalid serialized network state.")
+            return throw_runtime_error("Invalid serialized network state.");
         };
         let rg: &mut PyRegulatoryGraph = self_.as_mut();
         rg.0 = model.as_graph().clone();
