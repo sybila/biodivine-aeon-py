@@ -257,11 +257,7 @@ impl PyBooleanNetwork {
     }
 
     pub fn parameters(&self) -> Vec<PyParameterId> {
-        self.as_native()
-            .parameters()
-            .into_iter()
-            .map(|it| it.into())
-            .collect()
+        self.as_native().parameters().map(|it| it.into()).collect()
     }
 
     pub fn implicit_parameters(&self) -> Vec<PyVariableId> {

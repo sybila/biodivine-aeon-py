@@ -63,11 +63,11 @@ fn throw_runtime_error<T, A: 'static>(message: A) -> PyResult<T>
 where
     A: Send + Sync + IntoPy<Py<PyAny>>,
 {
-    Err(runtime_error::<T, A>(message))
+    Err(runtime_error::<A>(message))
 }
 
 /// Helper function to quickly create a runtime error.
-fn runtime_error<T, A: 'static>(message: A) -> PyErr
+fn runtime_error<A: 'static>(message: A) -> PyErr
 where
     A: Send + Sync + IntoPy<Py<PyAny>>,
 {
