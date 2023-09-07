@@ -9,3 +9,6 @@ pub mod aeon;
 
 /// Wrappers for the `pbn-control` library.
 pub mod pbn_control;
+
+/// Wrappers for the `hctl-model-checker` library.
+pub mod hctl_model_checker;

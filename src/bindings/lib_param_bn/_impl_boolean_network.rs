@@ -43,7 +43,7 @@ impl PyBooleanNetwork {
 
     fn __setstate__(mut self_: PyRefMut<'_, Self>, state: &str) -> PyResult<()> {
         let Ok(model) = BooleanNetwork::try_from(state) else {
-            return throw_runtime_error("Invalid serialized network state.")
+            return throw_runtime_error("Invalid serialized network state.");
         };
         let rg: &mut PyRegulatoryGraph = self_.as_mut();
         rg.0 = model.as_graph().clone();
@@ -257,11 +257,7 @@ impl PyBooleanNetwork {
     }
 
     pub fn parameters(&self) -> Vec<PyParameterId> {
-        self.as_native()
-            .parameters()
-            .into_iter()
-            .map(|it| it.into())
-            .collect()
+        self.as_native().parameters().map(|it| it.into()).collect()
     }
 
     pub fn implicit_parameters(&self) -> Vec<PyVariableId> {

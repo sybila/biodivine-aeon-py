@@ -37,7 +37,7 @@ impl PyRegulatoryGraph {
 
     fn __setstate__(&mut self, state: &str) -> PyResult<()> {
         let Ok(graph) = RegulatoryGraph::try_from(state) else {
-            return throw_runtime_error("Invalid serialized graph state.")
+            return throw_runtime_error("Invalid serialized graph state.");
         };
         self.0 = graph;
         Ok(())
