@@ -3,7 +3,9 @@ use crate::bindings::lib_param_bn::{
 };
 use biodivine_hctl_model_checker::analysis::{analyse_formula, analyse_formulae};
 use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
-use biodivine_hctl_model_checker::model_checking::{model_check_tree, model_check_trees};
+use biodivine_hctl_model_checker::model_checking::{
+    model_check_multiple_trees_dirty, model_check_tree, model_check_tree_dirty, model_check_trees,
+};
 use biodivine_hctl_model_checker::preprocessing::node::HctlTreeNode;
 use biodivine_hctl_model_checker::preprocessing::parser::parse_and_minimize_hctl_formula;
 use biodivine_hctl_model_checker::result_print::PrintOptions;
@@ -24,6 +26,8 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(get_extended_stg, module)?)?;
     module.add_function(wrap_pyfunction!(model_check, module)?)?;
     module.add_function(wrap_pyfunction!(model_check_multiple, module)?)?;
+    module.add_function(wrap_pyfunction!(model_check_dirty, module)?)?;
+    module.add_function(wrap_pyfunction!(model_check_multiple_dirty, module)?)?;
     module.add_function(wrap_pyfunction!(mc_analysis, module)?)?;
     module.add_function(wrap_pyfunction!(mc_analysis_multiple, module)?)?;
     Ok(())
@@ -97,6 +101,44 @@ pub fn model_check_multiple(
         list.push(PyHctlTreeNode::from_python(formula, stg.as_network())?.into());
     }
     match model_check_trees(list, stg) {
+        Ok(results) => Ok(results.into_iter().map(|r| r.into()).collect()),
+        Err(error) => throw_runtime_error(error),
+    }
+}
+
+#[pyfunction]
+/// Run the model checking algorithm on a HCTL formula ([String] or [PyHctlTreeNode]).
+///
+/// Returns a satisfying color-state relation, however, does not `sanitize` the result.
+/// That means the underlying BDD contains additional symbolic variables.
+pub fn model_check_dirty(
+    formula: &PyAny,
+    stg: &PySymbolicAsyncGraph,
+) -> PyResult<PyGraphColoredVertices> {
+    let stg = stg.as_native();
+    let formula = PyHctlTreeNode::from_python(formula, stg.as_network())?;
+    match model_check_tree_dirty(formula.into(), stg) {
+        Ok(result) => Ok(result.into()),
+        Err(error) => throw_runtime_error(error),
+    }
+}
+
+#[pyfunction]
+/// Run the model checking algorithm on a list of HCTL formulae (each formula can be a [String]
+/// or a [HctlTreeNode]).
+///
+/// Returns a list of satisfying color-state relations, one for each formula. However, does not
+/// `sanitize` the result. That means the underlying BDDs contain additional symbolic variables.
+pub fn model_check_multiple_dirty(
+    formulae: &PyList,
+    stg: &PySymbolicAsyncGraph,
+) -> PyResult<Vec<PyGraphColoredVertices>> {
+    let stg = stg.as_native();
+    let mut list: Vec<HctlTreeNode> = Vec::new();
+    for formula in formulae {
+        list.push(PyHctlTreeNode::from_python(formula, stg.as_network())?.into());
+    }
+    match model_check_multiple_trees_dirty(list, stg) {
         Ok(results) => Ok(results.into_iter().map(|r| r.into()).collect()),
         Err(error) => throw_runtime_error(error),
     }

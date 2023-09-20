@@ -41,6 +41,8 @@ shows how to work with the symbolic representation of the network's state-transi
 AEON.py to enumerate fixed-points of a particular Boolean network.
  - `workflow/computing-attractors.ipynb` Shows how to use the symbolic algorithms in AEON.py
 to enumerate the asynchronous attractors of a particular Boolean network.
+- `workflow/model-checking.ipynb` Shows how to run the model-checking algorithm in AEON.py
+  to analyze temporal properties of Boolean networks.
 
 ## Case studies
 

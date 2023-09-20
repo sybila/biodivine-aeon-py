@@ -23,6 +23,7 @@ biodivine-pbn-control = "0.2.1"
 biodivine-hctl-model-checker = "0.1.7"
 rand = "0.8.5"
 macros = { path = "macros" }
+zip = "0.6.3"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
