@@ -213,7 +213,8 @@ pub fn build_classification_archive(
     Ok(())
 }
 
-/// Write a short summary regarding the computation where the assertions were not satisfied.
+/// Write a short summary regarding the classification computation where the assertions were
+/// not satisfied.
 pub fn write_empty_report(
     assertion_formulae: &[String],
     archive_name: &str,

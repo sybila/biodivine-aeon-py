@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use biodivine_hctl_model_checker::mc_utils::collect_unique_hctl_vars;
 use biodivine_hctl_model_checker::preprocessing::node::NodeType;
 use biodivine_hctl_model_checker::preprocessing::parser::{
-    parse_and_minimize_hctl_formula, parse_hctl_formula,
+    parse_and_minimize_extended_formula, parse_and_minimize_hctl_formula, parse_hctl_formula,
 };
 
 use pyo3::basic::CompareOp;
@@ -48,7 +48,7 @@ impl PyHctlTreeNode {
 
     /// Collect all unique HCTL variables occurring in the quantifiers in the tree nodes.
     pub fn collect_unique_hctl_vars(&self) -> HashSet<String> {
-        collect_unique_hctl_vars(self.as_native().clone(), HashSet::new())
+        collect_unique_hctl_vars(self.as_native().clone())
     }
 
     /// Return child node(s). If there are two children, returns left first.
@@ -85,9 +85,21 @@ impl PyHctlTreeNode {
     }
 
     #[staticmethod]
-    /// Generate syntax tree given a HCTL formula and corresponding Boolean network.
-    /// Tree is generated exactly according to the formula, and it is not modified. This tree
-    /// cannot be used for model checking directly (use `HctlTreeNode::new()` instead).
+    /// Parse an extended HCTL formula string representation into an actual formula tree
+    /// with renamed (minimized) set of variables. Validity of the formula is checked during
+    /// parsing, including proposition names.
+    /// Extended formulae can include `wild-card propositions` in form `%proposition%`.
+    pub fn new_from_extended(formula: String, bn: &PyBooleanNetwork) -> PyResult<PyHctlTreeNode> {
+        match parse_and_minimize_extended_formula(bn.as_native(), formula.as_str()) {
+            Ok(tree) => Ok(PyHctlTreeNode(tree)),
+            Err(error) => throw_runtime_error(error),
+        }
+    }
+
+    #[staticmethod]
+    /// Generate syntax tree given a HCTL formula. Tree is generated exactly according to
+    /// the formula, and it is not modified.
+    /// This tree cannot be used for model checking directly (use `HctlTreeNode::new()` instead).
     /// Validity of the formula is checked during parsing, but not proposition names.
     pub fn build_exact_from_formula(formula: String) -> PyResult<PyHctlTreeNode> {
         match parse_hctl_formula(formula.as_str()) {
