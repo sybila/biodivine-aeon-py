@@ -2,11 +2,14 @@ use crate::internal::classification::classify::classify;
 use crate::internal::classification::write_output::build_classification_archive;
 use std::collections::HashMap;
 
-use crate::bindings::lib_param_bn::PyGraphColors;
+use crate::bindings::lib_param_bn::{PyGraphColors, PyModelAnnotation};
 
 use crate::throw_runtime_error;
+use crate::AsNative;
 
-use crate::internal::classification::load_inputs::load_classification_archive;
+use crate::internal::classification::load_inputs::{
+    load_classification_archive, read_model_assertions, read_model_properties,
+};
 use pyo3::prelude::*;
 use pyo3::PyResult;
 
@@ -14,6 +17,8 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(run_classification, module)?)?;
     module.add_function(wrap_pyfunction!(build_class_archive, module)?)?;
     module.add_function(wrap_pyfunction!(load_class_archive, module)?)?;
+    module.add_function(wrap_pyfunction!(get_model_assertions, module)?)?;
+    module.add_function(wrap_pyfunction!(get_model_properties, module)?)?;
     Ok(())
 }
 
@@ -79,6 +84,25 @@ pub fn load_class_archive(
                 .collect();
             Ok((mapping, model_str))
         }
+        Err(error) => throw_runtime_error(format!("{error:?}")),
+    }
+}
+
+#[pyfunction]
+/// Read the list of assertions from an `aeon model annotation` object.
+/// The assertions are expected to appear as `#! dynamic_assertion: FORMULA` in model string.
+pub fn get_model_assertions(annotations: &PyModelAnnotation) -> Vec<String> {
+    read_model_assertions(annotations.as_native())
+}
+
+#[pyfunction]
+/// Read the list of named properties from an `aeon model annotation` object.
+///
+/// The properties are expected to appear as `#! dynamic_property: NAME: FORMULA` in model string.
+/// They are returned in alphabetic order w.r.t. the property name.
+pub fn get_model_properties(annotations: &PyModelAnnotation) -> PyResult<Vec<(String, String)>> {
+    match read_model_properties(annotations.as_native()) {
+        Ok(named_properties) => Ok(named_properties),
         Err(error) => throw_runtime_error(format!("{error:?}")),
     }
 }
