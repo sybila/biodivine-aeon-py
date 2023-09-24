@@ -177,9 +177,17 @@ pub fn model_check_multiple_extended(
 }
 
 #[pyfunction]
+#[pyo3(signature = (bn, formula, print_progress=true))]
 /// Run the whole model checking analysis pipeline on a single formula.
-pub fn mc_analysis(bn: PyBooleanNetwork, formula: String) -> PyResult<()> {
-    let result = analyse_formula(&bn.as_native().clone(), formula, PrintOptions::WithProgress);
+/// Argument `print_progress` determines the amount of progress printed. If false (default), only
+/// the results summary is printed. Otherwise also some progress details are given.
+pub fn mc_analysis(bn: PyBooleanNetwork, formula: String, print_progress: bool) -> PyResult<()> {
+    let result = if print_progress {
+        analyse_formula(bn.as_native(), formula, PrintOptions::WithProgress)
+    } else {
+        analyse_formula(bn.as_native(), formula, PrintOptions::JustSummary)
+    };
+
     match result {
         Ok(()) => Ok(()),
         Err(e) => throw_runtime_error(e),
@@ -187,13 +195,21 @@ pub fn mc_analysis(bn: PyBooleanNetwork, formula: String) -> PyResult<()> {
 }
 
 #[pyfunction]
+#[pyo3(signature = (bn, formulae, print_progress=true))]
 /// Run the whole model checking analysis pipeline on a list of several (individual) formulae.
-pub fn mc_analysis_multiple(bn: PyBooleanNetwork, formulae: Vec<String>) -> PyResult<()> {
-    let result = analyse_formulae(
-        &bn.as_native().clone(),
-        formulae,
-        PrintOptions::WithProgress,
-    );
+/// Argument `print_progress` determines the amount of progress printed. If false (default), only
+/// the results summary is printed. Otherwise also some progress details are given.
+pub fn mc_analysis_multiple(
+    bn: PyBooleanNetwork,
+    formulae: Vec<String>,
+    print_progress: bool,
+) -> PyResult<()> {
+    let result = if print_progress {
+        analyse_formulae(bn.as_native(), formulae, PrintOptions::WithProgress)
+    } else {
+        analyse_formulae(bn.as_native(), formulae, PrintOptions::JustSummary)
+    };
+
     match result {
         Ok(()) => Ok(()),
         Err(e) => throw_runtime_error(e),
