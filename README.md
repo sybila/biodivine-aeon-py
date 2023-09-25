@@ -105,6 +105,11 @@ an official installer or cannot be installed globally.
  > to even build the Z3 dependency, regardless of the linking process. On debian-ish distros,
  > `apt install build-essential clang` should be sufficient.
 
+ > On Apple Silicon, dynamic linking for Z3 is currently not working out of the box if
+ > you installed Z3 through `brew`. To fix this issue, you need to ensure that the compiler can find
+ > Z3 include files in `/opt/homebrew/include`. However, static linking should work fine.
+ > As such, we recommend this option for now.
+
 To install a local version of AEON.py, you then simply need to follow the same steps outlined 
 in the `maturin` [tutorial](https://www.maturin.rs/tutorial):
 
