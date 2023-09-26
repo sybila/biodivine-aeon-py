@@ -43,6 +43,11 @@ AEON.py to enumerate fixed-points of a particular Boolean network.
 to enumerate the asynchronous attractors of a particular Boolean network.
 - `workflow/model-checking.ipynb` Shows how to run the model-checking algorithm in AEON.py
   to analyze (hybrid) temporal properties of Boolean networks.
+- `workflow/classification.ipynb` Demonstrates the use of classification methods
+  (HCTL/attractor/custom...) to group the instantiations (colors) of a partially
+  specified network into classes with functionally distinct behavior. Such classification
+  can be visually explored as a decision tree in 
+  the [BN classifier](https://github.com/sybila/biodivine-bn-classifier) app.
 
 ## Case studies
 
