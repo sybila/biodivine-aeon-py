@@ -42,7 +42,7 @@ AEON.py to enumerate fixed-points of a particular Boolean network.
  - `workflow/computing-attractors.ipynb` Shows how to use the symbolic algorithms in AEON.py
 to enumerate the asynchronous attractors of a particular Boolean network.
 - `workflow/model-checking.ipynb` Shows how to run the model-checking algorithm in AEON.py
-  to analyze temporal properties of Boolean networks.
+  to analyze (hybrid) temporal properties of Boolean networks.
 
 ## Case studies
 

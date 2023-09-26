@@ -1,20 +1,26 @@
+# Note that some of the following properties have (slightly) simpler but equivalent formulas.
+# However, we use these formulas to demonstrate various features of HCTL.
+
+
 ### Assertions
 
-# There must be an attractor with a state where at least one of the phenotypes activated.
+# There exists a state that is (a) in an attractor, and (b) with at least one phenotype variable active.
 #! dynamic_assertion: #`3{x}: @{x}: ((!{y}: AG EF {y}) & (Apoptosis | Growth_Arrest | Proliferation))`#
+
 
 ### Properties
 
-# The only attractors are fixed points with active Apoptosis (system always converges to the programmed cell death).
+# The only attractors are fixed points with active `Apoptosis` (system always converges
+# to the programmed cell death).
 #! dynamic_property: p1: #`V{x}: @{x}: ((!{y}: AG EF {y}) => ((AX {x}) & Apoptosis))`#
 
-# Growth_arrest is stably activated in an attractor.
+# `Growth_arrest` is active and stable in some attractor.
 #! dynamic_property: p2: #`3{x}: @{x}: ((!{y}: AG EF {y}) & Growth_Arrest & ~(EF ~Growth_Arrest))`#
 
-# Proliferation is stably activated in an attractor.
+# `Proliferation` is active and stable in some attractor.
 #! dynamic_property: p3: #`3{x}: @{x}: ((!{y}: AG EF {y}) & Proliferation & ~(EF ~Proliferation))`#
 
-# Proliferation and Apoptosis are simultaneously active in an attractor state.
+# `Proliferation` and `Apoptosis` are simultaneously active in some attractor state.
 #! dynamic_property: p4: #`3{x}: @{x}: ((!{y}: AG EF {y}) & Apoptosis & Proliferation)`#
 
 ### Model
