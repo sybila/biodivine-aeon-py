@@ -77,8 +77,10 @@ impl PyHctlTreeNode {
 #[pyo3(signature = (formula, stg, sanitize=true))]
 /// Run the model checking algorithm on a HCTL `formula` ([String] or [PyHctlTreeNode]).
 ///
-/// Argument `sanitize` determines whether the results are sanitized (i.e., the underlying BDDs
-/// are `cleaned` of redundant symbolic variables).
+/// Argument `sanitize` determines whether the extra symbolic variables required for HCTL model
+/// checking should be removed from the result (default: `true`). In general, you should use
+/// sanitized results with any other form of post-processing using the standard
+/// `SymbolicAsyncGraph`, while non-sanitized results can be used for further model checking.
 ///
 /// Returns a satisfying color-state relation.
 pub fn model_check(
