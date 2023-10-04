@@ -1,5 +1,6 @@
 use super::{Behaviour, Class};
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use std::fmt::{Display, Error, Formatter};
 
 impl Class {
@@ -26,11 +27,19 @@ impl Class {
 
 impl Display for Class {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(
-            f,
-            "{:?}",
-            self.0.iter().map(|c| format!("{c:?}")).collect::<Vec<_>>()
-        )
+        let mut behaviour_count: HashMap<String, usize> = HashMap::new();
+        for behaviour in self.0.iter() {
+            *behaviour_count.entry(format!("{behaviour:?}")).or_insert(0) += 1;
+        }
+
+        // Format the result
+        let short_name: String = behaviour_count
+            .iter()
+            .filter(|(_, &count)| count > 0)
+            .map(|(behaviour, &count)| format!("{} x {}", count, behaviour))
+            .collect::<Vec<_>>()
+            .join(", ");
+        write!(f, "{}", short_name)
     }
 }
 
