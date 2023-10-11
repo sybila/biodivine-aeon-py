@@ -4,7 +4,8 @@ use crate::bindings::pbn_control::{PyControlMap, PyPerturbationGraph, PyPhenotyp
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::VariableId;
-use biodivine_pbn_control::perturbation::PerturbationGraph;
+use biodivine_pbn_control::perturbation::{PerturbationGraph};
+use biodivine_pbn_control::phenotype_control::PhenotypeOscillationType;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
@@ -30,6 +31,15 @@ impl AsNative<PerturbationGraph> for PyPerturbationGraph {
     }
 }
 
+pub fn convert_str_to_oscillation_type(osc: &str) -> PhenotypeOscillationType {
+    match osc {
+            "Forbidden" => PhenotypeOscillationType::Forbidden,
+            "Allowed" => PhenotypeOscillationType::Allowed,
+            "Required" => PhenotypeOscillationType::Required,
+            _ => panic!("Invalid variant"),
+    }
+}
+
 #[pymethods]
 impl PyPerturbationGraph {
     /// Create a new `PerturbationGraph` based on a `BooleanNetwork`.
@@ -52,7 +62,7 @@ impl PyPerturbationGraph {
             perturb_vars.push(network.as_ref().find_variable(var)?.unwrap().into());
         }
 
-        Ok(PerturbationGraph::with_restricted_variables(network.as_native(), &perturb_vars).into())
+        Ok(PerturbationGraph::with_restricted_variables(network.as_native(), perturb_vars.clone()).into())
     }
 
     /// Get a `SymbolicAsyncGraph` that represents the original (unperturbed) behaviour
@@ -79,6 +89,11 @@ impl PyPerturbationGraph {
     /// Boolean network.
     pub fn variables(&self) -> Vec<PyVariableId> {
         self.as_native().variables().map(|i| i.into()).collect()
+    }
+
+    /// Get the list of `VariableId` objects which can be perturbed
+    pub fn perturbable_variables(&self) -> Vec<PyVariableId> {
+        self.as_native().perturbable_variables().iter().map(|i| i.clone().into()).collect()
     }
 
     /// Get the `ParameterId` of a parameter that is associated with the perturbation
@@ -263,56 +278,53 @@ impl PyPerturbationGraph {
             .into()
     }
 
+
+    // pub fn phenotype_permanent_control(
+    //     &self,
+    //     phenotype: GraphVertices,
+    //     admissible_colors_perturbations: GraphColors,
+    //     oscillation: PhenotypeOscillationType,
+    //     verbose: bool
+    // )
+
     pub fn phenotype_permanent_control(
         &self,
         phenotype: PyGraphVertices,
         admissible_perturbations: PyGraphColors,
-        allow_oscillation: bool
+        oscillation: &str,
+        verbose: bool
     ) -> PyPhenotypeControlMap {
         let converted_phenotype = phenotype.as_native().clone();
         let converted_perturbation = admissible_perturbations.as_native().clone();
-        self.as_native()
+        let converted_oscillation = convert_str_to_oscillation_type(oscillation);
+        let result = self.as_native()
             .phenotype_permanent_control(converted_phenotype,
                                          converted_perturbation,
-                                         allow_oscillation)
-            .into()
+                                         converted_oscillation,
+                                         verbose);
+        return result.into()
     }
 
     pub fn ceiled_phenotype_permanent_control(
         &self,
         phenotype: PyGraphVertices,
         size_bound: usize,
-        perturbation_variables: Vec<PyVariableId>,
+        oscillation: &str,
+        required_robustness: f64,
         stop_early: bool,
-        allow_oscillation: bool
-    ) -> PyPhenotypeControlMap {
+        verbose: bool) -> PyPhenotypeControlMap {
         let converted_phenotype = phenotype.as_native().clone();
-        let converted_perturbation_variables = perturbation_variables.iter().map(|i| i.clone().as_native().clone()).collect();
-        self.as_native()
+        let converted_oscillation = convert_str_to_oscillation_type(oscillation);
+        let result = self.as_native()
             .ceiled_phenotype_permanent_control(converted_phenotype,
-                                                size_bound,
-                                                converted_perturbation_variables,
-                                                stop_early,
-                                                allow_oscillation)
-            .into()
+                                         size_bound,
+                                         converted_oscillation,
+                                         required_robustness,
+                                         stop_early,
+                                         verbose);
+        return result.into()
     }
 
-      pub fn ceiled_phenotype_permanent_control_with_true_oscillation(
-        &self,
-        phenotype: PyGraphVertices,
-        size_bound: usize,
-        perturbation_variables: Vec<PyVariableId>,
-        stop_early: bool
-    ) -> PyPhenotypeControlMap {
-          let converted_phenotype = phenotype.as_native().clone();
-        let converted_perturbation_variables = perturbation_variables.iter().map(|i| i.clone().as_native().clone()).collect();
-        self.as_native()
-            .ceiled_phenotype_permanent_control_with_true_oscillation(converted_phenotype,
-                                                size_bound,
-                                                converted_perturbation_variables,
-                                                stop_early)
-            .into()
-      }
 
     /// Resolves a string or `VariableId` to `VariableId`.
     pub fn find_variable(&self, variable: &PyAny) -> PyResult<PyVariableId> {

@@ -1,6 +1,6 @@
 [package]
 name = "biodivine-aeon-py"
-version = "0.4.0-alpha1"
+version = "0.4.0-alpha2"
 edition = "2021"
 
 [lib]
@@ -19,7 +19,7 @@ static-z3 = ["z3/static-link-z3"]
 pyo3 = { version = "0.19.0", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = { version="0.4.5", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.1"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "ffe2680" }
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "0f92934" }
 rand = "0.8.5"
 macros = { path = "macros" }
 

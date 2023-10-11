@@ -19,6 +19,16 @@ fn py_dict_to_rust_hashmap(py_dict: &PyDict) -> HashMap<String, bool> {
     rust_hashmap
 }
 
+fn rust_hashmap_to_py_dict(py:Python, rust_hashmap: &HashMap<String, bool>) -> Py<PyDict> {
+    let mut pyDict = PyDict::new(py);
+
+    for (k, v) in rust_hashmap {
+        pyDict.set_item(k, v).unwrap();
+    }
+
+    pyDict.into()
+}
+
 impl From<PhenotypeControlMap> for PyPhenotypeControlMap {
     fn from(value: PhenotypeControlMap) -> Self {
         PyPhenotypeControlMap(value)
@@ -54,6 +64,11 @@ impl PyPhenotypeControlMap {
         self.as_native().as_colored_vertices().clone().into()
     }
 
+    // pub fn working_perturbations(&self, min_robustness: f64, verbose: bool) -> Vec<(HashMap<String, bool>, GraphColors)> {
+    /// Obtain list of working perturbations
+    pub fn working_perturbations(&self, py: Python, min_robustness: f64, verbose: bool) -> Vec<(Py<PyDict>, PyGraphColors)> {
+        self.as_native().working_perturbations(min_robustness, verbose).iter().map(|i| (rust_hashmap_to_py_dict(py, &i.0), i.1.clone().into())).collect()
+    }
 
     /// Obtain a set of colours for which the given perturbation works
     pub fn perturbation_working_colors(&self, perturbation: &PyDict) -> PyGraphColors {
