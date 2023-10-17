@@ -2,13 +2,14 @@
 #![allow(clippy::wrong_self_convention)]
 
 use crate::bindings::lib_bdd::{
-    PyBddPartialValuation, PyBddValuation, PyBddVariable, PyBddVariableSet,
+    PyBddPartialValuation, PyBddValuation, PyBddVariable, PyBddVariableSet, PyPartialValuationIter,
+    PyValuationIter,
 };
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable};
 use pyo3::basic::CompareOp;
 use pyo3::types::{PyDict, PyList, PyTuple};
-use pyo3::{pymethods, PyAny, PyResult};
+use pyo3::{pymethods, PyAny, PyRef, PyResult};
 use std::collections::HashMap;
 
 impl Default for PyBddPartialValuation {
@@ -145,8 +146,8 @@ impl PyBddValuation {
         self.as_native_mut().set_value(index.into(), value);
     }
 
-    pub fn __iter__(&self) -> Vec<bool> {
-        self.into_list()
+    pub fn __iter__(&self) -> PyValuationIter {
+        PyValuationIter(self.into_list(), 0)
     }
 
     pub fn extends(&self, partial_valuation: &PyAny) -> PyResult<bool> {
@@ -205,8 +206,8 @@ impl PyBddPartialValuation {
         self.as_native().has_value(index.into())
     }
 
-    pub fn __iter__(&self) -> Vec<(PyBddVariable, bool)> {
-        self.into_list()
+    pub fn __iter__(&self) -> PyPartialValuationIter {
+        PyPartialValuationIter(self.into_list(), 0)
     }
 
     pub fn extends(&self, partial_valuation: &PyAny) -> PyResult<bool> {
@@ -233,5 +234,39 @@ impl PyBddPartialValuation {
     #[staticmethod]
     pub fn from_data(data: &PyAny) -> PyResult<PyBddPartialValuation> {
         PyBddPartialValuation::from_python(data, None)
+    }
+}
+
+#[pymethods]
+impl PyValuationIter {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(&mut self) -> Option<bool> {
+        if self.1 >= self.0.len() {
+            None
+        } else {
+            let result = self.0.get(self.1).cloned();
+            self.1 += 1;
+            result
+        }
+    }
+}
+
+#[pymethods]
+impl PyPartialValuationIter {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(&mut self) -> Option<(PyBddVariable, bool)> {
+        if self.1 >= self.0.len() {
+            None
+        } else {
+            let result = self.0.get(self.1).cloned();
+            self.1 += 1;
+            result
+        }
     }
 }

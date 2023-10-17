@@ -48,6 +48,8 @@ to enumerate the asynchronous attractors of a particular Boolean network.
   specified network into classes with functionally distinct behavior. Such classification
   can be visually explored as a decision tree in 
   the [BN classifier](https://github.com/sybila/biodivine-bn-classifier) app.
+ - `workflow/file-formats.ipynb` Describes basic Boolean network representations supported in AEON
+and/or relevant technical limitations of these representations.
 
 ## Case studies
 
