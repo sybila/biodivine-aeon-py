@@ -12,3 +12,6 @@ pub mod pbn_control;
 
 /// Wrappers for the `hctl-model-checker` library.
 pub mod hctl_model_checker;
+
+/// Wrappers for internal classification algorithms used by `bn-classifier`.
+pub mod bn_classifier;
