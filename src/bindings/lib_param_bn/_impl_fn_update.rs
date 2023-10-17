@@ -226,4 +226,18 @@ impl PyFnUpdate {
             _ => None,
         }
     }
+
+    /// Substitutes every occurrence of `var` with `function`. Returns `None` when the substitution
+    /// is impossible.
+    ///
+    /// A substitution is impossible when `var` appears as argument of an uninterpreted function.
+    pub fn substitute_variable(
+        &self,
+        var: PyVariableId,
+        function: PyFnUpdate,
+    ) -> Option<PyFnUpdate> {
+        self.as_native()
+            .substitute_variable(var.into(), function.as_native())
+            .map(|it| it.into())
+    }
 }
