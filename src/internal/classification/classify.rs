@@ -55,13 +55,15 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
     let annotations = ModelAnnotation::from_model_string(aeon_str.as_str());
     let assertions = read_model_assertions(&annotations);
     let named_properties = read_model_properties(&annotations)?;
-    println!("Loaded all inputs.");
+    println!("Loaded model and properties out of `{model_path}`.");
 
-    println!("Parsing formulae and generating model representation...");
+    println!("Parsing formulae and generating symbolic representation...");
     // Combine all assertions into one formula and add it to the list of properties.
     let assertion = build_combined_assertion(&assertions);
+    // Adjust message depending on the number of properties (singular/multiple)
+    let assertion_message = if assertions.len() == 1 {"property (assertion)"} else {"properties (assertions)"};
     println!(
-        "Successfully parsed {} assertions and {} properties.",
+        "Successfully parsed all {} required {assertion_message} and all {} classification properties.",
         assertions.len(),
         named_properties.len(),
     );
@@ -79,30 +81,30 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
 
     // Instantiate extended STG with enough variables to evaluate all formulae.
     let Ok(graph) = get_extended_symbolic_graph(&bn, num_hctl_vars as u16) else {
-        return Err("Unable to generate STG for provided BN model.".to_string());
+        return Err("Unable to generate STG for provided PSBN model.".to_string());
     };
     println!(
-        "Successfully generated model with {} vars and {} params.",
+        "Successfully encoded model with {} variables and {} parameters.",
         graph.symbolic_context().num_state_variables(),
         graph.symbolic_context().num_parameter_variables(),
     );
     println!(
-        "Model admits {:.0} concretizations.",
+        "Model admits {:.0} instances.",
         graph.mk_unit_colors().approx_cardinality(),
     );
 
-    println!("Evaluating assertions...");
+    println!("Evaluating required properties (this may take some time)...");
     // Compute the colors (universally) satisfying the combined assertion formula.
     let assertion_result = model_check_tree_dirty(assertion_tree, &graph)?;
     let valid_colors = get_universal_colors(&graph, &assertion_result);
-    println!("Assertions evaluated.");
+    println!("Required properties successfully evaluated.");
     println!(
-        "{:.0} concretizations satisfy all assertions.",
+        "{:.0} instances satisfy all required properties.",
         valid_colors.approx_cardinality(),
     );
 
     if valid_colors.is_empty() {
-        println!("No color satisfies given assertions. Aborting.");
+        println!("No instance satisfies given required properties. Aborting.");
         return write_empty_report(&assertions, output_zip).map_err(|e| format!("{e:?}"));
     }
 
@@ -113,14 +115,14 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
         valid_colors.as_bdd().clone(),
     )?;
 
-    println!("Evaluating properties...");
+    println!("Evaluating classification properties (this may take some time)...");
     // Model check all properties on the restricted graph.
     let property_result = model_check_multiple_trees_dirty(property_trees, &graph)?;
     let property_colors: Vec<GraphColors> = property_result
         .iter()
         .map(|result| get_universal_colors(&graph, result))
         .collect();
-    println!("Properties evaluated.");
+    println!("Classification properties successfully evaluated.");
 
     // This is an important step where we ensure that the "model checking context"
     // does not "leak" outside of the BN classifier. In essence, this ensures that the
@@ -134,7 +136,7 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
         .collect();
 
     // do the classification while printing the report and dumping resulting BDDs
-    println!("Classifying based on model-checking results...");
+    println!("Generating classification mapping based on model-checking results...");
     write_classifier_output(
         &assertions,
         &valid_colors,
@@ -144,7 +146,7 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
         aeon_str.as_str(),
     )
     .map_err(|e| format!("{e:?}"))?;
-    println!("Results saved to {output_zip}.");
+    println!("Results saved to `{output_zip}`.");
 
     Ok(())
 }
