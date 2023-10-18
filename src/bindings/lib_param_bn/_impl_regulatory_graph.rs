@@ -315,18 +315,18 @@ fn regulation_to_python(py: Python, reg: &Regulation) -> PyResult<PyObject> {
 pub(crate) fn regulation_from_python(
     dict: &PyDict,
 ) -> PyResult<(&PyAny, &PyAny, bool, Option<Monotonicity>)> {
-    let Some(source) = dict.get_item("source") else {
+    let Some(source) = dict.get_item("source")? else {
         return throw_type_error("Missing regulation source variable.");
     };
-    let Some(target) = dict.get_item("target") else {
+    let Some(target) = dict.get_item("target")? else {
         return throw_type_error("Missing regulation target variable.");
     };
     let observable = dict
-        .get_item("observable")
+        .get_item("observable")?
         .map(|it| it.extract::<bool>())
         .unwrap_or(Ok(true))?;
     let monotonicity = dict
-        .get_item("monotonicity")
+        .get_item("monotonicity")?
         .map(|it| it.extract::<String>())
         .transpose()?;
     let monotonicity = monotonicity

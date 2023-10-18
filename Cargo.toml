@@ -16,14 +16,14 @@ crate-type = ["cdylib", "rlib"]
 static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
-pyo3 = { version = "0.19.0", features = ["abi3-py37", "extension-module"] }
+pyo3 = { version = "0.20.0", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = { version="0.4.7", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.2"
 biodivine-pbn-control = "0.2.1"
 biodivine-hctl-model-checker = "0.2.0"
 rand = "0.8.5"
 macros = { path = "macros" }
-zip = "0.6.3"
+zip = "0.6.6"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
@@ -31,4 +31,4 @@ z3="^0.12.1"
 z3-sys = "^0.8.1"
 
 [build-dependencies]
-pyo3-build-config = "0.19.0"
+pyo3-build-config = "0.20.0"

@@ -228,14 +228,14 @@ impl PyBooleanNetwork {
     }
 
     pub fn add_parameter(&mut self, parameter: &PyDict) -> PyResult<PyParameterId> {
-        let name = parameter.get_item("name");
+        let name = parameter.get_item("name")?;
         let name = if let Some(name) = name {
             name.extract::<String>()?
         } else {
             return throw_type_error("Expected string name.");
         };
 
-        let arity = parameter.get_item("arity");
+        let arity = parameter.get_item("arity")?;
         let arity = if let Some(arity) = arity {
             arity.extract::<u32>()?
         } else {
