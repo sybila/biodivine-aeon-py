@@ -61,7 +61,11 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
     // Combine all assertions into one formula and add it to the list of properties.
     let assertion = build_combined_assertion(&assertions);
     // Adjust message depending on the number of properties (singular/multiple)
-    let assertion_message = if assertions.len() == 1 {"property (assertion)"} else {"properties (assertions)"};
+    let assertion_message = if assertions.len() == 1 {
+        "property (assertion)"
+    } else {
+        "properties (assertions)"
+    };
     println!(
         "Successfully parsed all {} required {assertion_message} and all {} classification properties.",
         assertions.len(),
