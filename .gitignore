@@ -87,3 +87,6 @@ docs/_build/
 
 # Virtual Python environment
 .env
+
+# Some temporary Z3 files
+.z3-trace
