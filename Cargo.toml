@@ -18,7 +18,7 @@ static-z3 = ["z3/static-link-z3"]
 [dependencies]
 pyo3 = { version = "0.19.0", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = { version="0.4.6", features=["solver-z3"] }
-biodivine-lib-bdd = "0.5.1"
+biodivine-lib-bdd = "0.5.2"
 biodivine-pbn-control = "0.2.1"
 biodivine-hctl-model-checker = "0.2.0"
 rand = "0.8.5"

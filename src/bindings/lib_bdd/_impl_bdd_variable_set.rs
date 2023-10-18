@@ -153,4 +153,10 @@ impl PyBddVariableSet {
         }
         Ok(self.as_native().mk_dnf(&native_clauses).into())
     }
+
+    pub fn transfer_from(&self, bdd: &PyBdd, ctx: &PyBddVariableSet) -> Option<PyBdd> {
+        self.as_native()
+            .transfer_from(bdd.as_native(), ctx.as_native())
+            .map(|it| it.into())
+    }
 }
