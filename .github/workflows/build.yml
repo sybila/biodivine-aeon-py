@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       # On linux, everything is installed in the container,
       # so we don't really need any dependencies here.
       - name: Maturin build.
@@ -37,7 +37,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v3      
+        uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
         uses: cda-tum/setup-z3@v1
@@ -73,7 +73,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Python.
         uses: actions/setup-python@v4
         with:
@@ -121,7 +121,7 @@ jobs:
         python: ["3.9", "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -131,7 +131,7 @@ jobs:
           auto-activate-base: false
           show-channel-urls: true
       - name: Build and upload the conda packages
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.1-beta.1
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         with:
           python-version: ${{ matrix.python }}
           meta_yaml_dir: "conda"
