@@ -50,6 +50,10 @@ to enumerate the asynchronous attractors of a particular Boolean network.
   the [BN classifier](https://github.com/sybila/biodivine-bn-classifier) app.
  - `workflow/file-formats.ipynb` Describes basic Boolean network representations supported in AEON
 and/or relevant technical limitations of these representations.
+ - `workflow/comparing-partial-and-full-functions.ipynb` Demonstrates how to work with Boolean
+   functions symbolically using AEON.py. Specifically, we show how to test whether a particular 
+   (fully specified) function is one of the possible instantiations of another partially
+   specified function.
 
 ## Case studies
 
