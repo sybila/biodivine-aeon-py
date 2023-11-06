@@ -539,6 +539,36 @@ impl PySymbolicAsyncGraph {
         self.as_native().trap_backward(initial.as_native()).into()
     }
 
+    pub fn transfer_from(
+        &self,
+        set: &PyGraphColoredVertices,
+        context: &PySymbolicAsyncGraph,
+    ) -> Option<PyGraphColoredVertices> {
+        self.as_native()
+            .transfer_from(set.as_native(), context.as_native())
+            .map(|it| it.into())
+    }
+
+    pub fn transfer_colors_from(
+        &self,
+        set: &PyGraphColors,
+        context: &PySymbolicAsyncGraph,
+    ) -> Option<PyGraphColors> {
+        self.as_native()
+            .transfer_colors_from(set.as_native(), context.as_native())
+            .map(|it| it.into())
+    }
+
+    pub fn transfer_vertices_from(
+        &self,
+        set: &PyGraphVertices,
+        context: &PySymbolicAsyncGraph,
+    ) -> Option<PyGraphVertices> {
+        self.as_native()
+            .transfer_vertices_from(set.as_native(), context.as_native())
+            .map(|it| it.into())
+    }
+
     /// Resolve a `VariableId` for a variable given either as a string or as a `VariableId`.
     pub(crate) fn resolve_variable(&self, variable: &PyAny) -> PyResult<PyVariableId> {
         if let Ok(name) = variable.extract::<String>() {

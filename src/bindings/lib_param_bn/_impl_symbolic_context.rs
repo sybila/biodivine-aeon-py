@@ -252,4 +252,10 @@ impl PySymbolicContext {
             .instantiate_fn_update(&valuation, function.as_native())
             .into())
     }
+
+    pub fn transfer_from(&self, bdd: &PyBdd, context: &PySymbolicContext) -> Option<PyBdd> {
+        self.as_native()
+            .transfer_from(bdd.as_native(), context.as_native())
+            .map(|it| it.into())
+    }
 }

@@ -1,5 +1,5 @@
 {% set name = "biodivine_aeon" %}
-{% set version = "0.4.0a2" %}
+{% set version = "0.4.0a3" %}
 
 package:
   name: "{{ name|lower }}"

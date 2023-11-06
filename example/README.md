@@ -41,6 +41,19 @@ shows how to work with the symbolic representation of the network's state-transi
 AEON.py to enumerate fixed-points of a particular Boolean network.
  - `workflow/computing-attractors.ipynb` Shows how to use the symbolic algorithms in AEON.py
 to enumerate the asynchronous attractors of a particular Boolean network.
+- `workflow/model-checking.ipynb` Shows how to run the model-checking algorithm in AEON.py
+  to analyze (hybrid) temporal properties of Boolean networks.
+- `workflow/classification.ipynb` Demonstrates the use of classification methods
+  (HCTL/attractor/custom...) to group the instantiations (colors) of a partially
+  specified network into classes with functionally distinct behavior. Such classification
+  can be visually explored as a decision tree in 
+  the [BN classifier](https://github.com/sybila/biodivine-bn-classifier) app.
+ - `workflow/file-formats.ipynb` Describes basic Boolean network representations supported in AEON
+and/or relevant technical limitations of these representations.
+ - `workflow/comparing-partial-and-full-functions.ipynb` Demonstrates how to work with Boolean
+   functions symbolically using AEON.py. Specifically, we show how to test whether a particular 
+   (fully specified) function is one of the possible instantiations of another partially
+   specified function.
 
 ## Case studies
 

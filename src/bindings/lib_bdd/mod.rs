@@ -20,7 +20,9 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<PyBddVariable>()?;
     module.add_class::<PyBddVariableSet>()?;
     module.add_class::<PyBddValuation>()?;
+    module.add_class::<PyValuationIter>()?;
     module.add_class::<PyBddPartialValuation>()?;
+    module.add_class::<PyPartialValuationIter>()?;
     module.add_class::<PyBddValuationIterator>()?;
     module.add_class::<PyBddClauseIterator>()?;
     module.add_class::<PyBooleanExpression>()?;
@@ -40,9 +42,17 @@ pub struct PyBddClauseIterator(BddPathIterator<'static>, Box<Bdd>);
 #[pyclass(name = "BddValuation")]
 #[derive(Clone, Eq, PartialEq, Hash, Wrapper)]
 pub struct PyBddValuation(BddValuation);
+#[pyclass(name = "ValuationIter")]
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct PyValuationIter(Vec<bool>, usize);
+
 #[pyclass(name = "BddPartialValuation")]
 #[derive(Clone, Eq, PartialEq, Hash, Wrapper)]
 pub struct PyBddPartialValuation(BddPartialValuation);
+
+#[pyclass(name = "PartialValuationIter")]
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct PyPartialValuationIter(Vec<(PyBddVariable, bool)>, usize);
 
 /// An identifier of a Boolean decision variable used within a `Bdd`.
 #[pyclass(name = "BddVariable")]
