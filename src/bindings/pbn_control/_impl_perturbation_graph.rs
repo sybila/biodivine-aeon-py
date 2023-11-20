@@ -290,16 +290,13 @@ impl PyPerturbationGraph {
     pub fn phenotype_permanent_control(
         &self,
         phenotype: PyGraphVertices,
-        admissible_perturbations: PyGraphColors,
         oscillation: &str,
         verbose: bool
     ) -> PyPhenotypeControlMap {
         let converted_phenotype = phenotype.as_native().clone();
-        let converted_perturbation = admissible_perturbations.as_native().clone();
         let converted_oscillation = convert_str_to_oscillation_type(oscillation);
         let result = self.as_native()
             .phenotype_permanent_control(converted_phenotype,
-                                         converted_perturbation,
                                          converted_oscillation,
                                          verbose);
         return result.into()
@@ -310,7 +307,6 @@ impl PyPerturbationGraph {
         phenotype: PyGraphVertices,
         size_bound: usize,
         oscillation: &str,
-        required_robustness: f64,
         stop_early: bool,
         verbose: bool) -> PyPhenotypeControlMap {
         let converted_phenotype = phenotype.as_native().clone();
@@ -319,7 +315,6 @@ impl PyPerturbationGraph {
             .ceiled_phenotype_permanent_control(converted_phenotype,
                                          size_bound,
                                          converted_oscillation,
-                                         required_robustness,
                                          stop_early,
                                          verbose);
         return result.into()
