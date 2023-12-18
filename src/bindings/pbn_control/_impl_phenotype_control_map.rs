@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use crate::bindings::lib_bdd::PyBdd;
 use crate::bindings::lib_param_bn::{PyGraphColoredVertices, PyGraphColors};
-use crate::bindings::pbn_control::PyPhenotypeControlMap;
-use crate::AsNative;
+use crate::bindings::pbn_control::{PyPerturbationGraph, PyPhenotypeControlMap};
+use crate::{AsNative, throw_runtime_error};
 use biodivine_pbn_control::phenotype_control::PhenotypeControlMap;
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 
 fn py_dict_to_rust_hashmap(py_dict: &PyDict) -> HashMap<String, bool> {
     let mut rust_hashmap = HashMap::new();
@@ -53,6 +53,15 @@ impl AsNative<PhenotypeControlMap> for PyPhenotypeControlMap {
 
 #[pymethods]
 impl PyPhenotypeControlMap {
+    #[new]
+    pub fn new(colors: PyGraphColoredVertices, stg: PyPerturbationGraph) -> Self {
+        PhenotypeControlMap::new(
+            stg.as_native().clone(),
+            colors.as_native().clone(),
+        ).into()
+    }
+
+
     /// Obtain a copy of the underlying `Bdd` representing this map.
     pub fn as_bdd(&self) -> PyBdd {
         self.as_native().as_bdd().clone().into()
