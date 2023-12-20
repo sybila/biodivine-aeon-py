@@ -15,7 +15,7 @@ use biodivine_hctl_model_checker::preprocessing::parser::parse_and_minimize_hctl
 
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{
-    GraphColoredVertices, GraphColors, SymbolicAsyncGraph,
+    GraphColoredVertices, GraphColors, SymbolicAsyncGraph, SymbolicContext,
 };
 use biodivine_lib_param_bn::{BooleanNetwork, ModelAnnotation};
 
@@ -52,6 +52,7 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
         return Err(format!("Input file `{model_path}` is not accessible."));
     };
     let bn = BooleanNetwork::try_from(aeon_str.as_str())?;
+    let ctx = SymbolicContext::new(&bn).unwrap();
     let annotations = ModelAnnotation::from_model_string(aeon_str.as_str());
     let assertions = read_model_assertions(&annotations);
     let named_properties = read_model_properties(&annotations)?;
@@ -73,11 +74,11 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
     );
 
     // Parse all formulae and count the max. number of HCTL variables across formulae.
-    let assertion_tree = parse_and_minimize_hctl_formula(&bn, &assertion)?;
+    let assertion_tree = parse_and_minimize_hctl_formula(&ctx, &assertion)?;
     let mut num_hctl_vars = collect_unique_hctl_vars(assertion_tree.clone()).len();
     let mut property_trees: Vec<HctlTreeNode> = Vec::new();
     for (_name, formula) in &named_properties {
-        let tree = parse_and_minimize_hctl_formula(&bn, formula.as_str())?;
+        let tree = parse_and_minimize_hctl_formula(&ctx, formula.as_str())?;
         let tree_vars = collect_unique_hctl_vars(tree.clone()).len();
         num_hctl_vars = max(num_hctl_vars, tree_vars);
         property_trees.push(tree);
@@ -114,7 +115,7 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
 
     // restrict the colors on the symbolic graph
     let graph = SymbolicAsyncGraph::with_custom_context(
-        bn,
+        &bn,
         graph.symbolic_context().clone(),
         valid_colors.as_bdd().clone(),
     )?;
@@ -162,6 +163,7 @@ mod tests {
     };
     use biodivine_hctl_model_checker::mc_utils::collect_unique_hctl_vars;
     use biodivine_hctl_model_checker::preprocessing::parser::parse_and_minimize_hctl_formula;
+    use biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext;
     use biodivine_lib_param_bn::{BooleanNetwork, ModelAnnotation};
     use std::cmp::max;
 
@@ -175,6 +177,7 @@ mod tests {
             v_3 -> v_3
         ";
         let bn = BooleanNetwork::try_from(aeon_str).unwrap();
+        let ctx = SymbolicContext::new(&bn).unwrap();
         let formulae = vec![
             "!{x}: AX {x}".to_string(),
             "!{y}: (AG EF {y} & (!{z}: AX {z}))".to_string(),
@@ -182,7 +185,7 @@ mod tests {
 
         let mut var_count = 0;
         for f in formulae {
-            let tree = parse_and_minimize_hctl_formula(&bn, f.as_str()).unwrap();
+            let tree = parse_and_minimize_hctl_formula(&ctx, f.as_str()).unwrap();
             let c = collect_unique_hctl_vars(tree).len();
             var_count = max(c, var_count);
         }

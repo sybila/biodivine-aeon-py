@@ -331,8 +331,15 @@ impl PyBooleanNetwork {
         }
     }
 
-    pub fn inline_inputs(&self, py: Python) -> PyResult<Py<PyBooleanNetwork>> {
-        PyBooleanNetwork::from(self.as_native().inline_inputs()).export_to_python(py)
+    #[pyo3(signature = (infer_inputs = true, repair_graph = true))]
+    pub fn inline_inputs(
+        &self,
+        py: Python,
+        infer_inputs: bool,
+        repair_graph: bool,
+    ) -> PyResult<Py<PyBooleanNetwork>> {
+        PyBooleanNetwork::from(self.as_native().inline_inputs(infer_inputs, repair_graph))
+            .export_to_python(py)
     }
 
     /// Eliminate a network variable by inlining its update function into its downstream targets.
@@ -343,10 +350,12 @@ impl PyBooleanNetwork {
     ///  - The function cannot be safely inlined due to the presence of uninterpreted functions.
     ///
     /// Check the Rust documentation for more information about the method.
+    #[pyo3(signature = (var, repair_graph = true))]
     pub fn inline_variable(
         self_: PyRefMut<'_, Self>,
         py: Python,
         var: &PyAny,
+        repair_graph: bool,
     ) -> PyResult<Option<Py<PyBooleanNetwork>>> {
         let id = self_
             .as_ref()
@@ -355,7 +364,7 @@ impl PyBooleanNetwork {
 
         self_
             .as_native()
-            .inline_variable(id.into())
+            .inline_variable(id.into(), repair_graph)
             .map(|it| PyBooleanNetwork::from(it).export_to_python(py))
             .transpose()
     }

@@ -7,7 +7,7 @@ use crate::bindings::lib_param_bn::{
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::{BddPartialValuation, BddValuation, BddVariable, BddVariableSet};
 use biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext;
-use biodivine_lib_param_bn::VariableId;
+use biodivine_lib_param_bn::{FnUpdate, VariableId};
 use pyo3::prelude::*;
 use std::collections::HashMap;
 
@@ -17,6 +17,10 @@ fn convert_var_list(variables: &[BddVariable]) -> Vec<PyBddVariable> {
 
 fn read_arg_list(variables: &[PyVariableId]) -> Vec<VariableId> {
     variables.iter().map(|it| (*it).into()).collect()
+}
+
+fn read_fn_arg_list(variables: &[PyFnUpdate]) -> Vec<FnUpdate> {
+    variables.iter().map(|it| (*it).clone().into()).collect()
 }
 
 /// A helper method that reads a `BddValuation` object from `PyAny`, ensuring that the
@@ -158,10 +162,10 @@ impl PySymbolicContext {
     pub fn mk_uninterpreted_function_is_true(
         &self,
         parameter: PyParameterId,
-        arguments: Vec<PyVariableId>,
+        arguments: Vec<PyFnUpdate>,
     ) -> PyBdd {
         self.as_native()
-            .mk_uninterpreted_function_is_true(parameter.into(), &read_arg_list(&arguments))
+            .mk_uninterpreted_function_is_true(parameter.into(), &read_fn_arg_list(&arguments))
             .into()
     }
 
@@ -206,7 +210,7 @@ impl PySymbolicContext {
         &self,
         valuation: &PyAny,
         parameter: PyParameterId,
-        arguments: Vec<PyVariableId>,
+        arguments: Vec<PyFnUpdate>,
     ) -> PyResult<PyBdd> {
         let required_variables = self
             .as_native()
@@ -222,7 +226,7 @@ impl PySymbolicContext {
             .instantiate_uninterpreted_function(
                 &valuation,
                 parameter.into(),
-                &read_arg_list(&arguments),
+                &read_fn_arg_list(&arguments),
             )
             .into())
     }

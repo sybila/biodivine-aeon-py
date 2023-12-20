@@ -24,9 +24,9 @@ pub fn interleaved_transition_guided_reduction(
     graph: &SymbolicAsyncGraph,
     initial: GraphColoredVertices,
 ) -> (GraphColoredVertices, Vec<VariableId>) {
-    let variables = graph.as_network().variables().collect::<Vec<_>>();
+    let variables = graph.variables().collect::<Vec<_>>();
     let mut scheduler = Scheduler::new(initial, variables);
-    for variable in graph.as_network().variables() {
+    for variable in graph.variables() {
         scheduler.spawn(ReachableProcess::new(
             variable,
             graph,

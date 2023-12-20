@@ -1,6 +1,6 @@
 use crate::bindings::lib_param_bn::{PyBooleanNetwork, PyFnUpdate, PyParameterId, PyVariableId};
 use crate::{throw_runtime_error, AsNative};
-use biodivine_lib_param_bn::{BinaryOp, BooleanNetwork, FnUpdate, VariableId};
+use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use pyo3::basic::CompareOp;
 use pyo3::{pymethods, PyResult};
 use std::collections::hash_map::DefaultHasher;
@@ -37,56 +37,11 @@ impl PyFnUpdate {
     /// variable/parameter names are used. Otherwise, names are substituted for "v_id" (variables)
     /// and "p_id" (parameters).
     pub fn to_string(&self, network: Option<&PyBooleanNetwork>) -> String {
-        fn recursive(update: &FnUpdate, network: Option<&BooleanNetwork>) -> String {
-            match update {
-                FnUpdate::Const(value) => {
-                    if *value {
-                        "true".to_string()
-                    } else {
-                        "false".to_string()
-                    }
-                }
-                FnUpdate::Var(id) => {
-                    if let Some(network) = network {
-                        network.get_variable_name(*id).clone()
-                    } else {
-                        format!("v_{}", id.to_index())
-                    }
-                }
-                FnUpdate::Param(id, args) => {
-                    if let Some(network) = network {
-                        let name = network.get_parameter(*id).get_name();
-                        if args.is_empty() {
-                            name.clone()
-                        } else {
-                            let args = args
-                                .iter()
-                                .map(|x| network.get_variable_name(*x).clone())
-                                .collect::<Vec<_>>();
-                            format!("{}({})", name, args.join(", "))
-                        }
-                    } else if args.is_empty() {
-                        format!("p_{}", id.to_index())
-                    } else {
-                        let args = args.iter().map(|x| format!("{:?}", *x)).collect::<Vec<_>>();
-                        format!("p_{}({})", id.to_index(), args.join(", "))
-                    }
-                }
-                FnUpdate::Not(inner) => {
-                    format!("!{}", recursive(inner, network))
-                }
-                FnUpdate::Binary(op, left, right) => {
-                    format!(
-                        "({} {} {})",
-                        recursive(left, network),
-                        op,
-                        recursive(right, network)
-                    )
-                }
-            }
+        if let Some(network) = network {
+            self.as_native().to_string(network.as_native())
+        } else {
+            format!("{}", self.as_native())
         }
-
-        recursive(self.as_native(), network.map(|it| it.as_native()))
     }
 
     /// Build a new expression which uses the variables and parameters from the given network.
@@ -109,8 +64,8 @@ impl PyFnUpdate {
     }
 
     #[staticmethod]
-    pub fn from_parameter(id: PyParameterId, args: Option<Vec<PyVariableId>>) -> PyFnUpdate {
-        let mut args_native: Vec<VariableId> = Vec::new();
+    pub fn from_parameter(id: PyParameterId, args: Option<Vec<PyFnUpdate>>) -> PyFnUpdate {
+        let mut args_native: Vec<FnUpdate> = Vec::new();
         if let Some(args) = args {
             for a in args {
                 args_native.push(a.into());
@@ -124,52 +79,42 @@ impl PyFnUpdate {
         match operator.as_str() {
             "not" => {
                 assert_eq!(1, arguments.len());
-                Ok(FnUpdate::Not(Box::new(arguments[0].as_native().clone())).into())
+                let f = FnUpdate::mk_not(arguments[0].as_native().clone());
+                Ok(f.into())
             }
             "and" => {
-                assert_eq!(2, arguments.len());
-                Ok(FnUpdate::Binary(
-                    BinaryOp::And,
-                    Box::new(arguments[0].as_native().clone()),
-                    Box::new(arguments[1].as_native().clone()),
-                )
-                .into())
+                let args = arguments
+                    .into_iter()
+                    .map(|it| it.as_native().clone())
+                    .collect::<Vec<_>>();
+                let f = FnUpdate::mk_conjunction(&args);
+                Ok(f.into())
             }
             "or" => {
-                assert_eq!(2, arguments.len());
-                Ok(FnUpdate::Binary(
-                    BinaryOp::Or,
-                    Box::new(arguments[0].as_native().clone()),
-                    Box::new(arguments[1].as_native().clone()),
-                )
-                .into())
+                let args = arguments
+                    .into_iter()
+                    .map(|it| it.as_native().clone())
+                    .collect::<Vec<_>>();
+                let f = FnUpdate::mk_disjunction(&args);
+                Ok(f.into())
             }
             "xor" => {
                 assert_eq!(2, arguments.len());
-                Ok(FnUpdate::Binary(
-                    BinaryOp::Xor,
-                    Box::new(arguments[0].as_native().clone()),
-                    Box::new(arguments[1].as_native().clone()),
-                )
-                .into())
+                let l = arguments[0].as_native().clone();
+                let r = arguments[1].as_native().clone();
+                Ok(l.xor(r).into())
             }
             "iff" => {
                 assert_eq!(2, arguments.len());
-                Ok(FnUpdate::Binary(
-                    BinaryOp::Iff,
-                    Box::new(arguments[0].as_native().clone()),
-                    Box::new(arguments[1].as_native().clone()),
-                )
-                .into())
+                let l = arguments[0].as_native().clone();
+                let r = arguments[1].as_native().clone();
+                Ok(l.iff(r).into())
             }
             "imp" => {
                 assert_eq!(2, arguments.len());
-                Ok(FnUpdate::Binary(
-                    BinaryOp::Imp,
-                    Box::new(arguments[0].as_native().clone()),
-                    Box::new(arguments[1].as_native().clone()),
-                )
-                .into())
+                let l = arguments[0].as_native().clone();
+                let r = arguments[1].as_native().clone();
+                Ok(l.implies(r).into())
             }
             _ => throw_runtime_error(format!("Unknown operator: {operator}.")),
         }
@@ -191,9 +136,12 @@ impl PyFnUpdate {
         }
     }
 
-    pub fn as_parameter(&self) -> Option<(PyParameterId, Vec<PyVariableId>)> {
+    pub fn as_parameter(&self) -> Option<(PyParameterId, Vec<PyFnUpdate>)> {
         if let FnUpdate::Param(id, args) = self.as_native() {
-            let args = args.iter().map(|it| (*it).into()).collect::<Vec<_>>();
+            let args = args
+                .iter()
+                .map(|it| (*it).clone().into())
+                .collect::<Vec<_>>();
             Some(((*id).into(), args))
         } else {
             None
@@ -231,13 +179,9 @@ impl PyFnUpdate {
     /// is impossible.
     ///
     /// A substitution is impossible when `var` appears as argument of an uninterpreted function.
-    pub fn substitute_variable(
-        &self,
-        var: PyVariableId,
-        function: PyFnUpdate,
-    ) -> Option<PyFnUpdate> {
+    pub fn substitute_variable(&self, var: PyVariableId, function: PyFnUpdate) -> PyFnUpdate {
         self.as_native()
             .substitute_variable(var.into(), function.as_native())
-            .map(|it| it.into())
+            .into()
     }
 }

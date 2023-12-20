@@ -88,7 +88,7 @@ pub fn load_classification_archive(
     // Load the BN model (from the archive) and generate the extended STG.
     let aeon_str = read_zip_file(&mut archive, "model.aeon");
     let bn = BooleanNetwork::try_from(aeon_str.as_str())?;
-    let graph = SymbolicAsyncGraph::new(bn)?;
+    let graph = SymbolicAsyncGraph::new(&bn)?;
 
     // collect the classification outcomes (colored sets) from the individual BDD dumps
     let mut categories = HashMap::new();

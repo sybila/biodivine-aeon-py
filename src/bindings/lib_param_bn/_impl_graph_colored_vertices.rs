@@ -5,6 +5,7 @@ use crate::bindings::lib_param_bn::{
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_bdd::Bdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 
@@ -30,7 +31,10 @@ impl PyGraphColoredVertices {
             ctx.bdd_variable_set().num_vars(),
             bdd.as_native().num_vars()
         );
-        PyGraphColoredVertices(graph.as_native().empty_vertices().copy(bdd.into()))
+        PyGraphColoredVertices(GraphColoredVertices::new(
+            bdd.into(),
+            graph.as_native().symbolic_context(),
+        ))
     }
 
     pub fn to_bdd(&self) -> PyBdd {

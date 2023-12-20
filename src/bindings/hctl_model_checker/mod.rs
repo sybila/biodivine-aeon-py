@@ -11,7 +11,8 @@ use biodivine_hctl_model_checker::model_checking::{
 use biodivine_hctl_model_checker::preprocessing::node::HctlTreeNode;
 use biodivine_hctl_model_checker::preprocessing::parser::parse_and_minimize_hctl_formula;
 use biodivine_hctl_model_checker::result_print::PrintOptions;
-use biodivine_lib_param_bn::BooleanNetwork;
+
+use biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext;
 use std::collections::HashMap;
 
 use crate::{throw_runtime_error, throw_type_error, AsNative};
@@ -58,11 +59,11 @@ impl PyHctlTreeNode {
     ///
     ///  - `PyHctlTreeNode` itself;
     ///  - A string that will be parsed as a HCTL formula.
-    pub(crate) fn from_python(any: &PyAny, network: &BooleanNetwork) -> PyResult<PyHctlTreeNode> {
+    pub(crate) fn from_python(any: &PyAny, ctx: &SymbolicContext) -> PyResult<PyHctlTreeNode> {
         if let Ok(val) = any.extract::<PyHctlTreeNode>() {
             Ok(val)
         } else if let Ok(string) = any.extract::<String>() {
-            let parsed = parse_and_minimize_hctl_formula(network, string.as_str());
+            let parsed = parse_and_minimize_hctl_formula(ctx, string.as_str());
             match parsed {
                 Err(e) => throw_runtime_error(e),
                 Ok(tree) => Ok(PyHctlTreeNode::from(tree)),
@@ -89,7 +90,7 @@ pub fn model_check(
     sanitize: bool,
 ) -> PyResult<PyGraphColoredVertices> {
     let stg = stg.as_native();
-    let formula = PyHctlTreeNode::from_python(formula, stg.as_network())?;
+    let formula = PyHctlTreeNode::from_python(formula, stg.symbolic_context())?;
 
     let result = if sanitize {
         model_check_tree(formula.into(), stg)
@@ -120,7 +121,7 @@ pub fn model_check_multiple(
     let stg = stg.as_native();
     let mut list: Vec<HctlTreeNode> = Vec::new();
     for formula in formulae {
-        list.push(PyHctlTreeNode::from_python(formula, stg.as_network())?.into());
+        list.push(PyHctlTreeNode::from_python(formula, stg.symbolic_context())?.into());
     }
 
     let result = if sanitize {

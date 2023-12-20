@@ -41,11 +41,7 @@ pub fn xie_beerel_attractors(
     graph: &PySymbolicAsyncGraph,
     states: Option<&PyGraphColoredVertices>,
 ) -> Vec<PyGraphColoredVertices> {
-    let variables = graph
-        .as_native()
-        .as_network()
-        .variables()
-        .collect::<Vec<_>>();
+    let variables = Vec::from_iter(graph.as_native().variables());
     let states = states
         .map(|it| it.as_native())
         .unwrap_or_else(|| graph.as_native().unit_colored_vertices());
@@ -66,11 +62,7 @@ pub fn reach_fwd(
     states: &PyGraphColoredVertices,
     universe: Option<&PyGraphColoredVertices>,
 ) -> PyGraphColoredVertices {
-    let variables = graph
-        .as_native()
-        .as_network()
-        .variables()
-        .collect::<Vec<_>>();
+    let variables = Vec::from_iter(graph.as_native().variables());
     let universe = universe
         .map(|it| it.as_native())
         .unwrap_or_else(|| graph.as_native().unit_colored_vertices());
@@ -93,11 +85,7 @@ pub fn reach_bwd(
     states: &PyGraphColoredVertices,
     universe: Option<&PyGraphColoredVertices>,
 ) -> PyGraphColoredVertices {
-    let variables = graph
-        .as_native()
-        .as_network()
-        .variables()
-        .collect::<Vec<_>>();
+    let variables = Vec::from_iter(graph.as_native().variables());
     let universe = universe
         .map(|it| it.as_native())
         .unwrap_or_else(|| graph.as_native().unit_colored_vertices());

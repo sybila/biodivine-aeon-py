@@ -8,6 +8,7 @@ use biodivine_hctl_model_checker::preprocessing::node::NodeType;
 use biodivine_hctl_model_checker::preprocessing::parser::{
     parse_and_minimize_extended_formula, parse_and_minimize_hctl_formula, parse_hctl_formula,
 };
+use biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext;
 
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -40,7 +41,8 @@ impl PyHctlTreeNode {
     /// Tree is slightly modified after the parsing (variable renaming, etc.) due to optimizations.
     /// Validity of the formula is checked during parsing, including proposition names.
     pub fn new(formula: String, bn: &PyBooleanNetwork) -> PyResult<PyHctlTreeNode> {
-        match parse_and_minimize_hctl_formula(bn.as_native(), formula.as_str()) {
+        let ctx = SymbolicContext::new(bn.as_native()).unwrap();
+        match parse_and_minimize_hctl_formula(&ctx, formula.as_str()) {
             Ok(tree) => Ok(PyHctlTreeNode(tree)),
             Err(error) => throw_runtime_error(error),
         }
@@ -90,7 +92,8 @@ impl PyHctlTreeNode {
     /// parsing, including proposition names.
     /// Extended formulae can include `wild-card propositions` in form `%proposition%`.
     pub fn new_from_extended(formula: String, bn: &PyBooleanNetwork) -> PyResult<PyHctlTreeNode> {
-        match parse_and_minimize_extended_formula(bn.as_native(), formula.as_str()) {
+        let ctx = SymbolicContext::new(bn.as_native()).unwrap();
+        match parse_and_minimize_extended_formula(&ctx, formula.as_str()) {
             Ok(tree) => Ok(PyHctlTreeNode(tree)),
             Err(error) => throw_runtime_error(error),
         }

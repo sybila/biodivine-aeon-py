@@ -16,18 +16,22 @@ impl PySymbolicAsyncGraph {
     /// Create a new `SymbolicAsyncGraph` from a `BooleanNetwork`.
     #[new]
     pub fn new(network: PyBooleanNetwork) -> PyResult<Self> {
-        let result = SymbolicAsyncGraph::new(network.into());
+        let result = SymbolicAsyncGraph::new(network.as_native());
         match result {
             Ok(graph) => Ok(graph.into()),
             Err(e) => throw_runtime_error(e),
         }
     }
 
-    /// Obtain a copy of the underlying `BooleanNetwork` used by this `SymbolicAsyncGraph`.
-    pub fn network(&self, py: Python) -> PyResult<Py<PyBooleanNetwork>> {
-        let network = self.as_native().as_network();
-        let network = PyBooleanNetwork::from(network.clone());
-        network.export_to_python(py)
+    /// Obtain a copy of the underlying `BooleanNetwork` used by this `SymbolicAsyncGraph`, or `None` if there is
+    /// no network.
+    pub fn network(&self, py: Python) -> PyResult<Option<Py<PyBooleanNetwork>>> {
+        if let Some(network) = self.as_native().as_network() {
+            let network = PyBooleanNetwork::from(network.clone());
+            network.export_to_python(py).map(Some)
+        } else {
+            Ok(None)
+        }
     }
 
     /// Obtain a copy of the `SymbolicContext` used by this symbolic encoding.
@@ -78,7 +82,7 @@ impl PySymbolicAsyncGraph {
     pub fn wrap_in_subspace(&self, vertices: &PyGraphVertices) -> HashMap<PyVariableId, bool> {
         let space = self.as_native().wrap_in_subspace(vertices.as_native());
         let mut result = HashMap::new();
-        for k in self.as_native().as_network().variables() {
+        for k in self.as_native().variables() {
             if let Some(value) = space[k].try_as_bool() {
                 result.insert(k.into(), value);
             }
@@ -157,11 +161,12 @@ impl PySymbolicAsyncGraph {
     pub fn fix_parameter(&self, parameter: &PyAny, value: bool) -> PyResult<PyGraphColors> {
         // Find parameter and validate.
         let id = self.resolve_parameter(parameter)?;
-        let param = self.as_native().as_network().get_parameter(id.into());
-        if param.get_arity() != 0 {
+        let ctx = self.as_native().symbolic_context();
+        let arity = ctx.get_network_parameter_arity(id.into());
+        if arity != 0 {
             return throw_runtime_error(format!(
                 "Parameter {} has non-zero arity.",
-                param.get_name()
+                ctx.get_network_parameter_name(id.into())
             ));
         }
 
@@ -196,11 +201,12 @@ impl PySymbolicAsyncGraph {
         value: bool,
     ) -> PyResult<PyGraphColors> {
         let id = self.resolve_parameter(parameter)?;
-        let param = self.as_native().as_network().get_parameter(id.into());
-        if (param.get_arity() as usize) != inputs.len() {
+        let ctx = self.as_native().symbolic_context();
+        let arity = ctx.get_network_parameter_arity(id.into());
+        if usize::from(arity) != inputs.len() {
             return throw_runtime_error(format!(
                 "Arity mismatch for parameter {}.",
-                param.get_name()
+                ctx.get_network_parameter_name(id.into())
             ));
         }
         let ctx = self.as_native().symbolic_context();
@@ -237,10 +243,16 @@ impl PySymbolicAsyncGraph {
         value: bool,
     ) -> PyResult<PyGraphColors> {
         let id = self.resolve_variable(variable)?;
+        /*
+
+        TODO:
+         At some point, we should add the method to symbolic context which would allow this
+         to be a runtime check again.
+
         if self.as_native().as_network().regulators(id.into()).len() != inputs.len() {
             let name = self.as_native().as_network().get_variable_name(id.into());
             return throw_runtime_error(format!("Artiy mismatch for variable {name}."));
-        }
+        }*/
         let ctx = self.as_native().symbolic_context();
         let table = ctx.get_implicit_function_table(id.into());
         let mut bdd = ctx.mk_constant(false);
@@ -276,6 +288,11 @@ impl PySymbolicAsyncGraph {
 
     /// Make an empty `ColoredVertexSet`.
     pub fn empty_colored_vertices(&self) -> PyGraphColoredVertices {
+        self.as_native().mk_empty_colored_vertices().into()
+    }
+
+    /// Make an empty `VertexSet`.
+    pub fn empty_vertices(&self) -> PyGraphVertices {
         self.as_native().mk_empty_vertices().into()
     }
 
@@ -287,10 +304,7 @@ impl PySymbolicAsyncGraph {
 
     /// Return a `VertexSet` of all vertices valid in this graph.
     pub fn unit_vertices(&self) -> PyGraphVertices {
-        self.as_native()
-            .mk_unit_colored_vertices()
-            .vertices()
-            .into()
+        self.as_native().mk_unit_vertices().into()
     }
 
     /// Return a `ColoredVertexSet` of all color-vertex pairs valid in this graph (i.e. satisfting
@@ -574,9 +588,8 @@ impl PySymbolicAsyncGraph {
         if let Ok(name) = variable.extract::<String>() {
             let var = self
                 .as_native()
-                .as_network()
-                .as_graph()
-                .find_variable(name.as_str());
+                .symbolic_context()
+                .find_network_variable(name.as_str());
             if let Some(var) = var {
                 Ok(var.into())
             } else {
@@ -590,7 +603,10 @@ impl PySymbolicAsyncGraph {
     /// Resolve a `ParameterId` for a parameter given either as a string or as a `ParameterId`.
     pub(crate) fn resolve_parameter(&self, parameter: &PyAny) -> PyResult<PyParameterId> {
         if let Ok(name) = parameter.extract::<String>() {
-            let param = self.as_native().as_network().find_parameter(name.as_str());
+            let param = self
+                .as_native()
+                .symbolic_context()
+                .find_network_parameter(name.as_str());
             if let Some(param) = param {
                 Ok(param.into())
             } else {

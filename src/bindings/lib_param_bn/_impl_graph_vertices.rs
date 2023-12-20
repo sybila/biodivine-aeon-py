@@ -6,7 +6,7 @@ use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::biodivine_std::bitvector::BitVector;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphVertexIterator, IterableVertices};
+use biodivine_lib_param_bn::symbolic_async_graph::GraphVertices;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use std::collections::HashSet;
@@ -36,13 +36,10 @@ impl PyGraphVertices {
         let support = bdd.as_native().support_set();
         let expected: HashSet<BddVariable> = ctx.state_variables().iter().cloned().collect();
         assert!(support.is_subset(&expected));
-        PyGraphVertices(
-            graph
-                .as_native()
-                .empty_vertices()
-                .vertices()
-                .copy(bdd.into()),
-        )
+        PyGraphVertices(GraphVertices::new(
+            bdd.into(),
+            graph.as_native().symbolic_context(),
+        ))
     }
 
     pub fn to_bdd(&self) -> PyBdd {
@@ -118,15 +115,7 @@ impl PyGraphVertices {
     }
 
     pub fn iterator(&self) -> PyGraphVertexIterator {
-        // See the discussion in `_impl_bdd_iterator.rs` on the safety of this approach.
-        let iterable = Box::new(self.as_native().materialize());
-        let static_iterable = unsafe {
-            (iterable.as_ref() as *const IterableVertices)
-                .as_ref()
-                .unwrap()
-        };
-        let iterator: GraphVertexIterator<'static> = static_iterable.iter();
-        PyGraphVertexIterator(iterable, iterator)
+        PyGraphVertexIterator(self.as_native().iter())
     }
 
     pub fn __iter__(&self) -> PyGraphVertexIterator {
@@ -149,6 +138,6 @@ impl PyGraphVertexIterator {
     }
 
     fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<Vec<bool>> {
-        slf.1.next().map(|it| it.values())
+        slf.0.next().map(|it| it.values())
     }
 }
