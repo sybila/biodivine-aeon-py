@@ -15,3 +15,5 @@ pub mod hctl_model_checker;
 
 /// Wrappers for internal classification algorithms used by `bn-classifier`.
 pub mod bn_classifier;
+
+pub mod lib_bdd_2;

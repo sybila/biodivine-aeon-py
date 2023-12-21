@@ -90,3 +90,7 @@ docs/_build/
 
 # Some temporary Z3 files
 .z3-trace
+
+# Code coverage data
+*.profraw
+coverage.lcov

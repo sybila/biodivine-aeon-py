@@ -1,5 +1,5 @@
 use pyo3::exceptions::{PyRuntimeError, PyTypeError};
-use pyo3::prelude::*;
+use pyo3::{prelude::*, wrap_pymodule};
 use pyo3::{PyResult, Python};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
@@ -27,16 +27,18 @@ mod bindings;
 /// into a dependency.
 ///
 mod internal;
+mod pyo3_utils;
 
-/// A Python module implemented in Rust.
+/// AEON.py is a library...
 #[pymodule]
-fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
-    bindings::lib_bdd::register(module)?;
-    bindings::lib_param_bn::register(module)?;
-    bindings::aeon::register(module)?;
-    bindings::pbn_control::register(module)?;
-    bindings::hctl_model_checker::register(module)?;
-    bindings::bn_classifier::register(module)?;
+fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {    
+    bindings::lib_bdd_2::register(module)?;
+    //bindings::lib_bdd::register(module)?;
+    //bindings::lib_param_bn::register(module)?;
+    //bindings::aeon::register(module)?;
+    //bindings::pbn_control::register(module)?;
+    //bindings::hctl_model_checker::register(module)?;
+    //bindings::bn_classifier::register(module)?;
     Ok(())
 }
 

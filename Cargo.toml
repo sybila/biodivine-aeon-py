@@ -8,6 +8,7 @@ name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
 [features]
+#default = ['static-z3']
 # For releases, we want to include Z3 statically, so that users
 # don't have to install it (or break compatibility with new versions).
 # So for CI builds, this feature is enabled, but for local builds,
@@ -18,7 +19,7 @@ static-z3 = ["z3/static-link-z3"]
 [dependencies]
 pyo3 = { version = "0.20.0", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = { version="0.5.2", features=["solver-z3"] }
-biodivine-lib-bdd = "0.5.7"
+biodivine-lib-bdd = "0.5.8"
 biodivine-pbn-control = "0.3.1"
 biodivine-hctl-model-checker = "0.2.2"
 rand = "0.8.5"
