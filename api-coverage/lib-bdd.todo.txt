@@ -330,76 +330,10 @@ pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::borrow_mut(&mut self) -> 
 impl<T> core::convert::From<T> for biodivine_lib_bdd::BddSatisfyingValuations<'a>
 pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::from(t: T) -> T
 
-pub struct biodivine_lib_bdd::BddValuation(_)
-impl biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::all_false(num_vars: u16) -> biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::all_true(num_vars: u16) -> biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::clear(&mut self, variable: biodivine_lib_bdd::BddVariable)
-pub fn biodivine_lib_bdd::BddValuation::extends(&self, valuation: &biodivine_lib_bdd::BddPartialValuation) -> bool
-pub fn biodivine_lib_bdd::BddValuation::flip_value(&mut self, variable: biodivine_lib_bdd::BddVariable)
-pub fn biodivine_lib_bdd::BddValuation::new(values: alloc::vec::Vec<bool>) -> biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::num_vars(&self) -> u16
-pub fn biodivine_lib_bdd::BddValuation::set(&mut self, variable: biodivine_lib_bdd::BddVariable)
-pub fn biodivine_lib_bdd::BddValuation::set_value(&mut self, variable: biodivine_lib_bdd::BddVariable, value: bool)
-pub fn biodivine_lib_bdd::BddValuation::to_values(&self) -> alloc::vec::Vec<(biodivine_lib_bdd::BddVariable, bool)>
-pub fn biodivine_lib_bdd::BddValuation::value(&self, variable: biodivine_lib_bdd::BddVariable) -> bool
-pub fn biodivine_lib_bdd::BddValuation::vector(self) -> alloc::vec::Vec<bool>
-impl core::clone::Clone for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::clone(&self) -> biodivine_lib_bdd::BddValuation
-impl core::cmp::Eq for biodivine_lib_bdd::BddValuation
-impl core::cmp::Ord for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::cmp(&self, other: &biodivine_lib_bdd::BddValuation) -> core::cmp::Ordering
-impl core::cmp::PartialEq for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::eq(&self, other: &biodivine_lib_bdd::BddValuation) -> bool
-impl core::cmp::PartialOrd for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::partial_cmp(&self, other: &biodivine_lib_bdd::BddValuation) -> core::option::Option<core::cmp::Ordering>
 impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::from(valuation: biodivine_lib_bdd::BddValuation) -> Self
 impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::BddPartialValuation
 pub fn biodivine_lib_bdd::BddPartialValuation::from(value: biodivine_lib_bdd::BddValuation) -> Self
-impl core::convert::TryFrom<biodivine_lib_bdd::BddPartialValuation> for biodivine_lib_bdd::BddValuation
-pub type biodivine_lib_bdd::BddValuation::Error = ()
-pub fn biodivine_lib_bdd::BddValuation::try_from(value: biodivine_lib_bdd::BddPartialValuation) -> core::result::Result<Self, Self::Error>
-impl core::fmt::Debug for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::fmt::Display for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
-impl core::hash::Hash for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl core::marker::StructuralEq for biodivine_lib_bdd::BddValuation
-impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddValuation
-impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddValuation
-pub type biodivine_lib_bdd::BddValuation::Output = bool
-pub fn biodivine_lib_bdd::BddValuation::index(&self, index: biodivine_lib_bdd::BddVariable) -> &Self::Output
-impl core::ops::index::IndexMut<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::index_mut(&mut self, index: biodivine_lib_bdd::BddVariable) -> &mut Self::Output
-impl core::marker::Send for biodivine_lib_bdd::BddValuation
-impl core::marker::Sync for biodivine_lib_bdd::BddValuation
-impl core::marker::Unpin for biodivine_lib_bdd::BddValuation
-impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddValuation
-impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddValuation
-impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddValuation where U: core::convert::From<T>
-pub fn biodivine_lib_bdd::BddValuation::into(self) -> U
-impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddValuation where U: core::convert::Into<T>
-pub type biodivine_lib_bdd::BddValuation::Error = core::convert::Infallible
-pub fn biodivine_lib_bdd::BddValuation::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
-impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddValuation where U: core::convert::TryFrom<T>
-pub type biodivine_lib_bdd::BddValuation::Error = <U as core::convert::TryFrom<T>>::Error
-pub fn biodivine_lib_bdd::BddValuation::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
-impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddValuation where T: core::clone::Clone
-pub type biodivine_lib_bdd::BddValuation::Owned = T
-pub fn biodivine_lib_bdd::BddValuation::clone_into(&self, target: &mut T)
-pub fn biodivine_lib_bdd::BddValuation::to_owned(&self) -> T
-impl<T> alloc::string::ToString for biodivine_lib_bdd::BddValuation where T: core::fmt::Display + core::marker::Sized
-pub fn biodivine_lib_bdd::BddValuation::to_string(&self) -> alloc::string::String
-impl<T> core::any::Any for biodivine_lib_bdd::BddValuation where T: 'static + core::marker::Sized
-pub fn biodivine_lib_bdd::BddValuation::type_id(&self) -> core::any::TypeId
-impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddValuation where T: core::marker::Sized
-pub fn biodivine_lib_bdd::BddValuation::borrow(&self) -> &T
-impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddValuation where T: core::marker::Sized
-pub fn biodivine_lib_bdd::BddValuation::borrow_mut(&mut self) -> &mut T
-impl<T> core::convert::From<T> for biodivine_lib_bdd::BddValuation
-pub fn biodivine_lib_bdd::BddValuation::from(t: T) -> T
 
 pub struct biodivine_lib_bdd::BddValuationIterator(_)
 impl biodivine_lib_bdd::BddValuationIterator

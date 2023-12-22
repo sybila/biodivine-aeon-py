@@ -1,4 +1,4 @@
-from biodivine_aeon import BddVariable, BddPointer, BddVariableSet, BddVariableSetBuilder
+from biodivine_aeon import *
 from typing import Literal
 import pytest
 import pickle
@@ -84,9 +84,9 @@ def test_bdd_variable_set():
     assert ctx.find_variable(BddVariable(10)) is None
     assert ctx.get_variable_name(var_b) == "b"
     assert ctx.get_variable_name("c") == "c"
-    with pytest.raises(RuntimeError):
+    with pytest.raises(IndexError):
         ctx.get_variable_name("x")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(IndexError):
         ctx.get_variable_name(BddVariable(5))
 
     # BDD transfer.
@@ -113,3 +113,44 @@ def test_bdd_variable_set():
     assert ctx.mk_conjunctive_clause(clause_1) != ctx.mk_disjunctive_clause(clause_1)
     assert ctx.mk_conjunctive_clause(clause_1) == ctx.mk_dnf([clause_1, clause_2])
     assert ctx.mk_disjunctive_clause(clause_1) == ctx.mk_cnf([clause_1, clause_2])
+
+
+def test_bdd_valuation():
+    ctx = BddVariableSet(["a", "b", "c"])
+
+    assert BddValuation(ctx).values() == [False, False, False]
+
+    val_1 = BddValuation(ctx, [0, 1, 1])
+    val_2 = BddValuation(ctx, [0, 0, 0])
+    val_1_copy = BddValuation(val_1)
+
+    assert val_1 == eval(repr(val_1))
+    assert val_1 == BddValuation(ctx, [False, True, True])
+    assert val_1 == BddValuation(BddPartialValuation(ctx, {'a': 0, 'b': 1, 'c': 1}))
+    assert str(val_1) == "[0,1,1]"
+    assert len(val_1) == 3
+    assert "a" in val_1 and "z" not in val_1
+    assert val_1["a"] == val_1_copy["a"]
+    assert val_1[BddVariable(2)] == val_1_copy[BddVariable(2)]
+    val_1_copy["a"] = 1
+    assert val_1["a"] != val_1_copy["a"]
+
+    valuations_as_keys = {val_1: "foo", val_1_copy: "bar"}
+    assert valuations_as_keys[val_1] == "foo"
+
+    data = pickle.dumps(val_2)
+    assert pickle.loads(data) == val_2
+
+    assert val_1.keys() == ctx.variable_ids()
+    assert val_1.values() == [False, True, True]
+
+    val_dict = dict(val_1.items())
+    assert val_dict == {
+        BddVariable(0): False, 
+        BddVariable(1): True,
+        BddVariable(2): True
+    }
+
+    p_val_1 = BddPartialValuation(ctx, {'a': 0, 'c': 1})
+    assert val_1.extends(p_val_1)
+    assert not val_2.extends(p_val_1)

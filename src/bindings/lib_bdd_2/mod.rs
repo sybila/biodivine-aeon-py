@@ -1,14 +1,14 @@
-use pyo3::PyResult;
-use pyo3::types::PyModule;
 use crate::bindings;
+use pyo3::types::PyModule;
+use pyo3::PyResult;
 
 pub mod bdd;
-pub mod boolean_expression;
-pub mod bdd_variable;
 pub mod bdd_pointer;
 pub mod bdd_valuation;
+pub mod bdd_variable;
 pub mod bdd_variable_set;
 pub mod bdd_variable_set_builder;
+pub mod boolean_expression;
 
 pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<bdd::Bdd>()?;

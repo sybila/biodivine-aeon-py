@@ -1,6 +1,6 @@
+use crate::{throw_runtime_error, throw_type_error};
 use macros::Wrapper;
 use pyo3::prelude::*;
-use crate::{throw_runtime_error, throw_type_error};
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Debug, Eq, PartialEq, Wrapper)]
@@ -17,7 +17,7 @@ impl BooleanExpression {
                 Err(message) => {
                     throw_runtime_error(format!("Invalid expression: \"{}\".", message))
                 }
-            }
+            };
         }
         throw_type_error("Expected `BooleanExpression` or `str`.")
     }

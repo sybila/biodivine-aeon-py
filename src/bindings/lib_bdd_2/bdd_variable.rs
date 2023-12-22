@@ -1,12 +1,12 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 /// A numeric identifier of a single decision variable used within a `Bdd`.
-/// 
+///
 /// It essentially behaves like a type-safe integer value:
 /// ```python
 /// a = BddVariable(0)
@@ -31,7 +31,6 @@ pub struct BddVariable(biodivine_lib_bdd::BddVariable);
 
 #[pymethods]
 impl BddVariable {
-    
     #[new]
     #[pyo3(signature = (value = 0))]
     pub fn new(value: usize) -> BddVariable {
@@ -61,7 +60,6 @@ impl BddVariable {
     }
 
     pub fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(py, &[self.0.to_index()])
+        PyTuple::new(py, [self.0.to_index()])
     }
-
 }

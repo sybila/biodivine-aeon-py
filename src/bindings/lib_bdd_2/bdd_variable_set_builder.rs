@@ -1,9 +1,9 @@
+use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
+use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
+use crate::{throw_runtime_error, AsNative};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use crate::{AsNative, throw_runtime_error};
-use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
-use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
 
 /// A utility class that can be used to build `BddVariableSet` iteratively instead of
 /// providing all the variable names at once.
@@ -24,7 +24,6 @@ pub struct BddVariableSetBuilder(biodivine_lib_bdd::BddVariableSetBuilder);
 
 #[pymethods]
 impl BddVariableSetBuilder {
-
     #[new]
     #[pyo3(signature = (variables = None))]
     fn new(variables: Option<Vec<&str>>) -> BddVariableSetBuilder {
@@ -61,7 +60,8 @@ impl BddVariableSetBuilder {
 
     fn __getstate__(&self) -> Vec<String> {
         let vars = self.as_native().clone().build();
-        vars.variables().into_iter()
+        vars.variables()
+            .into_iter()
             .map(|it| vars.name_of(it))
             .collect()
     }
@@ -82,7 +82,8 @@ impl BddVariableSetBuilder {
     ///
     /// Panics if some of variables already exist.
     fn add_all(&mut self, names: Vec<&str>) -> Vec<BddVariable> {
-        self.as_native_mut().make_variables(&names)
+        self.as_native_mut()
+            .make_variables(&names)
             .into_iter()
             .map(Into::into)
             .collect()
@@ -92,5 +93,4 @@ impl BddVariableSetBuilder {
     fn build(&self) -> BddVariableSet {
         self.as_native().clone().build().into()
     }
-
 }

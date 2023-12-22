@@ -1,8 +1,7 @@
+use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
+use crate::{throw_runtime_error, AsNative};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use crate::{AsNative, throw_runtime_error};
-use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
-
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -13,7 +12,6 @@ pub struct Bdd {
 
 #[pymethods]
 impl Bdd {
-
     fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
         match op {
             CompareOp::Eq => Ok(self.value.eq(&other.value)),
@@ -21,7 +19,6 @@ impl Bdd {
             _ => throw_runtime_error("`BddVariableSet` cannot be ordered."),
         }
     }
-
 }
 
 impl AsNative<biodivine_lib_bdd::Bdd> for Bdd {
@@ -35,12 +32,10 @@ impl AsNative<biodivine_lib_bdd::Bdd> for Bdd {
 }
 
 impl Bdd {
-
     pub fn new(ctx: PyRef<'_, BddVariableSet>, value: biodivine_lib_bdd::Bdd) -> Bdd {
         Bdd {
             ctx: ctx.into(),
-            value
+            value,
         }
     }
-
 }

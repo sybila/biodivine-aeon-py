@@ -1,5 +1,5 @@
-use pyo3::exceptions::{PyRuntimeError, PyTypeError};
-use pyo3::{prelude::*, wrap_pymodule};
+use pyo3::exceptions::{PyIndexError, PyRuntimeError, PyTypeError};
+use pyo3::prelude::*;
 use pyo3::{PyResult, Python};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
@@ -31,7 +31,7 @@ mod pyo3_utils;
 
 /// AEON.py is a library...
 #[pymodule]
-fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {    
+fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {
     bindings::lib_bdd_2::register(module)?;
     //bindings::lib_bdd::register(module)?;
     //bindings::lib_param_bn::register(module)?;
@@ -75,4 +75,11 @@ where
     A: Send + Sync + IntoPy<Py<PyAny>>,
 {
     PyRuntimeError::new_err(message)
+}
+
+fn throw_index_error<T, A: 'static>(message: A) -> PyResult<T>
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
+    Err(PyIndexError::new_err(message))
 }

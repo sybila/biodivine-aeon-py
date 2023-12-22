@@ -326,6 +326,105 @@
 
 ## `BddValuation`
 
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>BddValuation::new</code></td>
+            <td rowspan="3"><code>BddValuation.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::all_false</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::try_from<&BddPartialValuation></code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::all_true</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::eq</code></td>
+            <td><code>BddValuation.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::cmp</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::hash</code></td>
+            <td><code>BddValuation.__hash__</code></td>
+        </tr> 
+        <tr>
+            <td><code>BddValuation::to_string()</code></td>
+            <td><code>BddValuation.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuation.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuation.__getnewargs__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuation.__ctx__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::num_vars</code></td>
+            <td><code>BddValuation.__len__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::index</code></td>
+            <td rowspan="2"><code>BddValuation.__getitem__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::value</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::set_value</code></td>
+            <td rowspan="4"><code>BddValuation.__setitem__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::clear</code></td> 
+        </tr>
+        <tr>
+            <td><code>BddValuation::set</code></td> 
+        </tr>
+        <tr>
+            <td><code>BddValuation::flip_value</code></td> 
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuation.__contains__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Iteration / conversion</td></tr>
+        <tr>
+            <td><code>BddValuation::vector</code></td>
+            <td><code>BddValuation.values</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuation.keys</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::to_values</code></td>
+            <td><code>BddValuation.items</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>BddValuation::extends</code></td>
+            <td><code>BddValuation.extends</code></td>
+        </tr> 
+    </tbody>
+</table>
 
 
 The list of relationships between public APIs in Rust and Python. "Trivial" items that do not have direct Python counterparts, like blanket trait implementations (`Into`, `From`, ...) or the `Debug` trait are intentionally omitted. For more information about individual Python functions, see the Python API documentation generated from the `biodivine_aeon.pyi` stub file.
@@ -881,88 +980,6 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         </tr>
         <tr> 
             <td><code>BddPartialValuation.to_dict</code></td>
-        </tr>
-    </tbody>
-</table>
-
-## `BddValuation`
-
-<table>
-    <thead>
-        <tr>
-            <th>Rust Member</th>
-            <th>Python Member</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr><td colspan="2" align="center">Special methods</td></tr>
-        <tr>
-            <td><code>BddValuation::new</code></td>
-            <td rowspan="3"><code>BddValuation.__init__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::all_false</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::try_from<&BddPartialValuation></code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::all_true</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::num_vars</code></td>
-            <td><code>BddValuation.__len__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::index</code></td>
-            <td rowspan="2"><code>BddValuation.__getitem__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::value</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::set_value</code></td>
-            <td rowspan="4"><code>BddValuation.__setitem__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::clear</code></td> 
-        </tr>
-        <tr>
-            <td><code>BddValuation::set</code></td> 
-        </tr>
-        <tr>
-            <td><code>BddValuation::flip_value</code></td> 
-        </tr>
-        <tr>
-            <td><code>BddValuation::hash</code></td>
-            <td><code>BddValuation.__hash__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::eq</code></td>
-            <td><code>BddValuation.__eq__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::cmp</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>BddValuation::to_string()</code></td>
-            <td><code>BddValuation.__str__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddValuation.__repr__</code></td>
-        </tr>
-        <tr><td colspan="2" align="center">Introspection</td></tr>
-        <tr>
-            <td><code>BddValuation::extends</code></td>
-            <td><code>BddValuation.extends</code></td>
-        </tr> 
-        <tr><td colspan="2" align="center">Conversions</td></tr>
-        <tr>
-            <td rowspan="2"><code>BddValuation::vector</code></td>
-            <td><code>BddValuation.to_list</code></td>
         </tr>
     </tbody>
 </table>

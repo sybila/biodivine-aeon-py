@@ -1,5 +1,5 @@
-use pyo3::{PyAny, PyResult};
 use crate::throw_type_error;
+use pyo3::{PyAny, PyResult};
 
 pub fn resolve_boolean(value: &PyAny) -> PyResult<bool> {
     if let Ok(value) = value.extract::<bool>() {

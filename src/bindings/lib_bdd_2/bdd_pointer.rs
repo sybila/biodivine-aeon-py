@@ -1,10 +1,10 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use crate::throw_type_error;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
-use crate::throw_type_error;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 /// A numeric identifier of a single node in a `Bdd`.
 ///
@@ -37,7 +37,6 @@ pub struct BddPointer(biodivine_lib_bdd::BddPointer);
 
 #[pymethods]
 impl BddPointer {
-
     #[new]
     #[pyo3(signature = (value = None))]
     fn new(value: Option<&PyAny>) -> PyResult<BddPointer> {
@@ -77,9 +76,8 @@ impl BddPointer {
         self.0.to_index()
     }
 
-
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(py, &[self.0.to_index()])
+        PyTuple::new(py, [self.0.to_index()])
     }
 
     /// Returns the `BddPointer` referencing the `0` terminal node.
@@ -114,5 +112,4 @@ impl BddPointer {
     fn as_bool(&self) -> Option<bool> {
         self.0.as_bool()
     }
-
 }
