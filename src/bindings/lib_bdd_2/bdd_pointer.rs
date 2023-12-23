@@ -103,7 +103,7 @@ impl BddPointer {
     }
 
     /// Returns `True` if this `BddPointer` refers to the `0` or `1` terminal node.
-    fn is_terminal(&self) -> bool {
+    pub fn is_terminal(&self) -> bool {
         self.0.is_terminal()
     }
 

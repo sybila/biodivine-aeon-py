@@ -186,6 +186,7 @@
     </tbody>
 </table>
 
+
 ## `BddVariableSet` (frozen)
 
 <table>
@@ -528,6 +529,353 @@
     </tbody>
 </table>
 
+## `Bdd`
+
+The `IntoBdd` trait is currently largely ignored. The `Bdd` constructor
+should be sufficient, as it supports a wide variety of types.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>Bdd::from<&BddValuation></code></td>
+            <td rowspan="5"><code>Bdd.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::read_as_bytes</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::read_as_string</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::from_bytes</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::from_string</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::hash</code></td>
+            <td><code>Bdd.__hash__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.__repr__</code></td>
+        </tr> 
+        <tr>
+            <td></td>
+            <td><code>Bdd.__getnewargs__</code></td>
+        </tr> 
+        <tr>
+            <td></td>
+            <td><code>Bdd.__ctx__</code></td>
+        </tr> 
+        <tr>
+            <td><code>Bdd::eval_in</code></td>
+            <td><code>Bdd.__call__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Conversions and serialization</td></tr>
+        <tr>
+            <td><code>Bdd::to_bytes</code></td>
+            <td rowspan="2"><code>Bdd.data_bytes</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::write_as_bytes</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::to_string</code></td>
+            <td rowspan="2"><code>Bdd.data_string</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::write_as_string</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::to_dot_string</code></td>
+            <td rowspan="2"><code>Bdd.to_dot_string</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::write_as_dot_string</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::to_boolean_expression</code></td>
+            <td><code>Bdd.to_expression</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::to_dnf</code></td>
+            <td><code>Bdd.to_dnf</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::to_cnf</code></td>
+            <td><code>Bdd.to_cnf</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Structural introspection and basic introspection</td></tr>
+        <tr>
+            <td rowspan="2"><code>Bdd::size</code></td>
+            <td><code>Bdd.__len__</code></td>
+        </tr> 
+        <tr>
+            <td><code>Bdd.node_count</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::size_per_variable</code></td>
+            <td><code>Bdd.node_count_per_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::eq</code></td>
+            <td><code>Bdd.structural_eq</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.semantic_eq</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.implies</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::root_pointer</code></td>
+            <td><code>Bdd.root</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::high_link_of</code></td>
+            <td rowspan="2"><code>Bdd.node_links</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::low_link_of</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::var_of</code></td>
+            <td><code>Bdd.node_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::num_vars</code></td>
+            <td><code>Bdd.variable_count</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::support_set</code></td>
+            <td><code>Bdd.support_set</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::is_false</code></td>
+            <td><code>Bdd.is_false</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::is_true</code></td>
+            <td><code>Bdd.is_true</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::is_clause</code></td>
+            <td><code>Bdd.is_clause</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::is_valuation</code></td>
+            <td><code>Bdd.is_valuation</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cardinality</code></td>
+            <td rowspan="2"><code>Bdd.cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::exact_cardinality</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Boolean operations</td></tr>
+        <tr>
+            <td><code>Bdd::not</code></td>
+            <td><code>Bdd.l_not</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::and</code></td>
+            <td><code>Bdd.l_and</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::or</code></td>
+            <td><code>Bdd.l_or</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::and</code></td>
+            <td><code>Bdd.l_and_not</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::imp</code></td>
+            <td><code>Bdd.l_imp</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::iff</code></td>
+            <td><code>Bdd.l_iff</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::xor</code></td>
+            <td><code>Bdd.l_xor</code></td>
+        </tr>        
+        <tr>
+            <td><code>Bdd::if_then_else</code></td>
+            <td><code>Bdd.if_then_else</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::binary_op</code></td>
+            <td rowspan="4"><code>Bdd.apply2</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::binary_op_with_limit</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::fused_binary_flip_op</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::fused_binary_flip_op_with_limit</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::ternary_op</code></td>
+            <td rowspan="2"><code>Bdd.apply3</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::fused_ternary_flip_op</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::check_binary_op</code></td>
+            <td rowspan="2"><code>Bdd.check2</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::check_fused_binary_flip_op</code></td> 
+        </tr>
+        <tr> 
+            <td><code>Bdd::binary_op_nested</code></td>
+            <td><code>Bdd.apply_nested</code></td>
+        </tr>
+        <tr> 
+            <td><code>Bdd::binary_op_with_exists</code></td>
+            <td><code>Bdd.apply_with_exists</code></td>
+        </tr>
+        <tr> 
+            <td><code>Bdd::binary_op_with_for_all</code></td>
+            <td><code>Bdd.apply_with_for_all</code></td>
+        </tr> 
+        <tr><td colspan="2" align="center">Relational operations</td></tr>
+        <tr>
+            <td><code>Bdd::pick</code></td>
+            <td rowspan="2"><code>Bdd.r_pick</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::var_pick</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::pick_random</code></td>
+            <td rowspan="2"><code>Bdd.r_pick_random</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::var_pick_random</code></td> 
+        </tr>
+        <tr>
+            <td><code>Bdd::project</code></td>
+            <td rowspan="2"><code>Bdd.r_exists</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::var_project</code></td> 
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.r_for_all</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::restrict</code></td>
+            <td rowspan="2"><code>Bdd.r_restrict</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::var_restrict</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::select</code></td>
+            <td rowspan="2"><code>Bdd.r_select</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::var_select</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Valuations / Clauses</td></tr>
+        <tr>
+            <td><code>Bdd::sat_witness</code></td>
+            <td><code>Bdd.witness</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::first_valuation</code></td>
+            <td><code>Bdd.valuation_first</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::last_valuation</code></td>
+            <td><code>Bdd.valuation_last</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::random_valuation</code></td>
+            <td><code>Bdd.valuation_random</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::most_negative_valuation</code></td>
+            <td><code>Bdd.valuation_most_negative</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::most_positive_valuation</code></td>
+            <td><code>Bdd.valuation_most_positive</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::sat_valuations</code></td>
+            <td><code>Bdd.valuation_iterator</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::first_clause</code></td>
+            <td><code>Bdd.clause_first</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::last_clause</code></td>
+            <td><code>Bdd.clause_last</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::random_clause</code></td>
+            <td><code>Bdd.clause_random</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::most_fixed_clause</code></td>
+            <td><code>Bdd.clause_most_fixed</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::most_free_clause</code></td>
+            <td><code>Bdd.clause_most_free</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::necessary_clause</code></td>
+            <td><code>Bdd.clause_necessary</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::sat_clauses</code></td>
+            <td><code>Bdd.clause_iterator</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>Bdd::substitute</code></td>
+            <td><code>Bdd.substitute</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::rename_variable</code></td>
+            <td><code>Bdd.rename</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::set_num_vars</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
 
 The list of relationships between public APIs in Rust and Python. "Trivial" items that do not have direct Python counterparts, like blanket trait implementations (`Into`, `From`, ...) or the `Debug` trait are intentionally omitted. For more information about individual Python functions, see the Python API documentation generated from the `biodivine_aeon.pyi` stub file.
 
@@ -698,308 +1046,6 @@ Currently, it does not really make sense to export the functions from this modul
 
 Naturally, the `bdd!` macro is not translated into Python in any meaningful way. However, you can use the infix operator methods instead.
 
-<table>
-    <thead>
-        <tr>
-            <th>Rust Member</th>
-            <th>Python Member</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr><td colspan="2" align="center">Special methods</td></tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__str__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__repr__</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::hash</code></td>
-            <td><code>Bdd.__hash__</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::eval_in</code></td>
-            <td><code>Bdd.__call__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__eq__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__ne__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__lt__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__gt__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__le__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.__ge__</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::eq</code></td>
-            <td><code>Bdd.graph_eq</code></td>
-        </tr>
-        <tr><td colspan="2" align="center">Boolean operations</td></tr>
-        <tr>
-            <td><code>Bdd::not</code></td>
-            <td><code>Bdd.l_not</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::and</code></td>
-            <td><code>Bdd.l_and</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::or</code></td>
-            <td><code>Bdd.l_or</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::and</code></td>
-            <td><code>Bdd.l_and_not</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::imp</code></td>
-            <td><code>Bdd.l_imp</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::iff</code></td>
-            <td><code>Bdd.l_iff</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::xor</code></td>
-            <td><code>Bdd.l_xor</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::binary_op</code></td>
-            <td rowspan="4"><code>Bdd.apply2</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::binary_op_with_limit</code></td> 
-        </tr>
-        <tr>
-            <td><code>Bdd::fused_binary_flip_op</code></td> 
-        </tr>
-        <tr>
-            <td><code>Bdd::fused_binary_flip_op_with_limit</code></td> 
-        </tr>
-        <tr>
-            <td><code>Bdd::ternary_op</code></td>
-            <td rowspan="2"><code>Bdd.apply3</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::fused_ternary_flip_op</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::check_binary_op</code></td>
-            <td rowspan="2"><code>Bdd.check2</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::check_fused_binary_flip_op</code></td> 
-        </tr> 
-        <tr><td colspan="2" align="center">Relational operations</td></tr>
-        <tr>
-            <td><code>Bdd::pick</code></td>
-            <td rowspan="2"><code>Bdd.r_pick</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::var_pick</code></td> 
-        </tr>
-        <tr>
-            <td><code>Bdd::pick_random</code></td>
-            <td rowspan="2"><code>Bdd.r_pick_random</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::var_pick_random</code></td> 
-        </tr>
-        <tr>
-            <td><code>Bdd::project</code></td>
-            <td rowspan="2"><code>Bdd.r_project_exists</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::var_project</code></td> 
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.r_project_for_all</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::restrict</code></td>
-            <td rowspan="2"><code>Bdd.r_restrict</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::var_restrict</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::select</code></td>
-            <td rowspan="2"><code>Bdd.r_select</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::var_select</code></td>
-        </tr>
-        <tr><td colspan="2" align="center">Properties and tests</td></tr>
-        <tr>
-            <td><code>Bdd::num_vars</code></td>
-            <td><code>Bdd.var_count</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::support_set</code></td>
-            <td><code>Bdd.support_set</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::is_false</code></td>
-            <td><code>Bdd.is_false</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::is_true</code></td>
-            <td><code>Bdd.is_true</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::is_clause</code></td>
-            <td><code>Bdd.is_clause</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::is_valuation</code></td>
-            <td><code>Bdd.is_valuation</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::cardinality</code></td>
-            <td rowspan="2"><code>Bdd.cardinality</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::exact_cardinality</code></td>
-        </tr> 
-        <tr>
-            <td><code>Bdd::size</code></td>
-            <td><code>Bdd.node_count</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::size_per_variable</code></td>
-            <td><code>Bdd.node_count_per_variable</code></td>
-        </tr>
-        <tr><td colspan="2" align="center">Introspection</td></tr>
-        <tr>
-            <td><code>Bdd::sat_witness</code></td>
-            <td><code>Bdd.witness</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::first_valuation</code></td>
-            <td><code>Bdd.valuation_first</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::last_valuation</code></td>
-            <td><code>Bdd.valuation_last</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::random_valuation</code></td>
-            <td><code>Bdd.valuation_random</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::most_negative_valuation</code></td>
-            <td><code>Bdd.valuation_most_negative</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::most_positive_valuation</code></td>
-            <td><code>Bdd.valuation_most_positive</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::sat_valuations</code></td>
-            <td><code>Bdd.valuation_iterator</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::first_clause</code></td>
-            <td><code>Bdd.clause_first</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::last_clause</code></td>
-            <td><code>Bdd.clause_last</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::random_clause</code></td>
-            <td><code>Bdd.clause_random</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::most_fixed_clause</code></td>
-            <td><code>Bdd.clause_most_fixed</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::most_free_clause</code></td>
-            <td><code>Bdd.clause_most_free</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::necessary_clause</code></td>
-            <td><code>Bdd.clause_necessary</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::sat_clauses</code></td>
-            <td><code>Bdd.clause_iterator</code></td>
-        </tr>
-        <tr><td colspan="2" align="center">Conversions and serialization</td></tr>
-        <tr>
-            <td><code>Bdd::from(BddValuation)</code></td>
-            <td><code>Bdd.from_valuation</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::to_boolean_expression</code></td>
-            <td><code>Bdd.to_expression</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>Bdd.from_expression</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::to_bytes</code></td>
-            <td><code>Bdd.to_bytes</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::from_bytes</code></td>
-            <td><code>Bdd.from_bytes</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::write_as_bytes</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::read_as_bytes</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::to_string</code></td>
-            <td><code>Bdd.to_raw_string</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::from_string</code></td>
-            <td><code>Bdd.from_raw_string</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::read_as_string</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::write_as_string</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::to_dot_string</code></td>
-            <td><code>Bdd.to_dot_string</code></td>
-        </tr>
-        <tr>
-            <td><code>Bdd::write_as_dot_string</code></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
-
 ## `BddPathIterator` and `ValuationsOfClauseIterator`
 
 We do not export these iterators directly, because the API is quite low level and frankly kind of weird. Instead, we have two Python-only types: `BddClauseIterator` and `BddValuationIterator`. These just go through all relevant clauses/valuations of a single `Bdd` and have no other public API. If you still want to replicate the behaviour of the Rust iterators, you can always create a `Bdd` representing a single clause (or a `True` BDD) and iterate over that.
@@ -1054,4 +1100,3 @@ We do not export these iterators directly, because the API is quite low level an
         </tr>
     </tbody>
 </table>
-

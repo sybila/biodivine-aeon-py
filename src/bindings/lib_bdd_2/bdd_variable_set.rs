@@ -7,7 +7,7 @@ use crate::{throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyTuple};
+use pyo3::types::{PyDict, PyList, PyTuple};
 
 /// Represents a collection of named `BddVariable` identifiers and is primarily used to create
 /// "atomic" `Bdd` objects (constants, literals, etc.).
@@ -131,13 +131,13 @@ impl BddVariableSet {
     /// Create a new `Bdd` representing the Boolean function $\mathit{false}$.
     fn mk_false(self_: PyRef<'_, Self>) -> Bdd {
         let value = self_.0.mk_false();
-        Bdd::new(self_, value)
+        Bdd::new_raw(self_, value)
     }
 
     /// Create a new `Bdd` representing the Boolean function $\mathit{true}$.
     fn mk_true(self_: PyRef<'_, Self>) -> Bdd {
         let value = self_.0.mk_true();
-        Bdd::new(self_, value)
+        Bdd::new_raw(self_, value)
     }
 
     /// Create a new `Bdd` representing the constant Boolean function given by `value`.
@@ -148,7 +148,7 @@ impl BddVariableSet {
         } else {
             self_.0.mk_false()
         };
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Create a new `Bdd` representing the literal $variable$ or $\neg variable$, depending
@@ -157,14 +157,14 @@ impl BddVariableSet {
         let value = resolve_boolean(value)?;
         let variable = self_.resolve_variable(variable)?;
         let value = self_.0.mk_literal(variable, value);
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Create a new `Bdd` representing a conjunction of positive/negative literals
     /// (e.g. $x \land y \land \neg z$).
     ///
     /// See also `BoolClauseType`.
-    fn mk_conjunctive_clause(self_: PyRef<'_, Self>, clause: &PyAny) -> PyResult<Bdd> {
+    pub fn mk_conjunctive_clause(self_: PyRef<'_, Self>, clause: &PyAny) -> PyResult<Bdd> {
         let value = if let Ok(valuation) = clause.extract::<BddPartialValuation>() {
             // This is useful because there is no need to copy the inner valuation.
             self_.0.mk_conjunctive_clause(valuation.as_native())
@@ -172,7 +172,7 @@ impl BddVariableSet {
             let valuation = self_.resolve_partial_valuation(clause)?;
             self_.0.mk_conjunctive_clause(&valuation)
         };
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Create a new `Bdd` representing a disjunction of positive/negative literals
@@ -187,7 +187,7 @@ impl BddVariableSet {
             let valuation = self_.resolve_partial_valuation(clause)?;
             self_.0.mk_disjunctive_clause(&valuation)
         };
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Create a new `Bdd` representing a conjunction of disjunctive clauses
@@ -203,7 +203,7 @@ impl BddVariableSet {
             .map(|it| self_.resolve_partial_valuation(it))
             .collect();
         let value = self_.0.mk_cnf(&clauses?);
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Create a new `Bdd` representing a disjunction of conjunctive clauses
@@ -219,7 +219,7 @@ impl BddVariableSet {
             .map(|it| self_.resolve_partial_valuation(it))
             .collect();
         let value = self_.0.mk_dnf(&clauses?);
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Compute a `Bdd` which is satisfied by (and only by) valuations where exactly `k`
@@ -231,7 +231,7 @@ impl BddVariableSet {
     fn mk_sat_exactly_k(
         self_: PyRef<'_, Self>,
         k: usize,
-        variables: Option<Vec<&PyAny>>,
+        variables: Option<&PyAny>,
     ) -> PyResult<Bdd> {
         let variables = if let Some(variables) = variables {
             self_.resolve_variables(variables)?
@@ -239,7 +239,7 @@ impl BddVariableSet {
             self_.0.variables()
         };
         let value = self_.0.mk_sat_exactly_k(k, &variables);
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Compute a `Bdd` which is satisfied by (and only by) valuations where up to `k`
@@ -251,7 +251,7 @@ impl BddVariableSet {
     fn mk_sat_up_to_k(
         self_: PyRef<'_, Self>,
         k: usize,
-        variables: Option<Vec<&PyAny>>,
+        variables: Option<&PyAny>,
     ) -> PyResult<Bdd> {
         let variables = if let Some(variables) = variables {
             self_.resolve_variables(variables)?
@@ -259,7 +259,7 @@ impl BddVariableSet {
             self_.0.variables()
         };
         let value = self_.0.mk_sat_up_to_k(k, &variables);
-        Ok(Bdd::new(self_, value))
+        Ok(Bdd::new_raw(self_, value))
     }
 
     /// Evaluate the provided `BoolExpressionType` into a `Bdd`, or throw an error if the
@@ -267,7 +267,7 @@ impl BddVariableSet {
     fn eval_expression(self_: PyRef<'_, Self>, expression: &PyAny) -> PyResult<Bdd> {
         let expression = BooleanExpression::resolve_expression(expression)?;
         match self_.0.safe_eval_expression(expression.as_native()) {
-            Some(value) => Ok(Bdd::new(self_, value)),
+            Some(value) => Ok(Bdd::new_raw(self_, value)),
             None => throw_runtime_error("Expression contains unknown variables."),
         }
     }
@@ -286,7 +286,7 @@ impl BddVariableSet {
         let value = self_
             .0
             .transfer_from(value.as_native(), original_ctx.as_native());
-        value.map(|it| Bdd::new(self_, it))
+        value.map(|it| Bdd::new_raw(self_, it))
     }
 }
 
@@ -336,11 +336,18 @@ impl BddVariableSet {
 
     pub fn resolve_variables(
         &self,
-        variables: Vec<&PyAny>,
+        variables: &PyAny,
     ) -> PyResult<Vec<biodivine_lib_bdd::BddVariable>> {
-        variables
-            .into_iter()
-            .map(|it| self.resolve_variable(it))
-            .collect()
+        if let Ok(variable) = self.resolve_variable(variables) {
+            return Ok(vec![variable]);
+        }
+        if let Ok(variables) = variables.downcast::<PyList>() {
+            let result = variables
+                .iter()
+                .map(|it| self.resolve_variable(it))
+                .collect::<PyResult<Vec<_>>>();
+            return result;
+        }
+        throw_type_error("Expected `BddVariable`, `str`, or `list[BddVariable | str]`.")
     }
 }

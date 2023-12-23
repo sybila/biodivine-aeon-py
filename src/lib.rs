@@ -1,4 +1,4 @@
-use pyo3::exceptions::{PyIndexError, PyRuntimeError, PyTypeError};
+use pyo3::exceptions::{PyIndexError, PyInterruptedError, PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
 use pyo3::{PyResult, Python};
 
@@ -82,4 +82,11 @@ where
     A: Send + Sync + IntoPy<Py<PyAny>>,
 {
     Err(PyIndexError::new_err(message))
+}
+
+fn throw_interrupted_error<T, A: 'static>(message: A) -> PyResult<T>
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
+    Err(PyInterruptedError::new_err(message))
 }

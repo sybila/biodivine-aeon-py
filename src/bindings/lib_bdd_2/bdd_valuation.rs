@@ -44,7 +44,7 @@ pub struct BddValuation {
 impl BddValuation {
     #[new]
     #[pyo3(signature = (ctx, values = None))]
-    fn new(ctx: &PyAny, values: Option<&PyAny>) -> PyResult<BddValuation> {
+    pub fn new(ctx: &PyAny, values: Option<&PyAny>) -> PyResult<BddValuation> {
         if let Ok(valuation) = ctx.extract::<BddValuation>() {
             if values.is_some() {
                 return throw_type_error("Unexpected second argument.");
@@ -123,7 +123,7 @@ impl BddValuation {
     }
 
     /// Access the underlying `BddVariableSet` connected to this `BddValuation`.
-    fn __ctx__(&self) -> Py<BddVariableSet> {
+    pub fn __ctx__(&self) -> Py<BddVariableSet> {
         self.ctx.clone()
     }
 
@@ -207,6 +207,15 @@ impl AsNative<biodivine_lib_bdd::BddValuation> for BddValuation {
 
     fn as_native_mut(&mut self) -> &mut biodivine_lib_bdd::BddValuation {
         &mut self.value
+    }
+}
+
+impl BddValuation {
+    pub fn new_raw(
+        ctx: Py<BddVariableSet>,
+        value: biodivine_lib_bdd::BddValuation,
+    ) -> BddValuation {
+        BddValuation { ctx, value }
     }
 }
 
@@ -339,7 +348,7 @@ impl BddPartialValuation {
     }
 
     /// Access the underlying `BddVariableSet` connected to this `BddValuation`.
-    fn __ctx__(&self) -> Py<BddVariableSet> {
+    pub fn __ctx__(&self) -> Py<BddVariableSet> {
         self.ctx.clone()
     }
 
@@ -429,5 +438,14 @@ impl AsNative<biodivine_lib_bdd::BddPartialValuation> for BddPartialValuation {
 
     fn as_native_mut(&mut self) -> &mut biodivine_lib_bdd::BddPartialValuation {
         &mut self.value
+    }
+}
+
+impl BddPartialValuation {
+    pub fn new_raw(
+        ctx: Py<BddVariableSet>,
+        value: biodivine_lib_bdd::BddPartialValuation,
+    ) -> BddPartialValuation {
+        BddPartialValuation { ctx, value }
     }
 }

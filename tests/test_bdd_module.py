@@ -197,3 +197,11 @@ def test_bdd_partial_valuation():
     assert val_dict == val_1.to_dict()
 
     assert val_2.extends(val_1)
+
+
+def test_bdd():
+    ctx = BddVariableSet(["a", "b", "c"])
+
+    val_1 = ctx.mk_literal("a", True)
+    assert len(list(val_1.valuation_iterator())) == 4
+    assert len(list(val_1.clause_iterator())) == 1
