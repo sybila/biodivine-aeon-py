@@ -1,11 +1,12 @@
 use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
-use crate::pyo3_utils::resolve_boolean;
+use crate::pyo3_utils::{resolve_boolean, richcmp_eq_inner};
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::PyList;
+use pyo3::types::{PyDict, PyList};
 use std::collections::hash_map::DefaultHasher;
+use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 
 /// Represents a *complete* valuation of all variables in a `Bdd`.
@@ -48,10 +49,7 @@ impl BddValuation {
             if values.is_some() {
                 return throw_type_error("Unexpected second argument.");
             }
-            return Ok(BddValuation {
-                ctx: valuation.ctx,
-                value: valuation.value.clone(),
-            });
+            return Ok(valuation.clone());
         }
         if let Ok(valuation) = ctx.extract::<BddPartialValuation>() {
             if values.is_some() {
@@ -102,11 +100,7 @@ impl BddValuation {
     }
 
     fn __richcmp__(&self, other: &BddValuation, op: CompareOp) -> PyResult<bool> {
-        match op {
-            CompareOp::Eq => Ok(self.value.eq(&other.value)),
-            CompareOp::Ne => Ok(self.value.ne(&other.value)),
-            _ => throw_runtime_error("`BddValuation` cannot be ordered."),
-        }
+        richcmp_eq_inner(op, &self, &other, |x| &x.value)
     }
 
     fn __hash__(&self) -> u64 {
@@ -216,6 +210,39 @@ impl AsNative<biodivine_lib_bdd::BddValuation> for BddValuation {
     }
 }
 
+/// Represents a *partial* valuation of symbolic variables of a `Bdd`.
+///
+/// This can be seen as a safer alternative to `dict[BddVariable, bool]` that can be also indexed using any
+/// `BddVariableType`.
+///
+/// ```python
+/// ctx = BddVariableSet(["a", "b", "c"])
+///
+/// assert len(BddPartialValuation(ctx)) == 0
+///
+/// val_1 = BddPartialValuation(ctx, {'a': 0, 'b': 1})
+/// val_2 = BddPartialValuation(BddValuation(ctx, [0, 1, 0]))
+/// val_3 = BddPartialValuation(val_1)
+///
+/// assert val_1 == eval(repr(val_1))
+/// assert str(val_1) == "{'a': 0, 'b': 1}"
+/// assert len(val_1) == 2
+/// assert "a" in val_1 and "z" not in val_1
+/// assert (val_1['a'] is not None) and (not val_1['a'])
+/// assert (val_1['b'] is not None) and (val_1['b'])
+/// # For "valid" variables, we return `None`, but fail for invalid variables.
+/// assert val_1['c'] is None
+/// with pytest.raises(IndexError):
+///     assert val_1['z']
+/// assert val_1["a"] == val_3["a"]
+/// assert val_1[BddVariable(2)] == val_3[BddVariable(2)]
+/// val_3["a"] = 1
+/// assert val_1["a"] != val_3["a"]
+///
+/// assert val_1.keys() == [BddVariable(0), BddVariable(1)]
+/// assert val_1.values() == [False, True]
+/// assert dict(val_1.items()) == val_1.to_dict()
+/// ```
 #[pyclass(module = "biodivine_aeon")]
 #[derive(Clone)]
 pub struct BddPartialValuation {
@@ -226,9 +253,172 @@ pub struct BddPartialValuation {
 #[pymethods]
 impl BddPartialValuation {
     #[new]
-    fn new(ctx: Py<BddVariableSet>, values: &PyAny) -> PyResult<BddPartialValuation> {
-        let value = ctx.get().resolve_partial_valuation(values)?;
-        Ok(BddPartialValuation { ctx, value })
+    #[pyo3(signature = (ctx, values = None))]
+    fn new(ctx: &PyAny, values: Option<&PyAny>) -> PyResult<BddPartialValuation> {
+        if let Ok(valuation) = ctx.extract::<BddPartialValuation>() {
+            if values.is_some() {
+                return throw_type_error("Unexpected second argument.");
+            }
+            return Ok(valuation.clone());
+        }
+        if let Ok(valuation) = ctx.extract::<BddValuation>() {
+            if values.is_some() {
+                return throw_type_error("Unexpected second argument.");
+            }
+            return Ok(BddPartialValuation {
+                ctx: valuation.ctx.clone(),
+                value: biodivine_lib_bdd::BddPartialValuation::from(valuation.value.clone()),
+            });
+        }
+        match ctx.extract::<Py<BddVariableSet>>() {
+            Err(_) => throw_type_error(
+                "Expected one of `BddValuation`, `BddPartialValuation`, or `BddVariableSet`.",
+            ),
+            Ok(ctx) => match values {
+                None => {
+                    let value = biodivine_lib_bdd::BddPartialValuation::empty();
+                    Ok(BddPartialValuation { ctx, value })
+                }
+                Some(values) => {
+                    if let Ok(dict) = values.downcast::<PyDict>() {
+                        let value = dict
+                            .iter()
+                            .map(|(a, b)| {
+                                let a = ctx.get().resolve_variable(a);
+                                let b = resolve_boolean(b);
+                                match (a, b) {
+                                    (Ok(a), Ok(b)) => Ok((a, b)),
+                                    (Err(e), _) | (_, Err(e)) => Err(e),
+                                }
+                            })
+                            .collect::<PyResult<Vec<(biodivine_lib_bdd::BddVariable, bool)>>>()?;
+                        let value = biodivine_lib_bdd::BddPartialValuation::from_values(&value);
+                        Ok(BddPartialValuation { ctx, value })
+                    } else {
+                        throw_type_error("Expected `dict[BddVariableType, BoolType]` or `None`.")
+                    }
+                }
+            },
+        }
+    }
+
+    fn __richcmp__(&self, other: &BddPartialValuation, op: CompareOp) -> PyResult<bool> {
+        richcmp_eq_inner(op, &self, &other, |x| &x.value)
+    }
+
+    fn __hash__(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.value.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn __str__(&self) -> String {
+        let items = self
+            .value
+            .to_values()
+            .into_iter()
+            .map(|(var, value)| {
+                let name = self.ctx.get().as_native().name_of(var);
+                let value = i32::from(value);
+                format!("'{}': {}", name, value)
+            })
+            .collect::<Vec<_>>();
+        format!("{{{}}}", items.join(", "))
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "BddPartialValuation({}, {})",
+            self.ctx.get().__repr__(),
+            self.__str__()
+        )
+    }
+
+    fn __getnewargs__(&self) -> (Py<BddVariableSet>, HashMap<BddVariable, bool>) {
+        (self.ctx.clone(), self.to_dict())
+    }
+
+    /// Access the underlying `BddVariableSet` connected to this `BddValuation`.
+    fn __ctx__(&self) -> Py<BddVariableSet> {
+        self.ctx.clone()
+    }
+
+    fn __len__(&self) -> usize {
+        usize::from(self.value.cardinality())
+    }
+
+    fn __getitem__(&self, key: &PyAny) -> PyResult<Option<bool>> {
+        let ctx = self.ctx.get();
+        let var = ctx.resolve_variable(key)?;
+        Ok(self.value[var])
+    }
+
+    fn __setitem__(&mut self, key: &PyAny, value: Option<&PyAny>) -> PyResult<()> {
+        let ctx = self.ctx.get();
+        let value = value.map(resolve_boolean).transpose()?;
+        let var = ctx.resolve_variable(key)?;
+        self.value[var] = value;
+        Ok(())
+    }
+
+    fn __delitem__(&mut self, key: &PyAny) -> PyResult<()> {
+        let ctx = self.ctx.get();
+        let var = ctx.resolve_variable(key)?;
+        self.value.unset_value(var);
+        Ok(())
+    }
+
+    fn __contains__(&self, key: &PyAny) -> bool {
+        let ctx = self.ctx.get();
+        ctx.resolve_variable(key).is_ok()
+    }
+
+    /// The list of `BddVariable` identifiers for which a fixed value is stored in this `BddPartialValuation`.
+    pub fn keys(&self) -> Vec<BddVariable> {
+        self.value
+            .to_values()
+            .into_iter()
+            .map(|(a, _)| a.into())
+            .collect()
+    }
+
+    /// The list of `bool` values stored for individual `BddVariable` keys.
+    pub fn values(&self) -> Vec<bool> {
+        self.value.to_values().into_iter().map(|(_, b)| b).collect()
+    }
+
+    /// The list of `(BddVariable, bool)` tuples, similar to `dict.items()`.
+    pub fn items(&self) -> Vec<(BddVariable, bool)> {
+        self.value
+            .to_values()
+            .into_iter()
+            .map(|(a, b)| (a.into(), b))
+            .collect()
+    }
+
+    /// A utility method for directly converting this `BddPartialValuation` to `dict[BddVariable, bool]`.
+    pub fn to_dict(&self) -> HashMap<BddVariable, bool> {
+        self.value
+            .to_values()
+            .into_iter()
+            .map(|(a, b)| (a.into(), b))
+            .collect()
+    }
+
+    /// True if this valuation is an extension (i.e. a more specified version) of the `other` valuation.
+    pub fn extends(&self, other: &BddPartialValuation) -> bool {
+        self.value.extends(other.as_native())
+    }
+
+    /// Return the set of variables that are actively used by this `BddPartialValuation`.
+    ///
+    /// (This is equivalent to `BddPartialValuation.keys`, but returns a `set` instead of a `list`)
+    pub fn support_set(&self) -> HashSet<BddVariable> {
+        self.value
+            .to_values()
+            .into_iter()
+            .map(|(a, _)| a.into())
+            .collect()
     }
 }
 

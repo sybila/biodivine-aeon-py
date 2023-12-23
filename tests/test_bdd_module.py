@@ -146,7 +146,7 @@ def test_bdd_valuation():
 
     val_dict = dict(val_1.items())
     assert val_dict == {
-        BddVariable(0): False, 
+        BddVariable(0): False,
         BddVariable(1): True,
         BddVariable(2): True
     }
@@ -154,3 +154,46 @@ def test_bdd_valuation():
     p_val_1 = BddPartialValuation(ctx, {'a': 0, 'c': 1})
     assert val_1.extends(p_val_1)
     assert not val_2.extends(p_val_1)
+
+
+def test_bdd_partial_valuation():
+    ctx = BddVariableSet(["a", "b", "c"])
+
+    assert len(BddPartialValuation(ctx)) == 0
+
+    val_1 = BddPartialValuation(ctx, {'a': 0, 'b': 1})
+    val_2 = BddPartialValuation(BddValuation(ctx, [0, 1, 0]))
+    val_3 = BddPartialValuation(val_1)
+
+    assert val_1 == eval(repr(val_1))
+    assert str(val_1) == "{'a': 0, 'b': 1}"
+    assert len(val_1) == 2
+    assert "a" in val_1 and "z" not in val_1
+    assert (val_1['a'] is not None) and (not val_1['a'])
+    assert (val_1['b'] is not None) and (val_1['b'])
+    # For "valid" variables, we return `None`, but fail for invalid variables.
+    assert val_1['c'] is None
+    with pytest.raises(IndexError):
+        assert val_1['z']
+    assert val_1["a"] == val_3["a"]
+    assert val_1[BddVariable(2)] == val_3[BddVariable(2)]
+    val_3["a"] = 1
+    assert val_1["a"] != val_3["a"]
+
+    valuations_as_keys = {val_1: "foo", val_3: "bar"}
+    assert valuations_as_keys[val_1] == "foo"
+
+    data = pickle.dumps(val_2)
+    assert pickle.loads(data) == val_2
+
+    assert val_1.keys() == [BddVariable(0), BddVariable(1)]
+    assert val_1.support_set() == {BddVariable(0), BddVariable(1)}
+    assert val_1.values() == [False, True]
+    val_dict = dict(val_1.items())
+    assert val_dict == {
+        BddVariable(0): False,
+        BddVariable(1): True
+    }
+    assert val_dict == val_1.to_dict()
+
+    assert val_2.extends(val_1)

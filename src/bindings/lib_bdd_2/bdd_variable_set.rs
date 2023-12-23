@@ -2,7 +2,7 @@ use crate::bindings::lib_bdd_2::bdd::Bdd;
 use crate::bindings::lib_bdd_2::bdd_valuation::{BddPartialValuation, BddValuation};
 use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd_2::boolean_expression::BooleanExpression;
-use crate::pyo3_utils::resolve_boolean;
+use crate::pyo3_utils::{resolve_boolean, richcmp_eq_inner};
 use crate::{throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
@@ -64,13 +64,7 @@ impl BddVariableSet {
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
-        let self_names = self.variable_names();
-        let other_names = other.variable_names();
-        match op {
-            CompareOp::Eq => Ok(self_names.eq(&other_names)),
-            CompareOp::Ne => Ok(self_names.ne(&other_names)),
-            _ => throw_runtime_error("`BddVariableSet` cannot be ordered."),
-        }
+        richcmp_eq_inner(op, &self, &other, |x| x.variable_names())
     }
 
     fn __len__(&self) -> usize {
@@ -129,7 +123,7 @@ impl BddVariableSet {
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
     /// such variable does not exist.
-    fn get_variable_name(&self, variable: &PyAny) -> PyResult<String> {
+    pub fn get_variable_name(&self, variable: &PyAny) -> PyResult<String> {
         let var = self.resolve_variable(variable)?;
         Ok(self.0.name_of(var))
     }

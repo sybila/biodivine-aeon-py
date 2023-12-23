@@ -426,6 +426,108 @@
     </tbody>
 </table>
 
+## `BddPartialValuation`
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>BddPartialValuation::empty</code></td>
+            <td rowspan="3"><code>BddPartialValuation.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::from_values</code></td> 
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::from<&BddValuation></code></td> 
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::eq</code></td>
+            <td><code>BddPartialValuation.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::hash</code></td>
+            <td><code>BddPartialValuation.__hash__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::to_string</code></td>
+            <td><code>BddPartialValuation.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddPartialValuation.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddPartialValuation.__getnewargs__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddPartialValuation.__ctx__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::cardinality</code></td>
+            <td><code>BddPartialValuation.__len__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::get_value</code></td>
+            <td><code>BddPartialValuation.__getitem__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::set_value</code></td>
+            <td><code>BddPartialValuation.__setitem__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::unset_value</code></td>
+            <td><code>BddPartialValuation.__delitem__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::has_value</code></td>
+            <td><code>BddPartialValuation.__contains__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Iteration / conversion</td></tr>
+        <tr>
+            <td rowspan="1"><code>BddPartialValuation::to_values</code></td>
+            <td><code>BddPartialValuation.items</code></td>
+        </tr>
+        <tr> 
+            <td></td>
+            <td><code>BddPartialValuation.keys</code></td>
+        </tr>
+        <tr> 
+            <td></td>
+            <td><code>BddPartialValuation.values</code></td>
+        </tr>
+        <tr> 
+            <td></td>
+            <td><code>BddPartialValuation.to_dict</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr> 
+        <tr>
+            <td><code>BddPartialValuation::is_empty</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::extends</code></td>
+            <td><code>BddPartialValuation.extends</code></td>
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::last_fixed_variable</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddPartialValuation.support_set</code></td>
+        </tr>
+    </tbody>
+</table>
+
 
 The list of relationships between public APIs in Rust and Python. "Trivial" items that do not have direct Python counterparts, like blanket trait implementations (`Into`, `From`, ...) or the `Debug` trait are intentionally omitted. For more information about individual Python functions, see the Python API documentation generated from the `biodivine_aeon.pyi` stub file.
 
@@ -894,92 +996,6 @@ Naturally, the `bdd!` macro is not translated into Python in any meaningful way.
         <tr>
             <td><code>Bdd::write_as_dot_string</code></td>
             <td></td>
-        </tr>
-    </tbody>
-</table>
-
-## `BddPartialValuation`
-
-<table>
-    <thead>
-        <tr>
-            <th>Rust Member</th>
-            <th>Python Member</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr><td colspan="2" align="center">Special methods</td></tr>
-        <tr>
-            <td><code>BddPartialValuation::empty</code></td>
-            <td rowspan="2"><code>BddPartialValuation.__init__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::from_values</code></td> 
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddPartialValuation.__str__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddPartialValuation.__repr__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::cardinality</code></td>
-            <td><code>BddPartialValuation.__len__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::get_value</code></td>
-            <td><code>BddPartialValuation.__getitem__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::set_value</code></td>
-            <td><code>BddPartialValuation.__setitem__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::unset_value</code></td>
-            <td><code>BddPartialValuation.__delitem__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::has_value</code></td>
-            <td><code>BddPartialValuation.__contains__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddPartialValuation.__iter__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::hash</code></td>
-            <td><code>BddPartialValuation.__hash__</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::eq</code></td>
-            <td><code>BddPartialValuation.__eq__</code></td>
-        </tr>
-        <tr><td colspan="2" align="center">Introspection</td></tr> 
-        <tr>
-            <td><code>BddPartialValuation::is_empty</code></td>
-            <td><code>BddPartialValuation.is_empty</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::extends</code></td>
-            <td><code>BddPartialValuation.extends</code></td>
-        </tr>
-        <tr>
-            <td><code>BddPartialValuation::last_fixed_variable</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddPartialValuation.support_set</code></td>
-        </tr>
-        <tr><td colspan="2" align="center">Data conversion</td></tr>
-        <tr>
-            <td rowspan="2"><code>BddPartialValuation::to_values</code></td>
-            <td><code>BddPartialValuation.to_list</code></td>
-        </tr>
-        <tr> 
-            <td><code>BddPartialValuation.to_dict</code></td>
         </tr>
     </tbody>
 </table>
