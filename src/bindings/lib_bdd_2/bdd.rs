@@ -11,6 +11,7 @@ use num_bigint::BigInt;
 use num_traits::FromPrimitive;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use pyo3::types::PyBytes;
 use rand::{Rng, SeedableRng};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
@@ -144,8 +145,8 @@ impl Bdd {
         )
     }
 
-    fn __getnewargs__(&self) -> (Py<BddVariableSet>, Vec<u8>) {
-        (self.ctx.clone(), self.data_bytes())
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> (Py<BddVariableSet>, &'a PyBytes) {
+        (self.ctx.clone(), self.data_bytes(py))
     }
 
     fn __ctx__(&self) -> Py<BddVariableSet> {
@@ -171,8 +172,8 @@ impl Bdd {
     }
 
     /// Convert this `Bdd` into a serialized `bytes` format that can be read using the `Bdd` constructor.
-    fn data_bytes(&self) -> Vec<u8> {
-        self.as_native().to_bytes()
+    fn data_bytes<'a>(&self, py: Python<'a>) -> &'a PyBytes {
+        PyBytes::new(py, &self.as_native().to_bytes())
     }
 
     /// Produce a `graphviz`-compatible `.dot` representation of the underlying graph. If `zero_pruned` is set,
@@ -193,8 +194,8 @@ impl Bdd {
 
     /// Produce a `BooleanExpression` which is logically equivalent to the function represented by this `Bdd`.
     ///
-    /// The format uses an if-then-else representation based on implications, hence it is not very
-    /// practical for complicated `Bdd`.
+    /// The format uses an and-or expansion of the function graph, hence it is not very
+    /// practical for complicated `Bdd` objects.
     fn to_expression(&self) -> BooleanExpression {
         self.as_native()
             .to_boolean_expression(self.ctx.get().as_native())

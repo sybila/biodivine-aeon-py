@@ -202,6 +202,176 @@ def test_bdd_partial_valuation():
 def test_bdd():
     ctx = BddVariableSet(["a", "b", "c"])
 
-    val_1 = ctx.mk_literal("a", True)
-    assert len(list(val_1.valuation_iterator())) == 4
-    assert len(list(val_1.clause_iterator())) == 1
+    bdd_true = ctx.mk_true()
+    bdd_false = ctx.mk_false()
+    bdd_val = Bdd(BddValuation(ctx, [0, 1, 0]))
+    bdd_clause = Bdd(BddPartialValuation(ctx, {'a': False, 'b': True}))
+    bdd_x = ctx.eval_expression("(a & b) | (b & !c)")
+
+    # Basic properties
+    assert bdd_x == eval(repr(bdd_x))
+    assert str(bdd_x) == "Bdd(vars = 3, len = 6, cardinality = 3)"
+    assert bdd_true.is_true()
+    assert not bdd_x.is_true()
+    assert bdd_false.is_false()
+    assert not bdd_x.is_false()
+    assert bdd_val.is_valuation()
+    assert not bdd_x.is_valuation()
+    assert bdd_clause.is_clause()
+    assert not bdd_x.is_clause()
+    assert {bdd_x: True}[bdd_x]
+    assert bdd_val.implies(bdd_clause)
+    assert not bdd_val.semantic_eq(bdd_clause)
+    assert not bdd_val.structural_eq(bdd_clause)
+    assert bdd_val < bdd_clause
+    assert bdd_val <= bdd_clause
+    assert bdd_x(BddValuation(ctx, [1, 1, 0]))
+    assert not bdd_x(BddValuation(ctx, [0, 0, 1]))
+    assert len(bdd_x) == 6
+    assert bdd_x.cardinality() == 3
+    assert bdd_x.variable_count() == 3
+    assert bdd_x.node_count() == 6
+    assert bdd_x.node_count_per_variable() == {
+        BddVariable(0): 1,
+        BddVariable(1): 2,
+        BddVariable(2): 1
+    }
+    assert bdd_x.support_set() == {BddVariable(0), BddVariable(1), BddVariable(2)}
+    assert bdd_clause.support_set() == {BddVariable(0), BddVariable(1)}
+
+    # Graph queries
+    root = bdd_x.root()
+    n_1, n_2 = bdd_x.node_links(root)
+    assert bdd_x.node_variable(root) == BddVariable(0)
+    assert bdd_x.node_variable(n_1) == BddVariable(1)
+    assert bdd_x.node_variable(n_2) == BddVariable(1)
+
+    # Serialization and conversions
+    assert Bdd(ctx, bdd_x.data_string()) == bdd_x
+    assert Bdd(ctx, bdd_x.data_bytes()) == bdd_x
+    assert pickle.loads(pickle.dumps(bdd_x)) == bdd_x
+
+    assert bdd_x.to_dot_string() != bdd_x.to_dot_string(zero_pruned=False)
+    assert str(bdd_x.to_expression()) == "((a & b) | (!a & (b & !c)))"
+    assert BddPartialValuation(ctx, {'a': True, 'b': True}) == BddPartialValuation(ctx, {'a': 1, 'b': 1})
+    # (!a & b & c) | (a & b)
+    dnf = bdd_x.to_dnf()
+    assert len(dnf) == 2
+    assert dnf[0] == BddPartialValuation(ctx, {'a': False, 'b': True, 'c': False})
+    assert dnf[1] == BddPartialValuation(ctx, {'a': True, 'b': True})
+    # (a | b) & (a | !b | !c) & (!a | b)
+    cnf = bdd_x.to_cnf()
+    assert len(cnf) == 3
+    assert cnf[0] == BddPartialValuation(ctx, {'a': True, 'b': True})
+    assert cnf[1] == BddPartialValuation(ctx, {'a': True, 'b': False, 'c': False})
+    assert cnf[2] == BddPartialValuation(ctx, {'a': False, 'b': True})
+    assert ctx.mk_cnf(cnf) == ctx.mk_dnf(dnf)
+
+    # Iterators
+    bdd_a = ctx.mk_literal("a", True)
+    assert len(list(bdd_a.valuation_iterator())) == 4
+    assert len(list(bdd_a.clause_iterator())) == 1
+
+    assert len(list(bdd_x.valuation_iterator())) == bdd_x.cardinality()
+    assert len(list(bdd_x.clause_iterator())) == 2
+
+    # Basic logic
+    assert bdd_x == bdd_x.l_not().l_not()
+    assert bdd_x == bdd_x.l_and(bdd_x)
+    assert bdd_x.l_and(bdd_x.l_not()).is_false()
+    assert bdd_x == bdd_x.l_or(bdd_x)
+    assert bdd_x.l_or(bdd_x.l_not()).is_true()
+    assert bdd_val.l_imp(bdd_clause).is_true()
+    assert bdd_x.l_iff(bdd_x.l_not()).is_false()
+    assert bdd_x.l_xor(bdd_x.l_not()).is_true()
+    assert bdd_x.l_and_not(bdd_x).is_false()
+
+    var_c = ctx.mk_literal('c', True)
+    var_a = ctx.mk_literal('a', True)
+    ite = Bdd.if_then_else(var_c, bdd_clause, var_a)
+    assert ite == ctx.eval_expression("(c => (!a & b)) & (!c => a)")
+
+    def my_xor(a, b):
+        if a is None or b is None:
+            return None
+        return a != b
+
+    with pytest.raises(InterruptedError):
+        Bdd.apply2(
+            bdd_val,
+            bdd_clause,
+            function=my_xor,
+            flip_output='c',
+            limit=4
+        )
+
+    result = Bdd.apply2(
+        bdd_val,
+        bdd_clause,
+        function=my_xor,
+        flip_output='c',
+        limit=8
+    )
+
+    assert result == Bdd(BddValuation(ctx, [0, 1, 0]))
+
+    def my_and_3(a, b, c):
+        if a is None or b is None or c is None:
+            return None
+        return (a and b) and c
+
+    result = Bdd.apply3(
+        ctx.mk_literal('a', True),
+        ctx.mk_literal('b', False),
+        ctx.mk_literal('c', True),
+        function=my_and_3,
+        flip_a='a',
+        flip_b='b',
+        flip_c='c',
+    )
+
+    assert result == bdd_val
+
+    result_nested = Bdd.apply_nested(
+        bdd_val,
+        bdd_x,
+        outer_function=my_xor,
+        inner_function=lambda x, y: (x or y) if (x is not None and y is not None) else None,
+        variables=['b']
+    )
+
+    result_exists = Bdd.apply_with_exists(bdd_val, bdd_x, variables=['b'], function=my_xor)
+    result_for_all = Bdd.apply_with_for_all(bdd_val, bdd_x, variables=['b'], function=my_xor)
+
+    assert result_nested == result_exists
+    assert result_nested != result_for_all
+
+    # Should replace 'a' and 'b' with witnesses.
+    assert bdd_true.r_pick(['a', 'b']).cardinality() == 2
+
+    assert bdd_true.r_pick_random('a', seed=1) != bdd_true.r_pick_random('a', seed=2)
+    assert bdd_true.r_pick_random('a', seed=1) == bdd_true.r_pick_random('a', seed=1)
+
+    assert bdd_x.r_exist('b') != bdd_x.r_for_all('b')
+    assert bdd_clause.r_for_all('c') == bdd_clause
+    assert bdd_val.r_exist('c') == bdd_clause
+    assert bdd_val.r_for_all('c').is_false()
+    assert bdd_x.r_select({'b': True}).r_exist('b') == bdd_x.r_restrict({'b': True})
+
+    assert bdd_false.valuation_first() is None
+    assert bdd_x.witness() == BddValuation(ctx, [1, 1, 0])
+    assert bdd_x.valuation_first() == BddValuation(ctx, [0, 1, 0])
+    assert bdd_x.valuation_last() == BddValuation(ctx, [1, 1, 1])
+    assert bdd_x.valuation_random(seed=1) != bdd_x.valuation_random(seed=2)
+    assert bdd_x.valuation_most_positive() == BddValuation(ctx, [1, 1, 1])
+    assert bdd_x.valuation_most_negative() == BddValuation(ctx, [0, 1, 0])
+
+    assert bdd_false.clause_first() is None
+    assert bdd_x.clause_first() == dnf[0]
+    assert bdd_x.clause_last() == dnf[1]
+    assert bdd_x.clause_random(seed=1) != bdd_x.clause_random(seed=2)
+    assert bdd_clause.clause_necessary() == BddPartialValuation(ctx, {'a': False, 'b': True})
+
+    expected = Bdd(BddPartialValuation(ctx, {'a': False, 'c': True}))
+    assert bdd_clause.substitute('b', var_c) == expected
+    assert bdd_clause.rename([('b', 'c')]) == expected
