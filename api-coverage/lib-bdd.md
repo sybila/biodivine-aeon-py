@@ -529,7 +529,7 @@
     </tbody>
 </table>
 
-## `Bdd`
+## `Bdd` (frozen)
 
 The `IntoBdd` trait is currently largely ignored. The `Bdd` constructor
 should be sufficient, as it supports a wide variety of types.
@@ -621,7 +621,7 @@ should be sufficient, as it supports a wide variety of types.
             <td><code>Bdd::to_cnf</code></td>
             <td><code>Bdd.to_cnf</code></td>
         </tr>
-        <tr><td colspan="2" align="center">Structural introspection and basic introspection</td></tr>
+        <tr><td colspan="2" align="center">Structural properties and basic introspection</td></tr>
         <tr>
             <td rowspan="2"><code>Bdd::size</code></td>
             <td><code>Bdd.__len__</code></td>
@@ -751,18 +751,6 @@ should be sufficient, as it supports a wide variety of types.
         <tr>
             <td><code>Bdd::check_fused_binary_flip_op</code></td> 
         </tr>
-        <tr> 
-            <td><code>Bdd::binary_op_nested</code></td>
-            <td><code>Bdd.apply_nested</code></td>
-        </tr>
-        <tr> 
-            <td><code>Bdd::binary_op_with_exists</code></td>
-            <td><code>Bdd.apply_with_exists</code></td>
-        </tr>
-        <tr> 
-            <td><code>Bdd::binary_op_with_for_all</code></td>
-            <td><code>Bdd.apply_with_for_all</code></td>
-        </tr> 
         <tr><td colspan="2" align="center">Relational operations</td></tr>
         <tr>
             <td><code>Bdd::pick</code></td>
@@ -779,15 +767,18 @@ should be sufficient, as it supports a wide variety of types.
             <td><code>Bdd::var_pick_random</code></td> 
         </tr>
         <tr>
-            <td><code>Bdd::project</code></td>
+            <td><code>Bdd::exists</code></td>
             <td rowspan="2"><code>Bdd.r_exists</code></td>
         </tr>
         <tr>
-            <td><code>Bdd::var_project</code></td> 
+            <td><code>Bdd::var_exists</code></td> 
         </tr>
         <tr>
-            <td></td>
-            <td><code>Bdd.r_for_all</code></td>
+            <td><code>Bdd::for_all</code></td>
+            <td rowspan="2"><code>Bdd.r_for_all</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::var_for_all</code></td> 
         </tr>
         <tr>
             <td><code>Bdd::restrict</code></td>
@@ -803,6 +794,18 @@ should be sufficient, as it supports a wide variety of types.
         <tr>
             <td><code>Bdd::var_select</code></td>
         </tr>
+        <tr> 
+            <td><code>Bdd::binary_op_nested</code></td>
+            <td><code>Bdd.apply_nested</code></td>
+        </tr>
+        <tr> 
+            <td><code>Bdd::binary_op_with_exists</code></td>
+            <td><code>Bdd.apply_with_exists</code></td>
+        </tr>
+        <tr> 
+            <td><code>Bdd::binary_op_with_for_all</code></td>
+            <td><code>Bdd.apply_with_for_all</code></td>
+        </tr> 
         <tr><td colspan="2" align="center">Valuations / Clauses</td></tr>
         <tr>
             <td><code>Bdd::sat_witness</code></td>

@@ -27,17 +27,23 @@ pub struct Bdd {
 /// An iterator over all satisfying clauses (`BddPartialValuation`) of a `Bdd`.
 ///
 /// Intuitively, these clauses together represent a disjunctive normal form of the underlying Boolean function.
-#[pyclass]
+#[pyclass(module = "biodivine_aeon")]
 pub struct BddClauseIterator(Py<Bdd>, BddPathIterator<'static>);
 
 /// An iterator over all satisfying valuations (`BddValuation`) of a `Bdd`.
 ///
 /// Intuitively, these valuation together represent the `1` rows of a truth table of the underlying Boolean function.
-#[pyclass]
+#[pyclass(module = "biodivine_aeon")]
 pub struct BddValuationIterator(Py<Bdd>, BddSatisfyingValuations<'static>);
 
 #[pymethods]
 impl Bdd {
+    /// A `Bdd` can be created as:
+    ///  - A copy of a different `Bdd`.
+    ///  - A conjunction of literals defined by a `BddValuation` or a `BddPartialValuation`.
+    ///  - Deserialization of a string created with `Bdd.data_string()`.
+    ///  - Deserialization of bytes created with `Bdd.data_bytes()`.
+    ///
     #[new]
     #[pyo3(signature = (ctx, data = None))]
     fn new(ctx: &PyAny, data: Option<&PyAny>) -> PyResult<Bdd> {
@@ -641,6 +647,16 @@ impl Bdd {
         .unwrap())
     }
 
+    /// An `apply` function which performs two nested passes of the apply algorithm:
+    ///  - First, the `outer_function` is applied to combine the left and right BDDs.
+    ///  - Then, for each node of the newly created BDD which conditions on one of the specified `variables`,
+    ///    the method executes the `inner_function` on its two child nodes. The result replaces the original
+    ///    output node.
+    ///
+    /// This operation can be used to implement various combinations of logic + projection. Specifically, using
+    /// `inner_function = or` implements existential projection and `inner_function = and` implements universal
+    /// projection on the result of the `outer_function`. However, much "wilder" combinations are possible if
+    /// you, for whatever reason, need them.
     #[staticmethod]
     pub fn apply_nested(
         py: Python,
@@ -664,6 +680,10 @@ impl Bdd {
         Ok(left.new_from(result))
     }
 
+    /// Performs a binary logical operation (`function`) on two `Bdd` objects while performing an existential
+    /// projection on the given variables in the result `Bdd`.
+    ///
+    /// See also `Bdd.apply_nested`.
     #[staticmethod]
     pub fn apply_with_exists(
         py: Python,
@@ -683,6 +703,10 @@ impl Bdd {
         Ok(left.new_from(result))
     }
 
+    /// Performs a binary logical operation (`function`) on two `Bdd` objects while performing a universal
+    /// projection on the given variables in the result `Bdd`.
+    ///
+    /// See also `Bdd.apply_nested`.
     #[staticmethod]
     pub fn apply_with_for_all(
         py: Python,
@@ -702,11 +726,32 @@ impl Bdd {
         Ok(left.new_from(result))
     }
 
+    /// Picks one "witness" valuation for the given `BddVariable` id(s) from this `Bdd`.
+    ///
+    /// To understand this operation, we split the `BddVariables` into `picked` (`variables`) and `non-picked`
+    /// (the rest). For every unique valuation of `non-picked` variables, the operation selects exactly one valuation
+    /// of `picked` variables from the original `Bdd` (assuming the `non-picked` valuation is present at all).
+    /// In other words, the result is satisfied by every `non-picked` valuation that satisfied the original `Bdd`,
+    /// but each such `non-picked` valuation corresponds to exactly one full valuation of `picked + non-picked`
+    /// variables.
+    ///
+    /// Another useful way of understanding this operation is through relations: Consider a relation
+    /// $R \subseteq A \times B$ represented as a `Bdd`. The result of `R.pick(variables_B)`, denoted $R'$
+    /// is a *sub-relation* which is a bijection: for every $a \in A$ which is present in the original $R$,
+    /// we selected exactly one $b \in B$ s.t. $(a,b) \in R' \land (a, b) \in R$. If we instead compute
+    /// `R.pick(variables_A)`, we obtain a different bijection: one where we selected exactly $a \in A$ for every
+    /// $b \in B$.
+    ///
+    /// This operation is biased such that it always tries to select the lexicographically "first" witness.
     pub fn r_pick(&self, variables: &PyAny) -> PyResult<Bdd> {
         let variables = self.ctx.get().resolve_variables(variables)?;
         Ok(self.new_from(self.as_native().pick(&variables)))
     }
 
+    /// The semantics of this operation are the same as `Bdd.r_pick`, but instead of being biased towards the
+    /// "first" available witness, the operation picks the witnesses randomly.
+    ///
+    /// You can make the process randomized but deterministic by specifying a fixed `seed`.
     #[pyo3(signature = (variables, seed = None))]
     pub fn r_pick_random(&self, variables: &PyAny, seed: Option<u64>) -> PyResult<Bdd> {
         /// Generic helper function to handle both cases.
@@ -727,46 +772,67 @@ impl Bdd {
         }
     }
 
+    /// Eliminate the specified `variables` from this `Bdd` using *existential projection*.
+    ///
+    /// In terms of first-order logic, this is equivalent to applying the $\exists$ operator to the underlying
+    /// Boolean function.
     pub fn r_exist(&self, variables: &PyAny) -> PyResult<Bdd> {
         let variables = self.ctx.get().resolve_variables(variables)?;
         Ok(self.new_from(self.as_native().exists(&variables)))
     }
 
+    /// Eliminate the specified `variables` from this `Bdd` using *universal projection*.
+    ///
+    /// In terms of first-order logic, this is equivalent to applying the $\forall$ operator to the underlying
+    /// Boolean function.
     pub fn r_for_all(&self, variables: &PyAny) -> PyResult<Bdd> {
         let variables = self.ctx.get().resolve_variables(variables)?;
         Ok(self.new_from(self.as_native().for_all(&variables)))
     }
 
+    /// Fix the specified variables to the respective values, and then eliminate the variables using existential
+    /// projection.
     pub fn r_restrict(&self, values: &PyAny) -> PyResult<Bdd> {
         let valuation = self.ctx.get().resolve_partial_valuation(values)?;
         let result = self.as_native().restrict(&valuation.to_values());
         Ok(self.new_from(result))
     }
 
+    /// Fix the specified variables to the respective values.
     pub fn r_select(&self, values: &PyAny) -> PyResult<Bdd> {
         let valuation = self.ctx.get().resolve_partial_valuation(values)?;
         let result = self.as_native().select(&valuation.to_values());
         Ok(self.new_from(result))
     }
 
+    /// Pick a single satisfying valuation from this `Bdd`.
     pub fn witness(&self) -> Option<BddValuation> {
         self.as_native()
             .sat_witness()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Pick the lexicographically first valuation from this `Bdd`.
     pub fn valuation_first(&self) -> Option<BddValuation> {
         self.as_native()
             .first_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Pick the lexicographically last valuation from this `Bdd`.
     pub fn valuation_last(&self) -> Option<BddValuation> {
         self.as_native()
             .last_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Pick a randomized valuation from this `Bdd`.
+    ///
+    /// Note: At the moment, the distribution of the selected valuations is not uniform (it depends on the structure
+    /// of the `Bdd`). However, in the future we plan to update the method such that it actually samples
+    /// the valuations uniformly. If this is important to you, get in touch :)
+    ///
+    /// You can make the process randomized but deterministic by specifying a fixed `seed`.
     #[pyo3(signature = (seed = None))]
     pub fn valuation_random(&self, seed: Option<u64>) -> Option<BddValuation> {
         fn inner<R: Rng>(bdd: &RsBdd, rng: &mut R) -> Option<biodivine_lib_bdd::BddValuation> {
@@ -782,34 +848,46 @@ impl Bdd {
         result.map(|it| BddValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Pick the valuation with the most `true` variables.
     pub fn valuation_most_positive(&self) -> Option<BddValuation> {
         self.as_native()
             .most_positive_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Pick the valuation with the most `false` variables.
     pub fn valuation_most_negative(&self) -> Option<BddValuation> {
         self.as_native()
             .most_negative_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// An iterator over all `BddValuation` objects that satisfy this `Bdd`.
     pub fn valuation_iterator(self_: Py<Bdd>, py: Python) -> BddValuationIterator {
         BddValuationIterator::new(py, self_)
     }
 
+    /// Pick the lexicographically first satisfying clause of this `Bdd`.
     pub fn clause_first(&self) -> Option<BddPartialValuation> {
         self.as_native()
             .first_clause()
             .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Pick the lexicographically last satisfying clause of this `Bdd`.
     pub fn clause_last(&self) -> Option<BddPartialValuation> {
         self.as_native()
             .last_clause()
             .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Pick a randomized satisfying clause from this `Bdd`.
+    ///
+    /// Note: At the moment, the distribution of the selected clauses is not uniform (it depends on the structure
+    /// of the `Bdd`). However, in the future we plan to update the method such that it actually samples
+    /// the clauses uniformly. If this is important to you, get in touch :)
+    ///
+    /// You can make the process randomized but deterministic by specifying a fixed `seed`.
     #[pyo3(signature = (seed = None))]
     pub fn clause_random(&self, seed: Option<u64>) -> Option<BddPartialValuation> {
         fn inner<R: Rng>(
@@ -827,16 +905,27 @@ impl Bdd {
         result.map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// Compute the most restrictive conjunctive clause that covers all satisfying valuations of this BDD.
+    ///
+    /// In other words, if you compute the BDD corresponding to the resulting partial valuation, the resulting BDD
+    /// will be a superset of this BDD, and it will be the smallest superset that can be described using
+    /// a single clause.
     pub fn clause_necessary(&self) -> Option<BddPartialValuation> {
         self.as_native()
             .necessary_clause()
             .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
     }
 
+    /// An iterator over all DNF clauses (i.e. `BddPartialValuation` objects) that satisfy this `Bdd`.
     pub fn clause_iterator(self_: Py<Bdd>, py: Python) -> BddClauseIterator {
         BddClauseIterator::new(py, self_)
     }
 
+    /// Replace the occurrence of a given `variable` with a specific `function`.
+    ///
+    /// Note that at the moment, the result is not well defined if `function` also depends on the substituted
+    /// variable (the variable is eliminated both from the original `Bdd` and from `function`). We are planning
+    /// to fix this in the future.
     pub fn substitute(&self, variable: &PyAny, function: &Bdd) -> PyResult<Bdd> {
         let ctx = self.ctx.get();
         let variable = ctx.resolve_variable(variable)?;
@@ -844,6 +933,11 @@ impl Bdd {
         Ok(self.new_from(result))
     }
 
+    /// Rename `Bdd` variables based on the provided `(from, to)` pairs.
+    ///
+    /// At the moment, this operation *cannot* modify the graph structure of the `Bdd`. It can only replace variable
+    /// identifiers with new ones. As such, rename operation is only permitted if it does not violate
+    /// the current ordering. If this is not satisfied, the method panics.
     pub fn rename(&self, replace_with: Vec<(&PyAny, &PyAny)>) -> PyResult<Bdd> {
         let mut result = self.value.clone();
         for (a, b) in replace_with {

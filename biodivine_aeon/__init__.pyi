@@ -131,7 +131,7 @@ class Bdd:
         """
         A `Bdd` can be created as:
          - A copy of a different `Bdd`.
-         - A conjunction of literals defined by `BddValuation` or `BddPartialValuation`.
+         - A conjunction of literals defined by a `BddValuation` or a `BddPartialValuation`.
          - Deserialization of a string created with `Bdd.data_string()`.
          - Deserialization of bytes created with `Bdd.data_bytes()`.
         """
@@ -313,7 +313,9 @@ class Bdd:
 
 class BddValuationIterator:
     def __init__(self, bdd: Bdd):
-        ...
+        """
+        Create a new iterator over all satisfying `BddValuation` objects of a `Bdd`.
+        """
     def __iter__(self) -> BddValuationIterator:
         ...
     def __next__(self) -> BddValuation:
@@ -321,7 +323,9 @@ class BddValuationIterator:
 
 class BddClauseIterator:
     def __init__(self, bdd: Bdd):
-        ...
+        """
+        Create a new iterator over all DNF clauses (i.e. `BddPartialValuation` objects) of a `Bdd`.
+        """
     def __iter__(self) -> BddClauseIterator:
         ...
     def __next__(self) -> BddPartialValuation:

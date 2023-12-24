@@ -123,9 +123,6 @@ pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::borrow_mut(&mut self) -> 
 impl<T> core::convert::From<T> for biodivine_lib_bdd::BddSatisfyingValuations<'a>
 pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::from(t: T) -> T
 
-impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_bdd::Bdd::from(valuation: biodivine_lib_bdd::BddValuation) -> Self
-
 pub struct biodivine_lib_bdd::BddValuationIterator(_)
 impl biodivine_lib_bdd::BddValuationIterator
 pub fn biodivine_lib_bdd::BddValuationIterator::new(num_vars: u16) -> biodivine_lib_bdd::BddValuationIterator
@@ -158,10 +155,6 @@ impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddValuationIterator w
 pub fn biodivine_lib_bdd::BddValuationIterator::borrow_mut(&mut self) -> &mut T
 impl<T> core::convert::From<T> for biodivine_lib_bdd::BddValuationIterator
 pub fn biodivine_lib_bdd::BddValuationIterator::from(t: T) -> T
-
-pub struct biodivine_lib_bdd::BddVariable(_)
-impl biodivine_lib_bdd::IntoBdd for biodivine_lib_bdd::BddVariable
-pub fn biodivine_lib_bdd::BddVariable::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
 
 pub struct biodivine_lib_bdd::ValuationsOfClauseIterator
 impl biodivine_lib_bdd::ValuationsOfClauseIterator
@@ -203,14 +196,3 @@ impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::ValuationsOfClauseIter
 pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::borrow_mut(&mut self) -> &mut T
 impl<T> core::convert::From<T> for biodivine_lib_bdd::ValuationsOfClauseIterator
 pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::from(t: T) -> T
-
-pub trait biodivine_lib_bdd::IntoBdd
-pub fn biodivine_lib_bdd::IntoBdd::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
-impl biodivine_lib_bdd::IntoBdd for &biodivine_lib_bdd::Bdd
-pub fn &biodivine_lib_bdd::Bdd::into_bdd(self, _variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
-impl biodivine_lib_bdd::IntoBdd for &str
-pub fn &str::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
-impl biodivine_lib_bdd::IntoBdd for biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_bdd::Bdd::into_bdd(self, _variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
-impl biodivine_lib_bdd::IntoBdd for biodivine_lib_bdd::BddVariable
-pub fn biodivine_lib_bdd::BddVariable::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
