@@ -6,16 +6,76 @@ env:
   # A fixed version used for testing, so that the builds don't
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
-  RUST_VERSION: "1.72.0"
+  RUST_VERSION: "1.74.0"
   # This is the version currently used by `z3-sys`.
   # If this ever changes, you might also need to increase
   # the minimum macOS version below.
   Z3_VERSION: "4.8.12"
   MACOS_TARGET: "11.0"
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
 jobs:
-  linux:
+  tests-and-coverage:
+    # For reasons unbeknownst to mankind, llvm-cov segfaults on ubuntu runners
+    # when combined with pytest. The solution for now is to use macOS.
+    runs-on: macos-12
+    env:
+      # These are the env variables set by llvm-cov, but modified such that they actually work in GH actions.
+      RUSTFLAGS: '-C instrument-coverage --cfg=coverage --cfg=trybuild_no_target'
+      LLVM_PROFILE_FILE: './target/biodivine-aeon-py-%p-%4m.profraw'
+      CARGO_LLVM_COV: 1
+      CARGO_LLVM_COV_SHOW_ENV: 1
+      CARGO_LLVM_COV_TARGET_DIR: './target'
+    steps:
+      # Here, we don't need to bother with the `manylinux` container,
+      # since we are only testing, not building multiplatform `wheel` files.
+      - name: Checkout.
+        uses: actions/checkout@v4
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - run: echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - run: |
+          echo $CPATH
+          echo $LIBRARY_PATH
+          echo $DYLD_LIBRARY_PATH
+          ls -la $Z3_ROOT
+          ls -la $Z3_ROOT/include
+          ls -la $Z3_ROOT/bin
+      - name: Setup Python.
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - name: Setup Rust toolchain.
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
+      - name: Setup Rust/Python environment.
+        run: |
+          rustup component add llvm-tools-preview
+          cargo install cargo-llvm-cov
+          python3 -m venv venv
+          ./venv/bin/pip3 install -r dev-requirements.txt
+      - run: |
+          source ./venv/bin/activate
+          cargo llvm-cov clean --workspace
+          cargo test
+          maturin develop
+          pytest ./tests --cov=biodivine_aeon --cov-report xml
+          cargo llvm-cov report --lcov --output-path coverage.lcov
+      - uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.lcov,coverage.xml
+
+  build-linux:
     runs-on: ubuntu-latest
+    needs: [ tests-and-coverage ]
     steps:
       - name: Checkout.
         uses: actions/checkout@v4
@@ -33,8 +93,9 @@ jobs:
           name: wheels
           path: target/dist
 
-  macos:
+  build-macos:
     runs-on: macos-latest
+    needs: [ tests-and-coverage ]
     steps:
       - name: Checkout.
         uses: actions/checkout@v4
@@ -69,8 +130,9 @@ jobs:
           name: wheels
           path: target/dist
 
-  windows:
+  build-windows:
     runs-on: windows-latest
+    needs: [ tests-and-coverage ]
     steps:
       - name: Checkout.
         uses: actions/checkout@v4
@@ -97,7 +159,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ macos, windows, linux ]
+    needs: [ build-macos, build-windows, build-linux ]
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -113,6 +175,7 @@ jobs:
   conda_deployment_with_new_tag:
     name: Conda deployment (${{ matrix.os }})
     if: "startsWith(github.ref, 'refs/tags/')"
+    needs: [ tests-and-coverage ]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

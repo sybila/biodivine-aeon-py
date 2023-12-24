@@ -105,7 +105,7 @@ available through an official installer or cannot be installed globally.
 
  > In any case, on linux, you'll need typical "essential" build tools like `cmake` and `clang`
  > to even build the Z3 dependency, regardless of the linking process. On debian-ish distros,
- > `apt install build-essential clang` should be sufficient.
+ > `apt install build-essential cmake clang` should be sufficient.
 
  > On Apple Silicon, dynamic linking for Z3 is currently not working out-of-the-box if
  > you installed Z3 through `brew`, because the library files are not discoverable by `clang`

@@ -8,7 +8,7 @@ name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default = ['static-z3']
+#default = ['static-z3']
 # For releases, we want to include Z3 statically, so that users
 # don't have to install it (or break compatibility with new versions).
 # So for CI builds, this feature is enabled, but for local builds,
