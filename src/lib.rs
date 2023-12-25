@@ -26,19 +26,13 @@ mod bindings;
 /// possible -- ideally, the stuff in here should be eventually published to crates.io and turned
 /// into a dependency.
 ///
-mod internal;
+//mod internal;
 mod pyo3_utils;
 
 /// AEON.py is a library...
 #[pymodule]
-fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {
+fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
     bindings::lib_bdd_2::register(module)?;
-    //bindings::lib_bdd::register(module)?;
-    //bindings::lib_param_bn::register(module)?;
-    //bindings::aeon::register(module)?;
-    //bindings::pbn_control::register(module)?;
-    //bindings::hctl_model_checker::register(module)?;
-    //bindings::bn_classifier::register(module)?;
     Ok(())
 }
 

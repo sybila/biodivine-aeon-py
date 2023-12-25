@@ -14,13 +14,79 @@ env:
   MACOS_TARGET: "11.0"
   PYTHON_VERSION: "3.12"
 jobs:
+  # Checks syntax formatting (does not need z3).
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  # Run basic code validity check.
+  check:
+    needs: fmt
+    name: Check
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      # Should use shared z3 for faster runtime.
+      - run: cargo check
+
+  # Checks code style.
+  clippy:
+    needs: check
+    name: Clippy
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: clippy
+      # Should use shared z3 for faster runtime.
+      - run: cargo clippy
+
   tests-and-coverage:
+    needs: check
     # For reasons unbeknownst to mankind, llvm-cov segfaults on ubuntu runners
     # when combined with pytest. The solution for now is to use macOS.
     runs-on: macos-12
     env:
       # These are the env variables set by llvm-cov, but modified such that they actually work in GH actions.
-      RUSTFLAGS: '-C instrument-coverage --cfg=coverage --cfg=trybuild_no_target'
+      RUSTFLAGS: '-D warnings -C instrument-coverage --cfg=coverage --cfg=trybuild_no_target'
       LLVM_PROFILE_FILE: './target/biodivine-aeon-py-%p-%4m.profraw'
       CARGO_LLVM_COV: 1
       CARGO_LLVM_COV_SHOW_ENV: 1
@@ -41,20 +107,14 @@ jobs:
       - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
       - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
       - run: echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
-      - run: |
-          echo $CPATH
-          echo $LIBRARY_PATH
-          echo $DYLD_LIBRARY_PATH
-          ls -la $Z3_ROOT
-          ls -la $Z3_ROOT/include
-          ls -la $Z3_ROOT/bin
       - name: Setup Python.
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-      - name: Setup Rust toolchain.
-        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
       - name: Setup Rust/Python environment.
         run: |
           rustup component add llvm-tools-preview
