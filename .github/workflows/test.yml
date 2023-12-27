@@ -75,14 +75,12 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup Z3.
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: daemontus/setup-z3@v1.3.0
         with:
           version: ${{ env.Z3_VERSION }}
+          add-to-library-path: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
-      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
-      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
@@ -99,14 +97,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: daemontus/setup-z3@v1.3.0
         with:
           version: ${{ env.Z3_VERSION }}
+          add-to-library-path: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
-      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
-      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
       - name: Setup Python.
         uses: actions/setup-python@v4
         with:
@@ -132,15 +128,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: daemontus/setup-z3@v1.3.0
         with:
           version: ${{ env.Z3_VERSION }}
+          add-to-library-path: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
-      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
-      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
-      - run: echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
       - name: Setup Python.
         uses: actions/setup-python@v4
         with:
@@ -166,24 +159,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: daemontus/setup-z3@v1.3.0
         with:
           version: ${{ env.Z3_VERSION }}
+          add-to-library-path: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
-#      - run: echo "INCLUDE=$INCLUDE;$Z3_ROOT\include" >> $GITHUB_ENV
-#        shell: bash
-#      - run: echo "LIBPATH=$LIBPATH;$Z3_ROOT\bin" >> $GITHUB_ENV
-#        shell: bash
-#      - run: echo "CPATH=$CPATH;$Z3_ROOT\include" >> $GITHUB_ENV
-#        shell: bash
-#      - run: echo "LIB=$LIB;$Z3_ROOT\bin" >> $GITHUB_ENV
-#        shell: bash
-#      - run: echo "LIBRARY_PATH=$LIBRARY_PATH;$Z3_ROOT\bin" >> $GITHUB_ENV
-#        shell: bash
-#      - run: echo "LIB=$LIB;$Z3_ROOT\bin" >> $GITHUB_ENV
-#        shell: bash
       - name: Setup Python.
         uses: actions/setup-python@v4
         with:
@@ -192,15 +173,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
-      - run: | 
-          echo "CPATH=$Z3_ROOT\include" >> $GITHUB_ENV
-          echo "LIB=$Z3_ROOT\bin" >> $GITHUB_ENV
-        shell: bash
       - name: Run tests.
         run: |
           python3 -m venv venv
           .\venv\Scripts\activate
-          dir $Z3_ROOT
           pip3 install -r dev-requirements.txt      
           maturin develop
           pytest .\tests
@@ -225,15 +201,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: daemontus/setup-z3@v1.3.0
         with:
           version: ${{ env.Z3_VERSION }}
+          add-to-library-path: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
-      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
-      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
-      - run: echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
       - name: Setup Python.
         uses: actions/setup-python@v4
         with:
