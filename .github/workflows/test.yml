@@ -1,0 +1,264 @@
+# This runs on every commit that is not on a dev-* branch. It should be reasonably fast,
+# as it links to Z3 dynamically.
+# Specifically, we check that:
+#  - Rust formatting is correct.
+#  - Rust project has no errors.
+#  - Rust project has no `clippy` issues.
+#  - Python tests have no `mypy` issues.
+#  - Everything compiles and tests pass on linux/macOS/windows with dynamically linked Z3.
+#    * On macOS, we also measure code coverage of the Python tests (on linux this seems broken now).
+name: test
+on:
+  push:
+    branches-ignore:
+      - 'dev-*'
+  pull_request:
+    branches:
+      - '*'
+env:
+  # A fixed version used for testing, so that the builds don't
+  # spontaneously break after a few years.
+  # Make sure to update this from time to time.
+  RUST_VERSION: "1.74.0"
+  # This is the version currently used by `z3-sys`.
+  # If this ever changes, you might also need to increase
+  # the minimum macOS version below.
+  Z3_VERSION: "4.8.12"
+  MACOS_TARGET: "11.0"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # Checks syntax formatting (does not need z3).
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  # Run basic code validity check.
+  check:
+    needs: fmt
+    name: check
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      - run: cargo check
+
+  # Checks code style.
+  clippy:
+    needs: check
+    name: clippy
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: clippy
+      # Should use shared z3 for faster runtime.
+      - run: cargo clippy
+
+  mypy:
+    needs: check
+    name: mypy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v4
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - name: Setup Python.
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      - name: Install and run mypy.
+        run: |
+          python3 -m venv venv
+          source ./venv/bin/activate
+          ./venv/bin/pip3 install -r dev-requirements.txt      
+          maturin develop
+          mypy ./tests --check-untyped-defs
+
+  tests-linux:
+    # This also tests that compilation with dynamic Z3 linking is not broken.
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v4
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - run: echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - name: Setup Python.
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      - name: Run tests.
+        run: |
+          python3 -m venv venv
+          source ./venv/bin/activate
+          ./venv/bin/pip3 install -r dev-requirements.txt      
+          maturin develop
+          pytest ./tests
+
+  tests-windows:
+    # This also tests that compilation with dynamic Z3 linking is not broken.
+    needs: check
+    runs-on: windows-latest
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v4
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+#      - run: echo "INCLUDE=$INCLUDE;$Z3_ROOT\include" >> $GITHUB_ENV
+#        shell: bash
+#      - run: echo "LIBPATH=$LIBPATH;$Z3_ROOT\bin" >> $GITHUB_ENV
+#        shell: bash
+#      - run: echo "CPATH=$CPATH;$Z3_ROOT\include" >> $GITHUB_ENV
+#        shell: bash
+#      - run: echo "LIB=$LIB;$Z3_ROOT\bin" >> $GITHUB_ENV
+#        shell: bash
+#      - run: echo "LIBRARY_PATH=$LIBRARY_PATH;$Z3_ROOT\bin" >> $GITHUB_ENV
+#        shell: bash
+#      - run: echo "LIB=$LIB;$Z3_ROOT\bin" >> $GITHUB_ENV
+#        shell: bash
+      - name: Setup Python.
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      - run: | 
+          echo "CPATH=$Z3_ROOT\include" >> $GITHUB_ENV
+          echo "LIB=$Z3_ROOT\bin" >> $GITHUB_ENV
+        shell: bash
+      - name: Run tests.
+        run: |
+          python3 -m venv venv
+          .\venv\Scripts\activate
+          dir $Z3_ROOT
+          pip3 install -r dev-requirements.txt      
+          maturin develop
+          pytest .\tests
+
+  tests-macos-and-coverage:
+    needs: check
+    # For reasons unbeknownst to mankind, llvm-cov segfaults on ubuntu runners
+    # when combined with pytest. The solution for now is to use macOS.
+    runs-on: macos-12
+    env:
+      # These are the env variables set by llvm-cov, but modified such that they actually work in GH actions.
+      # In particular, we changed the paths from absolute to relative.
+      RUSTFLAGS: '-D warnings -C instrument-coverage --cfg=coverage --cfg=trybuild_no_target'
+      LLVM_PROFILE_FILE: './target/biodivine-aeon-py-%p-%4m.profraw'
+      CARGO_LLVM_COV: 1
+      CARGO_LLVM_COV_SHOW_ENV: 1
+      CARGO_LLVM_COV_TARGET_DIR: './target'
+    steps:
+      # Here, we don't need to bother with the `manylinux` container,
+      # since we are only testing, not building multiplatform `wheel` files.
+      - name: Checkout.
+        uses: actions/checkout@v4
+      - name: Setup Z3.
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Explicitly add z3 to the include paths, because that's not what the installer is trained to do.
+      - run: echo "CPATH=$CPATH:$Z3_ROOT/include" >> $GITHUB_ENV
+      - run: echo "LIBRARY_PATH=$LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - run: echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$Z3_ROOT/bin" >> $GITHUB_ENV
+      - name: Setup Python.
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      - name: Setup Rust/Python environment.
+        run: |
+          rustup component add llvm-tools-preview
+          cargo install cargo-llvm-cov
+          python3 -m venv venv
+          ./venv/bin/pip3 install -r dev-requirements.txt
+      - name: Run tests with coverage.
+        run: |
+          source ./venv/bin/activate
+          cargo llvm-cov clean --workspace
+          cargo test
+          maturin develop
+          pytest ./tests --cov=biodivine_aeon --cov-report xml
+          cargo llvm-cov report --lcov --output-path coverage.lcov
+      - uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.lcov,coverage.xml
