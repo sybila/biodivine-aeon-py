@@ -99,8 +99,8 @@ impl BddValuation {
         }
     }
 
-    fn __richcmp__(&self, other: &BddValuation, op: CompareOp) -> PyResult<bool> {
-        richcmp_eq_inner(op, &self, &other, |x| &x.value)
+    fn __richcmp__(&self, py: Python, other: &BddValuation, op: CompareOp) -> Py<PyAny> {
+        richcmp_eq_inner(py, op, &self, &other, |x| &x.value)
     }
 
     fn __hash__(&self) -> u64 {
@@ -311,8 +311,8 @@ impl BddPartialValuation {
         }
     }
 
-    fn __richcmp__(&self, other: &BddPartialValuation, op: CompareOp) -> PyResult<bool> {
-        richcmp_eq_inner(op, &self, &other, |x| &x.value)
+    fn __richcmp__(&self, py: Python, other: &BddPartialValuation, op: CompareOp) -> Py<PyAny> {
+        richcmp_eq_inner(py, op, &self, &other, |x| &x.value)
     }
 
     fn __hash__(&self) -> u64 {

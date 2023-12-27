@@ -63,8 +63,8 @@ impl BddVariableSet {
         throw_type_error("Expected `int` or `list[str]`.")
     }
 
-    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
-        richcmp_eq_inner(op, &self, &other, |x| x.variable_names())
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+        richcmp_eq_inner(py, op, &self, &other, |x| x.variable_names())
     }
 
     fn __len__(&self) -> usize {

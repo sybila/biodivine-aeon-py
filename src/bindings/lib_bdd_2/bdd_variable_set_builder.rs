@@ -1,6 +1,7 @@
 use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
-use crate::{throw_runtime_error, AsNative};
+use crate::pyo3_utils::richcmp_eq_inner;
+use crate::AsNative;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -34,14 +35,8 @@ impl BddVariableSetBuilder {
         BddVariableSetBuilder(inner)
     }
 
-    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
-        let self_names = self.__getstate__();
-        let other_names = other.__getstate__();
-        match op {
-            CompareOp::Eq => Ok(self_names.eq(&other_names)),
-            CompareOp::Ne => Ok(self_names.ne(&other_names)),
-            _ => throw_runtime_error("`BddVariableSetBuilder` cannot be ordered."),
-        }
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+        richcmp_eq_inner(py, op, self, other, |x| x.__getstate__())
     }
 
     fn __len__(&self) -> usize {

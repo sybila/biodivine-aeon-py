@@ -19,7 +19,15 @@ BoolType: TypeAlias = Literal[0, 1] | bool
 Most methods can also accept `0`/`1` wherever `False`/`True` would be typically required.
 """
 
-BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | dict[BddVariableType, BoolType]
+DynamicValuation: TypeAlias = dict[BddVariable, bool] | dict[BddVariable, Literal[0,1]] | dict[str, bool] | dict[str, Literal[0,1]]
+"""
+Describes types that can be converted into `BddPartialValuation`, or `BddValuation` (assuming the values of all 
+variables are set). In practice, this is in fact implemented as `dict[BddVariableType, BoolType]`. 
+But type inference in `mypy` gets confused by all the nested `Union` types and requires extra annotations even
+in trivial cases. To avoid this, we instead list the most common cases explicitly.   
+"""
+
+BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | DynamicValuation
 """
 A Boolean clause represents a collection of literals. This can be either done through one of the valuation types, 
 or through a regular dictionary. However, any representation other than `BddPartialValuation` incurs a performance
