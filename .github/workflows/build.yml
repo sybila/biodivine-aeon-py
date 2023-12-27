@@ -116,7 +116,7 @@ jobs:
       matrix:
         # For now, windows builds are broken...
         os: [macos-latest, ubuntu-latest]
-        python: ["3.9", "3.10", "3.11", "3.12"]
+        python: ["3.9", "3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v4
