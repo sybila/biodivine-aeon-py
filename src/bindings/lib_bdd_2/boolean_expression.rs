@@ -22,6 +22,22 @@ use std::sync::Arc;
    structure, as long as the reference counter ensures safety.
 */
 
+/// Represents a simple Boolean expression with support for Boolean constants, string variables, negation,
+/// and common binary operators (`and`/`or`/`imp`/`iff`/`xor`).
+///
+/// Expressions can be converted to/from `Bdd` objects.
+///
+/// ```python
+/// vars = BddVariableSet(["a", "b", "c"])
+///
+/// # The expressions are syntactically different, but represent the same function.
+/// expr_x = BooleanExpression("(a & b) | (!b & c)")
+/// expr_y = BooleanExpression("(c & !b) | (b & a)")
+///
+/// assert vars.eval_expression(expr_x) == vars.eval_expression(expr_y)
+/// ```
+///
+///
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BooleanExpression {
@@ -156,22 +172,22 @@ impl BooleanExpression {
         matches!(self.as_native(), &RsBooleanExpression::Not(_))
     }
 
-    /// Return true if the root of this expression is a `and`.
+    /// Return true if the root of this expression is an `and`.
     pub fn is_and(&self) -> bool {
         matches!(self.as_native(), &And(_, _))
     }
 
-    /// Return true if the root of this expression is a `or`.
+    /// Return true if the root of this expression is an `or`.
     pub fn is_or(&self) -> bool {
         matches!(self.as_native(), &Or(_, _))
     }
 
-    /// Return true if the root of this expression is a `imp`.
+    /// Return true if the root of this expression is an `imp`.
     pub fn is_imp(&self) -> bool {
         matches!(self.as_native(), &Imp(_, _))
     }
 
-    /// Return true if the root of this expression is a `iff`.
+    /// Return true if the root of this expression is an `iff`.
     pub fn is_iff(&self) -> bool {
         matches!(self.as_native(), &Iff(_, _))
     }
@@ -202,7 +218,7 @@ impl BooleanExpression {
         )
     }
 
-    /// If the root of this expression is `bool`, return its value, or `None` otherwise.
+    /// If the root of this expression is a constant, return its value, or `None` otherwise.
     pub fn as_const(&self) -> Option<bool> {
         match self.as_native() {
             RsBooleanExpression::Const(x) => Some(*x),
@@ -210,7 +226,7 @@ impl BooleanExpression {
         }
     }
 
-    /// If the root of this expression is `var`, return its name, or `None` otherwise.
+    /// If the root of this expression is a `var`, return its name, or `None` otherwise.
     pub fn as_var(&self) -> Option<String> {
         match self.as_native() {
             RsBooleanExpression::Variable(x) => Some(x.clone()),
@@ -218,7 +234,7 @@ impl BooleanExpression {
         }
     }
 
-    /// If the root of this expression is `not`, return its operand, or `None` otherwise.
+    /// If the root of this expression is a `not`, return its operand, or `None` otherwise.
     pub fn as_not(&self) -> Option<BooleanExpression> {
         match self.as_native() {
             RsBooleanExpression::Not(x) => Some(self.mk_child_ref(x)),
@@ -226,7 +242,7 @@ impl BooleanExpression {
         }
     }
 
-    /// If the root of this expression is `and`, return its two operands, or `None` otherwise.
+    /// If the root of this expression is an `and`, return its two operands, or `None` otherwise.
     pub fn as_and(&self) -> Option<(BooleanExpression, BooleanExpression)> {
         match self.as_native() {
             And(l, r) => Some((self.mk_child_ref(l), self.mk_child_ref(r))),
@@ -234,7 +250,7 @@ impl BooleanExpression {
         }
     }
 
-    /// If the root of this expression is `or`, return its two operands, or `None` otherwise.
+    /// If the root of this expression is an `or`, return its two operands, or `None` otherwise.
     pub fn as_or(&self) -> Option<(BooleanExpression, BooleanExpression)> {
         match self.as_native() {
             Or(l, r) => Some((self.mk_child_ref(l), self.mk_child_ref(r))),
@@ -242,7 +258,7 @@ impl BooleanExpression {
         }
     }
 
-    /// If the root of this expression is `imp`, return its two operands, or `None` otherwise.
+    /// If the root of this expression is an `imp`, return its two operands, or `None` otherwise.
     pub fn as_imp(&self) -> Option<(BooleanExpression, BooleanExpression)> {
         match self.as_native() {
             Imp(l, r) => Some((self.mk_child_ref(l), self.mk_child_ref(r))),
@@ -250,7 +266,7 @@ impl BooleanExpression {
         }
     }
 
-    /// If the root of this expression is `iff`, return its two operands, or `None` otherwise.
+    /// If the root of this expression is an `iff`, return its two operands, or `None` otherwise.
     pub fn as_iff(&self) -> Option<(BooleanExpression, BooleanExpression)> {
         match self.as_native() {
             Iff(l, r) => Some((self.mk_child_ref(l), self.mk_child_ref(r))),
