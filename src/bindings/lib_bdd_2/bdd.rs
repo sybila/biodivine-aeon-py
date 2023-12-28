@@ -197,9 +197,10 @@ impl Bdd {
     /// The format uses an and-or expansion of the function graph, hence it is not very
     /// practical for complicated `Bdd` objects.
     fn to_expression(&self) -> BooleanExpression {
-        self.as_native()
-            .to_boolean_expression(self.ctx.get().as_native())
-            .into()
+        BooleanExpression::from_native(
+            self.as_native()
+                .to_boolean_expression(self.ctx.get().as_native()),
+        )
     }
 
     /// Build a list of `BddPartialValuation` objects that represents a **disjunctive normal form** of this

@@ -1,5 +1,5 @@
 from .biodivine_aeon import *
-from typing import TypeAlias, Literal
+from typing import TypeAlias, Literal, Any
 
 __doc__ = biodivine_aeon.__doc__
 # For some reason, the following is recommned, but will cause the type aliases

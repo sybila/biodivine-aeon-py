@@ -531,8 +531,17 @@
 
 ## `Bdd` (frozen)
 
-The `IntoBdd` trait is currently largely ignored. The `Bdd` constructor
-should be sufficient, as it supports a wide variety of types.
+The `IntoBdd` trait and the `bdd!` macro trait are currently largely ignored. 
+The `Bdd` constructor should be sufficient, as it supports a wide variety of types.
+
+In the future, we can consider adding logical operations on BDDs as 
+["infix operators"](https://code.activestate.com/recipes/384122/). But this 
+poses a few challenges:
+ 
+ * If we want to make this available for multiple types,
+we will need either complicated generics, or heavy use of `Any`.
+ * We still cannot override Python keywords like `and` and `or`, so we would have
+   to use something else.
 
 <table>
     <thead>
@@ -879,12 +888,83 @@ should be sufficient, as it supports a wide variety of types.
     </tbody>
 </table>
 
+## `op_function` module
 
-The list of relationships between public APIs in Rust and Python. "Trivial" items that do not have direct Python counterparts, like blanket trait implementations (`Into`, `From`, ...) or the `Debug` trait are intentionally omitted. For more information about individual Python functions, see the Python API documentation generated from the `biodivine_aeon.pyi` stub file.
+Currently, it does not really make sense to export the functions from this module 
+into Python just to receive them back as references. Instead, we use a different 
+approach:
 
-Logical operations on `BooleanExpression` and `Bdd` objects can be also performed using the "infix operators".
+`Bdd` methods that accept arbitrary "op function" in Rust can accept an arbitrary 
+callable Python object. They use it to build an exhaustive lookup table. 
+The original Rust method is then called with a function that is based on 
+this lookup table. Since the lookup tables are small, the overhead is acceptable 
+for any sufficiently large `Bdd`.
 
-## `BooleanExpression`
+## `BddPathIterator` and `ValuationsOfClauseIterator`
+
+We do not export the iterator types directly, because the API is quite low level and 
+frankly kind of weird. Instead, we have two Python-only types: `BddClauseIterator` 
+and `BddValuationIterator`. These just go through all relevant clauses/valuations of 
+a single `Bdd` and have no other public API. If you still want to replicate the behaviour 
+of the Rust iterators, you can always create a `Bdd` representing a single clause 
+(or a `True` BDD) and iterate over that.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody> 
+        <tr>
+            <td></td>
+            <td><code>BddClauseIterator.__init__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddClauseIterator.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddClauseIterator.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddClauseIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddClauseIterator.__next__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuationIterator.__init__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuationIterator.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuationIterator.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuationIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddValuationIterator.__next__</code></td>
+        </tr>
+    </tbody>
+</table>
+
+## `BooleanExpression` (frozen)
+
+Originally, `BooleanExpression` has almost no API and we rely on using Rust pattern matching
+for most non-trivial manipulation. However, this does not really work in Python, hence we have
+added a bunch of utility methods similar to how `FnUpdate` is expected to work.
 
 <!--suppress XmlDeprecatedElement -->
 <table>
@@ -901,6 +981,14 @@ Logical operations on `BooleanExpression` and `Bdd` objects can be also performe
             <td><code>BooleanExpression.__init__</code></td>
         </tr>
         <tr>
+            <td></td>
+            <td><code>BooleanExpression.__hash__</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanExpression::eq</code></td>
+            <td><code>BooleanExpression.__richcmp__</code></td>
+        </tr>
+        <tr>
             <td><code>BooleanExpression::to_string</code></td>
             <td><code>BooleanExpression.__str__</code></td>
         </tr>
@@ -910,11 +998,15 @@ Logical operations on `BooleanExpression` and `Bdd` objects can be also performe
         </tr>
         <tr>
             <td></td>
-            <td><code>BooleanExpression.__call__</code></td>
+            <td><code>BooleanExpression.__getnewargs__</code></td>
         </tr>
         <tr>
-            <td><code>BooleanExpression::eq</code></td>
-            <td><code>BooleanExpression.__eq__</code></td>
+            <td></td>
+            <td><code>BooleanExpression.__root__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.__call__</code></td>
         </tr>
         <tr><td colspan="2" align="center">Pattern constructors</td></tr>
         <tr>
@@ -1035,71 +1127,6 @@ Logical operations on `BooleanExpression` and `Bdd` objects can be also performe
         <tr>
             <td></td>
             <td><code>BooleanExpression.support_set</code></td>
-        </tr>
-    </tbody>
-</table>
-
-## `op_function` module
-
-Currently, it does not really make sense to export the functions from this module into Python just to receive them back as references. Instead, we use a different approach:
-
-`Bdd` methods that in Rust accept arbitrary "op function" can accept an arbitrary callable Python object. In such case, this object is used to build a function table (just an exhaustive lookup table). The original Rust method is then called with a function that is based on this lookup table. Since the lookup tables are small, the overhead is acceptable for any sufficiently large BDD.
-
-# `Bdd`
-
-Naturally, the `bdd!` macro is not translated into Python in any meaningful way. However, you can use the infix operator methods instead.
-
-## `BddPathIterator` and `ValuationsOfClauseIterator`
-
-We do not export these iterators directly, because the API is quite low level and frankly kind of weird. Instead, we have two Python-only types: `BddClauseIterator` and `BddValuationIterator`. These just go through all relevant clauses/valuations of a single `Bdd` and have no other public API. If you still want to replicate the behaviour of the Rust iterators, you can always create a `Bdd` representing a single clause (or a `True` BDD) and iterate over that.
-
-<table>
-    <thead>
-        <tr>
-            <th>Rust Member</th>
-            <th>Python Member</th>
-        </tr>
-    </thead>
-    <tbody> 
-        <tr>
-            <td></td>
-            <td><code>BddClauseIterator.__init__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddClauseIterator.__str__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddClauseIterator.__repr__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddClauseIterator.__iter__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddClauseIterator.__next__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddValuationIterator.__init__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddValuationIterator.__str__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddValuationIterator.__repr__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddValuationIterator.__iter__</code></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><code>BddValuationIterator.__next__</code></td>
         </tr>
     </tbody>
 </table>

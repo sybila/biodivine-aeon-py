@@ -375,3 +375,70 @@ def test_bdd():
     expected = Bdd(BddPartialValuation(ctx, {'a': False, 'c': True}))
     assert bdd_clause.substitute('b', var_c) == expected
     assert bdd_clause.rename([('b', 'c')]) == expected
+
+
+def test_boolean_expression():
+    a = BooleanExpression("a")
+    b = BooleanExpression("b")
+    expr = BooleanExpression("(a & b) | (b & !c)")
+
+    assert str(expr) == "((a & b) | (b & !c))"
+    assert expr == eval(repr(expr))
+    assert expr({'a': 1, 'b': 1, 'c': 0})
+    assert not expr(a=0, b=0, c=0)
+
+    d = {a: "foo", b: "bar"}
+    assert d[a] == "foo"
+    assert d[a] != d[b]
+
+    assert expr == pickle.loads(pickle.dumps(expr))
+
+    expr_inner = expr.as_binary()
+    assert expr_inner is not None
+    op, l, r = expr_inner
+    assert op == "or"
+    assert l.__root__() == r.__root__() == expr
+
+    assert BooleanExpression.mk_const(0) == BooleanExpression.mk_const(False)
+    assert BooleanExpression.mk_const(0) != BooleanExpression.mk_const(True)
+    assert BooleanExpression("a") == BooleanExpression.mk_var("a")
+    assert BooleanExpression("!a") == BooleanExpression.mk_not(a)
+    assert BooleanExpression("a & b") == BooleanExpression.mk_and(a, b)
+    assert BooleanExpression("a | b") == BooleanExpression.mk_or(a, b)
+    assert BooleanExpression("a => b") == BooleanExpression.mk_imp(a, b)
+    assert BooleanExpression("a <=> b") == BooleanExpression.mk_iff(a, b)
+    assert BooleanExpression("a ^ b") == BooleanExpression.mk_xor(a, b)
+
+    assert BooleanExpression("true").is_const() and not BooleanExpression("a").is_const()
+    assert BooleanExpression("a").is_var() and not BooleanExpression("true").is_var()
+    assert BooleanExpression("!a").is_not() and not BooleanExpression("a").is_not()
+    assert BooleanExpression("a & b").is_and() and not BooleanExpression("a | b").is_and()
+    assert BooleanExpression("a | b").is_or() and not BooleanExpression("a & b").is_or()
+    assert BooleanExpression("a => b").is_imp() and not BooleanExpression("a & b").is_imp()
+    assert BooleanExpression("a <=> b").is_iff() and not BooleanExpression("a & b").is_iff()
+    assert BooleanExpression("a ^ b").is_xor() and not BooleanExpression("a & b").is_xor()
+    assert BooleanExpression("a").is_literal() and BooleanExpression("!a").is_literal()
+    assert BooleanExpression("a & b").is_binary() and not BooleanExpression("!a").is_binary()
+
+    assert BooleanExpression("true").as_const()
+    assert BooleanExpression("a").as_var() == "a"
+    assert BooleanExpression("!a").as_var() is None
+    assert BooleanExpression("!a").as_not() == a
+    assert BooleanExpression("a").as_not() is None
+    assert BooleanExpression("a & b").as_and() == (a, b)
+    assert BooleanExpression("a | b").as_and() is None
+    assert BooleanExpression("a | b").as_or() == (a, b)
+    assert BooleanExpression("a & b").as_or() is None
+    assert BooleanExpression("a => b").as_imp() == (a, b)
+    assert BooleanExpression("a & b").as_imp() is None
+    assert BooleanExpression("a <=> b").as_iff() == (a, b)
+    assert BooleanExpression("a & b").as_iff() is None
+    assert BooleanExpression("a ^ b").as_xor() == (a, b)
+    assert BooleanExpression("a & b").as_xor() is None
+    assert BooleanExpression("a").as_literal() == ("a", True)
+    assert BooleanExpression("!a").as_literal() == ("a", False)
+    assert BooleanExpression("!!a").as_literal() is None
+    assert BooleanExpression("a & b").as_binary() == ("and", a, b)
+    assert BooleanExpression("a").as_binary() is None
+
+    assert expr.support_set() == {"a", "b", "c"}
