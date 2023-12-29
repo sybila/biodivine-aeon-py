@@ -32,7 +32,7 @@ mod pyo3_utils;
 /// AEON.py is a library...
 #[pymodule]
 fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
-    bindings::lib_bdd_2::register(module)?;
+    bindings::lib_bdd::register(module)?;
     Ok(())
 }
 

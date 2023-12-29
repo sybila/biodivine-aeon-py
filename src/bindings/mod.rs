@@ -5,4 +5,4 @@
 //pub mod hctl_model_checker;
 //pub mod bn_classifier;
 
-pub mod lib_bdd_2;
+pub mod lib_bdd;

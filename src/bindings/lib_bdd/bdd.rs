@@ -1,9 +1,9 @@
-use crate::bindings::lib_bdd_2::bdd_pointer::BddPointer;
-use crate::bindings::lib_bdd_2::bdd_valuation::{BddPartialValuation, BddValuation};
-use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
-use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
-use crate::bindings::lib_bdd_2::boolean_expression::BooleanExpression;
-use crate::bindings::lib_bdd_2::op_function::{OpFunction2, OpFunction3};
+use crate::bindings::lib_bdd::bdd_pointer::BddPointer;
+use crate::bindings::lib_bdd::bdd_valuation::{BddPartialValuation, BddValuation};
+use crate::bindings::lib_bdd::bdd_variable::BddVariable;
+use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
+use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
+use crate::bindings::lib_bdd::op_function::{OpFunction2, OpFunction3};
 use crate::{throw_interrupted_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_bdd::{BddPathIterator, BddSatisfyingValuations};

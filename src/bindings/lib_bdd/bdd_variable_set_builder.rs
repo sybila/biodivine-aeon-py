@@ -1,5 +1,5 @@
-use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
-use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
+use crate::bindings::lib_bdd::bdd_variable::BddVariable;
+use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::pyo3_utils::richcmp_eq_inner;
 use crate::AsNative;
 use macros::Wrapper;

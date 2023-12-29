@@ -1,7 +1,7 @@
-use crate::bindings::lib_bdd_2::bdd::Bdd;
-use crate::bindings::lib_bdd_2::bdd_valuation::{BddPartialValuation, BddValuation};
-use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
-use crate::bindings::lib_bdd_2::boolean_expression::BooleanExpression;
+use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_bdd::bdd_valuation::{BddPartialValuation, BddValuation};
+use crate::bindings::lib_bdd::bdd_variable::BddVariable;
+use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_inner};
 use crate::{throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use macros::Wrapper;

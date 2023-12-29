@@ -1,5 +1,5 @@
-use crate::bindings::lib_bdd_2::bdd_variable::BddVariable;
-use crate::bindings::lib_bdd_2::bdd_variable_set::BddVariableSet;
+use crate::bindings::lib_bdd::bdd_variable::BddVariable;
+use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_inner};
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use pyo3::basic::CompareOp;
