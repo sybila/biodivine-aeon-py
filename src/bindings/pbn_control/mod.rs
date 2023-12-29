@@ -1,8 +1,7 @@
 use biodivine_pbn_control::control::ControlMap;
 use biodivine_pbn_control::perturbation::PerturbationGraph;
-use biodivine_pbn_control::phenotype_control::{PhenotypeControlMap,PhenotypeOscillationType};
+use biodivine_pbn_control::phenotype_control::PhenotypeControlMap;
 use pyo3::prelude::*;
-use crate::AsNative;
 
 mod _impl_control_map;
 mod _impl_perturbation_graph;

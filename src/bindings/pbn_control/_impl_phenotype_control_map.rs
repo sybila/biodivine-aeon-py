@@ -2,10 +2,10 @@ use std::collections::HashMap;
 use crate::bindings::lib_bdd::PyBdd;
 use crate::bindings::lib_param_bn::{PyGraphColoredVertices, PyGraphColors};
 use crate::bindings::pbn_control::{PyPerturbationGraph, PyPhenotypeControlMap};
-use crate::{AsNative, throw_runtime_error};
+use crate::AsNative;
 use biodivine_pbn_control::phenotype_control::PhenotypeControlMap;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::PyDict;
 
 fn py_dict_to_rust_hashmap(py_dict: &PyDict) -> HashMap<String, bool> {
     let mut rust_hashmap = HashMap::new();
@@ -20,13 +20,13 @@ fn py_dict_to_rust_hashmap(py_dict: &PyDict) -> HashMap<String, bool> {
 }
 
 fn rust_hashmap_to_py_dict(py:Python, rust_hashmap: &HashMap<String, bool>) -> Py<PyDict> {
-    let mut pyDict = PyDict::new(py);
+    let py_dict = PyDict::new(py);
 
     for (k, v) in rust_hashmap {
-        pyDict.set_item(k, v).unwrap();
+        py_dict.set_item(k, v).unwrap();
     }
 
-    pyDict.into()
+    py_dict.into()
 }
 
 impl From<PhenotypeControlMap> for PyPhenotypeControlMap {
