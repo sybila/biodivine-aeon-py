@@ -59,7 +59,7 @@ pub fn run_attractor_classification(model_path: String, output_zip: String) -> P
         Ok(model) => model,
         Err(error) => return throw_runtime_error(error),
     };
-    let graph = match SymbolicAsyncGraph::new(model.clone()) {
+    let graph = match SymbolicAsyncGraph::new(&model) {
         Ok(graph) => graph,
         Err(error) => return throw_runtime_error(error),
     };

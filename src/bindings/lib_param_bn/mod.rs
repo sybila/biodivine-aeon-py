@@ -3,8 +3,8 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     MixedProjection, MixedProjectionIterator,
 };
 use biodivine_lib_param_bn::symbolic_async_graph::{
-    GraphColoredVertices, GraphColors, GraphVertexIterator, GraphVertices, IterableVertices,
-    SymbolicAsyncGraph, SymbolicContext,
+    GraphColoredVertices, GraphColors, GraphVertexIterator, GraphVertices, SymbolicAsyncGraph,
+    SymbolicContext,
 };
 use biodivine_lib_param_bn::{
     BooleanNetwork, FnUpdate, ModelAnnotation, ParameterId, RegulatoryGraph, VariableId,
@@ -84,7 +84,7 @@ pub struct PyModelAnnotation(ModelAnnotation);
 pub struct PyFixedPoints();
 
 #[pyclass(name = "GraphVertexIterator")]
-pub struct PyGraphVertexIterator(Box<IterableVertices>, GraphVertexIterator<'static>);
+pub struct PyGraphVertexIterator(GraphVertexIterator);
 
 #[pyclass(name = "SymbolicContext")]
 #[derive(Clone, Wrapper)]

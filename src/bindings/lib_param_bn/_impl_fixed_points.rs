@@ -1,5 +1,6 @@
 use crate::bindings::lib_param_bn::{
-    PyFixedPoints, PyGraphColoredVertices, PyGraphColors, PyGraphVertices, PySymbolicAsyncGraph,
+    PyBooleanNetwork, PyFixedPoints, PyGraphColoredVertices, PyGraphColors, PyGraphVertices,
+    PySymbolicAsyncGraph,
 };
 use crate::AsNative;
 use biodivine_lib_bdd::BddPartialValuation;
@@ -127,8 +128,9 @@ impl PyFixedPoints {
     ///
     /// WARNING: Due to technical issues, right now this is only a list, not an iterator.
     #[staticmethod]
-    #[pyo3(signature = (stg, limit = None, positive_restriction = None, negative_restriction = None))]
+    #[pyo3(signature = (bn, stg, limit = None, positive_restriction = None, negative_restriction = None))]
     pub fn solver_list(
+        bn: &PyBooleanNetwork,
         stg: &PySymbolicAsyncGraph,
         limit: Option<usize>,
         positive_restriction: Option<Vec<&PyDict>>,
@@ -141,7 +143,7 @@ impl PyFixedPoints {
                 positive_spaces.push(read_space(stg, space)?);
             }
         } else {
-            positive_spaces.push(Space::new(stg.as_native().as_network()));
+            positive_spaces.push(Space::new(bn.as_native()));
         }
         // A negative restriction is simply empty if not provided.
         let negative_restriction = negative_restriction.unwrap_or_default();
@@ -152,8 +154,7 @@ impl PyFixedPoints {
 
         let z3_config = z3::Config::new();
         let z3 = z3::Context::new(&z3_config);
-        let network_copy = stg.as_native().as_network().clone();
-        let context = BnSolverContext::new(&z3, network_copy);
+        let context = BnSolverContext::new(&z3, bn.as_native().clone());
         let iterator = FixedPoints::solver_iterator(&context, &positive_spaces, &negative_spaces);
         let limit = limit.unwrap_or(usize::MAX);
         let results: Vec<PyGraphColoredVertices> = iterator
@@ -178,8 +179,9 @@ impl PyFixedPoints {
     ///
     /// WARNING: Due to technical issues, right now this is only a list, not an iterator.
     #[staticmethod]
-    #[pyo3(signature = (stg, limit = None, positive_restriction = None, negative_restriction = None))]
+    #[pyo3(signature = (bn, stg, limit = None, positive_restriction = None, negative_restriction = None))]
     pub fn solver_vertex_list(
+        bn: &PyBooleanNetwork,
         stg: &PySymbolicAsyncGraph,
         limit: Option<usize>,
         positive_restriction: Option<Vec<&PyDict>>,
@@ -192,7 +194,7 @@ impl PyFixedPoints {
                 positive_spaces.push(read_space(stg, space)?);
             }
         } else {
-            positive_spaces.push(Space::new(stg.as_native().as_network()));
+            positive_spaces.push(Space::new(bn.as_native()));
         }
         // A negative restriction is simply empty if not provided.
         let negative_restriction = negative_restriction.unwrap_or_default();
@@ -203,8 +205,7 @@ impl PyFixedPoints {
 
         let z3_config = z3::Config::new();
         let z3 = z3::Context::new(&z3_config);
-        let network_copy = stg.as_native().as_network().clone();
-        let context = BnSolverContext::new(&z3, network_copy);
+        let context = BnSolverContext::new(&z3, bn.as_native().clone());
         let iterator =
             FixedPoints::solver_vertex_iterator(&context, &positive_spaces, &negative_spaces);
         let limit = limit.unwrap_or(usize::MAX);
@@ -242,8 +243,9 @@ impl PyFixedPoints {
     ///
     /// WARNING: Due to technical issues, right now this is only a list, not an iterator.
     #[staticmethod]
-    #[pyo3(signature = (stg, limit = None, positive_restriction = None, negative_restriction = None))]
+    #[pyo3(signature = (bn, stg, limit = None, positive_restriction = None, negative_restriction = None))]
     pub fn solver_color_list(
+        bn: &PyBooleanNetwork,
         stg: &PySymbolicAsyncGraph,
         limit: Option<usize>,
         positive_restriction: Option<Vec<&PyDict>>,
@@ -256,7 +258,7 @@ impl PyFixedPoints {
                 positive_spaces.push(read_space(stg, space)?);
             }
         } else {
-            positive_spaces.push(Space::new(stg.as_native().as_network()));
+            positive_spaces.push(Space::new(bn.as_native()));
         }
         // A negative restriction is simply empty if not provided.
         let negative_restriction = negative_restriction.unwrap_or_default();
@@ -267,8 +269,7 @@ impl PyFixedPoints {
 
         let z3_config = z3::Config::new();
         let z3 = z3::Context::new(&z3_config);
-        let network_copy = stg.as_native().as_network().clone();
-        let context = BnSolverContext::new(&z3, network_copy);
+        let context = BnSolverContext::new(&z3, bn.as_native().clone());
         let iterator =
             FixedPoints::solver_color_iterator(&context, &positive_spaces, &negative_spaces);
         let limit = limit.unwrap_or(usize::MAX);
@@ -284,7 +285,7 @@ impl PyFixedPoints {
 }
 
 fn read_space(stg: &PySymbolicAsyncGraph, py_space: &PyDict) -> PyResult<Space> {
-    let mut space = Space::new(stg.as_native().as_network());
+    let mut space = Space::new_raw(stg.as_native().num_vars());
     for (k, v) in py_space {
         let key: VariableId = stg.resolve_variable(k)?.into();
         let value: ExtendedBoolean = v.extract::<bool>()?.into();

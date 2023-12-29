@@ -128,9 +128,9 @@ impl Classifier {
         }
         if !not_sink_params.is_empty() {
             let mut disorder = graph.mk_empty_colors();
-            for variable in graph.as_network().variables() {
+            for variable in graph.variables() {
                 let found_first_successor = &graph.var_can_post(variable, &without_sinks);
-                for next_variable in graph.as_network().variables() {
+                for next_variable in graph.variables() {
                     if next_variable == variable {
                         continue;
                     }
@@ -198,8 +198,8 @@ impl Classifier {
         component: GraphColoredVertices,
         graph: &SymbolicAsyncGraph,
     ) -> GraphColoredVertices {
-        let mut is_not_sink = graph.empty_vertices().clone();
-        for variable in graph.as_network().variables() {
+        let mut is_not_sink = graph.empty_colored_vertices().clone();
+        for variable in graph.variables() {
             let has_successor = &graph.var_can_post(variable, &component);
             if !has_successor.is_empty() {
                 is_not_sink = is_not_sink.union(has_successor);

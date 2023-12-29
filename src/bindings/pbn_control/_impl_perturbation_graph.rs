@@ -324,8 +324,8 @@ impl PyPerturbationGraph {
     /// Resolves a string or `VariableId` to `VariableId`.
     pub fn find_variable(&self, variable: &PyAny) -> PyResult<PyVariableId> {
         if let Ok(name) = variable.extract::<String>() {
-            let network = self.as_native().as_original().as_network();
-            if let Some(var) = network.as_graph().find_variable(name.as_str()) {
+            let ctx = self.as_native().as_original().symbolic_context();
+            if let Some(var) = ctx.find_network_variable(name.as_str()) {
                 Ok(var.into())
             } else {
                 throw_runtime_error(format!("Variable {name} not found."))
