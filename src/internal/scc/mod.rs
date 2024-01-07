@@ -10,6 +10,7 @@ mod _impl_classifier;
 pub mod algo_interleaved_transition_guided_reduction;
 pub mod algo_saturated_reachability;
 pub mod algo_xie_beerel;
+mod _impl_classifier_phenotype;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Behaviour {
@@ -24,4 +25,9 @@ pub struct Class(Vec<Behaviour>);
 pub struct Classifier {
     classes: Mutex<HashMap<Class, GraphColors>>,
     attractors: Mutex<Vec<(GraphColoredVertices, HashMap<Behaviour, GraphColors>)>>,
+}
+
+pub struct ClassifierPhenotype {
+    classes: HashMap<String, GraphColors>,
+    phenotypes: Vec<(GraphColoredVertices, HashMap<String, GraphColors>)>
 }
