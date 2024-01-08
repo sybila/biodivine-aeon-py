@@ -93,7 +93,7 @@ impl PyPerturbationGraph {
 
     /// Get the list of `VariableId` objects which can be perturbed
     pub fn perturbable_variables(&self) -> Vec<PyVariableId> {
-        self.as_native().perturbable_variables().iter().map(|i| i.clone().into()).collect()
+        self.as_native().perturbable_variables().iter().map(|i| (*i).into()).collect()
     }
 
     /// Get the `ParameterId` of a parameter that is associated with the perturbation
@@ -299,7 +299,7 @@ impl PyPerturbationGraph {
             .phenotype_permanent_control(converted_phenotype,
                                          converted_oscillation,
                                          verbose);
-        return result.into()
+        result.into()
     }
 
     pub fn ceiled_phenotype_permanent_control(
@@ -317,7 +317,7 @@ impl PyPerturbationGraph {
                                          converted_oscillation,
                                          stop_early,
                                          verbose);
-        return result.into()
+        result.into()
     }
 
 

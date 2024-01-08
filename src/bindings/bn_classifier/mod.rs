@@ -17,7 +17,6 @@ use crate::internal::scc::algo_xie_beerel::xie_beerel_attractors;
 use crate::internal::scc::{Classifier, ClassifierPhenotype};
 use pyo3::prelude::*;
 use pyo3::PyResult;
-use pyo3::types::{PyDict, PyList, PyString, PyType};
 
 
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
@@ -27,6 +26,7 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(load_class_archive, module)?)?;
     module.add_function(wrap_pyfunction!(get_model_assertions, module)?)?;
     module.add_function(wrap_pyfunction!(get_model_properties, module)?)?;
+    module.add_function(wrap_pyfunction!(run_phenotype_attractor_classification, module)?)?;
     Ok(())
 }
 
@@ -82,31 +82,26 @@ pub fn run_attractor_classification(model_path: String, output_zip: String) -> P
 }
 
 #[pyfunction]
-pub fn run_phenotype_attractor_classification<'a>(py: Python<'a>, graph: PySymbolicAsyncGraph, eligible_phenotypes: &PyList) -> &'a PyDict {
+pub fn run_phenotype_attractor_classification(
+    graph: PySymbolicAsyncGraph,
+    eligible_phenotypes: Vec<(String, PyGraphVertices)>
+) -> HashMap<String, PyGraphColors> {
+
     let mut eligible_phenotypes_native = Vec::new();
-    for tuple in eligible_phenotypes {
-        eligible_phenotypes_native.push(
-            (
-                tuple.get_item(0).unwrap().extract::<String>().unwrap(),
-                tuple.get_item(1).unwrap().extract::<PyGraphVertices>().unwrap().into()
-            )
-        )
+    for (name, phenotype) in eligible_phenotypes {
+        eligible_phenotypes_native.push((name, phenotype.as_native().clone()));
     }
 
     let stg = graph.as_native();
     let (states, transitions) =
-        interleaved_transition_guided_reduction(&stg, stg.mk_unit_colored_vertices());
-    let result = xie_beerel_attractors(&stg, &states, &transitions);
-    let classes = ClassifierPhenotype::classify_all_components(result, &stg, eligible_phenotypes_native);
-    let result = PyDict::new(py);
+        interleaved_transition_guided_reduction(stg, stg.mk_unit_colored_vertices());
+    let result = xie_beerel_attractors(stg, &states, &transitions);
+    let classes = ClassifierPhenotype::classify_all_components(result, stg, &eligible_phenotypes_native);
+
+    let mut result = HashMap::new();
 
     for (key, value) in classes {
-        let converted_str = PyString::new(py, &key);
-        let converted_cols = PyGraphColors::new(
-            &graph,
-            value.as_bdd().into(),
-        );
-        result.set_item::<&PyString, PyGraphColors>(converted_str, converted_cols);
+        result.insert(key, value.into());
     }
 
     result
