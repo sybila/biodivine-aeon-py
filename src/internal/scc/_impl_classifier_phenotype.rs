@@ -34,12 +34,8 @@ impl ClassifierPhenotype {
             for c in eligible_phenotypes.iter().combinations(i) {
                 let mut combination_colors = graph.mk_unit_colors();
                 let mut phen_group_names: Vec<String> = Vec::new();
-                for (p, space) in c {
-                    let bad_colors = graph
-                        .mk_unit_colored_vertices()
-                        .minus_vertices(space)
-                        .colors();
-                    combination_colors = combination_colors.minus(&bad_colors);
+                for (p, _) in c {
+                    combination_colors = combination_colors.intersect(&single_component_classification.get(p).unwrap());
                     phen_group_names.push(p.to_string());
                 }
                 combination_colors = combination_colors.minus(&taken_colors);
@@ -47,7 +43,7 @@ impl ClassifierPhenotype {
                     continue;
                 }
                 let phen_group_name = format!("<{}>", phen_group_names.join(","));
-                taken_colors = taken_colors.minus(&combination_colors);
+                taken_colors = taken_colors.union(&combination_colors);
                 full_component_classification.push((phen_group_name, combination_colors));
             }
         }
@@ -58,7 +54,7 @@ impl ClassifierPhenotype {
     pub fn classify_all_components(
         components: Vec<GraphColoredVertices>,
         graph: &SymbolicAsyncGraph,
-        eligible_phenotypes: &[(String, GraphVertices)],
+        eligible_phenotypes: &Vec<(String, GraphVertices)>,
     ) -> HashMap<String, GraphColors> {
         let mut eligible_phenotypes_sorted = eligible_phenotypes.to_vec();
         eligible_phenotypes_sorted.sort_by(|(p1, _), (p2, _)| p1.cmp(p2));

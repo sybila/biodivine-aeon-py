@@ -23,6 +23,7 @@ use pyo3::PyResult;
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(run_hctl_classification, module)?)?;
     module.add_function(wrap_pyfunction!(run_attractor_classification, module)?)?;
+    module.add_function(wrap_pyfunction!(run_phenotype_attractor_classification, module)?)?;
     module.add_function(wrap_pyfunction!(save_class_archive, module)?)?;
     module.add_function(wrap_pyfunction!(load_class_archive, module)?)?;
     module.add_function(wrap_pyfunction!(get_model_assertions, module)?)?;
@@ -99,6 +100,7 @@ pub fn run_phenotype_attractor_classification(
     let (states, transitions) =
         interleaved_transition_guided_reduction(stg, stg.mk_unit_colored_vertices());
     let result = xie_beerel_attractors(stg, &states, &transitions);
+    println!("{:?}", eligible_phenotypes_native);
     let classes =
         ClassifierPhenotype::classify_all_components(result, stg, &eligible_phenotypes_native);
 

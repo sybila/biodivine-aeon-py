@@ -33,3 +33,7 @@ z3-sys = "^0.8.1"
 
 [build-dependencies]
 pyo3-build-config = "0.20.0"
+
+[[bin]]
+name = "phenotype_classification"
+path = "src/main.rs"
