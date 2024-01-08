@@ -7,10 +7,10 @@ mod _impl_behaviour;
 mod _impl_class;
 /// **(internal)** Implementation of `Behaviour` classification in `Classifier`.
 mod _impl_classifier;
+mod _impl_classifier_phenotype;
 pub mod algo_interleaved_transition_guided_reduction;
 pub mod algo_saturated_reachability;
 pub mod algo_xie_beerel;
-mod _impl_classifier_phenotype;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Behaviour {
@@ -29,5 +29,5 @@ pub struct Classifier {
 
 pub struct ClassifierPhenotype {
     classes: HashMap<String, GraphColors>,
-    phenotypes: Vec<(GraphColoredVertices, HashMap<String, GraphColors>)>
+    phenotypes: Vec<(GraphColoredVertices, HashMap<String, GraphColors>)>,
 }

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::bindings::lib_bdd::PyBdd;
 use crate::bindings::lib_param_bn::{PyGraphColoredVertices, PyGraphColors};
 use crate::bindings::pbn_control::{PyPerturbationGraph, PyPhenotypeControlMap};
@@ -6,6 +5,7 @@ use crate::AsNative;
 use biodivine_pbn_control::phenotype_control::PhenotypeControlMap;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use std::collections::HashMap;
 
 fn py_dict_to_rust_hashmap(py_dict: &PyDict) -> HashMap<String, bool> {
     let mut rust_hashmap = HashMap::new();
@@ -19,7 +19,7 @@ fn py_dict_to_rust_hashmap(py_dict: &PyDict) -> HashMap<String, bool> {
     rust_hashmap
 }
 
-fn rust_hashmap_to_py_dict(py:Python, rust_hashmap: &HashMap<String, bool>) -> Py<PyDict> {
+fn rust_hashmap_to_py_dict(py: Python, rust_hashmap: &HashMap<String, bool>) -> Py<PyDict> {
     let py_dict = PyDict::new(py);
 
     for (k, v) in rust_hashmap {
@@ -55,12 +55,8 @@ impl AsNative<PhenotypeControlMap> for PyPhenotypeControlMap {
 impl PyPhenotypeControlMap {
     #[new]
     pub fn new(colors: PyGraphColoredVertices, stg: PyPerturbationGraph) -> Self {
-        PhenotypeControlMap::new(
-            stg.as_native().clone(),
-            colors.as_native().clone(),
-        ).into()
+        PhenotypeControlMap::new(stg.as_native().clone(), colors.as_native().clone()).into()
     }
-
 
     /// Obtain a copy of the underlying `Bdd` representing this map.
     pub fn as_bdd(&self) -> PyBdd {
@@ -75,14 +71,26 @@ impl PyPhenotypeControlMap {
 
     // pub fn working_perturbations(&self, min_robustness: f64, verbose: bool) -> Vec<(HashMap<String, bool>, GraphColors)> {
     /// Obtain list of working perturbations
-    pub fn working_perturbations(&self, py: Python, min_robustness: f64, verbose: bool) -> Vec<(Py<PyDict>, PyGraphColors)> {
-        self.as_native().working_perturbations(min_robustness, verbose).iter().map(|i| (rust_hashmap_to_py_dict(py, &i.0), i.1.clone().into())).collect()
+    pub fn working_perturbations(
+        &self,
+        py: Python,
+        min_robustness: f64,
+        verbose: bool,
+    ) -> Vec<(Py<PyDict>, PyGraphColors)> {
+        self.as_native()
+            .working_perturbations(min_robustness, verbose)
+            .iter()
+            .map(|i| (rust_hashmap_to_py_dict(py, &i.0), i.1.clone().into()))
+            .collect()
     }
 
     /// Obtain a set of colours for which the given perturbation works
     pub fn perturbation_working_colors(&self, perturbation: &PyDict) -> PyGraphColors {
         let p = py_dict_to_rust_hashmap(perturbation);
 
-        self.as_native().perturbation_working_colors(&p).clone().into()
+        self.as_native()
+            .perturbation_working_colors(&p)
+            .clone()
+            .into()
     }
 }

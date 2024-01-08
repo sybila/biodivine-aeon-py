@@ -4,7 +4,9 @@ use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;
 use biodivine_lib_param_bn::{BooleanNetwork, ModelAnnotation};
 use std::collections::HashMap;
 
-use crate::bindings::lib_param_bn::{PyGraphColors, PyGraphVertices, PyModelAnnotation, PySymbolicAsyncGraph};
+use crate::bindings::lib_param_bn::{
+    PyGraphColors, PyGraphVertices, PyModelAnnotation, PySymbolicAsyncGraph,
+};
 
 use crate::AsNative;
 use crate::{throw_runtime_error, throw_type_error};
@@ -18,7 +20,6 @@ use crate::internal::scc::{Classifier, ClassifierPhenotype};
 use pyo3::prelude::*;
 use pyo3::PyResult;
 
-
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(run_hctl_classification, module)?)?;
     module.add_function(wrap_pyfunction!(run_attractor_classification, module)?)?;
@@ -26,7 +27,10 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(load_class_archive, module)?)?;
     module.add_function(wrap_pyfunction!(get_model_assertions, module)?)?;
     module.add_function(wrap_pyfunction!(get_model_properties, module)?)?;
-    module.add_function(wrap_pyfunction!(run_phenotype_attractor_classification, module)?)?;
+    module.add_function(wrap_pyfunction!(
+        run_phenotype_attractor_classification,
+        module
+    )?)?;
     Ok(())
 }
 
@@ -84,9 +88,8 @@ pub fn run_attractor_classification(model_path: String, output_zip: String) -> P
 #[pyfunction]
 pub fn run_phenotype_attractor_classification(
     graph: PySymbolicAsyncGraph,
-    eligible_phenotypes: Vec<(String, PyGraphVertices)>
+    eligible_phenotypes: Vec<(String, PyGraphVertices)>,
 ) -> HashMap<String, PyGraphColors> {
-
     let mut eligible_phenotypes_native = Vec::new();
     for (name, phenotype) in eligible_phenotypes {
         eligible_phenotypes_native.push((name, phenotype.as_native().clone()));
@@ -96,7 +99,8 @@ pub fn run_phenotype_attractor_classification(
     let (states, transitions) =
         interleaved_transition_guided_reduction(stg, stg.mk_unit_colored_vertices());
     let result = xie_beerel_attractors(stg, &states, &transitions);
-    let classes = ClassifierPhenotype::classify_all_components(result, stg, &eligible_phenotypes_native);
+    let classes =
+        ClassifierPhenotype::classify_all_components(result, stg, &eligible_phenotypes_native);
 
     let mut result = HashMap::new();
 
