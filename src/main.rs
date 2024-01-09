@@ -17,7 +17,9 @@ fn main() {
     let (states, transitions) = interleaved_transition_guided_reduction(&stg, stg.mk_unit_colored_vertices());
     let result = xie_beerel_attractors(&stg, &states, &transitions);
     let classes = ClassifierPhenotype::classify_all_components(result, &stg, &phenotypes);
-    println!("{:?}", classes.keys());
+    for (k, v) in classes {
+        println!("{:?}: {:?}", k, v.approx_cardinality() / stg.unit_colors().approx_cardinality())
+    }
 }
 
 pub fn get_mapk_phenotypes(graph: &SymbolicAsyncGraph) -> Vec<(String, GraphVertices)> {

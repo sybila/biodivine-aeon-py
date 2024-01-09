@@ -100,7 +100,6 @@ pub fn run_phenotype_attractor_classification(
     let (states, transitions) =
         interleaved_transition_guided_reduction(stg, stg.mk_unit_colored_vertices());
     let result = xie_beerel_attractors(stg, &states, &transitions);
-    println!("{:?}", eligible_phenotypes_native);
     let classes =
         ClassifierPhenotype::classify_all_components(result, stg, &eligible_phenotypes_native);
 

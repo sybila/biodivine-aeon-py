@@ -66,15 +66,20 @@ impl ClassifierPhenotype {
         let components_keys: Vec<Vec<String>> = classified_components
             .iter()
             .map(|v| v.iter().map(|(it, _)| it.to_string()).collect())
+            .into_iter()
+            .map(|v: Vec<String>| vec![v, vec!["#".to_string()]].concat())
             .collect();
 
-        let eligible_class_clusters: Vec<Vec<String>> = components_keys
+        let mut eligible_class_clusters: Vec<Vec<String>> = components_keys
             .into_iter()
             .multi_cartesian_product()
             .collect();
 
         let mut fully_classified: HashMap<String, GraphColors> = HashMap::new();
-        for cluster in eligible_class_clusters {
+        let mut taken_colors = graph.mk_empty_colors();
+
+        eligible_class_clusters.sort_by(|v1, v2| {v1.iter().filter(|y| {*y == &"#".to_string()}).count().cmp(&v2.iter().filter(|y| {*y == &"#".to_string()}).count())});
+        for cluster in eligible_class_clusters  {
             let mut belonging_colors = graph.mk_unit_colors();
             for (actual_classes, required_class) in
                 zip(classified_components.iter(), cluster.iter())
@@ -90,13 +95,18 @@ impl ClassifierPhenotype {
                 }
                 belonging_colors = belonging_colors.minus(&violating_colors);
             }
+            belonging_colors = belonging_colors.minus(&taken_colors);
             if !belonging_colors.is_empty() {
+                taken_colors = taken_colors.union(&belonging_colors);
+
                 let mut normalized_keys = cluster
                     .iter()
                     .filter(|req_class| req_class.as_str() != "#")
                     .collect::<Vec<&String>>();
+
                 normalized_keys.sort();
                 let normalized_key = normalized_keys.iter().join(";");
+
                 let to_insert = if let Some(value) = fully_classified.get(&normalized_key) {
                     belonging_colors.union(value)
                 } else {
