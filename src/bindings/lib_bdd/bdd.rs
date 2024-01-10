@@ -184,10 +184,10 @@ impl Bdd {
     /// bdd = ...
     ///
     /// import graphviz
-    /// graphviz.Source(bdd.to_dot_string())
+    /// graphviz.Source(bdd.to_dot())
     /// ```
     #[pyo3(signature = (zero_pruned = true))]
-    fn to_dot_string(&self, zero_pruned: bool) -> String {
+    fn to_dot(&self, zero_pruned: bool) -> String {
         self.as_native()
             .to_dot_string(self.ctx.get().as_native(), zero_pruned)
     }

@@ -1,4 +1,4 @@
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_inner};
+use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{throw_runtime_error, throw_type_error};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_bdd::boolean_expression::BooleanExpression::{And, Iff, Imp, Or, Xor};
@@ -60,7 +60,7 @@ impl BooleanExpression {
     }
 
     fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
-        richcmp_eq_inner(py, op, &self, &other, |it| it.as_native())
+        richcmp_eq_by_key(py, op, &self, &other, |it| it.as_native())
     }
 
     fn __str__(&self) -> String {

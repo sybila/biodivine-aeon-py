@@ -1,6 +1,6 @@
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_inner};
+use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -100,7 +100,7 @@ impl BddValuation {
     }
 
     fn __richcmp__(&self, py: Python, other: &BddValuation, op: CompareOp) -> Py<PyAny> {
-        richcmp_eq_inner(py, op, &self, &other, |x| &x.value)
+        richcmp_eq_by_key(py, op, &self, &other, |x| &x.value)
     }
 
     fn __hash__(&self) -> u64 {
@@ -312,7 +312,7 @@ impl BddPartialValuation {
     }
 
     fn __richcmp__(&self, py: Python, other: &BddPartialValuation, op: CompareOp) -> Py<PyAny> {
-        richcmp_eq_inner(py, op, &self, &other, |x| &x.value)
+        richcmp_eq_by_key(py, op, &self, &other, |x| &x.value)
     }
 
     fn __hash__(&self) -> u64 {

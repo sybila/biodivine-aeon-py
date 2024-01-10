@@ -5,36 +5,36 @@ use pyo3::types::PyTuple;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
-/// A numeric identifier of a single decision variable used within a `Bdd`.
+/// A numeric identifier of a single *explicit parameter* used within a `BooleanNetwork`.
 ///
 /// It essentially behaves like a type-safe integer value:
 /// ```python
-/// a = BddVariable(0)
-/// b = BddVariable(1)
+/// a = ParameterId(0)
+/// b = ParameterId(1)
 /// assert a == eval(repr(a))
 /// assert a != b
 /// assert a < b
 /// assert a <= a
-/// assert str(a) == "x_0"
+/// assert str(a) == "p_0"
 /// assert int(a) == 0
 /// d = {a: True, b: False}
 /// assert d[a] != d[b]
 /// ```
 ///
-/// The value of `BddVariable` is frozen (i.e. immutable).
+/// The value of `ParameterIdId` is frozen (i.e. immutable).
 ///
-/// See also `BddVariableType`.
-///  
+/// See also `ParameterIdType`.
+///
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Wrapper)]
-pub struct BddVariable(biodivine_lib_bdd::BddVariable);
+pub struct ParameterId(biodivine_lib_param_bn::ParameterId);
 
 #[pymethods]
-impl BddVariable {
+impl ParameterId {
     #[new]
     #[pyo3(signature = (value = 0))]
-    pub fn new(value: usize) -> BddVariable {
-        BddVariable(biodivine_lib_bdd::BddVariable::from_index(value))
+    pub fn new(value: usize) -> Self {
+        Self(biodivine_lib_param_bn::ParameterId::from_index(value))
     }
 
     pub fn __richcmp__(&self, other: &Self, op: CompareOp) -> bool {
@@ -42,11 +42,11 @@ impl BddVariable {
     }
 
     pub fn __str__(&self) -> String {
-        format!("x_{}", self.0)
+        format!("p_{}", self.0.to_index())
     }
 
     pub fn __repr__(&self) -> String {
-        format!("BddVariable({})", self.0)
+        format!("ParameterId({})", self.0.to_index())
     }
 
     pub fn __hash__(&self) -> u64 {

@@ -251,7 +251,7 @@ def test_bdd():
     assert Bdd(ctx, bdd_x.data_bytes()) == bdd_x
     assert pickle.loads(pickle.dumps(bdd_x)) == bdd_x
 
-    assert bdd_x.to_dot_string() != bdd_x.to_dot_string(zero_pruned=False)
+    assert bdd_x.to_dot() != bdd_x.to_dot(zero_pruned=False)
     assert str(bdd_x.to_expression()) == "((a & b) | (!a & (b & !c)))"
     assert BddPartialValuation(ctx, {'a': True, 'b': True}) == BddPartialValuation(ctx, {'a': 1, 'b': 1})
     # (!a & b & c) | (a & b)

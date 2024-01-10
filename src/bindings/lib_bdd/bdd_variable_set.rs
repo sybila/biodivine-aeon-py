@@ -2,7 +2,7 @@ use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_bdd::bdd_valuation::{BddPartialValuation, BddValuation};
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_inner};
+use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
@@ -64,7 +64,7 @@ impl BddVariableSet {
     }
 
     fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
-        richcmp_eq_inner(py, op, &self, &other, |x| x.variable_names())
+        richcmp_eq_by_key(py, op, &self, &other, |x| x.variable_names())
     }
 
     fn __len__(&self) -> usize {

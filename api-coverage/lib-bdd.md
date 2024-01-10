@@ -615,7 +615,7 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::to_dot_string</code></td>
-            <td rowspan="2"><code>Bdd.to_dot_string</code></td>
+            <td rowspan="2"><code>Bdd.to_dot</code></td>
         </tr>
         <tr>
             <td><code>Bdd::write_as_dot_string</code></td>

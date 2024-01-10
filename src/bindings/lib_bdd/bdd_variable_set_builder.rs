@@ -1,6 +1,6 @@
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
-use crate::pyo3_utils::richcmp_eq_inner;
+use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::AsNative;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
@@ -36,7 +36,7 @@ impl BddVariableSetBuilder {
     }
 
     fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
-        richcmp_eq_inner(py, op, self, other, |x| x.__getstate__())
+        richcmp_eq_by_key(py, op, self, other, |x| x.__getstate__())
     }
 
     fn __len__(&self) -> usize {
