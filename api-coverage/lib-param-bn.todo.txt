@@ -610,68 +610,6 @@ pub fn biodivine_lib_param_bn::FnUpdate::fmt(&self, f: &mut core::fmt::Formatter
 impl core::hash::Hash for biodivine_lib_param_bn::FnUpdate
 pub fn biodivine_lib_param_bn::FnUpdate::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 
-
-pub struct biodivine_lib_param_bn::BooleanNetwork
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::add_parameter(&mut self, name: &str, arity: u32) -> core::result::Result<biodivine_lib_param_bn::ParameterId, alloc::string::String>
-pub fn biodivine_lib_param_bn::BooleanNetwork::add_update_function(&mut self, variable: biodivine_lib_param_bn::VariableId, function: biodivine_lib_param_bn::FnUpdate) -> core::result::Result<(), alloc::string::String>
-pub fn biodivine_lib_param_bn::BooleanNetwork::new(graph: biodivine_lib_param_bn::RegulatoryGraph) -> biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::set_update_function(&mut self, variable: biodivine_lib_param_bn::VariableId, function: core::option::Option<biodivine_lib_param_bn::FnUpdate>) -> core::result::Result<(), alloc::string::String>
-pub fn biodivine_lib_param_bn::BooleanNetwork::try_from_file<T: core::convert::AsRef<std::path::Path>>(path: T) -> core::result::Result<biodivine_lib_param_bn::BooleanNetwork, alloc::string::String>
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::add_string_update_function(&mut self, variable: &str, update_function: &str) -> core::result::Result<(), alloc::string::String>
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::as_graph(&self) -> &biodivine_lib_param_bn::RegulatoryGraph
-pub fn biodivine_lib_param_bn::BooleanNetwork::as_graph_mut(&mut self) -> &mut biodivine_lib_param_bn::RegulatoryGraph
-pub fn biodivine_lib_param_bn::BooleanNetwork::find_parameter(&self, name: &str) -> core::option::Option<biodivine_lib_param_bn::ParameterId>
-pub fn biodivine_lib_param_bn::BooleanNetwork::get_parameter(&self, id: biodivine_lib_param_bn::ParameterId) -> &biodivine_lib_param_bn::Parameter
-pub fn biodivine_lib_param_bn::BooleanNetwork::get_update_function(&self, variable: biodivine_lib_param_bn::VariableId) -> &core::option::Option<biodivine_lib_param_bn::FnUpdate>
-pub fn biodivine_lib_param_bn::BooleanNetwork::get_variable(&self, id: biodivine_lib_param_bn::VariableId) -> &biodivine_lib_param_bn::Variable
-pub fn biodivine_lib_param_bn::BooleanNetwork::get_variable_name(&self, id: biodivine_lib_param_bn::VariableId) -> &alloc::string::String
-pub fn biodivine_lib_param_bn::BooleanNetwork::implicit_parameters(&self) -> alloc::vec::Vec<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::BooleanNetwork::is_valid_name(name: &str) -> bool
-pub fn biodivine_lib_param_bn::BooleanNetwork::num_implicit_parameters(&self) -> usize
-pub fn biodivine_lib_param_bn::BooleanNetwork::num_parameters(&self) -> usize
-pub fn biodivine_lib_param_bn::BooleanNetwork::num_vars(&self) -> usize
-pub fn biodivine_lib_param_bn::BooleanNetwork::parameter_appears_in(&self, parameter: biodivine_lib_param_bn::ParameterId) -> std::collections::hash::set::HashSet<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::BooleanNetwork::parameters(&self) -> biodivine_lib_param_bn::ParameterIdIterator
-pub fn biodivine_lib_param_bn::BooleanNetwork::prune_unused_parameters(&self) -> biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::regulators(&self, target: biodivine_lib_param_bn::VariableId) -> alloc::vec::Vec<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::BooleanNetwork::targets(&self, regulator: biodivine_lib_param_bn::VariableId) -> alloc::vec::Vec<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::BooleanNetwork::variables(&self) -> biodivine_lib_param_bn::VariableIdIterator
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::infer_valid_graph(&self) -> core::result::Result<biodivine_lib_param_bn::BooleanNetwork, alloc::string::String>
-pub fn biodivine_lib_param_bn::BooleanNetwork::inline_constants(&self, infer_constants: bool, repair_graph: bool) -> biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::inline_inputs(&self, infer_inputs: bool, repair_graph: bool) -> biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::inline_variable(&self, var: biodivine_lib_param_bn::VariableId, repair_graph: bool) -> core::option::Option<biodivine_lib_param_bn::BooleanNetwork>
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::to_bnet(&self, rename_if_necessary: bool) -> core::result::Result<alloc::string::String, alloc::string::String>
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::to_sbml(&self, layout: core::option::Option<&biodivine_lib_param_bn::sbml::Layout>) -> alloc::string::String
-pub fn biodivine_lib_param_bn::BooleanNetwork::write_as_sbml(&self, layout: core::option::Option<&biodivine_lib_param_bn::sbml::Layout>, out: &mut dyn std::io::Write) -> core::result::Result<(), std::io::error::Error>
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::try_from_bnet(model_string: &str) -> core::result::Result<biodivine_lib_param_bn::BooleanNetwork, alloc::string::String>
-impl biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::try_from_sbml(model_file: &str) -> core::result::Result<(biodivine_lib_param_bn::BooleanNetwork, biodivine_lib_param_bn::sbml::Layout), alloc::string::String>
-pub fn biodivine_lib_param_bn::BooleanNetwork::try_from_sbml_strict(model_file: &str, warnings: &mut alloc::vec::Vec<alloc::string::String>) -> core::result::Result<(biodivine_lib_param_bn::BooleanNetwork, biodivine_lib_param_bn::sbml::Layout), alloc::string::String>
-impl core::clone::Clone for biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::clone(&self) -> biodivine_lib_param_bn::BooleanNetwork
-impl core::cmp::Eq for biodivine_lib_param_bn::BooleanNetwork
-impl core::cmp::PartialEq for biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::eq(&self, other: &biodivine_lib_param_bn::BooleanNetwork) -> bool
-impl core::convert::TryFrom<&str> for biodivine_lib_param_bn::BooleanNetwork
-pub type biodivine_lib_param_bn::BooleanNetwork::Error = alloc::string::String
-pub fn biodivine_lib_param_bn::BooleanNetwork::try_from(value: &str) -> core::result::Result<Self, Self::Error>
-impl core::fmt::Display for biodivine_lib_param_bn::BooleanNetwork
-pub fn biodivine_lib_param_bn::BooleanNetwork::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
-impl core::ops::index::Index<biodivine_lib_param_bn::ParameterId> for biodivine_lib_param_bn::BooleanNetwork
-pub type biodivine_lib_param_bn::BooleanNetwork::Output = biodivine_lib_param_bn::Parameter
-pub fn biodivine_lib_param_bn::BooleanNetwork::index(&self, index: biodivine_lib_param_bn::ParameterId) -> &Self::Output
-impl core::ops::index::Index<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::BooleanNetwork
-pub type biodivine_lib_param_bn::BooleanNetwork::Output = biodivine_lib_param_bn::Variable
-pub fn biodivine_lib_param_bn::BooleanNetwork::index(&self, index: biodivine_lib_param_bn::VariableId) -> &Self::Output
-
-
 pub struct biodivine_lib_param_bn::ModelAnnotation
 impl biodivine_lib_param_bn::ModelAnnotation
 pub fn biodivine_lib_param_bn::ModelAnnotation::append_value(&mut self, path: &[&str], value: &str)
@@ -697,13 +635,6 @@ impl core::default::Default for biodivine_lib_param_bn::ModelAnnotation
 pub fn biodivine_lib_param_bn::ModelAnnotation::default() -> Self
 impl core::fmt::Display for biodivine_lib_param_bn::ModelAnnotation
 pub fn biodivine_lib_param_bn::ModelAnnotation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-
-
-
-impl core::ops::index::Index<biodivine_lib_param_bn::ParameterId> for biodivine_lib_param_bn::BooleanNetwork
-pub type biodivine_lib_param_bn::BooleanNetwork::Output = biodivine_lib_param_bn::Parameter
-pub fn biodivine_lib_param_bn::BooleanNetwork::index(&self, index: biodivine_lib_param_bn::ParameterId) -> &Self::Output
-
 
 pub struct biodivine_lib_param_bn::Space(_)
 impl biodivine_lib_param_bn::Space
@@ -731,19 +662,9 @@ pub fn biodivine_lib_param_bn::Space::index(&self, index: biodivine_lib_param_bn
 impl core::ops::index::IndexMut<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::Space
 pub fn biodivine_lib_param_bn::Space::index_mut(&mut self, index: biodivine_lib_param_bn::VariableId) -> &mut Self::Output
 
-
-
-impl core::ops::index::Index<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::BooleanNetwork
-pub type biodivine_lib_param_bn::BooleanNetwork::Output = biodivine_lib_param_bn::Variable
-pub fn biodivine_lib_param_bn::BooleanNetwork::index(&self, index: biodivine_lib_param_bn::VariableId) -> &Self::Output
-
-
 impl core::ops::index::Index<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::Space
 pub type biodivine_lib_param_bn::Space::Output = biodivine_lib_param_bn::ExtendedBoolean
 pub fn biodivine_lib_param_bn::Space::index(&self, index: biodivine_lib_param_bn::VariableId) -> &Self::Output
 
 impl core::ops::index::IndexMut<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::Space
 pub fn biodivine_lib_param_bn::Space::index_mut(&mut self, index: biodivine_lib_param_bn::VariableId) -> &mut Self::Output
-
-pub type biodivine_lib_param_bn::ParameterIdIterator = core::iter::adapters::map::Map<core::ops::range::Range<usize>, fn(usize) -> biodivine_lib_param_bn::ParameterId>
-pub type biodivine_lib_param_bn::VariableIdIterator = core::iter::adapters::map::Map<core::ops::range::Range<usize>, fn(usize) -> biodivine_lib_param_bn::VariableId>

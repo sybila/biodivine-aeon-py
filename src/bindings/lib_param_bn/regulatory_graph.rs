@@ -24,7 +24,7 @@ use std::collections::HashSet;
 ///     always create a new copy of the graph with a new set of valid `VariableId` objects.
 ///
 ///
-#[pyclass(module = "biodivine_aeon")]
+#[pyclass(module = "biodivine_aeon", subclass)]
 #[derive(Clone, Wrapper)]
 pub struct RegulatoryGraph(biodivine_lib_param_bn::RegulatoryGraph);
 
@@ -39,7 +39,7 @@ impl RegulatoryGraph {
     /// and no regulations.
     #[new]
     #[pyo3(signature = (variables = None, regulations = None))]
-    fn new(
+    pub fn new(
         variables: Option<Vec<String>>,
         regulations: Option<Vec<&PyAny>>,
     ) -> PyResult<RegulatoryGraph> {
@@ -99,7 +99,7 @@ impl RegulatoryGraph {
         format!("RegulatoryGraph({:?}, {:?})", names, regulations)
     }
 
-    fn __getnewargs__(&self) -> (Vec<String>, Vec<String>) {
+    pub fn __getnewargs__(&self) -> (Vec<String>, Vec<String>) {
         let names = self.variable_names();
         let regulations = self
             .as_native()
@@ -272,7 +272,7 @@ impl RegulatoryGraph {
         Self::encode_regulation(py, &removed)
     }
 
-    /// Update the `sign` and `essential` flags of a regulation that already exists in this `RegulatoryGraph`.
+    /// Update the `sign` and `essential` flags of a regulation in this `RegulatoryGraph`.
     /// If the regulation does not exist, it is created.
     ///
     /// Returns the previous state of the regulation as an `IdRegulation` dictionary, assuming the regulation
@@ -286,7 +286,6 @@ impl RegulatoryGraph {
         let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
         let source = self.as_native().find_variable(s.as_str()).unwrap();
         let target = self.as_native().find_variable(t.as_str()).unwrap();
-        // This will fail if the regulation does not exist.
         let old = self.as_native_mut().remove_regulation(source, target).ok();
         let m = m.as_ref().map(|it| match it {
             Positive => Monotonicity::Activation,
@@ -354,7 +353,7 @@ impl RegulatoryGraph {
         Ok(result)
     }
 
-    /// Inline a variable into its downstream regulators. This also "merges" the essential and sign flags of
+    /// Inline a variable into its downstream targets. This also "merges" the essential and sign flags of
     /// the associated regulations in a way that makes sense for the existing constraints (e.g. `+` and `-` becomes
     /// `-`, `-` and `-` becomes `+`; a regulation is essential if both "partial" regulations are essential, etc.).
     ///
@@ -367,7 +366,7 @@ impl RegulatoryGraph {
         let variable = self.resolve_variable(variable)?;
         let bn = biodivine_lib_param_bn::BooleanNetwork::new(self.as_native().clone());
         let Some(bn) = bn.inline_variable(variable, false) else {
-            return throw_runtime_error("Has self-regulation.");
+            return throw_runtime_error("Variable has a self-regulation.");
         };
         Ok(RegulatoryGraph(bn.as_graph().clone()))
     }

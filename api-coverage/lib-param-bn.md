@@ -409,3 +409,247 @@ as in Rust due to use of default argument values and polymorphism.
         </tr> 
     </tbody>
 </table>
+
+### `BooleanNetwork`
+
+A `BooleanNetwork` inherits from `RegulatoryGraph` and hence we need to
+re-implement methods that mutate the graph to reflect both underlying objects.
+
+As for `RegulatoryGraph`, we do not actually implement any `Index` traits, and
+we export trivial iterators as lists.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>BooleanNetwork::new</code></td>
+            <td><code>BooleanNetwork.__init__</code></td>
+        </tr> 
+        <tr>
+            <td><code>BooleanNetwork::eq</code></td>
+            <td><code>RegulatoryGraph.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.__getnewargs__</code></td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>BooleanNetwork::clone</code></td>
+            <td><code>BooleanNetwork.__copy__</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork.__deepcopy__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Overriding or inheriting <code>RegulatoryGraph</code></td></tr>
+        <tr>
+            <td><code>BooleanNetwork::try_from_file</code></td>
+            <td><code>BooleanNetwork.from_file</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::try_from(&str)</code></td>
+            <td><code>BooleanNetwork.from_aeon</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::to_string</code></td>
+            <td><code>BooleanNetwork.to_aeon</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::num_vars</code></td>
+            <td><code>RegulatoryGraph.variable_count</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::variables</code></td>
+            <td><code>RegulatoryGraph.variables</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::get_variable_name</code></td>
+            <td><code>RegulatoryGraph.get_variable_name</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::set_variable_name</code></td>
+            <td><code>BooleanNetwork.set_variable_name</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.add_regulation</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.remove_regulation</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.ensure_regulation</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.extend</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.drop</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::inline_variable</code></td>
+            <td><code>BooleanNetwork.inline_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::regulators</code></td>
+            <td><code>RegulatoryGraph.predecessors</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::targets</code></td>
+            <td><code>RegulatoryGraph.successors</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Conversions</td></tr>
+        <tr>
+            <td><code>BooleanNetwork::as_graph</code></td>
+            <td><code>BooleanNetwork.as_graph</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::as_graph_mut</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::try_from_bnet</code></td>
+            <td><code>BooleanNetwork.from_bnet</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::to_bnet</code></td>
+            <td><code>BooleanNetwork.to_bnet</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::try_from_sbml</code></td>
+            <td><code>BooleanNetwork.from_sbml</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::try_from_sbml_strict</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::to_sbml</code></td>
+            <td><code>BooleanNetwork.to_sbml</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::write_as_sbml</code></td>
+            <td></td>
+        </tr>
+        <tr><td colspan="2" align="center">Introspection and mutability</td></tr>
+        <tr>
+            <td><code>BooleanNetwork::num_parameters</code></td>
+            <td><code>BooleanNetwork.explicit_parameter_count</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::num_implicit_parameters</code></td>
+            <td><code>BooleanNetwork.implicit_parameter_count</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::parameters</code></td>
+            <td><code>BooleanNetwork.explicit_parameters</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::implicit_parameters</code></td>
+            <td><code>BooleanNetwork.implicit_parameters</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.explicit_parameter_names</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.get_explicit_parameter_name</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanNetwork.get_explicit_parameter_arity</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::find_parameter</code></td>
+            <td><code>BooleanNetwork.find_explicit_parameter</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::add_parameter</code></td>
+            <td><code>BooleanNetwork.add_explicit_parameter</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::get_update_function</code></td>
+            <td><code>BooleanNetwork.get_update_function</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::add_update_function</code></td>
+            <td rowspan="3"><code>BooleanNetwork.set_update_function</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::set_update_function</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::add_string_update_function</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Structural updates</td></tr>
+        <tr>
+            <td><code>BooleanNetwork::infer_valid_graph</code></td>
+            <td><code>BooleanNetwork.infer_valid_graph</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::inline_constants</code></td>
+            <td><code>BooleanNetwork.inline_constants</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::inline_inputs</code></td>
+            <td><code>BooleanNetwork.inline_inputs</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::prune_unused_parameters</code></td>
+            <td><code>BooleanNetwork.prune_unused_parameters</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>BooleanNetwork::is_valid_name</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>RegulatoryGraph::get_variable</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>RegulatoryGraph::get_parameter</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::parameter_appears_in</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+### `FnUpdate` (aka `UpdateFunction`)
+
+This largely follows the structure of `BooleanExpression` in `lib-bdd`, but of course
+extended to cover uninterpreted functions. Also, an `UpdateFunction` carries a reference
+to an underlying "context" in which it was created to resolve variable and function names.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+    </tbody>
+</table>

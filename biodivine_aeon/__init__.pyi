@@ -101,7 +101,7 @@ class BddVariableSetBuilder:
 
 
 class BddVariableSet:
-    def __init__(self, variables: int | list[str]):
+    def __init__(self, variables: int | list[str]) -> None:
         """
         A `BddVariableSet` is typically created using a list of variable names. However, you can also create
         an "anonymous" `BddVariableSet` using a variable count `n`. In such a case, the variables are automatically
@@ -159,7 +159,7 @@ class Bdd:
     def __init__(self,
          ctx: Bdd | BddValuation | BddPartialValuation | BddVariableSet,
          data: None | bytes | str = None
-    ) -> Bdd:
+    ) -> None:
         """
         A `Bdd` can be created as:
          - A copy of a different `Bdd`.
@@ -356,7 +356,7 @@ class Bdd:
         ...
 
 class BddValuationIterator:
-    def __init__(self, bdd: Bdd):
+    def __init__(self, bdd: Bdd) -> None:
         """
         Create a new iterator over all satisfying `BddValuation` objects of a `Bdd`.
         """
@@ -366,7 +366,7 @@ class BddValuationIterator:
         ...
 
 class BddClauseIterator:
-    def __init__(self, bdd: Bdd):
+    def __init__(self, bdd: Bdd) -> None:
         """
         Create a new iterator over all DNF clauses (i.e. `BddPartialValuation` objects) of a `Bdd`.
         """
@@ -379,7 +379,7 @@ class BddPartialValuation:
     def __init__(self,
         ctx: BddValuation | BddPartialValuation | BddVariableSet,
         values: None | dict[BddVariableType, BoolType] = None
-    ) -> BddPartialValuation:
+    ) -> None:
         """
         A `BddPartialValuation` can be created as:
          - A copy of a `BddValuation`.
@@ -428,7 +428,7 @@ class BddValuation:
     def __init__(self,
          ctx: BddValuation | BddPartialValuation | BddVariableSet,
          values: None | list[BoolType] = None,
-    ):
+    ) -> None:
         """
         A `BddValuation` can be created as:
          - A copy of a different `BddValuation`.
@@ -469,7 +469,7 @@ class BddValuation:
         ...
 
 class BooleanExpression:
-    def __init__(self, value: BooleanExpression | str):
+    def __init__(self, value: BooleanExpression | str) -> None:
         """
         Build a new `BooleanExpression`, either as a copy of an existing expression, or from a string representation.
         """
@@ -619,7 +619,7 @@ class RegulatoryGraph:
     def __init__(self,
                  variables: None | list[str] = None,
                  regulations: None | list[NamedRegulation] | list[str] = None
-    ) -> RegulatoryGraph:
+    ) -> None:
         """
         A `RegulatoryGraph` can be constructed from two optional arguments:
          - A list of variable names. If this list is not given, it is inferred from the list of regulations.
@@ -681,7 +681,7 @@ class RegulatoryGraph:
         ...
     def extend(self, variables: list[str]) -> RegulatoryGraph:
         ...
-    def drop(self, variables: VariableIdType | list[VariableIdType] | set[VariableIdType]) -> RegulatoryGraph:
+    def drop(self, variables: VariableIdType | VariableCollection) -> RegulatoryGraph:
         ...
     def inline_variable(self, variable: VariableIdType) -> RegulatoryGraph:
         ...
@@ -709,7 +709,107 @@ class RegulatoryGraph:
     ) -> list[VariableId] | None:
         ...
 
+class BooleanNetwork(RegulatoryGraph):
+    def __init__(
+            self,
+            variables: None | list[str] = None,
+            regulations: None | list[NamedRegulation] | list[str] = None,
+            parameters: None | list[tuple[str, int]] = None,
+            functions: None | list[None | str] | dict[str, str] = None,
+    ) -> None:
+        """
+        A new `BooleanNetwork` is constructed in a similar fashion to `RegulatoryGraph`, but additionally
+        allows a list (or dictionary) of string update functions and a dictionary of explicit parameters.
 
+        If variables are not specified, they can be inferred from the list of regulations. However, either
+        variables *or* regulations need to be specified in a non-empty network. That is, variables and regulations
+        cannot be currently inferred from functions alone. Similarly, explicit parameters are not inferred from
+        update functions automatically.
+        """
+        ...
+    def __str__(self) -> str:
+        ...
+    def __eq__(self, other) -> bool:
+        ...
+    def __ne__(self, other) -> bool:
+        ...
+    def __repr__(self) -> str:
+        ...
+    def __getnewargs__(self) -> tuple[list[str], list[str], list[tuple[str, int]], list[str]]:
+        ...
+    def __copy__(self) -> BooleanNetwork:
+        ...
+    def __deepcopy__(self, memo: dict) -> BooleanNetwork:
+        ...
+    @staticmethod
+    def from_file(file_path: str, repair_graph: bool = False) -> BooleanNetwork:
+        ...
+    @staticmethod
+    def from_aeon(file_contents: str) -> BooleanNetwork:
+        ...
+    def to_aeon(self) -> str:
+        ...
+    def set_variable_name(self, variable: VariableIdType, name: str) -> None:
+        ...
+    def add_regulation(self, regulation: IdRegulation | NamedRegulation | str) -> None:
+        ...
+    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> IdRegulation:
+        ...
+    def ensure_regulation(self, regulation: IdRegulation | NamedRegulation | str) -> None | IdRegulation:
+        ...
+    def extend(self, variables: list[str]) -> BooleanNetwork:
+        ...
+    def drop(self, variables: VariableIdType | VariableCollection) -> BooleanNetwork:
+        ...
+    def inline_variable(self, variable: VariableIdType, repair_graph: bool = False) -> BooleanNetwork:
+        ...
+    def as_graph(self) -> RegulatoryGraph:
+        ...
+    @staticmethod
+    def from_bnet(file_contents: str, repair_graph: bool = False) -> BooleanNetwork:
+        ...
+    def to_bnet(self, rename_if_necessary: bool = True) -> str:
+        ...
+    @staticmethod
+    def from_sbml(file_contents: str) -> BooleanNetwork:
+        ...
+    def to_sbml(self) -> str:
+        ...
+    def explicit_parameter_count(self) -> int:
+        ...
+    def implicit_parameter_count(self) -> int:
+        ...
+    def explicit_parameters(self) -> dict[ParameterId, int]:
+        ...
+    def implicit_parameters(self) -> dict[VariableId, int]:
+        ...
+    def explicit_parameter_names(self) -> list[str]:
+        ...
+    def get_explicit_parameter_name(self, parameter: ParameterIdType) -> str:
+        ...
+    def get_explicit_parameter_arity(self, parameter: ParameterIdType) -> int:
+        ...
+    def find_explicit_parameter(self, parameter: ParameterIdType) -> ParameterId | None:
+        ...
+    def add_explicit_parameter(self, name: str, arity: int) -> ParameterId:
+        ...
+    def get_update_function(self, variable: VariableIdType) -> UpdateFunction | None:
+        ...
+    def set_update_function(self, variable: VariableIdType, function: UpdateFunction | str | None) -> UpdateFunction | None:
+        ...
+    def infer_valid_graph(self) -> BooleanNetwork:
+        ...
+    def inline_constants(
+            self, infer_constants: bool = False, repair_graph: bool = False
+    ) -> BooleanNetwork:
+        ...
+    def inline_inputs(self, infer_inputs: bool = False, repair_graph: bool = False) -> BooleanNetwork:
+        ...
+    def prune_unused_parameters(self) -> BooleanNetwork:
+        ...
+
+class UpdateFunction:
+    ...
 
 BddVariableType: TypeAlias = BddVariable | str
 VariableIdType: TypeAlias = VariableId | str

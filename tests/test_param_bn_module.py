@@ -1,3 +1,5 @@
+import pytest
+
 from biodivine_aeon import *
 import pickle
 import copy
@@ -144,3 +146,217 @@ def test_regulatory_graph():
     assert rg1.shortest_cycle('a', length=1) is None
     assert rg1.shortest_cycle('a', subgraph=['a', 'b']) is None
     assert rg1.shortest_cycle('a', parity='+') == rg1.shortest_cycle('a', parity='-')
+
+
+def test_boolean_network_inheritence():
+    """
+    This is *almost* the same test as for RegulatoryGraph, but it performs the same operations on a BooleanNetwork
+    to check that they still work the same.
+    """
+    bn1 = BooleanNetwork(["a", "b", "c"])
+    bn1.add_regulation("a -> b")
+    bn1.add_regulation({
+        'source': 'b',
+        'target': 'c',
+        'sign': '-',
+        'essential': False,
+    })
+    bn1.add_regulation({
+        'source': VariableId(2),
+        'target': VariableId(0),
+    })
+    bn2 = BooleanNetwork(None, ["a -> b", "b -|? c", "c -? a"])
+
+    assert bn1 == bn2
+
+    assert str(bn1) == "BooleanNetwork(variables=3, regulations=3, explicit_parameters=0, implicit_parameters=3)"
+    assert bn1 == eval(repr(bn1))
+    assert bn1 == pickle.loads(pickle.dumps(bn1))
+    assert bn1 == copy.copy(bn1)
+
+    assert bn1 == BooleanNetwork.from_aeon(bn1.to_aeon())
+    Path("tmp.aeon").write_text(bn1.to_aeon())
+    assert bn1 == BooleanNetwork.from_file("tmp.aeon")
+    Path("tmp.aeon").unlink()
+
+    assert bn1.to_dot() == bn2.to_dot()
+
+    assert bn1.variable_count() == 3
+    assert bn1.variable_names() == ["a", "b", "c"]
+    assert bn1.variables() == [VariableId(0), VariableId(1), VariableId(2)]
+    assert bn1.find_variable("b") == VariableId(1)
+    assert bn1.find_variable("z") is None
+    assert bn1.find_variable(VariableId(4)) is None
+    assert bn1.get_variable_name(VariableId(2)) == "c"
+    bn1.set_variable_name("c", "d")
+    assert bn1.get_variable_name(VariableId(2)) == "d"
+    bn1.set_variable_name("d", "c")
+    assert bn1.get_variable_name(VariableId(2)) == "c"
+
+    assert bn1.regulation_count() == 3
+    assert bn1.regulations() == [
+        {'source': VariableId(0), 'target': VariableId(1), 'sign': '+'},
+        {'source': VariableId(1), 'target': VariableId(2), 'sign': '-', 'essential': False},
+        {'source': VariableId(2), 'target': VariableId(0)},
+    ]
+    assert bn1.regulation_strings() == ["a -> b", "b -|? c", "c -? a"]
+    assert bn1.find_regulation('a', 'c') is None
+    assert bn1.find_regulation('c', 'a') == {'source': VariableId(2), 'target': VariableId(0)}
+    bn1.add_regulation('a -?? c')
+    assert bn1.find_regulation('a', 'c') == {'source': VariableId(0), 'target': VariableId(2), 'essential': False}
+    bn1.remove_regulation('a', 'c')
+    assert bn1.find_regulation('a', 'c') is None
+    assert bn1.ensure_regulation('a -?? c ') is None
+    assert bn1.ensure_regulation('a -| c') == {'source': VariableId(0), 'target': VariableId(2), 'essential': False}
+    assert bn1.find_regulation('a', 'c') == {'source': VariableId(0), 'target': VariableId(2), 'sign': '-'}
+
+    bn1e = bn1.extend(['d', 'e'])
+    bn1e.add_regulation('c -> d')
+    bn1e.add_regulation('e -| b')
+    assert bn1e != bn1
+    assert bn1e.find_variable('e') == VariableId(4)
+
+    assert bn1e.drop(['d', 'e']) == bn1
+
+    # For inlining, the results are actually different compared to normal regulatory graph, because inlining
+    # can introduce inlined variables as parameters and give names to anonymous functions. Hence we only compare
+    # the RG here.
+    assert bn1e.inline_variable('d').inline_variable('e').as_graph() == bn1.as_graph()
+    # Keep in mind that rg1 is now extended with 'a -| c'
+    assert bn1.inline_variable('c').as_graph() == BooleanNetwork(None, ["a -> b", "b -?? a", "a -? a"]).as_graph()
+
+    assert bn1.predecessors('c') == {VariableId(0), VariableId(1)}
+    assert bn1.successors('a') == {VariableId(1), VariableId(2)}
+
+    assert bn1e.backward_reachable('d') == set(bn1e.variables())
+    assert bn1e.forward_reachable('d') == {VariableId(3)}
+    assert bn1e.backward_reachable('e') == {VariableId(4)}
+    assert bn1e.forward_reachable('e') == set(bn1e.variables())
+    assert bn1e.backward_reachable(['d', 'e']) == set(bn1e.variables())
+    assert bn1e.forward_reachable(['d', 'e']) == set(bn1e.variables())
+
+    # FVS and IC are very simple, since there are effectively just two cycles of very ambiguous monotonicity.
+    assert bn1.feedback_vertex_set() == {VariableId(0)}
+    assert bn1.feedback_vertex_set() == bn1e.feedback_vertex_set()
+    assert bn1.feedback_vertex_set(parity='+') == bn1.feedback_vertex_set()
+    assert bn1.feedback_vertex_set(parity='-') == bn1.feedback_vertex_set()
+    assert bn1.feedback_vertex_set(subgraph=['a', 'b']) == set()
+
+    # TODO: Re-enable this once independent cycles are properly deterministic.
+    # assert rg1.independent_cycles() == [[VariableId(0), VariableId(2)]]
+    # assert rg1.independent_cycles() == rg1e.independent_cycles()
+    assert bn1.independent_cycles(parity='+') == bn1.independent_cycles(parity='-')
+    assert bn1.independent_cycles(subgraph=['a', 'b']) == []
+
+    assert bn1.strongly_connected_components() == bn1e.strongly_connected_components()
+    assert bn1.strongly_connected_components(subgraph=['a', 'b']) == []
+
+    assert bn1.weakly_connected_components() == [set(bn1.variables())]
+    # TODO: Re-enable this once restricted weakly connected components work.
+    # assert rg1e.weakly_connected_components(subgraph=['d', 'e']) == [{VariableId(3)},{VariableId(4)}]
+
+    assert bn1.shortest_cycle('a') == [VariableId(0), VariableId(2)]
+    assert bn1.shortest_cycle('b') == [VariableId(1), VariableId(2), VariableId(0)]
+    assert bn1.shortest_cycle('a', length=1) is None
+    assert bn1.shortest_cycle('a', subgraph=['a', 'b']) is None
+    assert bn1.shortest_cycle('a', parity='+') == bn1.shortest_cycle('a', parity='-')
+
+
+def test_boolean_network():
+    """
+    This second test actually updates things that are "new" in a `BooleanNetwork` compared to a `RegulatoryGraph`.
+    """
+    bn1 = BooleanNetwork(variables=["a", "b", "c"])
+    bn1.add_regulation("a -> b")
+    bn1.add_regulation("b -?? c")
+    bn1.add_regulation("c -|? b")
+    bn1.add_explicit_parameter("f", 1)
+    bn1.set_update_function("b", "a | f(c)")
+
+    bn2 = BooleanNetwork(
+        regulations=["a -> b", "b -?? c", "c -|? b"],
+        parameters=[("f", 1)],
+        functions={"b": "a | f(c)"}
+    )
+
+    assert bn1 == bn2
+
+    assert str(bn1) == "BooleanNetwork(variables=3, regulations=3, explicit_parameters=1, implicit_parameters=2)"
+    assert bn1 == eval(repr(bn1))
+    assert bn1 == pickle.loads(pickle.dumps(bn1))
+    assert bn1 == copy.copy(bn1)
+
+    assert bn1 == BooleanNetwork.from_aeon(bn1.to_aeon())
+    Path("tmp.aeon").write_text(bn1.to_aeon())
+    assert bn1 == BooleanNetwork.from_file("tmp.aeon")
+    Path("tmp.aeon").unlink()
+    assert bn1 == BooleanNetwork.from_sbml(bn1.to_sbml())
+    Path("tmp.sbml").write_text(bn1.to_sbml())
+    assert bn1 == BooleanNetwork.from_file("tmp.sbml")
+    Path("tmp.sbml").unlink()
+    with pytest.raises(RuntimeError):
+        # Cannot export due to parameters.
+        bn1.to_bnet()
+
+    bn3 = BooleanNetwork(
+        regulations=["a -> b", "b -| a", "b -> b"],
+        functions=["!b", "a & b"]
+    )
+
+    assert bn3 == BooleanNetwork.from_bnet(bn3.to_bnet(), repair_graph=True)
+    Path("tmp.bnet").write_text(bn3.to_bnet())
+    assert bn3 == BooleanNetwork.from_file("tmp.bnet", repair_graph=True)
+    Path("tmp.bnet").unlink()
+
+    bn1i = bn1.inline_variable("b")
+    assert bn1i == BooleanNetwork(
+        ["a", "c"],
+        ["a -?? c", "c -?? c"],
+        [("f", 1), ("fn_c", 1)],
+        [None, "fn_c(a | f(c))"]
+    )
+
+    assert bn1.as_graph() == RegulatoryGraph(regulations=["a -> b", "b -?? c", "c -|? b"])
+
+    assert bn1.explicit_parameter_count() == 1
+    assert bn1.implicit_parameter_count() == 2
+    assert bn1.explicit_parameters() == {ParameterId(0): 1}
+    assert bn1.implicit_parameters() == {VariableId(0): 0, VariableId(2): 1}
+    assert bn1.explicit_parameter_names() == ["f"]
+    assert bn1.get_explicit_parameter_name(ParameterId(0)) == "f"
+    assert bn1.get_explicit_parameter_arity("f") == 1
+    assert bn1.find_explicit_parameter("f") == ParameterId(0)
+    assert bn1.find_explicit_parameter(ParameterId(0)) == ParameterId(0)
+    assert bn1.find_explicit_parameter("g") is None
+    assert bn1.find_explicit_parameter(ParameterId(2)) is None
+
+    bn1.add_explicit_parameter("g", 2)
+    assert bn1.find_explicit_parameter("g") == ParameterId(1)
+    bn1 = bn1.prune_unused_parameters()
+    assert bn1.find_explicit_parameter("g") is None
+
+    assert str(bn1.get_update_function("b")) == "a | f(c)"
+    assert bn1.get_update_function("c") is None
+
+    bn1.set_update_function("c", "true")
+    assert str(bn1.get_update_function("c")) == "true"
+    bn1.set_update_function("c", None)
+    assert bn1.get_update_function("c") is None
+
+    bn1.set_update_function("c", "b")
+    bn1x = bn1.infer_valid_graph()
+    assert bn1x.find_regulation("b", "c") == {
+        'source': VariableId(1),
+        'target': VariableId(2),
+        'sign': '+',
+    }
+
+    bn1x = bn1.inline_inputs()
+    assert bn1x.explicit_parameter_names() == ["f", "a"]
+    # TODO: Enable this once the name resolution bugfix is released.
+    # assert bn1x.find_explicit_parameter("a") == ParameterId(1)
+
+    bn1.set_update_function("a", "false")
+    bn1x = bn1.inline_constants()
+    assert bn1x.variable_names() == ["b", "c"]
+    assert str(bn1x.get_update_function("b")) == "f(c)"
