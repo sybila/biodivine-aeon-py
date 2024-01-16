@@ -451,3 +451,49 @@ def test_update_function():
     # assert UpdateFunction(bn1, "a ^ b").to_and_or_normal_form() == UpdateFunction(bn1, "(a | b) & !(a & b)")
     assert UpdateFunction(bn1, "a <=> b").to_and_or_normal_form() == UpdateFunction(bn1, "(a & b) | (!a & !b)")
 
+
+def test_model_annotation():
+    ann = ModelAnnotation()
+    desc = ann['description']
+    assert desc.value is None
+    desc.value = "Multiline\n"
+    desc.value += "Test description"
+    desc['x'].value = "Variable X"
+    desc['y'].value = "Variable Y"
+
+    assert len(desc) == 2
+    assert ann['description']['x'].value == "Variable X"
+
+    properties = ModelAnnotation('Required model properties.')
+    properties['p_1'].value = "Property:1"
+    properties['p_2'].value = "Property:2"
+    ann['properties'] = properties
+
+    assert ann['properties'].value == "Required model properties."
+    assert ann['properties']['p_1'].value == "Property:1"
+    assert ann['properties']['p_2'].value == "Property:2"
+
+    del ann['properties']['p_1']
+    assert 'p_1' not in ann['properties']
+
+    assert ann == copy.copy(ann)
+    assert str(ann) == str(eval(repr(ann)))
+    assert str(ann) == str(ModelAnnotation.from_aeon(str(ann)))
+    assert copy.deepcopy(ann) != ann
+
+    assert str(ann).strip() == """
+#!description:Multiline
+#!description:Test description
+#!description:x:Variable X
+#!description:y:Variable Y
+#!properties:Required model properties.
+#!properties:p_2:#`Property:2`#
+    """.strip()
+
+    Path('tmp.aeon').write_text(str(ann))
+    assert str(ann) == str(ModelAnnotation.from_file('tmp.aeon'))
+    Path('tmp.aeon').unlink()
+
+    assert ann['description'].values() == [ann['description']['x'], ann['description']['y']]
+    assert ann['description'].keys() == ['x', 'y']
+    assert ann['description'].items() == [('x', ann['description']['x']), ('y', ann['description']['y'])]

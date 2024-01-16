@@ -910,3 +910,112 @@ to an underlying "context" in which it was created to resolve variable and funct
         </tr>
     </tbody>
 </table>
+
+## `ModelAnnotation`
+
+Annotations are implemented essentially as special dictionaries, hence most of the functionality
+is actually in the special methods. Also, the main `ModelAnnotation` is `frozen`, but just because 
+it is actually referencing a hidden `_ModelAnnotation` type that has interior mutability and
+actually holds a reference to the native map.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>ModelAnnotation::new</code></td>
+            <td rowspan="2"><code>ModelAnnotation.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::with_value</code></td> 
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::eq</code></td>
+            <td><code>ModelAnnotation.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ModelAnnotation.__copy__</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::clone</code></td>
+            <td><code>ModelAnnotation.__deepcopy__</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::to_string</code></td>
+            <td><code>ModelAnnotation.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ModelAnnotation.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ModelAnnotation.__len__</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::get_child</code></td>
+            <td><code>ModelAnnotation.__getitem__</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::get_mut_child</code></td>
+            <td rowspan="2"><code>ModelAnnotation.__setitem__</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::ensure_child</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ModelAnnotation.__delitem__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ModelAnnotation.__contains__</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::value</code></td>
+            <td rowspan="2"><code>ModelAnnotation.get_value</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::get_value</code></td> 
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::value_mut</code></td>
+            <td rowspan="3"><code>ModelAnnotation.set_value</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::ensure_value</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::append_value</code></td> 
+        </tr>
+        <tr><td colspan="2" align="center">Conversions</td></tr>
+        <tr>
+            <td><code>ModelAnnotation::from_model_string</code></td>
+            <td><code>ModelAnnotation.from_aeon</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ModelAnnotation.from_file</code></td>
+        </tr>
+        <tr>
+            <td rowspan="3"><code>ModelAnnotation::children</code></td>
+            <td><code>ModelAnnotation.values</code></td>
+        </tr>
+        <tr> 
+            <td><code>ModelAnnotation.keys</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation.items</code></td>
+        </tr>
+        <tr>
+            <td><code>ModelAnnotation::children_mut</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>

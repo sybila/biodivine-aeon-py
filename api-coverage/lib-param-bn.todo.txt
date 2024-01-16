@@ -556,32 +556,6 @@ pub fn biodivine_lib_param_bn::BinaryOp::hash<__H: core::hash::Hasher>(&self, st
 impl core::marker::Copy for biodivine_lib_param_bn::BinaryOp
 
 
-pub struct biodivine_lib_param_bn::ModelAnnotation
-impl biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::append_value(&mut self, path: &[&str], value: &str)
-pub fn biodivine_lib_param_bn::ModelAnnotation::children(&self) -> &std::collections::hash::map::HashMap<alloc::string::String, biodivine_lib_param_bn::ModelAnnotation>
-pub fn biodivine_lib_param_bn::ModelAnnotation::children_mut(&mut self) -> &mut std::collections::hash::map::HashMap<alloc::string::String, biodivine_lib_param_bn::ModelAnnotation>
-pub fn biodivine_lib_param_bn::ModelAnnotation::ensure_child<'a>(&'a mut self, path: &[&str]) -> &'a mut biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::ensure_value(&mut self, path: &[&str], value: &str) -> bool
-pub fn biodivine_lib_param_bn::ModelAnnotation::get_child<'a>(&'a self, path: &[&str]) -> core::option::Option<&'a biodivine_lib_param_bn::ModelAnnotation>
-pub fn biodivine_lib_param_bn::ModelAnnotation::get_mut_child<'a>(&'a mut self, path: &[&str]) -> core::option::Option<&'a mut biodivine_lib_param_bn::ModelAnnotation>
-pub fn biodivine_lib_param_bn::ModelAnnotation::get_value(&self, path: &[&str]) -> core::option::Option<&alloc::string::String>
-pub fn biodivine_lib_param_bn::ModelAnnotation::new() -> biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::value(&self) -> core::option::Option<&alloc::string::String>
-pub fn biodivine_lib_param_bn::ModelAnnotation::value_mut(&mut self) -> &mut core::option::Option<alloc::string::String>
-pub fn biodivine_lib_param_bn::ModelAnnotation::with_value(value: alloc::string::String) -> biodivine_lib_param_bn::ModelAnnotation
-impl biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::from_model_string(model: &str) -> biodivine_lib_param_bn::ModelAnnotation
-impl core::clone::Clone for biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::clone(&self) -> biodivine_lib_param_bn::ModelAnnotation
-impl core::cmp::Eq for biodivine_lib_param_bn::ModelAnnotation
-impl core::cmp::PartialEq for biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::eq(&self, other: &biodivine_lib_param_bn::ModelAnnotation) -> bool
-impl core::default::Default for biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::default() -> Self
-impl core::fmt::Display for biodivine_lib_param_bn::ModelAnnotation
-pub fn biodivine_lib_param_bn::ModelAnnotation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-
 pub struct biodivine_lib_param_bn::Space(_)
 impl biodivine_lib_param_bn::Space
 pub fn biodivine_lib_param_bn::Space::count_any(&self) -> usize

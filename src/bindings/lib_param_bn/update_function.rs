@@ -13,6 +13,16 @@ use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
+/// Describes a single update function that is used to describe the dynamics of a `BooleanNetwork`.
+///
+/// It is similar to a `BooleanExpression`, but additionally admits the use of *uninterpreted functions* (also called
+/// explicit parameters in the context of a `BooleanNetwork`). These are Boolean functions with unknown but fixed
+/// specification that stand in for any unknown behaviour in the corresponding `BooleanNetwork`.
+///
+/// Additionally, compared to a `BooleanExpression`, the `UpdateFunction` refers to network variables and parameters
+/// using `VariableId` and `ParameterId`. To that end, every `UpdateFunction` has an underlying `BooleanNetwork`
+/// which is used to resolve names to IDs and vice versa.
+///
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct UpdateFunction {
