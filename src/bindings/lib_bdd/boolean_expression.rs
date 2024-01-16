@@ -72,7 +72,7 @@ impl BooleanExpression {
     }
 
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        // Technically, this is a "different" expression because it is created with a completely new `roo`,
+        // Technically, this is a "different" expression because it is created with a completely new `root`,
         // but it is much easier (and more transparent) than serializing the root expression and trying to figure
         // out how to serialize a pointer into the AST.
         PyTuple::new(py, [self.__str__()])
@@ -83,10 +83,15 @@ impl BooleanExpression {
     }
 
     #[pyo3(signature = (valuation = None, **kwargs))]
-    pub fn __call__(&self, valuation: Option<&PyDict>, kwargs: Option<&PyDict>) -> PyResult<bool> {
+    pub fn __call__(
+        &self,
+        py: Python,
+        valuation: Option<&PyDict>,
+        kwargs: Option<&PyDict>,
+    ) -> PyResult<bool> {
         match (valuation, kwargs) {
             (Some(_), Some(_)) => throw_type_error("Cannot use both explicit and named arguments."),
-            (None, None) => throw_runtime_error("Missing valuation."),
+            (None, None) => eval(self.as_native(), PyDict::new(py)),
             (Some(v), None) | (None, Some(v)) => eval(self.as_native(), v),
         }
     }

@@ -11,6 +11,7 @@ use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashMap;
+use std::sync::Arc;
 
 /// A `BooleanNetwork` extends a `RegulatoryGraph` with the ability to reference logical
 /// parameters (Boolean uninterpreted functions), and with the ability to store an
@@ -87,7 +88,7 @@ impl BooleanNetwork {
         Ok((BooleanNetwork(native_bn), rg))
     }
 
-    fn __str__(self_: PyRef<'_, Self>) -> String {
+    pub fn __str__(self_: PyRef<'_, Self>) -> String {
         format!(
             "BooleanNetwork(variables={}, regulations={}, explicit_parameters={}, implicit_parameters={})",
             self_.as_ref().variable_count(),
@@ -97,12 +98,12 @@ impl BooleanNetwork {
         )
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         // The BN and its underlying RG should be up to date, hence it should be ok to just compare the BN.
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
-    fn __repr__(self_: PyRef<'_, Self>) -> String {
+    pub fn __repr__(self_: PyRef<'_, Self>) -> String {
         let (names, regulations, parameters, functions) = BooleanNetwork::__getnewargs__(self_);
         let functions = functions
             .into_iter()
@@ -121,7 +122,7 @@ impl BooleanNetwork {
     }
 
     #[allow(clippy::type_complexity)]
-    fn __getnewargs__(
+    pub fn __getnewargs__(
         self_: PyRef<'_, Self>,
     ) -> (
         Vec<String>,
@@ -147,11 +148,11 @@ impl BooleanNetwork {
         (names, regulations, parameters, functions)
     }
 
-    fn __copy__(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    pub fn __copy__(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         self.clone().export_to_python(py)
     }
 
-    fn __deepcopy__(&self, py: Python, _memo: &PyAny) -> PyResult<Py<BooleanNetwork>> {
+    pub fn __deepcopy__(&self, py: Python, _memo: &PyAny) -> PyResult<Py<BooleanNetwork>> {
         self.__copy__(py)
     }
 
@@ -166,7 +167,11 @@ impl BooleanNetwork {
     /// `repair_graph=True`, the underlying graph is instead inferred correctly from the actual update functions.
     #[staticmethod]
     #[pyo3(signature = (file_path, repair_graph = false))]
-    fn from_file(py: Python, file_path: &str, repair_graph: bool) -> PyResult<Py<BooleanNetwork>> {
+    pub fn from_file(
+        py: Python,
+        file_path: &str,
+        repair_graph: bool,
+    ) -> PyResult<Py<BooleanNetwork>> {
         let bn = biodivine_lib_param_bn::BooleanNetwork::try_from_file(file_path)
             .map_err(runtime_error)?;
         let bn = if repair_graph {
@@ -179,14 +184,14 @@ impl BooleanNetwork {
 
     /// Try to read a `BooleanNetwork` from a string representing the contents of an `.aeon` file.
     #[staticmethod]
-    fn from_aeon(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
+    pub fn from_aeon(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
         let bn = biodivine_lib_param_bn::BooleanNetwork::try_from(file_contents)
             .map_err(runtime_error)?;
         BooleanNetwork(bn).export_to_python(py)
     }
 
     /// Convert this `BooleanNetwork` to a string representation of a valid `.aeon` file.
-    fn to_aeon(&self) -> String {
+    pub fn to_aeon(&self) -> String {
         self.as_native().to_string()
     }
 
@@ -632,7 +637,7 @@ impl BooleanNetwork {
             self_ref.as_native().get_update_function(variable).clone()
         };
         if let Some(fun) = fun {
-            Ok(Some(UpdateFunction::new_raw(self_, fun)))
+            Ok(Some(UpdateFunction::new_raw(self_, Arc::new(fun))))
         } else {
             Ok(None)
         }
@@ -803,16 +808,16 @@ impl BooleanNetwork {
     /// not [ParameterId] or [String], returns a `TypeError`.
     pub fn resolve_parameter(
         &self,
-        variable: &PyAny,
+        parameter: &PyAny,
     ) -> PyResult<biodivine_lib_param_bn::ParameterId> {
-        if let Ok(id) = variable.extract::<ParameterId>() {
+        if let Ok(id) = parameter.extract::<ParameterId>() {
             return if id.__index__() < self.explicit_parameter_count() {
                 Ok(*id.as_native())
             } else {
                 throw_index_error(format!("Unknown parameter ID `{}`.", id.__index__()))
             };
         }
-        if let Ok(name) = variable.extract::<String>() {
+        if let Ok(name) = parameter.extract::<String>() {
             return if let Some(var) = self.0.find_parameter(name.as_str()) {
                 Ok(var)
             } else {

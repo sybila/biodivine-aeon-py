@@ -360,3 +360,94 @@ def test_boolean_network():
     bn1x = bn1.inline_constants()
     assert bn1x.variable_names() == ["b", "c"]
     assert str(bn1x.get_update_function("b")) == "f(c)"
+
+
+def test_update_function():
+    bn1 = BooleanNetwork(variables=["a", "b", "c"], parameters=[("f", 1), ("g", 2)])
+    bn2 = BooleanNetwork(variables=["b", "c", "d"], parameters=[("g", 1), ("h", 2)])
+
+    a = UpdateFunction(bn1, "a")
+    b = UpdateFunction(bn1, "b")
+    expr = UpdateFunction(bn1, "(a & b) | g(b, !c)")
+
+    assert str(expr) == "(a & b) | g(b, !c)"
+    assert expr == eval(repr(expr))
+
+    assert "a" in expr and "b" in expr and "c" in expr
+    assert "f" not in expr and "g" in expr
+
+    d = {a: "foo", b: "bar"}
+    assert d[a] == "foo"
+    assert d[a] != d[b]
+
+    assert expr == pickle.loads(pickle.dumps(expr))
+
+    expr_inner = expr.as_binary()
+    assert expr_inner is not None
+    op, l, r = expr_inner
+    assert op == "or"
+    assert l.__root__() == r.__root__() == expr
+    assert l.__ctx__() == r.__ctx__() == expr.__ctx__()
+
+    assert UpdateFunction.mk_const(bn1, 0) == UpdateFunction.mk_const(bn2, False)
+    assert UpdateFunction.mk_const(bn1, 0) != UpdateFunction.mk_const(bn2, True)
+    assert UpdateFunction(bn1, "a") == UpdateFunction.mk_var(bn1, "a")
+    assert UpdateFunction(bn1, "g(a, b)") == UpdateFunction.mk_param(bn1, "g", ["a", "b"])
+    assert UpdateFunction(bn1, "g(a, b)") == UpdateFunction.mk_param(bn1, ParameterId(1),
+                                                                     [VariableId(0), VariableId(1)])
+    assert UpdateFunction(bn1, "!a") == UpdateFunction.mk_not(a)
+    assert UpdateFunction(bn1, "a & b") == UpdateFunction.mk_and(a, b)
+    assert UpdateFunction(bn1, "a | b") == UpdateFunction.mk_or(a, b)
+    assert UpdateFunction(bn1, "a => b") == UpdateFunction.mk_imp(a, b)
+    assert UpdateFunction(bn1, "a <=> b") == UpdateFunction.mk_iff(a, b)
+    assert UpdateFunction(bn1, "a ^ b") == UpdateFunction.mk_xor(a, b)
+    assert UpdateFunction(bn1, "a ^ b") == UpdateFunction.mk_binary("xor", a, b)
+    # TODO: Uncomment once lib-param-bn is up to date.
+    # assert UpdateFunction(bn1, "a & b & c") == UpdateFunction.mk_conjunction(bn1, ["a", "b", "c"])
+    # assert UpdateFunction(bn1, "a | b | c") == UpdateFunction.mk_disjunction(bn1, ["a", "b", "c"])
+
+    assert UpdateFunction(bn1, "true").is_const() and not UpdateFunction(bn1, "a").is_const()
+    assert UpdateFunction(bn1, "a").is_var() and not UpdateFunction(bn1, "true").is_var()
+    assert UpdateFunction(bn1, "g(a, b)").is_param() and not UpdateFunction(bn1, "a").is_param()
+    assert UpdateFunction(bn1, "!a").is_not() and not UpdateFunction(bn1, "a").is_not()
+    assert UpdateFunction(bn1, "a & b").is_and() and not UpdateFunction(bn1, "a | b").is_and()
+    assert UpdateFunction(bn1, "a | b").is_or() and not UpdateFunction(bn1, "a & b").is_or()
+    assert UpdateFunction(bn1, "a => b").is_imp() and not UpdateFunction(bn1, "a & b").is_imp()
+    assert UpdateFunction(bn1, "a <=> b").is_iff() and not UpdateFunction(bn1, "a & b").is_iff()
+    assert UpdateFunction(bn1, "a ^ b").is_xor() and not UpdateFunction(bn1, "a & b").is_xor()
+    assert UpdateFunction(bn1, "a").is_literal() and UpdateFunction(bn1, "!a").is_literal()
+    assert UpdateFunction(bn1, "a & b").is_binary() and not UpdateFunction(bn1, "!a").is_binary()
+
+    assert UpdateFunction(bn1, "true").as_const()
+    assert UpdateFunction(bn1, "a").as_var() == VariableId(0)
+    assert UpdateFunction(bn1, "!a").as_var() is None
+    assert UpdateFunction(bn1, "g(a, b)").as_param() == (ParameterId(1), [a, b])
+    assert UpdateFunction(bn1, "!a").as_not() == a
+    assert UpdateFunction(bn1, "a").as_not() is None
+    assert UpdateFunction(bn1, "a & b").as_and() == (a, b)
+    assert UpdateFunction(bn1, "a | b").as_and() is None
+    assert UpdateFunction(bn1, "a | b").as_or() == (a, b)
+    assert UpdateFunction(bn1, "a & b").as_or() is None
+    assert UpdateFunction(bn1, "a => b").as_imp() == (a, b)
+    assert UpdateFunction(bn1, "a & b").as_imp() is None
+    assert UpdateFunction(bn1, "a <=> b").as_iff() == (a, b)
+    assert UpdateFunction(bn1, "a & b").as_iff() is None
+    assert UpdateFunction(bn1, "a ^ b").as_xor() == (a, b)
+    assert UpdateFunction(bn1, "a & b").as_xor() is None
+    assert UpdateFunction(bn1, "a").as_literal() == (VariableId(0), True)
+    assert UpdateFunction(bn1, "!a").as_literal() == (VariableId(0), False)
+    assert UpdateFunction(bn1, "!!a").as_literal() is None
+    assert UpdateFunction(bn1, "a & b").as_binary() == ("and", a, b)
+    assert UpdateFunction(bn1, "a").as_binary() is None
+
+    assert expr.support_variables() == {VariableId(0), VariableId(1), VariableId(2)}
+    assert expr.support_parameters() == {ParameterId(1)}
+
+    assert expr.substitute_variable("b", "f(b & a)") == UpdateFunction(bn1, "(a & f(b & a)) | g(f(b & a), !c)")
+    assert expr.rename_all(bn2, {'a': 'd', 'b': 'c', 'c': 'b'}, {'g': 'h'}) == UpdateFunction(bn2, "(d & c) | h(c, !b)")
+    assert expr.substitute_variable("b", "true").simplify_constants() == UpdateFunction(bn1, "a | g(true, !c)")
+    assert UpdateFunction(bn1, "!(a & b)").distribute_negation() == UpdateFunction(bn1, "!a | !b")
+    # TODO: Uncomment once lib-param-bn is up to date.
+    # assert UpdateFunction(bn1, "a ^ b").to_and_or_normal_form() == UpdateFunction(bn1, "(a | b) & !(a & b)")
+    assert UpdateFunction(bn1, "a <=> b").to_and_or_normal_form() == UpdateFunction(bn1, "(a & b) | (!a & !b)")
+

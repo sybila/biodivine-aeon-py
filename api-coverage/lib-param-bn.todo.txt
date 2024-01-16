@@ -556,60 +556,6 @@ pub fn biodivine_lib_param_bn::BinaryOp::hash<__H: core::hash::Hasher>(&self, st
 impl core::marker::Copy for biodivine_lib_param_bn::BinaryOp
 
 
-pub enum biodivine_lib_param_bn::FnUpdate
-pub biodivine_lib_param_bn::FnUpdate::Binary(biodivine_lib_param_bn::BinaryOp, alloc::boxed::Box<biodivine_lib_param_bn::FnUpdate>, alloc::boxed::Box<biodivine_lib_param_bn::FnUpdate>)
-pub biodivine_lib_param_bn::FnUpdate::Const(bool)
-pub biodivine_lib_param_bn::FnUpdate::Not(alloc::boxed::Box<biodivine_lib_param_bn::FnUpdate>)
-pub biodivine_lib_param_bn::FnUpdate::Param(biodivine_lib_param_bn::ParameterId, alloc::vec::Vec<biodivine_lib_param_bn::FnUpdate>)
-pub biodivine_lib_param_bn::FnUpdate::Var(biodivine_lib_param_bn::VariableId)
-impl biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::and(self, other: biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::as_binary(&self) -> core::option::Option<(&biodivine_lib_param_bn::FnUpdate, biodivine_lib_param_bn::BinaryOp, &biodivine_lib_param_bn::FnUpdate)>
-pub fn biodivine_lib_param_bn::FnUpdate::as_const(&self) -> core::option::Option<bool>
-pub fn biodivine_lib_param_bn::FnUpdate::as_not(&self) -> core::option::Option<&biodivine_lib_param_bn::FnUpdate>
-pub fn biodivine_lib_param_bn::FnUpdate::as_param(&self) -> core::option::Option<(biodivine_lib_param_bn::ParameterId, &[biodivine_lib_param_bn::FnUpdate])>
-pub fn biodivine_lib_param_bn::FnUpdate::as_var(&self) -> core::option::Option<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::FnUpdate::iff(self, other: biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::implies(self, other: biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_basic_param(id: biodivine_lib_param_bn::ParameterId, args: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_binary(op: biodivine_lib_param_bn::BinaryOp, left: biodivine_lib_param_bn::FnUpdate, right: biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_conjunction(items: &[biodivine_lib_param_bn::FnUpdate]) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_disjunction(items: &[biodivine_lib_param_bn::FnUpdate]) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_false() -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_not(inner: biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_param(id: biodivine_lib_param_bn::ParameterId, args: &[biodivine_lib_param_bn::FnUpdate]) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_true() -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::mk_var(id: biodivine_lib_param_bn::VariableId) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::negation(self) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::or(self, other: biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::xor(self, other: biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-impl biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::build_from_bdd(context: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, bdd: &biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::collect_arguments(&self) -> alloc::vec::Vec<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::FnUpdate::collect_parameters(&self) -> alloc::vec::Vec<biodivine_lib_param_bn::ParameterId>
-pub fn biodivine_lib_param_bn::FnUpdate::contains_parameter(&self, parameter: biodivine_lib_param_bn::ParameterId) -> bool
-pub fn biodivine_lib_param_bn::FnUpdate::contains_variable(&self, variable: biodivine_lib_param_bn::VariableId) -> bool
-pub fn biodivine_lib_param_bn::FnUpdate::distribute_negation(&self) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::evaluate(&self, values: &std::collections::hash::map::HashMap<biodivine_lib_param_bn::VariableId, bool>) -> core::option::Option<bool>
-pub fn biodivine_lib_param_bn::FnUpdate::rename_all(&self, variables: &std::collections::hash::map::HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_param_bn::VariableId>, parameters: &std::collections::hash::map::HashMap<biodivine_lib_param_bn::ParameterId, biodivine_lib_param_bn::ParameterId>) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::simplify_constants(&self) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::substitute_variable(&self, var: biodivine_lib_param_bn::VariableId, expression: &biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::to_and_or_normal_form(&self) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::to_string(&self, context: &biodivine_lib_param_bn::BooleanNetwork) -> alloc::string::String
-pub fn biodivine_lib_param_bn::FnUpdate::try_from_str(expression: &str, network: &biodivine_lib_param_bn::BooleanNetwork) -> core::result::Result<biodivine_lib_param_bn::FnUpdate, alloc::string::String>
-pub fn biodivine_lib_param_bn::FnUpdate::walk_postorder<F>(&self, action: &mut F) where F: core::ops::function::FnMut(&biodivine_lib_param_bn::FnUpdate)
-impl biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::try_from_expression(expression: biodivine_lib_bdd::boolean_expression::BooleanExpression, graph: &biodivine_lib_param_bn::RegulatoryGraph) -> core::option::Option<biodivine_lib_param_bn::FnUpdate>
-impl core::clone::Clone for biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::clone(&self) -> biodivine_lib_param_bn::FnUpdate
-impl core::cmp::Eq for biodivine_lib_param_bn::FnUpdate
-impl core::cmp::PartialEq for biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::eq(&self, other: &biodivine_lib_param_bn::FnUpdate) -> bool
-impl core::fmt::Display for biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::hash::Hash for biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::FnUpdate::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-
 pub struct biodivine_lib_param_bn::ModelAnnotation
 impl biodivine_lib_param_bn::ModelAnnotation
 pub fn biodivine_lib_param_bn::ModelAnnotation::append_value(&mut self, path: &[&str], value: &str)

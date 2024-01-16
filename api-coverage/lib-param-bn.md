@@ -142,7 +142,7 @@ These work essentially the same way as the `BddVariable` class:
     </tbody>
 </table>
 
-### `RegulatoryGraph`
+## `RegulatoryGraph`
 
 Currently, we don't export `RegulationIterator`. A copy of the data is
 returned instead. We also do not provide the `Index` trait for `VariableId`
@@ -410,7 +410,7 @@ as in Rust due to use of default argument values and polymorphism.
     </tbody>
 </table>
 
-### `BooleanNetwork`
+## `BooleanNetwork`
 
 A `BooleanNetwork` inherits from `RegulatoryGraph` and hence we need to
 re-implement methods that mutate the graph to reflect both underlying objects.
@@ -636,7 +636,7 @@ we export trivial iterators as lists.
     </tbody>
 </table>
 
-### `FnUpdate` (aka `UpdateFunction`)
+## `FnUpdate` (aka `UpdateFunction`)
 
 This largely follows the structure of `BooleanExpression` in `lib-bdd`, but of course
 extended to cover uninterpreted functions. Also, an `UpdateFunction` carries a reference
@@ -651,5 +651,262 @@ to an underlying "context" in which it was created to resolve variable and funct
     </thead>
     <tbody>
         <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>FnUpdate::try_from_str</code></td>
+            <td rowspan="2"><code>UpdateFunction.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::try_from_expression</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::hash</code></td>
+            <td><code>UpdateFunction.__hash__</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::eq</code></td>
+            <td><code>UpdateFunction.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::to_string</code></td>
+            <td><code>UpdateFunction.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.__repr__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.__getnewargs__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.__root__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.__ctx__</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction::contains_variable</code></td>
+            <td rowspan="2"><code>UpdateFunction.__contains__</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction::contains_parameter</code></td> 
+        </tr>
+        <tr><td colspan="2" align="center">Pattern constructors</td></tr>
+        <tr>
+            <td><code>FnUpdate::Const</code></td>
+            <td rowspan="3"><code>UpdateFunction.mk_const</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_false</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_true</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::Var</code></td>
+            <td rowspan="2"><code>UpdateFunction.mk_var</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_var</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::Param</code></td>
+            <td rowspan="3"><code>UpdateFunction.mk_param</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_param</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_basic_param</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::Not</code></td>
+            <td rowspan="2"><code>UpdateFunction.mk_not</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_not</code></td>
+        </tr>
+        <tr>
+            <td rowspan="5"><code>FnUpdate::Binary</code></td>
+            <td><code>UpdateFunction.mk_and</code></td>
+        </tr>
+        <tr> 
+            <td><code>UpdateFunction.mk_or</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction.mk_imp</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction.mk_iff</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction.mk_xor</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_binary</code></td>
+            <td><code>UpdateFunction.mk_binary</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_conjunction</code></td>
+            <td><code>UpdateFunction.mk_conjunction</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::mk_disjunction</code></td>
+            <td><code>UpdateFunction.mk_disjunction</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Pattern tests</td></tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_const</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_var</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_param</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_not</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_and</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_or</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_imp</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_iff</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_xor</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_literal</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.is_binary</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Method constructors</td></tr>
+        <tr>
+            <td><code>FnUpdate::negation</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::and</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::or</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::implies</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::iff</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::xor</code></td>
+            <td></td>
+        </tr>
+        <tr><td colspan="2" align="center">Pattern destructors</td></tr>
+        <tr>
+            <td><code>FnUpdate::as_const</code></td>
+            <td><code>UpdateFunction.as_const</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::as_var</code></td>
+            <td><code>UpdateFunction.as_var</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::as_param</code></td>
+            <td><code>UpdateFunction.as_param</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::as_not</code></td>
+            <td><code>UpdateFunction.as_not</code></td>
+        </tr>
+        <tr>
+            <td rowspan="5"><code>FnUpdate::as_binary</code></td>
+            <td><code>UpdateFunction.as_and</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction.as_or</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction.as_imp</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction.as_iff</code></td>
+        </tr>
+        <tr>
+            <td><code>UpdateFunction.as_xor</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction.as_literal</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::as_binary</code></td>
+            <td><code>UpdateFunction.as_binary</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>FnUpdate::collect_arguments</code></td>
+            <td><code>UpdateFunction.support_variables</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::collect_parameters</code></td>
+            <td><code>UpdateFunction.support_parameters</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::substitute_variable</code></td>
+            <td><code>UpdateFunction.substitute_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::rename_all</code></td>
+            <td><code>UpdateFunction.rename_all</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::simplify_constants</code></td>
+            <td><code>UpdateFunction.simplify_constants</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::distribute_negation</code></td>
+            <td><code>UpdateFunction.distribute_negation</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::to_and_or_normal_form</code></td>
+            <td><code>UpdateFunction.to_and_or_normal_form</code></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::build_from_bdd</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::evaluate</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FnUpdate::walk_postorder</code></td>
+            <td></td>
+        </tr>
     </tbody>
 </table>

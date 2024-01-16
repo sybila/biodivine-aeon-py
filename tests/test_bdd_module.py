@@ -386,6 +386,9 @@ def test_boolean_expression():
     assert expr == eval(repr(expr))
     assert expr({'a': 1, 'b': 1, 'c': 0})
     assert not expr(a=0, b=0, c=0)
+    with pytest.raises(RuntimeError):
+        expr()
+    assert BooleanExpression("true")() == True
 
     d = {a: "foo", b: "bar"}
     assert d[a] == "foo"
