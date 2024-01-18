@@ -94,7 +94,8 @@ def test_bdd_variable_set():
     not_c_1 = ctx.mk_literal("c", False)
     not_c_2 = ctx2.transfer_from(not_c_1, ctx)
     assert not_c_2 == ctx2.mk_literal("c", False)
-    assert ctx2.transfer_from(ctx.mk_literal("b", True), ctx) is None
+    with pytest.raises(RuntimeError):
+        ctx2.transfer_from(ctx.mk_literal("b", True), ctx)
 
     # Pickle
     data = pickle.dumps(ctx)
@@ -388,7 +389,7 @@ def test_boolean_expression():
     assert not expr(a=0, b=0, c=0)
     with pytest.raises(RuntimeError):
         expr()
-    assert BooleanExpression("true")() == True
+    assert BooleanExpression("true")()
 
     d = {a: "foo", b: "bar"}
     assert d[a] == "foo"

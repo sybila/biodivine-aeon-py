@@ -79,6 +79,13 @@ where
     Err(PyIndexError::new_err(message))
 }
 
+fn index_error<A: 'static>(message: A) -> PyErr
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
+    PyIndexError::new_err(message)
+}
+
 fn throw_interrupted_error<T, A: 'static>(message: A) -> PyResult<T>
 where
     A: Send + Sync + IntoPy<Py<PyAny>>,

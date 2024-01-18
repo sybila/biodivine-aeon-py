@@ -387,53 +387,6 @@ impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::Symbol
 pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
 
 
-pub struct biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-impl biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::all_extra_state_variables(&self) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::as_canonical_context(&self) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::bdd_variable_set(&self) -> &biodivine_lib_bdd::BddVariableSet
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::eliminate_network_variable(&self, variable: biodivine_lib_param_bn::VariableId) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::extra_state_variables(&self, variable: biodivine_lib_param_bn::VariableId) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::extra_state_variables_by_offset(&self, offset: usize) -> alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable)>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::find_network_parameter(&self, name: &str) -> core::option::Option<biodivine_lib_param_bn::ParameterId>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::find_network_variable(&self, name: &str) -> core::option::Option<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::find_state_variable(&self, symbolic_variable: biodivine_lib_bdd::BddVariable) -> core::option::Option<biodivine_lib_param_bn::VariableId>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_explicit_function_table(&self, parameter: biodivine_lib_param_bn::ParameterId) -> &biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_extra_state_variable(&self, variable: biodivine_lib_param_bn::VariableId, offset: usize) -> biodivine_lib_bdd::BddVariable
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_implicit_function_table(&self, variable: biodivine_lib_param_bn::VariableId) -> &biodivine_lib_param_bn::symbolic_async_graph::FunctionTable
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_network_parameter_arity(&self, id: biodivine_lib_param_bn::ParameterId) -> u16
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_network_parameter_name(&self, id: biodivine_lib_param_bn::ParameterId) -> alloc::string::String
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> alloc::string::String
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::get_state_variable(&self, variable: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::BddVariable
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::instantiate_fn_update(&self, valuation: &biodivine_lib_bdd::BddValuation, function: &biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::instantiate_implicit_function(&self, valuation: &biodivine_lib_bdd::BddValuation, variable: biodivine_lib_param_bn::VariableId, args: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::instantiate_uninterpreted_function(&self, valuation: &biodivine_lib_bdd::BddValuation, parameter: biodivine_lib_param_bn::ParameterId, args: &[biodivine_lib_param_bn::FnUpdate]) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_constant(&self, value: bool) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_extra_state_variable_is_true(&self, variable: biodivine_lib_param_bn::VariableId, offset: usize) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_fn_update_true(&self, function: &biodivine_lib_param_bn::FnUpdate) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_implicit_function_is_true(&self, variable: biodivine_lib_param_bn::VariableId, args: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_instantiated_fn_update(&self, valuation: &biodivine_lib_bdd::BddValuation, function: &biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::FnUpdate
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_state_variable_is_true(&self, variable: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::mk_uninterpreted_function_is_true(&self, parameter: biodivine_lib_param_bn::ParameterId, args: &[biodivine_lib_param_bn::FnUpdate]) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::network_parameters(&self) -> biodivine_lib_param_bn::ParameterIdIterator
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::network_variables(&self) -> biodivine_lib_param_bn::VariableIdIterator
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::new(network: &biodivine_lib_param_bn::BooleanNetwork) -> core::result::Result<biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, alloc::string::String>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::num_extra_state_variables(&self) -> usize
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::num_parameter_variables(&self) -> usize
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::num_state_variables(&self) -> usize
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::parameter_variables(&self) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::state_variables(&self) -> &alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::transfer_from(&self, bdd: &biodivine_lib_bdd::Bdd, ctx: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext) -> core::option::Option<biodivine_lib_bdd::Bdd>
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::with_extra_state_variables(network: &biodivine_lib_param_bn::BooleanNetwork, extra: &std::collections::hash::map::HashMap<biodivine_lib_param_bn::VariableId, u16>) -> core::result::Result<biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, alloc::string::String>
-impl core::clone::Clone for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::clone(&self) -> biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-impl core::cmp::Eq for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-impl core::cmp::PartialEq for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-pub fn biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext::eq(&self, other: &Self) -> bool
-
-pub mod biodivine_lib_param_bn::trap_spaces
-
-
 pub struct biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
 impl biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
 pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::approx_cardinality(&self) -> f64
@@ -538,22 +491,6 @@ pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::essential_symbolic(netwo
 pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::maximize(ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
 pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::minimal_symbolic(network: &biodivine_lib_param_bn::BooleanNetwork, ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, restriction: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
 pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::minimize(ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub enum biodivine_lib_param_bn::BinaryOp
-pub biodivine_lib_param_bn::BinaryOp::And
-pub biodivine_lib_param_bn::BinaryOp::Iff
-pub biodivine_lib_param_bn::BinaryOp::Imp
-pub biodivine_lib_param_bn::BinaryOp::Or
-pub biodivine_lib_param_bn::BinaryOp::Xor
-impl core::clone::Clone for biodivine_lib_param_bn::BinaryOp
-pub fn biodivine_lib_param_bn::BinaryOp::clone(&self) -> biodivine_lib_param_bn::BinaryOp
-impl core::cmp::Eq for biodivine_lib_param_bn::BinaryOp
-impl core::cmp::PartialEq for biodivine_lib_param_bn::BinaryOp
-pub fn biodivine_lib_param_bn::BinaryOp::eq(&self, other: &biodivine_lib_param_bn::BinaryOp) -> bool
-impl core::fmt::Display for biodivine_lib_param_bn::BinaryOp
-pub fn biodivine_lib_param_bn::BinaryOp::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
-impl core::hash::Hash for biodivine_lib_param_bn::BinaryOp
-pub fn biodivine_lib_param_bn::BinaryOp::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl core::marker::Copy for biodivine_lib_param_bn::BinaryOp
 
 
 pub struct biodivine_lib_param_bn::Space(_)

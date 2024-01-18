@@ -6,6 +6,7 @@ pub mod fixed_points;
 pub mod model_annotation;
 pub mod parameter_id;
 pub mod regulatory_graph;
+pub mod symbolic_context;
 pub mod update_function;
 pub mod variable_id;
 
@@ -17,5 +18,6 @@ pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<update_function::UpdateFunction>()?;
     module.add_class::<model_annotation::ModelAnnotationRoot>()?;
     module.add_class::<model_annotation::ModelAnnotation>()?;
+    module.add_class::<symbolic_context::SymbolicContext>()?;
     Ok(())
 }

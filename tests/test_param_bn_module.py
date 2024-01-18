@@ -128,9 +128,8 @@ def test_regulatory_graph():
     assert rg1.feedback_vertex_set(parity='-') == rg1.feedback_vertex_set()
     assert rg1.feedback_vertex_set(subgraph=['a', 'b']) == set()
 
-    # TODO: Re-enable this once independent cycles are properly deterministic.
-    # assert rg1.independent_cycles() == [[VariableId(0), VariableId(2)]]
-    # assert rg1.independent_cycles() == rg1e.independent_cycles()
+    assert rg1.independent_cycles() == [[VariableId(0), VariableId(2)]]
+    assert rg1.independent_cycles() == rg1e.independent_cycles()
     assert rg1.independent_cycles(parity='+') == rg1.independent_cycles(parity='-')
     assert rg1.independent_cycles(subgraph=['a', 'b']) == []
 
@@ -138,8 +137,7 @@ def test_regulatory_graph():
     assert rg1.strongly_connected_components(subgraph=['a', 'b']) == []
 
     assert rg1.weakly_connected_components() == [set(rg1.variables())]
-    # TODO: Re-enable this once restricted weakly connected components work.
-    # assert rg1e.weakly_connected_components(subgraph=['d', 'e']) == [{VariableId(3)},{VariableId(4)}]
+    assert rg1e.weakly_connected_components(subgraph=['d', 'e']) == [{VariableId(3)}, {VariableId(4)}]
 
     assert rg1.shortest_cycle('a') == [VariableId(0), VariableId(2)]
     assert rg1.shortest_cycle('b') == [VariableId(1), VariableId(2), VariableId(0)]
@@ -242,9 +240,8 @@ def test_boolean_network_inheritence():
     assert bn1.feedback_vertex_set(parity='-') == bn1.feedback_vertex_set()
     assert bn1.feedback_vertex_set(subgraph=['a', 'b']) == set()
 
-    # TODO: Re-enable this once independent cycles are properly deterministic.
-    # assert rg1.independent_cycles() == [[VariableId(0), VariableId(2)]]
-    # assert rg1.independent_cycles() == rg1e.independent_cycles()
+    assert bn1.independent_cycles() == [[VariableId(0), VariableId(2)]]
+    assert bn1.independent_cycles() == bn1e.independent_cycles()
     assert bn1.independent_cycles(parity='+') == bn1.independent_cycles(parity='-')
     assert bn1.independent_cycles(subgraph=['a', 'b']) == []
 
@@ -252,8 +249,7 @@ def test_boolean_network_inheritence():
     assert bn1.strongly_connected_components(subgraph=['a', 'b']) == []
 
     assert bn1.weakly_connected_components() == [set(bn1.variables())]
-    # TODO: Re-enable this once restricted weakly connected components work.
-    # assert rg1e.weakly_connected_components(subgraph=['d', 'e']) == [{VariableId(3)},{VariableId(4)}]
+    assert bn1e.weakly_connected_components(subgraph=['d', 'e']) == [{VariableId(3)}, {VariableId(4)}]
 
     assert bn1.shortest_cycle('a') == [VariableId(0), VariableId(2)]
     assert bn1.shortest_cycle('b') == [VariableId(1), VariableId(2), VariableId(0)]
@@ -312,8 +308,8 @@ def test_boolean_network():
     assert bn1i == BooleanNetwork(
         ["a", "c"],
         ["a -?? c", "c -?? c"],
-        [("f", 1), ("fn_c", 1)],
-        [None, "fn_c(a | f(c))"]
+        [("f", 1), ("f_c", 1)],
+        [None, "f_c(a | f(c))"]
     )
 
     assert bn1.as_graph() == RegulatoryGraph(regulations=["a -> b", "b -?? c", "c -|? b"])
@@ -353,8 +349,7 @@ def test_boolean_network():
 
     bn1x = bn1.inline_inputs()
     assert bn1x.explicit_parameter_names() == ["f", "a"]
-    # TODO: Enable this once the name resolution bugfix is released.
-    # assert bn1x.find_explicit_parameter("a") == ParameterId(1)
+    assert bn1x.find_explicit_parameter("a") == ParameterId(1)
 
     bn1.set_update_function("a", "false")
     bn1x = bn1.inline_constants()
@@ -402,9 +397,8 @@ def test_update_function():
     assert UpdateFunction(bn1, "a <=> b") == UpdateFunction.mk_iff(a, b)
     assert UpdateFunction(bn1, "a ^ b") == UpdateFunction.mk_xor(a, b)
     assert UpdateFunction(bn1, "a ^ b") == UpdateFunction.mk_binary("xor", a, b)
-    # TODO: Uncomment once lib-param-bn is up to date.
-    # assert UpdateFunction(bn1, "a & b & c") == UpdateFunction.mk_conjunction(bn1, ["a", "b", "c"])
-    # assert UpdateFunction(bn1, "a | b | c") == UpdateFunction.mk_disjunction(bn1, ["a", "b", "c"])
+    assert UpdateFunction(bn1, "a & b & c") == UpdateFunction.mk_conjunction(bn1, ["a", "b", "c"])
+    assert UpdateFunction(bn1, "a | b | c") == UpdateFunction.mk_disjunction(bn1, ["a", "b", "c"])
 
     assert UpdateFunction(bn1, "true").is_const() and not UpdateFunction(bn1, "a").is_const()
     assert UpdateFunction(bn1, "a").is_var() and not UpdateFunction(bn1, "true").is_var()
@@ -447,8 +441,7 @@ def test_update_function():
     assert expr.rename_all(bn2, {'a': 'd', 'b': 'c', 'c': 'b'}, {'g': 'h'}) == UpdateFunction(bn2, "(d & c) | h(c, !b)")
     assert expr.substitute_variable("b", "true").simplify_constants() == UpdateFunction(bn1, "a | g(true, !c)")
     assert UpdateFunction(bn1, "!(a & b)").distribute_negation() == UpdateFunction(bn1, "!a | !b")
-    # TODO: Uncomment once lib-param-bn is up to date.
-    # assert UpdateFunction(bn1, "a ^ b").to_and_or_normal_form() == UpdateFunction(bn1, "(a | b) & !(a & b)")
+    assert UpdateFunction(bn1, "a ^ b").to_and_or_normal_form() == UpdateFunction(bn1, "(a | b) & !(a & b)")
     assert UpdateFunction(bn1, "a <=> b").to_and_or_normal_form() == UpdateFunction(bn1, "(a & b) | (!a & !b)")
 
 
@@ -497,3 +490,118 @@ def test_model_annotation():
     assert ann['description'].values() == [ann['description']['x'], ann['description']['y']]
     assert ann['description'].keys() == ['x', 'y']
     assert ann['description'].items() == [('x', ann['description']['x']), ('y', ann['description']['y'])]
+
+
+def test_symbolic_context():
+    bn = BooleanNetwork(
+        variables=["a", "b", "c"],
+        regulations=["a -> b", "c -| b", "a -> a", "b -| c"],
+        parameters=[("f", 2)],
+        functions=[None, "a | f(a, c)", None]
+    )
+
+    ctx = SymbolicContext(bn, {'a': 4, 'b': 2})
+    ctx_c = ctx.to_canonical_context()
+    bdd_vars = ctx.bdd_variable_set()
+
+    assert ctx.to_canonical_context() == ctx.to_canonical_context()
+    assert ctx != ctx_c
+
+    assert str(ctx) == ("SymbolicContext(network_variables=3, extra_variables=6, explicit_functions=1, "
+                        "implicit_functions=2)")
+
+    assert ctx == copy.copy(ctx)
+    assert ctx == copy.deepcopy(ctx)
+
+    assert ctx.network_variable_count() == 3
+    assert ctx.network_variable_names() == ["a", "b", "c"]
+    assert ctx.network_variables() == [VariableId(x) for x in range(3)]
+    # This is just hand computed.
+    assert ctx.network_bdd_variables() == [BddVariable(0), BddVariable(7), BddVariable(14)]
+    assert ctx.find_network_variable("b") == VariableId(1)
+    assert ctx.find_network_variable(VariableId(4)) is None
+    assert ctx.find_network_variable(BddVariable(14)) == VariableId(2)
+
+    assert ctx.find_network_bdd_variable("b") == BddVariable(7)
+    assert ctx.find_network_bdd_variable(VariableId(4)) is None
+    assert ctx.find_network_bdd_variable(BddVariable(10)) is None
+    assert ctx.find_network_bdd_variable(BddVariable(14)) == BddVariable(14)
+
+    assert ctx.get_network_variable_name(BddVariable(14)) == "c"
+    with pytest.raises(IndexError):
+        ctx.get_network_variable_name("x")
+
+    assert ctx.extra_bdd_variable_count() == 6
+    assert ctx.extra_bdd_variables_list() == [BddVariable(x) for x in [1, 2, 3, 4, 8, 9]]
+    assert ctx.extra_bdd_variables() == {
+        VariableId(0): [BddVariable(x) for x in [1, 2, 3, 4]],
+        VariableId(1): [BddVariable(x) for x in [8, 9]],
+    }
+
+    assert ctx.explicit_function_count() == 1
+    assert ctx.explicit_functions() == [ParameterId(0)]
+    assert ctx.explicit_functions_bdd_variables_list() == [BddVariable(x) for x in [10, 11, 12, 13]]
+    assert ctx.explicit_functions_bdd_variables() == {ParameterId(0): [BddVariable(x) for x in [10, 11, 12, 13]]}
+
+    assert ctx.implicit_function_count() == 2
+    assert ctx.implicit_functions() == [VariableId(0), VariableId(2)]
+    assert ctx.implicit_functions_bdd_variables_list() == [BddVariable(x) for x in [5, 6, 15, 16]]
+    assert ctx.implicit_functions_bdd_variables() == {
+        VariableId(0): [BddVariable(x) for x in [5, 6]],
+        VariableId(2): [BddVariable(x) for x in [15, 16]],
+    }
+
+    assert ctx.function_count() == 3
+    assert ctx.functions() == [ParameterId(0), VariableId(0), VariableId(2)]
+    assert ctx.functions_bdd_variables_list() == [BddVariable(x) for x in [5, 6, 10, 11, 12, 13, 15, 16]]
+    assert ctx.functions_bdd_variables() == {
+        ParameterId(0): [BddVariable(x) for x in [10, 11, 12, 13]],
+        VariableId(0): [BddVariable(x) for x in [5, 6]],
+        VariableId(2): [BddVariable(x) for x in [15, 16]],
+    }
+
+    assert ctx.find_function("f") == ParameterId(0)
+    assert ctx.find_function("a") == VariableId(0)
+    assert ctx.find_function(ParameterId(1)) is None
+    assert ctx.find_function(VariableId(4)) is None
+    assert ctx.find_function(BddVariable(12)) == ParameterId(0)
+    assert ctx.find_function(BddVariable(15)) == VariableId(2)
+    assert ctx.find_function(BddVariable(7)) is None
+
+    assert ctx.get_function_name(VariableId(0)) == "a"
+    assert ctx.get_function_name(ParameterId(0)) == "f"
+    with pytest.raises(IndexError):
+        ctx.get_function_name("b")
+
+    assert ctx.get_function_arity(VariableId(0)) == 1
+    assert ctx.get_function_arity("f") == 2
+
+    assert ctx.get_function_table("f") == [
+        ([False, False], BddVariable(10)),
+        ([True, False], BddVariable(11)),
+        ([False, True], BddVariable(12)),
+        ([True, True], BddVariable(13)),
+    ]
+    assert ctx.get_function_table("a") == [
+        ([False], BddVariable(5)),
+        ([True], BddVariable(6)),
+    ]
+
+    assert ctx.mk_constant(1) == bdd_vars.mk_const(1)
+    assert ctx.mk_network_variable("a") == bdd_vars.mk_literal("a", True)
+    assert ctx.mk_extra_bdd_variable("a", 1) == bdd_vars.mk_literal(BddVariable(2), True)
+    a = ctx.mk_network_variable("a")
+    c = ctx.mk_network_variable("c")
+    fn_b = bn.get_update_function("b")
+    assert fn_b is not None
+    assert ctx.mk_update_function(fn_b) == ctx.mk_function("f", [a, c]).l_or(a)
+
+    fn = ctx.mk_update_function(fn_b)
+    assert ctx_c.transfer_from(fn, ctx) != fn
+
+    ctx_e = ctx.eliminate_network_variable("a")
+    assert ctx_e != ctx
+    assert ctx_e.bdd_variable_set() == ctx.bdd_variable_set()
+    assert ctx.transfer_from(c, ctx) == ctx.mk_network_variable("c")
+    assert len(ctx_e.functions_bdd_variables_list()) == len(ctx.functions_bdd_variables_list())
+    assert len(ctx_e.functions_bdd_variables()) < len(ctx.functions_bdd_variables())

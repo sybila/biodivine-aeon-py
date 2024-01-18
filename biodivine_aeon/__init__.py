@@ -39,6 +39,11 @@ Sign is used in the context of regulatory networks to indicate positive/negative
 but can be also used for more general graph concepts, like positive/negative cycle.
 """
 
+BinaryOperator: TypeAlias = Literal["and", "or", "imp", "iff", "xor"]
+"""
+Lists the supported Boolean binary operators.
+"""
+
 VariableCollection: TypeAlias = VariableId | str | list[str] | list[VariableId] | set[str] | set[VariableId]
 """
 Describes a "collection of network variables". This can be either a list of variables, or a set of variables, 

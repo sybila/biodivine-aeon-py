@@ -277,16 +277,19 @@ impl BddVariableSet {
     /// The translation is only valid if the `Bdd` relies on variables that are in both
     /// variable set, and their ordering is mutually compatible. If this is not satisfied,
     /// i.e. some of the variables don't exist in the new context, or would have to be reordered,
-    /// the method returns `None`.
+    /// the method throws a runtime exception.
     fn transfer_from(
         self_: PyRef<'_, Self>,
         value: &Bdd,
         original_ctx: &BddVariableSet,
-    ) -> Option<Bdd> {
-        let value = self_
-            .0
-            .transfer_from(value.as_native(), original_ctx.as_native());
-        value.map(|it| Bdd::new_raw(self_, it))
+    ) -> PyResult<Bdd> {
+        let Some(rs_bdd) = self_
+            .as_native()
+            .transfer_from(value.as_native(), original_ctx.as_native())
+        else {
+            return throw_runtime_error("The contexts are not compatible.");
+        };
+        Ok(Bdd::new_raw(self_, rs_bdd))
     }
 }
 

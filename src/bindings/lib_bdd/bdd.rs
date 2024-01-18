@@ -260,6 +260,10 @@ impl Bdd {
     /// not need to create the full result, just check whether it is a tautology. However, it is slower than
     /// `Bdd.structural_eq`, because it needs to still explore the product graph of the two `Bdd` objects.
     pub fn semantic_eq(&self, other: &Bdd) -> bool {
+        if self.as_native().num_vars() != other.as_native().num_vars() {
+            return false;
+        }
+
         // Semantic equality check needs to verify that A <=> B is a tautology,
         // which is the same as checking if A XOR B is a contradiction.
         // We actually don't have to compute the whole result though, we just need to know
@@ -970,6 +974,10 @@ impl Bdd {
             ctx: ctx.into(),
             value,
         }
+    }
+
+    pub fn new_raw_2(ctx: Py<BddVariableSet>, value: RsBdd) -> Bdd {
+        Bdd { ctx, value }
     }
 
     /// A helper constructor that copies the context from the current `Bdd`.

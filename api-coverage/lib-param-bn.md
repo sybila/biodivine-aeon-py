@@ -14,7 +14,7 @@ a Python `Protocol`. However, the trait is not really used anywhere
 in the public API right now, it mostly just simplifies/separates
 implementation. Hence, we can omit it too.
 
-### `Sign`, `Monotonicity`, and `ExtendedBoolean`
+### `Sign`, `Monotonicity`, `ExtendedBoolean` and `BinaryOp`
 
 These enums are mostly just for additional type safety and are not really
 needed in Python. In Python, we can replace them with a `Literal` type 
@@ -27,7 +27,9 @@ In particular, a `Sign` value translates to the following constant values:
 
 The `Monotonicity` enum is replaced with `Sign | None`.
 
-Finally, an `ExtendedBoolean` is simply `bool | None`.
+An `ExtendedBoolean` is simply `bool | None`.
+
+Finally, a `BinaryOp` is `and`/`or`/`imp`/`iff`/`xor`.
 
 ### `Variable`, `Parameter` and `Regulation`
 
@@ -1016,6 +1018,225 @@ actually holds a reference to the native map.
         <tr>
             <td><code>ModelAnnotation::children_mut</code></td>
             <td></td>
+        </tr>
+    </tbody>
+</table>
+
+## `SymbolicContext` (`frozen`)
+
+For now, the decoding methods are left not implemented, as their current names are rather confusing. We should
+design a nicer API for this down the line.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>SymbolicContext::new</code></td>
+            <td><code>SymbolicContext.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::with_extra_state_variables</code></td> 
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::eq</code></td>
+            <td><code>SymbolicContext.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.__str__</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::clone</code></td>
+            <td><code>SymbolicContext.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.__deepcopy__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Symbolic variable mapping</td></tr>
+        <tr>
+            <td><code>SymbolicContext::num_state_variables</code></td>
+            <td><code>SymbolicContext.network_variable_count</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.network_variable_names</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::network_variables</code></td>
+            <td><code>SymbolicContext.network_variables</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::state_variables</code></td>
+            <td><code>SymbolicContext.network_bdd_variables</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::find_network_variable</code></td>
+            <td><code>SymbolicContext.find_network_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::find_state_variable</code></td>
+            <td rowspan="2"><code>SymbolicContext.find_network_bdd_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_state_variable</code></td> 
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_network_variable_name</code></td>
+            <td><code>SymbolicContext.get_network_variable_name</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::num_extra_state_variables</code></td>
+            <td><code>SymbolicContext.extra_bdd_variable_count</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::all_extra_state_variables</code></td>
+            <td><code>SymbolicContext.extra_bdd_variables_list</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::extra_state_variables</code></td>
+            <td rowspan="3"><code>SymbolicContext.extra_bdd_variables</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::extra_state_variables_by_offset</code></td> 
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_extra_state_variable</code></td> 
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.explicit_function_count</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::network_parameters</code></td>
+            <td><code>SymbolicContext.explicit_functions</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.explicit_function_bdd_variables_list</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.explicit_functions_bdd_variables</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.implicit_functions_count</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.implicit_functions</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.implicit_functions_bdd_variables_list</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.implicit_functions_bdd_variables</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.function_count</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.functions</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::parameter_variables</code></td>
+            <td><code>SymbolicContext.functions_bdd_variables_list</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicContext.functions_bdd_variables</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::find_network_parameter</code></td>
+            <td><code>SymbolicContext.find_function</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_network_parameter_name</code></td>
+            <td><code>SymbolicContext.get_function_name</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_network_parameter_arity</code></td>
+            <td><code>SymbolicContext.get_function_arity</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_explicit_function_table</code></td>
+            <td rowspan="2"><code>SymbolicContext.get_function_table</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_implicit_function_table</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::num_parameter_variables</code></td>
+            <td></td>
+        </tr>
+        <tr><td colspan="2" align="center">Encoding methods</td></tr>
+        <tr>
+            <td><code>SymbolicContext::mk_constant</code></td>
+            <td><code>SymbolicContext.mk_constant</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::mk_state_variable_is_true</code></td>
+            <td><code>SymbolicContext.mk_network_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::mk_constant</code></td>
+            <td><code>SymbolicContext.mk_extra_bdd_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::mk_uninterpreted_function_is_true</code></td>
+            <td rowspan="2"><code>SymbolicContext.mk_function</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::mk_implicit_function_is_true</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::mk_fn_update_true</code></td>
+            <td><code>SymbolicContext.mk_update_function</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Decoding methods</td></tr>
+        <tr>
+            <td><code>SymbolicContext::instantiate_implicit_function</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::instantiate_uninterpreted_function</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::instantiate_fn_update</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::mk_instantiated_fn_update</code></td>
+            <td></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>SymbolicContext::bdd_variable_set</code></td>
+            <td><code>SymbolicContext.bdd_variable_set</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::transfer_from</code></td>
+            <td><code>SymbolicContext.transfer_from</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::as_canonical_context</code></td>
+            <td><code>SymbolicContext.as_canonical_context</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::eliminate_network_variable</code></td>
+            <td><code>SymbolicContext.eliminate_network_variable</code></td>
         </tr>
     </tbody>
 </table>

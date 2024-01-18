@@ -93,6 +93,7 @@ fn mk_path(path: &[String]) -> Vec<&str> {
     path.iter().map(|it| it.as_str()).collect()
 }
 
+// TODO: Figure out how this should be pickled?
 #[pymethods]
 impl ModelAnnotation {
     /// Create a new `ModelAnnotation` with an optional string `value`.
