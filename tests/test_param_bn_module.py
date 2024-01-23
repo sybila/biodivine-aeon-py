@@ -698,5 +698,7 @@ def test_asynchronous_graph():
     assert graph.can_pre(space) == union_all([graph.var_can_pre(var, space) for var in graph.network_variables()])
 
     for var in graph.network_variables():
-        assert graph.var_can_post(var, space) == graph.var_can_post_out(var, space).union(graph.var_can_post_within(var, space))
-        assert graph.var_can_pre(var, space) == graph.var_can_pre_out(var, space).union(graph.var_can_pre_within(var, space))
+        can_post = graph.var_can_post_out(var, space).union(graph.var_can_post_within(var, space))
+        assert graph.var_can_post(var, space) == can_post
+        can_pre = graph.var_can_pre_out(var, space).union(graph.var_can_pre_within(var, space))
+        assert graph.var_can_pre(var, space) == can_pre
