@@ -1,11 +1,48 @@
+import biodivine_aeon
 from .biodivine_aeon import *
 from typing import TypeAlias, Literal, TypedDict, NotRequired
 
 __doc__ = biodivine_aeon.__doc__
-# For some reason, the following is recommned, but will cause the type aliases
-# to disappear from documentation.
+# For some reason, the following is recommended, but will cause some of the documentation
+# to disappear.
 # if hasattr(biodivine_aeon, "__all__"):
-#    __all__ = biodivine_aeon.__all__
+#     __all__ = biodivine_aeon.__all__
+
+LOG_NOTHING: Literal[0] = 0
+"""
+No progress messages are printed.
+"""
+LOG_ESSENTIAL: Literal[1] = 1
+"""
+Progress messages are printed only for operations of "non-trivial" complexity.
+"""
+LOG_VERBOSE: Literal[2] = 2
+"""
+All progress messages are printed.
+"""
+
+LOG_LEVEL: Literal[0, 1, 2] = biodivine_aeon.LOG_LEVEL
+"""
+A global variable which specifies what logging messages should be printed to the standard output. These are mainly 
+used to communicate progress during long-running algorithms. I.e. they typically do not communicate any new
+errors or warnings, just a rough estimate of resources being used. Note that these messages introduce some overhead
+into every algorithm. While we try to reduce this overhead as much as possible, especially `LOG_VERBOSE` can have
+measurable impact in shorter computations. For longer computations, the overhead should tend towards zero. 
+
+ - `LOG_NOTHING`: No logging messages are printed.
+ - `LOG_ESSENTIAL`: Logging messages are printed when resource consumption exceeds what is considered "trivial" in the context
+   of a particular algorithm.
+ - `LOG_VERBOSE`: Prints all progress messages. This setting is useful for in-depth comparisons between algorithms, but can
+   be overwhelming under normal circumstances.
+   
+When `biodivine_aeon` is first loaded, the module determines if it is running in a normal Python script, or
+in an interactive environment (interpreter shell, jupyter notebook, etc.). If an interactive environment is detected,
+the `LOG_LEVEL` is automatically set to `LOG_ESSENTIAL`. **In other words, normal Python scripts do not print anything, 
+while interactive environments should print some progress messages for non-trivial operations by default.** 
+
+(Unfortunately, logging to other types of output is currently not supported. But if you need this feature, make
+sure to get in touch.) 
+"""
 
 BddVariableType: TypeAlias = BddVariable | str
 """

@@ -29,9 +29,33 @@ mod bindings;
 //mod internal;
 mod pyo3_utils;
 
+fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
+    // This should be an error when running as a script or a normal shell, but returns a name in notebooks.
+    // https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
+    let is_notebook = py.eval("get_ipython().__class__.__name__", None, None);
+    if let Ok(is_notebook) = is_notebook {
+        if let Ok(is_notebook) = is_notebook.extract::<&str>() {
+            println!("Detected IPython (`{is_notebook}`). Log level set to `LOG_ESSENTIAL`.");
+            return module.setattr("LOG_LEVEL", 1);
+        }
+    }
+    // This should detect if we are running in a shell, as opposed to a script.
+    // https://stackoverflow.com/questions/6108330/checking-for-interactive-shell-in-a-python-script
+    let sys = PyModule::import(py, "sys")?;
+    let stdin = sys.getattr("__stdin__")?;
+    let is_shell = stdin.call_method("isatty", (), None)?;
+    if let Ok(true) = is_shell.extract::<bool>() {
+        println!("Detected interactive mode. Log level set to `LOG_ESSENTIAL`.");
+        return module.setattr("LOG_LEVEL", 1);
+    }
+    println!("Log level set to 0.");
+    module.setattr("LOG_LEVEL", 0)
+}
+
 /// AEON.py is a library...
 #[pymodule]
-fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
+fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {
+    set_log_level(py, module)?;
     bindings::lib_bdd::register(module)?;
     bindings::lib_param_bn::register(module)?;
     Ok(())

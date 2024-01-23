@@ -1,5 +1,10 @@
 from typing import TypeAlias, Literal, Callable, Sequence, TypedDict, NotRequired
 
+LOG_NOTHING: Literal[0]
+LOG_ESSENTIAL: Literal[1]
+LOG_VERBOSE: Literal[2]
+LOG_LEVEL: Literal[0, 1, 2]
+
 class BddVariable:
     def __init__(self, value: int = 0) -> None:
         """
