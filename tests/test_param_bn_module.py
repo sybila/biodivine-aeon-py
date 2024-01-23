@@ -5,6 +5,7 @@ import pickle
 import copy
 from pathlib import Path
 from functools import reduce
+from typing import Literal
 
 
 def test_variable_id():
@@ -672,9 +673,11 @@ def test_asynchronous_graph():
     var_c = UpdateFunction.mk_var(bn, "c")
     assert graph.mk_update_function("a") == custom_ctx.mk_function("a", [var_c])
 
-    space = graph.mk_subspace({"a": 0, "b": 1})
+    space_arg: dict[str, Literal[0,1]] = {"a": 0, "b": 1}
+    space = graph.mk_subspace(space_arg)
 
-    assert space.vertices() == graph.mk_subspace_vertices({"a": 0, "b": 1, "c": 1})
+    space_vertices_arg: dict[str, Literal[0,1]] = {"a": 0, "b": 1, "c": 1}
+    assert space.vertices() == graph.mk_subspace_vertices(space_vertices_arg)
 
     assert (graph.post(space) == graph.var_post("a", space)
             .union(graph.var_post("b", space))
