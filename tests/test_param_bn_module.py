@@ -4,6 +4,7 @@ from biodivine_aeon import *
 import pickle
 import copy
 from pathlib import Path
+from functools import reduce
 
 
 def test_variable_id():
@@ -605,3 +606,97 @@ def test_symbolic_context():
     assert ctx.transfer_from(c, ctx) == ctx.mk_network_variable("c")
     assert len(ctx_e.functions_bdd_variables_list()) == len(ctx.functions_bdd_variables_list())
     assert len(ctx_e.functions_bdd_variables()) < len(ctx.functions_bdd_variables())
+
+
+def test_asynchronous_graph():
+    bn = BooleanNetwork.from_aeon("""
+    a -> b
+    b -|? c
+    c -?? b
+    c -| a
+    $b: a & f(c)    
+    """)
+
+    custom_ctx = SymbolicContext(bn, {"c": 3})
+    custom_unit = custom_ctx.mk_network_variable("c")
+
+    graph = AsynchronousGraph(bn, context=custom_ctx, unit_bdd=custom_unit)
+
+    assert str(graph) == f"AsynchronousGraph({custom_ctx})"
+    assert graph.to_symbolic_context() == custom_ctx
+
+    assert graph.network_variable_count() == 3
+    assert graph.network_variable_names() == ["a", "b", "c"]
+    assert graph.network_variables() == [VariableId(x) for x in [0, 1, 2]]
+    assert graph.find_network_variable("a") == VariableId(0)
+    assert graph.get_network_variable_name(VariableId(1)) == "b"
+
+    empty_set = graph.mk_empty_colored_vertices()
+    empty_colors = graph.mk_empty_colors()
+    empty_vertices = graph.mk_empty_vertices()
+
+    unit_set = graph.mk_unit_colored_vertices()
+    unit_colors = graph.mk_unit_colors()
+    unit_vertices = graph.mk_unit_vertices()
+
+    assert empty_set.cardinality() == 0
+    assert empty_colors.cardinality() == 0
+    assert empty_vertices.cardinality() == 0
+
+    # The unit BDD is smaller than the whole state space.
+    assert unit_vertices.cardinality() == 4
+    assert unit_colors.cardinality() == 9
+    assert unit_set.cardinality() == 36
+
+    assert empty_set.intersect(unit_set).is_empty()
+    assert empty_colors.intersect(unit_colors).is_empty()
+    assert empty_vertices.intersect(unit_vertices).is_empty()
+
+    assert empty_set.union(unit_set) == unit_set
+    assert empty_colors.union(unit_colors) == unit_colors
+    assert empty_vertices.union(unit_vertices) == unit_vertices
+
+    assert unit_set.minus(empty_set) == unit_set
+    assert unit_colors.minus(empty_colors) == unit_colors
+    assert unit_vertices.minus(empty_vertices) == unit_vertices
+
+    assert unit_set.minus_colors(unit_colors).is_empty()
+    assert unit_set.minus_vertices(unit_vertices).is_empty()
+    assert unit_set.intersect_colors(unit_colors) == unit_set
+    assert unit_set.intersect_vertices(unit_vertices) == unit_set
+
+    assert graph.transfer_from(unit_set, graph) == unit_set
+    assert graph.transfer_colors_from(unit_colors, graph) == unit_colors
+    assert graph.transfer_vertices_from(unit_vertices, graph) == unit_vertices
+
+    var_c = UpdateFunction.mk_var(bn, "c")
+    assert graph.mk_update_function("a") == custom_ctx.mk_function("a", [var_c])
+
+    space = graph.mk_subspace({"a": 0, "b": 1})
+
+    assert space.vertices() == graph.mk_subspace_vertices({"a": 0, "b": 1, "c": 1})
+
+    assert (graph.post(space) == graph.var_post("a", space)
+            .union(graph.var_post("b", space))
+            .union(graph.var_post("c", space)))
+
+    assert (graph.pre(space) == graph.var_pre("a", space)
+            .union(graph.var_pre("b", space))
+            .union(graph.var_pre("c", space)))
+
+    def union_all(items):
+        return reduce(lambda x, y: x.union(y), items)
+
+    assert graph.post(space) == union_all([graph.var_post(var, space) for var in graph.network_variables()])
+    assert graph.pre(space) == union_all([graph.var_pre(var, space) for var in graph.network_variables()])
+
+    for var in graph.network_variables():
+        assert graph.var_post(var, space) == graph.var_post_out(var, space).union(graph.var_post_within(var, space))
+        assert graph.var_pre(var, space) == graph.var_pre_out(var, space).union(graph.var_pre_within(var, space))
+
+    assert graph.can_post(space) == union_all([graph.var_can_post(var, space) for var in graph.network_variables()])
+    assert graph.can_pre(space) == union_all([graph.var_can_pre(var, space) for var in graph.network_variables()])
+
+    for var in graph.network_variables():
+        assert graph.var_can_post(var, space) == graph.var_can_post_out(var, space).union(graph.var_can_post_within(var, space))
+        assert graph.var_can_pre(var, space) == graph.var_can_pre_out(var, space).union(graph.var_can_pre_within(var, space))

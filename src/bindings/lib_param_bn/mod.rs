@@ -6,7 +6,7 @@ pub mod fixed_points;
 pub mod model_annotation;
 pub mod parameter_id;
 pub mod regulatory_graph;
-pub mod symbolic_context;
+pub mod symbolic;
 pub mod update_function;
 pub mod variable_id;
 
@@ -18,6 +18,10 @@ pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<update_function::UpdateFunction>()?;
     module.add_class::<model_annotation::ModelAnnotationRoot>()?;
     module.add_class::<model_annotation::ModelAnnotation>()?;
-    module.add_class::<symbolic_context::SymbolicContext>()?;
+    module.add_class::<symbolic::symbolic_context::SymbolicContext>()?;
+    module.add_class::<symbolic::vertex_set::VertexSet>()?;
+    module.add_class::<symbolic::color_set::ColorSet>()?;
+    module.add_class::<symbolic::colored_vertex_set::ColoredVertexSet>()?;
+    module.add_class::<symbolic::asynchronous_graph::AsynchronousGraph>()?;
     Ok(())
 }

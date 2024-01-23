@@ -1027,6 +1027,8 @@ actually holds a reference to the native map.
 For now, the decoding methods are left not implemented, as their current names are rather confusing. We should
 design a nicer API for this down the line.
 
+Right now, `FunctionTable` is not exported. Instead, we just convert it to a `list`.
+
 <table>
     <thead>
         <tr>
@@ -1231,12 +1233,736 @@ design a nicer API for this down the line.
             <td><code>SymbolicContext.transfer_from</code></td>
         </tr>
         <tr>
-            <td><code>SymbolicContext::as_canonical_context</code></td>
+            <td><code>SymbolicContext::to_canonical_context</code></td>
             <td><code>SymbolicContext.as_canonical_context</code></td>
         </tr>
         <tr>
             <td><code>SymbolicContext::eliminate_network_variable</code></td>
             <td><code>SymbolicContext.eliminate_network_variable</code></td>
+        </tr>
+    </tbody>
+</table>
+
+## `ColorSet`, `VertexSet`, and `ColoredVertexSet` (`frozen`)
+
+Currently, symbolic sets hold a reference to the underlying `SymbolicContext`. As such, they
+cannot be serialized easily. For now, you should use BDD serialization instead.
+
+`IterableVertices` are not exported because they are deprecated. 
+
+Iterators (`GraphVertexIterator`, `FunctionTableIterator`, `OwnedRawSymbolicIterator`, 
+`MixedProjectionIterator`, `RawSymbolicIterator`, `FnUpdateProjectionIterator`, 
+`StateProjectionIterator`, `SymbolicIterator`, `SpaceIterator`) and projections (`MixedProjection`, 
+`RawProjection`, `StateProjection`, `FnUpdateProjection`) are currently not supported. They
+will be in the future once we figure out how to include them concisely.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>GraphColors::new</code></td>
+            <td><code>ColorSet.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::eq</code></td>
+            <td><code>ColorSet.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorSet.__str__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::clone</code></td>
+            <td><code>ColorSet.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>GraphColors.__deepcopy__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::hash</code></td>
+            <td><code>ColorSet.__hash__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Set operations</td></tr>
+        <tr>
+            <td><code>GraphColors::approx_cardinality</code></td>
+            <td rowspan="2"><code>ColorSet.cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::exact_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::intersect</code></td>
+            <td><code>ColorSet.intersect</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::minus</code></td>
+            <td><code>ColorSet.minus</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::union</code></td>
+            <td><code>ColorSet.union</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::is_empty</code></td>
+            <td><code>ColorSet.is_empty</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::is_subset</code></td>
+            <td><code>ColorSet.is_subset</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::is_singleton</code></td>
+            <td><code>ColorSet.is_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::is_subspace</code></td>
+            <td><code>ColorSet.is_subspace</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::pick_singleton</code></td>
+            <td><code>ColorSet.pick_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::symbolic_size</code></td>
+            <td><code>ColorSet.symbolic_size</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>GraphColors::as_bdd</code></td>
+            <td rowspan="2"><code>ColorSet.to_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::into_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::copy</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::fn_update_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::raw_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColors::to_dot_string</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>GraphVertices::new</code></td>
+            <td><code>VertexSet.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::eq</code></td>
+            <td><code>VertexSet.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexSet.__str__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::clone</code></td>
+            <td><code>VertexSet.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexSet.__deepcopy__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::hash</code></td>
+            <td><code>VertexSet.__hash__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Set operations</td></tr>
+        <tr>
+            <td><code>GraphVertices::approx_cardinality</code></td>
+            <td rowspan="2"><code>VertexSet.cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::exact_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::intersect</code></td>
+            <td><code>VertexSet.intersect</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::minus</code></td>
+            <td><code>VertexSet.minus</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::union</code></td>
+            <td><code>VertexSet.union</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::is_empty</code></td>
+            <td><code>VertexSet.is_empty</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::is_subset</code></td>
+            <td><code>VertexSet.is_subset</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::is_singleton</code></td>
+            <td><code>VertexSet.is_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::is_subspace</code></td>
+            <td><code>VertexSet.is_subspace</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::pick_singleton</code></td>
+            <td><code>VertexSet.pick_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::symbolic_size</code></td>
+            <td><code>VertexSet.symbolic_size</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>GraphVertices::as_bdd</code></td>
+            <td rowspan="2"><code>VertexSet.to_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::into_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::copy</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::raw_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::to_dot_string</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::fix_network_variable</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::iter</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::into_iter</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::materialize</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::restrict_network_variable</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::state_projection</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>GraphColoredVertices::new</code></td>
+            <td><code>ColoredVertexSet.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::eq</code></td>
+            <td><code>ColoredVertexSet.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredVertexSet.__str__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::clone</code></td>
+            <td><code>ColoredVertexSet.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredVertexSet.__deepcopy__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::hash</code></td>
+            <td><code>ColoredVertexSet.__hash__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Set operations</td></tr>
+        <tr>
+            <td><code>GraphColoredVertices::approx_cardinality</code></td>
+            <td rowspan="2"><code>ColoredVertexSet.cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::exact_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::intersect</code></td>
+            <td><code>ColoredVertexSet.intersect</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::minus</code></td>
+            <td><code>ColoredVertexSet.minus</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::union</code></td>
+            <td><code>ColoredVertexSet.union</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::is_empty</code></td>
+            <td><code>ColoredVertexSet.is_empty</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::is_subset</code></td>
+            <td><code>ColoredVertexSet.is_subset</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::is_singleton</code></td>
+            <td><code>ColoredVertexSet.is_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::is_subspace</code></td>
+            <td><code>ColoredVertexSet.is_subspace</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::pick_singleton</code></td>
+            <td><code>ColoredVertexSet.pick_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::symbolic_size</code></td>
+            <td><code>ColoredVertexSet.symbolic_size</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::colors</code></td>
+            <td><code>ColoredVertexSet.colors</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::vertices</code></td>
+            <td><code>ColoredVertexSet.vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::intersect_colors</code></td>
+            <td><code>ColoredVertexSet.intersect_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::intersect_vertices</code></td>
+            <td><code>ColoredVertexSet.intersect_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::minus_colors</code></td>
+            <td><code>ColoredVertexSet.minus_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::minus_vertices</code></td>
+            <td><code>ColoredVertexSet.minus_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::pick_color</code></td>
+            <td><code>ColoredVertexSet.pick_color</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::pick_vertex</code></td>
+            <td><code>ColoredVertexSet.pick_vertex</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::pick_singleton</code></td>
+            <td><code>ColoredVertexSet.pick_singleton</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>GraphColoredVertices::as_bdd</code></td>
+            <td rowspan="2"><code>ColoredVertexSet.to_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::into_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::copy</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::fn_update_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::raw_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::mixed_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::to_dot_string</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::fix_network_variable</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::iter</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::into_iter</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::materialize</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::restrict_network_variable</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::state_projection</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+## `AsynchronousGraph` (`frozen`)
+
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::new</code></td>
+            <td rowspan="4"><code>AsynchronousGraph.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::new_raw</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::with_custom_context</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::with_space_context</code></td> 
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>AsynchronousGraph.__str__</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::clone</code></td>
+            <td><code>AsynchronousGraph.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>AsynchronousGraph.__deepcopy__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Conversions</td></tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::as_network</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::symbolic_context</code></td>
+            <td><code>AsynchronousGraph.to_symbolic_context</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Network introspection</td></tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::num_vars</code></td>
+            <td><code>AsynchronousGraph.network_variable_count</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>AsynchronousGraph.network_variable_names</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::variables</code></td>
+            <td><code>AsynchronousGraph.network_variables</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>AsynchronousGraph.find_network_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::get_variable_name</code></td>
+            <td><code>AsynchronousGraph.get_network_variable_name</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Symbolic constructors</td></tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::empty_colored_vertices</code></td>
+            <td rowspan="2"><code>AsynchronousGraph.mk_empty_colored_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_empty_colored_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::empty_colors</code></td>
+            <td rowspan="2"><code>AsynchronousGraph.mk_empty_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_empty_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::empty_vertices</code></td>
+            <td rowspan="2"><code>AsynchronousGraph.mk_empty_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_empty_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::unit_colored_vertices</code></td>
+            <td rowspan="2"><code>AsynchronousGraph.mk_unit_colored_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_unit_colored_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::unit_colors</code></td>
+            <td rowspan="2"><code>AsynchronousGraph.mk_unit_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_unit_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::unit_vertices</code></td>
+            <td rowspan="2"><code>AsynchronousGraph.mk_unit_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_unit_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::transfer_colors_from</code></td>
+            <td><code>AsynchronousGraph.transfer_colors_from</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::transfer_vertices_from</code></td>
+            <td><code>AsynchronousGraph.transfer_vertices_from</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::transfer_from</code></td>
+            <td><code>AsynchronousGraph.transfer_from</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::vertex</code></td>
+            <td rowspan="5">
+                <code>SymbolicAsyncGraph.mk_subspace</code>
+                <br>
+                <code>SymbolicAsyncGraph.mk_subspace_vertices</code>
+            </td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::fix_network_variable</code></td> 
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::fix_vertices_with_network_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_partial_vertex</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_subspace</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::get_symbolic_fn_update</code></td>
+            <td><code>AsynchronousGraph.mk_update_function</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Atomic pre- and post- operations</td></tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::post</code></td>
+            <td><code>AsynchronousGraph.post</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::will_post_out</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::will_post_within</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::pre</code></td>
+            <td><code>AsynchronousGraph.pre</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::will_pre_out</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::will_pre_within</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_post</code></td>
+            <td><code>AsynchronousGraph.var_post</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_post_out</code></td>
+            <td><code>AsynchronousGraph.var_post_out</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_post_within</code></td>
+            <td><code>AsynchronousGraph.var_post_within</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_pre</code></td>
+            <td><code>AsynchronousGraph.var_pre</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_pre_out</code></td>
+            <td><code>AsynchronousGraph.var_pre_out</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_pre_within</code></td>
+            <td><code>AsynchronousGraph.var_pre_within</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::can_post</code></td>
+            <td><code>AsynchronousGraph.can_post</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::can_post_out</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::can_post_within</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::can_pre</code></td>
+            <td><code>AsynchronousGraph.can_pre</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::can_pre_out</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::can_pre_within</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_can_post</code></td>
+            <td><code>AsynchronousGraph.var_can_post</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_can_post_out</code></td>
+            <td><code>AsynchronousGraph.var_can_post_out</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_can_post_within</code></td>
+            <td><code>AsynchronousGraph.var_can_post_within</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_can_pre</code></td>
+            <td><code>AsynchronousGraph.var_can_pre</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_can_pre_out</code></td>
+            <td><code>AsynchronousGraph.var_can_pre_out</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::var_can_pre_within</code></td>
+            <td><code>AsynchronousGraph.var_can_pre_within</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::trap_forward</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::trap_backward</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::reach_forward</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::reach_backward</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::space_has_var_true</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::space_has_var_false</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::percolate_space</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::mk_subnetwork_colors</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::wrap_in_symbolic_subspace</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::wrap_in_subspace</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::universal_extra_variable_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::existential_extra_variable_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::is_trap_set</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::inline_symbolic</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::restrict</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::restrict_variable_in_graph</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::pick_witness</code></td>
+            <td></td>
         </tr>
     </tbody>
 </table>

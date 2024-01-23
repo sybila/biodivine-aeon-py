@@ -107,7 +107,7 @@ impl SymbolicContext {
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!(
             "SymbolicContext(network_variables={}, extra_variables={}, explicit_functions={}, implicit_functions={})",
             self.network_variable_count(),
