@@ -1,12 +1,17 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::symbolic::vertex_model::VertexModel;
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
+    OwnedRawSymbolicIterator, RawProjection,
+};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphVertices;
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use pyo3::types::PyList;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
@@ -18,6 +23,13 @@ use std::ops::Not;
 pub struct VertexSet {
     ctx: Py<SymbolicContext>,
     native: GraphVertices,
+}
+
+/// An internal class used for iterating over `VertexModel` instances of a `VertexSet`.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _VertexModelIterator {
+    ctx: Py<SymbolicContext>,
+    native: OwnedRawSymbolicIterator,
 }
 
 impl AsNative<GraphVertices> for VertexSet {
@@ -83,6 +95,10 @@ impl VertexSet {
         hasher.finish()
     }
 
+    fn __iter__(&self) -> PyResult<_VertexModelIterator> {
+        self.items(None)
+    }
+
     /// Returns the number of vertices that are represented in this set.
     pub fn cardinality(&self) -> BigInt {
         self.as_native().exact_cardinality()
@@ -143,6 +159,34 @@ impl VertexSet {
         let ctx = self.ctx.borrow(py);
         Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
     }
+
+    /// Returns an iterator over all vertices in this `VertexSet` with an optional projection to a subset
+    /// of network variables.
+    ///
+    /// When no `retained` collection is specified, this is equivalent to `VertexSet.__iter__`. However, if a retained
+    /// set is given, the resulting iterator only considers unique combinations of the `retained` variables.
+    /// Consequently, the resulting `VertexModel` instances will fail with an `IndexError` if a value of a variable
+    /// outside of the `retained` set is requested.
+    #[pyo3(signature = (retained = None))]
+    fn items(&self, retained: Option<&PyList>) -> PyResult<_VertexModelIterator> {
+        let ctx = self.ctx.get();
+        let retained = if let Some(retained) = retained {
+            retained
+                .iter()
+                .map(|it| {
+                    ctx.resolve_network_variable(it)
+                        .map(|it| ctx.as_native().get_state_variable(it))
+                })
+                .collect::<PyResult<Vec<_>>>()?
+        } else {
+            self.ctx.get().as_native().state_variables().clone()
+        };
+        let projection = RawProjection::new(retained, self.as_native().as_bdd());
+        Ok(_VertexModelIterator {
+            ctx: self.ctx.clone(),
+            native: projection.into_iter(),
+        })
+    }
 }
 
 impl VertexSet {
@@ -165,5 +209,18 @@ impl VertexSet {
         }
 
         RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+    }
+}
+
+#[pymethods]
+impl _VertexModelIterator {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    fn __next__(&mut self) -> Option<VertexModel> {
+        self.native
+            .next()
+            .map(|it| VertexModel::new_native(self.ctx.clone(), it))
     }
 }

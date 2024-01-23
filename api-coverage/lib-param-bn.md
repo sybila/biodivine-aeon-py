@@ -1248,13 +1248,8 @@ Right now, `FunctionTable` is not exported. Instead, we just convert it to a `li
 Currently, symbolic sets hold a reference to the underlying `SymbolicContext`. As such, they
 cannot be serialized easily. For now, you should use BDD serialization instead.
 
-`IterableVertices` are not exported because they are deprecated. 
-
-Iterators (`GraphVertexIterator`, `FunctionTableIterator`, `OwnedRawSymbolicIterator`, 
-`MixedProjectionIterator`, `RawSymbolicIterator`, `FnUpdateProjectionIterator`, 
-`StateProjectionIterator`, `SymbolicIterator`, `SpaceIterator`) and projections (`MixedProjection`, 
-`RawProjection`, `StateProjection`, `FnUpdateProjection`) are currently not supported. They
-will be in the future once we figure out how to include them concisely.
+`IterableVertices` are not exported because they are deprecated. For more info on iterators, 
+see below.
 
 <table>
     <thead>
@@ -1393,6 +1388,16 @@ will be in the future once we figure out how to include them concisely.
             <td><code>GraphVertices::hash</code></td>
             <td><code>VertexSet.__hash__</code></td>
         </tr>
+        <tr>
+            <td><code>GraphVertices::iter</code></td>
+            <td rowspan="3"><code>VertexSet.__iter__</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::into_iter</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::materialize</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Set operations</td></tr>
         <tr>
             <td><code>GraphVertices::approx_cardinality</code></td>
@@ -1446,11 +1451,14 @@ will be in the future once we figure out how to include them concisely.
             <td><code>GraphVertices::into_bdd</code></td>
         </tr>
         <tr>
-            <td><code>GraphVertices::copy</code></td>
-            <td></td>
+            <td><code>GraphVertices::state_projection</code></td>
+            <td rowspan="2"><code>VertexSet.items</code></td>
         </tr>
         <tr>
             <td><code>GraphVertices::raw_projection</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphVertices::copy</code></td>
             <td></td>
         </tr>
         <tr>
@@ -1462,23 +1470,7 @@ will be in the future once we figure out how to include them concisely.
             <td></td>
         </tr>
         <tr>
-            <td><code>GraphVertices::iter</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>GraphVertices::into_iter</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>GraphVertices::materialize</code></td>
-            <td></td>
-        </tr>
-        <tr>
             <td><code>GraphVertices::restrict_network_variable</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>GraphVertices::state_projection</code></td>
             <td></td>
         </tr>
     </tbody>
@@ -1648,6 +1640,89 @@ will be in the future once we figure out how to include them concisely.
         <tr>
             <td><code>GraphColoredVertices::state_projection</code></td>
             <td></td>
+        </tr>
+    </tbody>
+</table>
+
+## Symbolic iterators
+
+These classes replace the functionality of various symbolic iterators 
+(`GraphVertexIterator`, `FunctionTableIterator`, `OwnedRawSymbolicIterator`,
+`MixedProjectionIterator`, `RawSymbolicIterator`, `FnUpdateProjectionIterator`,
+`StateProjectionIterator`, `SymbolicIterator`, `SpaceIterator`) and projections (`MixedProjection`,
+`RawProjection`, `StateProjection`, `FnUpdateProjection`). They are simplified significantly
+compared to Rust because they support both normal and projected iteration simultaneously.
+The API is designed based on similar "model classes" that are provided e.g. by Z3.
+
+The new Python classes are designed to be instantiated exclusively from Rust and have only
+minimal API necessary to retrieve the relevant values. All model classes are `frozen`.
+
+### `_VertexModelIterator` and `VertexModel`
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>_VertexModelIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>_VertexModelIterator.__next__</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.__ctx__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.__len__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.__getitem__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.__contains__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.keys</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.values</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.items</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.to_dict</code></td>
         </tr>
     </tbody>
 </table>

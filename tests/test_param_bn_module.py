@@ -673,10 +673,10 @@ def test_asynchronous_graph():
     var_c = UpdateFunction.mk_var(bn, "c")
     assert graph.mk_update_function("a") == custom_ctx.mk_function("a", [var_c])
 
-    space_arg: dict[str, Literal[0,1]] = {"a": 0, "b": 1}
+    space_arg: dict[str, Literal[0, 1]] = {"a": 0, "b": 1}
     space = graph.mk_subspace(space_arg)
 
-    space_vertices_arg: dict[str, Literal[0,1]] = {"a": 0, "b": 1, "c": 1}
+    space_vertices_arg: dict[str, Literal[0, 1]] = {"a": 0, "b": 1, "c": 1}
     assert space.vertices() == graph.mk_subspace_vertices(space_vertices_arg)
 
     assert (graph.post(space) == graph.var_post("a", space)
@@ -705,3 +705,43 @@ def test_asynchronous_graph():
         assert graph.var_can_post(var, space) == can_post
         can_pre = graph.var_can_pre_out(var, space).union(graph.var_can_pre_within(var, space))
         assert graph.var_can_pre(var, space) == can_pre
+
+
+def test_symbolic_iterators():
+    bn = BooleanNetwork.from_aeon("""
+    a -> b
+    b -|? c
+    c -?? b
+    c -| a
+    $b: a & f(c)    
+    """)
+
+    graph = AsynchronousGraph(bn)
+
+    b_space: dict[str, Literal[0, 1]] = {'b': 1}
+    c_space: dict[str, Literal[0, 1]] = {'c': 1}
+    b_or_c = graph.mk_subspace_vertices(b_space).union(graph.mk_subspace_vertices(c_space))
+
+    for vertex in b_or_c:
+        assert vertex["b"] or vertex[VariableId(2)]
+        assert "a" in vertex
+        assert vertex.keys() == [VariableId(x) for x in range(3)]
+        assert vertex["b"] == vertex.values()[1]
+        assert vertex.items()[0] == (VariableId(0), vertex[VariableId(0)])
+        assert vertex.to_dict() == dict(vertex.items())
+
+    assert sum(1 for _ in b_or_c) == 6
+
+    for vertex in b_or_c.items(["b", "c"]):
+        assert vertex["b"] or vertex["c"]
+        assert "a" not in vertex
+        with pytest.raises(IndexError):
+            assert vertex["a"]
+        assert vertex.keys() == [VariableId(1), VariableId(2)]
+        assert vertex["b"] == vertex.values()[0]
+        assert vertex.items()[1] == (VariableId(2), vertex[VariableId(2)])
+        assert vertex.to_dict() == dict(vertex.items())
+
+    assert sum(1 for _ in b_or_c.items(["b", "c"])) == 3
+
+    assert str(next(iter(b_or_c))) == "VertexModel({'a': 0, 'b': 0, 'c': 1})"
