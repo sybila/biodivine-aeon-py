@@ -745,3 +745,91 @@ def test_symbolic_iterators():
     assert sum(1 for _ in b_or_c.items(["b", "c"])) == 3
 
     assert str(next(iter(b_or_c))) == "VertexModel({'a': 0, 'b': 0, 'c': 1})"
+
+    unit_colors = graph.mk_unit_colors()
+
+    f_expr = [str(i["f"]) for i in unit_colors.items(["f"])]
+    assert set(f_expr) == {"true", "x_0", "!x_0"}
+
+    a_expr = [str(i["a"]) for i in unit_colors.items(["a"])]
+    assert set(a_expr) == {"!x_0"}
+
+    c_expr = [str(i["c"]) for i in unit_colors.items(["c"])]
+    assert set(c_expr) == {"true", "false", "!x_0"}
+
+    assert sum(1 for _ in unit_colors) == unit_colors.cardinality()
+
+    for i in unit_colors:
+        i_bn = i.instantiate(bn)
+        assert i_bn.variable_count() == bn.variable_count()
+        assert i_bn.regulation_count() == bn.regulation_count()
+        assert i_bn.implicit_parameter_count() == 0 and i_bn.explicit_parameter_count() == 0
+
+        fn_b = bn.get_update_function("b")
+        assert fn_b is not None
+        fn_b = i.instantiate(fn_b)
+        assert str(fn_b) in {"a", "a & c", "a & !c"}
+
+        fn_c_in_a = i.instantiate("c", ["a"])
+        assert str(fn_c_in_a) in {"true", "false", "!a"}
+        fn_c_in_b = i.instantiate("c", ["b"])
+        assert str(fn_c_in_b) in {"true", "false", "!b"}
+
+    # This is basically a mix of tests for ColorSet and VertexSet
+
+    unit_colored_set = graph.mk_unit_colored_vertices()
+
+    f_expr = [str(i["f"]) for (i, _) in unit_colored_set.items(retained_functions=["f"])]
+    assert set(f_expr) == {"true", "x_0", "!x_0"}
+
+    a_expr = [str(i["a"]) for (i, _) in unit_colored_set.items(retained_functions=["a"])]
+    assert set(a_expr) == {"!x_0"}
+
+    c_expr = [str(i["c"]) for (i, _) in unit_colored_set.items(retained_functions=["c"])]
+    assert set(c_expr) == {"true", "false", "!x_0"}
+
+    a_vals = [v["a"] for (_, v) in unit_colored_set.items(retained_variables=["a"])]
+    assert set(a_vals) == {True, False}
+
+    assert sum(1 for _ in unit_colored_set) == unit_colored_set.cardinality()
+
+    for (i, v) in unit_colored_set:
+        assert len(v) == 3
+
+        i_bn = i.instantiate(bn)
+        assert i_bn.variable_count() == bn.variable_count()
+        assert i_bn.regulation_count() == bn.regulation_count()
+        assert i_bn.implicit_parameter_count() == 0 and i_bn.explicit_parameter_count() == 0
+
+        fn_b = bn.get_update_function("b")
+        assert fn_b is not None
+        fn_b = i.instantiate(fn_b)
+        assert str(fn_b) in {"a", "a & c", "a & !c"}
+
+        fn_c_in_a = i.instantiate("c", ["a"])
+        assert str(fn_c_in_a) in {"true", "false", "!a"}
+        fn_c_in_b = i.instantiate("c", ["b"])
+        assert str(fn_c_in_b) in {"true", "false", "!b"}
+
+    b_or_c_space = graph.mk_subspace(b_space).union(graph.mk_subspace(c_space))
+
+    for (i, v) in b_or_c_space.items(retained_variables=["b", "c"], retained_functions=["f"]):
+        assert "c" not in i
+        assert "a" not in i
+        assert "a" not in v
+        assert "b" in v
+        assert "c" in v
+
+        assert v["b"] or v["c"]
+        with pytest.raises(IndexError):
+            assert v["a"]
+
+        assert v.keys() == [VariableId(1), VariableId(2)]
+        assert v["b"] == v.values()[0]
+        assert v.items()[1] == (VariableId(2), v[VariableId(2)])
+        assert v.to_dict() == dict(v.items())
+
+        fn_b = bn.get_update_function("b")
+        assert fn_b is not None
+        fn_b = i.instantiate(fn_b)
+        assert str(fn_b) in {"a", "a & c", "a & !c"}

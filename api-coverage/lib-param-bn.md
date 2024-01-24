@@ -1509,6 +1509,10 @@ see below.
             <td><code>GraphColoredVertices::hash</code></td>
             <td><code>ColoredVertexSet.__hash__</code></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredVertexSet.__iter__</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Set operations</td></tr>
         <tr>
             <td><code>GraphColoredVertices::approx_cardinality</code></td>
@@ -1603,15 +1607,16 @@ see below.
         </tr>
         <tr>
             <td><code>GraphColoredVertices::fn_update_projection</code></td>
-            <td></td>
+            <td rowspan="4"><code>ColoredVertexSet.items</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::state_projection</code></td> 
         </tr>
         <tr>
             <td><code>GraphColoredVertices::raw_projection</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>GraphColoredVertices::mixed_projection</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>GraphColoredVertices::to_dot_string</code></td>
@@ -1622,23 +1627,7 @@ see below.
             <td></td>
         </tr>
         <tr>
-            <td><code>GraphColoredVertices::iter</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>GraphColoredVertices::into_iter</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>GraphColoredVertices::materialize</code></td>
-            <td></td>
-        </tr>
-        <tr>
             <td><code>GraphColoredVertices::restrict_network_variable</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>GraphColoredVertices::state_projection</code></td>
             <td></td>
         </tr>
     </tbody>
@@ -1723,6 +1712,110 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         <tr>
             <td></td>
             <td><code>VertexModel.to_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.to_valuation</code></td>
+        </tr>
+    </tbody>
+</table>
+
+### `_ColorModelIterator` and `ColorModel`
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>_ColorModelIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>_ColorModelIterator.__next__</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.__ctx__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.__len__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.__getitem__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.__contains__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.keys</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.values</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.items</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.to_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.to_valuation</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.instantiate</code></td>
+        </tr>
+    </tbody>
+</table>
+
+#### `_ColorVertexModelIterator`
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>_ColorVertexModelIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>_ColorVertexModelIterator.__next__</code></td>
         </tr>
     </tbody>
 </table>

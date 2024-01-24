@@ -1,7 +1,7 @@
 pub mod asynchronous_graph;
-pub mod color_set;
-pub mod colored_vertex_set;
+pub mod model_color;
+pub mod model_vertex;
+pub mod set_color;
+pub mod set_colored_vertex;
+pub mod set_vertex;
 pub mod symbolic_context;
-pub mod vertex_set;
-
-pub mod vertex_model;

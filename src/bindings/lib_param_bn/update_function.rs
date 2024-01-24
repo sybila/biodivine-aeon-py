@@ -91,7 +91,7 @@ impl UpdateFunction {
     }
 
     /// A reference to the underlying `BooleanNetwork` that serves as a context for this `UpdateFunction`.
-    fn __ctx__(&self) -> Py<BooleanNetwork> {
+    pub fn __ctx__(&self) -> Py<BooleanNetwork> {
         self.ctx.clone()
     }
 

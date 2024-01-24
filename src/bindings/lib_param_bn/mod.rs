@@ -19,11 +19,14 @@ pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<model_annotation::ModelAnnotationRoot>()?;
     module.add_class::<model_annotation::ModelAnnotation>()?;
     module.add_class::<symbolic::symbolic_context::SymbolicContext>()?;
-    module.add_class::<symbolic::vertex_set::VertexSet>()?;
-    module.add_class::<symbolic::vertex_set::_VertexModelIterator>()?;
-    module.add_class::<symbolic::vertex_model::VertexModel>()?;
-    module.add_class::<symbolic::color_set::ColorSet>()?;
-    module.add_class::<symbolic::colored_vertex_set::ColoredVertexSet>()?;
+    module.add_class::<symbolic::set_vertex::VertexSet>()?;
+    module.add_class::<symbolic::set_vertex::_VertexModelIterator>()?;
+    module.add_class::<symbolic::model_vertex::VertexModel>()?;
+    module.add_class::<symbolic::set_color::ColorSet>()?;
+    module.add_class::<symbolic::set_color::_ColorModelIterator>()?;
+    module.add_class::<symbolic::model_color::ColorModel>()?;
+    module.add_class::<symbolic::set_colored_vertex::ColoredVertexSet>()?;
+    module.add_class::<symbolic::set_colored_vertex::_ColorVertexModelIterator>()?;
     module.add_class::<symbolic::asynchronous_graph::AsynchronousGraph>()?;
     Ok(())
 }

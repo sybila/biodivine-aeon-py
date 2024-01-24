@@ -1,9 +1,9 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
-use crate::bindings::lib_param_bn::symbolic::color_set::ColorSet;
-use crate::bindings::lib_param_bn::symbolic::colored_vertex_set::ColoredVertexSet;
+use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::symbolic::vertex_set::VertexSet;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::pyo3_utils::resolve_boolean;
 use crate::{throw_runtime_error, throw_type_error, AsNative};

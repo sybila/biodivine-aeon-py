@@ -1,14 +1,21 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::symbolic::color_set::ColorSet;
+use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
+use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
+use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
+use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::symbolic::vertex_set::VertexSet;
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
+    OwnedRawSymbolicIterator, RawProjection,
+};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
+use either::Either;
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use pyo3::types::PyList;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
@@ -24,6 +31,15 @@ use std::ops::Not;
 pub struct ColoredVertexSet {
     ctx: Py<SymbolicContext>,
     native: GraphColoredVertices,
+}
+
+/// An internal class that allows iterating over pairs of `ColorModel` and `VertexModel` instances.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _ColorVertexModelIterator {
+    ctx: Py<SymbolicContext>,
+    native: OwnedRawSymbolicIterator,
+    retained_explicit: Vec<biodivine_lib_param_bn::ParameterId>,
+    retained_implicit: Vec<biodivine_lib_param_bn::VariableId>,
 }
 
 impl AsNative<GraphColoredVertices> for ColoredVertexSet {
@@ -89,6 +105,10 @@ impl ColoredVertexSet {
         let mut hasher = DefaultHasher::new();
         self.as_native().hash(&mut hasher);
         hasher.finish()
+    }
+
+    fn __iter__(&self) -> PyResult<_ColorVertexModelIterator> {
+        self.items(None, None)
     }
 
     /// Returns the number of vertex-color pairs that are represented in this set.
@@ -199,6 +219,85 @@ impl ColoredVertexSet {
         let ctx = self.ctx.borrow(py);
         Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
     }
+
+    /// Returns an iterator over all interpretation-vertex pairs in this `ColoredVertexSet` relation, with an optional
+    /// projection to a subset of network variables and uninterpreted functions.
+    ///
+    /// When no `retained` collections are specified, this is equivalent to `ColoredVertexSet.__iter__`. However, if
+    /// a retained collection is given, the resulting iterator only considers unique combinations of the `retained`
+    /// functions and variables. Consequently, the resulting `ColorModel` and `VertexModel` instances will fail with
+    /// an `IndexError` if a value outside of the `retained` set is requested.
+    ///
+    /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is equivalent to
+    /// `set.colors().items()`. Similarly, with `retained_variables = None` and `retained_functions = []`, this is
+    /// equivalent to `set.vertices().items()`.
+    #[pyo3(signature = (retained_variables = None, retained_functions = None))]
+    fn items(
+        &self,
+        retained_variables: Option<&PyList>,
+        retained_functions: Option<&PyList>,
+    ) -> PyResult<_ColorVertexModelIterator> {
+        let ctx = self.ctx.get();
+        // First, extract all functions that should be retained (see also ColorSet.items).
+        let mut retained_explicit = Vec::new();
+        let mut retained_implicit = Vec::new();
+        let mut retained_functions = if let Some(retained) = retained_functions {
+            let mut result = Vec::new();
+            for x in retained {
+                let function = ctx.resolve_function(x)?;
+                let table = match function {
+                    Either::Left(x) => {
+                        if retained_implicit.contains(&x) {
+                            continue;
+                        }
+                        retained_implicit.push(x);
+                        ctx.as_native().get_implicit_function_table(x).unwrap()
+                    }
+                    Either::Right(x) => {
+                        if retained_explicit.contains(&x) {
+                            continue;
+                        }
+                        retained_explicit.push(x);
+                        ctx.as_native().get_explicit_function_table(x)
+                    }
+                };
+                result.append(&mut table.symbolic_variables().clone());
+            }
+            result
+        } else {
+            retained_explicit.append(&mut ctx.as_native().network_parameters().collect::<Vec<_>>());
+            retained_implicit.append(&mut ctx.as_native().network_implicit_parameters());
+            self.ctx.get().as_native().parameter_variables().clone()
+        };
+        retained_explicit.sort();
+        retained_implicit.sort();
+
+        // Then add all retained network variables (see also VertexSet.items).
+        let mut retained_variables = if let Some(retained) = retained_variables {
+            retained
+                .iter()
+                .map(|it| {
+                    ctx.resolve_network_variable(it)
+                        .map(|it| ctx.as_native().get_state_variable(it))
+                })
+                .collect::<PyResult<Vec<_>>>()?
+        } else {
+            self.ctx.get().as_native().state_variables().clone()
+        };
+
+        let mut retained = Vec::new();
+        retained.append(&mut retained_functions);
+        retained.append(&mut retained_variables);
+        retained.sort();
+
+        let projection = RawProjection::new(retained, self.as_native().as_bdd());
+        Ok(_ColorVertexModelIterator {
+            ctx: self.ctx.clone(),
+            native: projection.into_iter(),
+            retained_implicit,
+            retained_explicit,
+        })
+    }
 }
 
 impl ColoredVertexSet {
@@ -221,5 +320,25 @@ impl ColoredVertexSet {
         }
 
         RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+    }
+}
+
+#[pymethods]
+impl _ColorVertexModelIterator {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    fn __next__(&mut self) -> Option<(ColorModel, VertexModel)> {
+        self.native.next().map(|it| {
+            let color = ColorModel::new_native(
+                self.ctx.clone(),
+                it.clone(),
+                self.retained_implicit.clone(),
+                self.retained_explicit.clone(),
+            );
+            let vertex = VertexModel::new_native(self.ctx.clone(), it);
+            (color, vertex)
+        })
     }
 }

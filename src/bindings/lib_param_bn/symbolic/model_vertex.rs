@@ -1,7 +1,7 @@
+use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::{index_error, AsNative};
-use biodivine_lib_bdd::BddPartialValuation;
 use pyo3::{pyclass, pymethods, Py, PyAny, PyResult};
 use std::collections::HashMap;
 
@@ -14,7 +14,7 @@ use std::collections::HashMap;
 #[derive(Clone)]
 pub struct VertexModel {
     ctx: Py<SymbolicContext>,
-    native: BddPartialValuation,
+    native: biodivine_lib_bdd::BddPartialValuation,
 }
 
 #[pymethods]
@@ -26,7 +26,6 @@ impl VertexModel {
 
     pub fn __str__(&self) -> String {
         let items = self
-            .native
             .to_values()
             .into_iter()
             .map(|(var, value)| {
@@ -40,7 +39,7 @@ impl VertexModel {
 
     /// The number of actual values in this `VertexModel` (i.e. retained network variables).
     pub fn __len__(&self) -> usize {
-        usize::from(self.native.cardinality())
+        self.to_values().len()
     }
 
     pub fn __getitem__(&self, key: &PyAny) -> PyResult<bool> {
@@ -67,7 +66,7 @@ impl VertexModel {
     /// This is the list of all network variables if no projection was applied.
     pub fn keys(&self) -> Vec<VariableId> {
         let ctx = self.ctx.get();
-        let values = self.native.to_values();
+        let values = self.to_values();
         values
             .into_iter()
             .map(|(it, _)| VariableId::from(ctx.as_native().find_state_variable(it).unwrap()))
@@ -76,14 +75,14 @@ impl VertexModel {
 
     /// The list of values for individual variables from `VertexModel.keys`.
     pub fn values(&self) -> Vec<bool> {
-        let values = self.native.to_values();
+        let values = self.to_values();
         values.into_iter().map(|(_, it)| it).collect()
     }
 
     /// The list of key-value pairs represented in this model.
     pub fn items(&self) -> Vec<(VariableId, bool)> {
         let ctx = self.ctx.get();
-        let values = self.native.to_values();
+        let values = self.to_values();
         values
             .into_iter()
             .map(|(k, v)| {
@@ -96,7 +95,7 @@ impl VertexModel {
     /// The same as `VertexModel.items`, but returns a dictionary instead.
     pub fn to_dict(&self) -> HashMap<VariableId, bool> {
         let ctx = self.ctx.get();
-        let values = self.native.to_values();
+        let values = self.to_values();
         values
             .into_iter()
             .map(|(k, v)| {
@@ -105,10 +104,29 @@ impl VertexModel {
             })
             .collect()
     }
+
+    /// Return the underlying `BddPartialValuation` for this symbolic model.
+    pub fn to_valuation(&self) -> BddPartialValuation {
+        BddPartialValuation::new_raw(self.ctx.get().bdd_variable_set(), self.native.clone())
+    }
 }
 
 impl VertexModel {
-    pub fn new_native(ctx: Py<SymbolicContext>, native: BddPartialValuation) -> VertexModel {
+    pub fn new_native(
+        ctx: Py<SymbolicContext>,
+        native: biodivine_lib_bdd::BddPartialValuation,
+    ) -> VertexModel {
         VertexModel { ctx, native }
+    }
+
+    fn to_values(&self) -> Vec<(biodivine_lib_bdd::BddVariable, bool)> {
+        // Only return state variables:
+        let mut result = Vec::new();
+        for var in self.ctx.get().as_native().state_variables() {
+            if let Some(value) = self.native.get_value(*var) {
+                result.push((*var, value))
+            }
+        }
+        result
     }
 }

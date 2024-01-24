@@ -63,7 +63,7 @@ impl BooleanExpression {
         richcmp_eq_by_key(py, op, &self, &other, |it| it.as_native())
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         self.as_native().to_string()
     }
 
@@ -160,6 +160,52 @@ impl BooleanExpression {
             Box::new(left.as_native().clone()),
             Box::new(right.as_native().clone()),
         ))
+    }
+
+    /// Build an expression which is equivalent to the conjunction of the given items.
+    #[staticmethod]
+    pub fn mk_conjunction(items: Vec<BooleanExpression>) -> BooleanExpression {
+        fn rec(items: &[BooleanExpression]) -> BooleanExpression {
+            if items.is_empty() {
+                // Empty conjunction is `true`.
+                return BooleanExpression::from_native(RsBooleanExpression::Const(true));
+            }
+            if items.len() == 1 {
+                return items[0].clone();
+            }
+            if items.len() == 2 {
+                return BooleanExpression::mk_and(&items[0], &items[1]);
+            }
+
+            let first = items.first().unwrap();
+            let rest = rec(&items[1..]);
+            BooleanExpression::mk_and(first, &rest)
+        }
+
+        rec(&items)
+    }
+
+    /// Build an expression which is equivalent to the disjunction of the given items.
+    #[staticmethod]
+    pub fn mk_disjunction(items: Vec<BooleanExpression>) -> BooleanExpression {
+        fn rec(items: &[BooleanExpression]) -> BooleanExpression {
+            if items.is_empty() {
+                // Empty disjunction is `false`.
+                return BooleanExpression::from_native(RsBooleanExpression::Const(false));
+            }
+            if items.len() == 1 {
+                return items[0].clone();
+            }
+            if items.len() == 2 {
+                return BooleanExpression::mk_or(&items[0], &items[1]);
+            }
+
+            let first = items.first().unwrap();
+            let rest = rec(&items[1..]);
+            BooleanExpression::mk_or(first, &rest)
+        }
+
+        rec(&items)
     }
 
     /// Return true if the root of this expression is a constant.

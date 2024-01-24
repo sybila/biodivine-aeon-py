@@ -7,6 +7,7 @@ use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{index_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
+use biodivine_lib_param_bn::FnUpdate;
 use either::{Either, Left, Right};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -656,6 +657,13 @@ impl SymbolicContext {
         if let Ok(function) = function.extract::<UpdateFunction>() {
             return Ok(self.as_native().mk_fn_update_true(function.as_native()));
         }
+        if let Ok(function) = function.extract::<&str>() {
+            let fake_network = self.mk_fake_network();
+            return match FnUpdate::try_from_str(function, &fake_network) {
+                Ok(update) => Ok(self.as_native().mk_fn_update_true(&update)),
+                Err(e) => throw_runtime_error(format!("Cannot parse function: {}", e)),
+            };
+        }
         throw_type_error("Expected `Bdd` or `UpdateFunction`.")
     }
 
@@ -748,5 +756,52 @@ impl SymbolicContext {
                 .ok_or_else(|| index_error(format!("Unknown variable name `{}`.", name)));
         }
         throw_type_error("Expected `VariableId`, `BddVariable` or `str`.")
+    }
+
+    /// Create a network that contains all relevant variables and parameters, but no regulations or update
+    /// functions. I.e. all the information that is available in a symbolic context.
+    ///
+    /// Note that this does not preserve extra symbolic variables in any way.
+    ///
+    /// This is mostly used for functions that *need* the network, but won't actually use it for anything
+    /// other than name and arity resolution.
+    pub fn mk_fake_network(&self) -> biodivine_lib_param_bn::BooleanNetwork {
+        let mut rg = biodivine_lib_param_bn::RegulatoryGraph::new(self.network_variable_names());
+        // We have to make fake regulations to preserve the arity of the implicit parameters.
+        // It does not really matter what regulations we create here, just make sure they are there.
+        for target in self.as_native().network_implicit_parameters() {
+            let arity = self
+                .as_native()
+                .get_network_implicit_parameter_arity(target);
+            for regulator in rg.variables().take(arity as usize) {
+                rg.add_regulation(
+                    self.as_native()
+                        .get_network_variable_name(regulator)
+                        .as_str(),
+                    self.as_native().get_network_variable_name(target).as_str(),
+                    false,
+                    None,
+                )
+                .unwrap();
+            }
+        }
+        let mut bn = biodivine_lib_param_bn::BooleanNetwork::new(rg);
+        // Copy explicit parameters.
+        for param in self.as_native().network_parameters() {
+            let arity = self.as_native().get_network_parameter_arity(param);
+            bn.add_parameter(
+                self.as_native().get_network_parameter_name(param).as_str(),
+                arity as u32,
+            )
+            .unwrap();
+        }
+        // Add explicit functions for variables that don't have implicit parameters.
+        for var in bn.variables() {
+            if self.as_native().get_implicit_function_table(var).is_none() {
+                bn.set_update_function(var, Some(FnUpdate::Const(false)))
+                    .unwrap();
+            }
+        }
+        bn
     }
 }

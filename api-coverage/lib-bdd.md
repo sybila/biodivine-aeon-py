@@ -1043,6 +1043,14 @@ added a bunch of utility methods similar to how `FnUpdate` is expected to work.
             <td><code>BooleanExpression::Xor</code></td>
             <td><code>BooleanExpression.mk_xor</code></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.mk_conjunction</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.mk_disjunction</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Pattern tests</td></tr>
         <tr>
             <td></td>
