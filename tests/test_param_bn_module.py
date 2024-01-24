@@ -219,11 +219,11 @@ def test_boolean_network_inheritence():
     assert bn1e.drop(['d', 'e']) == bn1
 
     # For inlining, the results are actually different compared to normal regulatory graph, because inlining
-    # can introduce inlined variables as parameters and give names to anonymous functions. Hence we only compare
+    # can introduce inlined variables as parameters and give names to anonymous functions. Hence, we only compare
     # the RG here.
-    assert bn1e.inline_variable('d').inline_variable('e').as_graph() == bn1.as_graph()
+    assert bn1e.inline_variable('d').inline_variable('e').to_graph() == bn1.to_graph()
     # Keep in mind that rg1 is now extended with 'a -| c'
-    assert bn1.inline_variable('c').as_graph() == BooleanNetwork(None, ["a -> b", "b -?? a", "a -? a"]).as_graph()
+    assert bn1.inline_variable('c').to_graph() == BooleanNetwork(None, ["a -> b", "b -?? a", "a -? a"]).to_graph()
 
     assert bn1.predecessors('c') == {VariableId(0), VariableId(1)}
     assert bn1.successors('a') == {VariableId(1), VariableId(2)}
@@ -314,7 +314,7 @@ def test_boolean_network():
         [None, "f_c(a | f(c))"]
     )
 
-    assert bn1.as_graph() == RegulatoryGraph(regulations=["a -> b", "b -?? c", "c -|? b"])
+    assert bn1.to_graph() == RegulatoryGraph(regulations=["a -> b", "b -?? c", "c -|? b"])
 
     assert bn1.explicit_parameter_count() == 1
     assert bn1.implicit_parameter_count() == 2

@@ -520,7 +520,7 @@ we export trivial iterators as lists.
         <tr><td colspan="2" align="center">Conversions</td></tr>
         <tr>
             <td><code>BooleanNetwork::as_graph</code></td>
-            <td><code>BooleanNetwork.as_graph</code></td>
+            <td><code>BooleanNetwork.to_graph</code></td>
         </tr>
         <tr>
             <td><code>BooleanNetwork::as_graph_mut</code></td>

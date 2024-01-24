@@ -472,7 +472,7 @@ impl BooleanNetwork {
 
     /// Return *a copy* of the underlying `RegulatoryGraph` for this `BooleanNetwork`.
     #[allow(clippy::wrong_self_convention)]
-    pub fn as_graph(self_: PyRef<'_, Self>) -> RegulatoryGraph {
+    pub fn to_graph(self_: PyRef<'_, Self>) -> RegulatoryGraph {
         self_.as_ref().clone()
     }
 
