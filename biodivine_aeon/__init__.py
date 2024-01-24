@@ -118,7 +118,7 @@ A `BooleanExpression` can be typically also substituted with its "raw" string re
 requires the expression to be repeatedly parsed whenever used and is thus slower and more error prone.
 """
 
-IDT = TypeVar('IDT')
+IDT = TypeVar('IDT', covariant=True)
 
 
 class Regulation(TypedDict, Generic[IDT]):
