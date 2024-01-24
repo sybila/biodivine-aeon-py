@@ -1,4 +1,4 @@
-from typing import TypeAlias, Literal, Callable, Sequence, TypedDict, NotRequired, Iterable, Iterator, overload
+from typing import TypeAlias, Literal, Callable, Sequence, TypedDict, Iterator, overload, Mapping, TypeVar, Generic
 
 LOG_NOTHING: Literal[0]
 LOG_ESSENTIAL: Literal[1]
@@ -79,7 +79,7 @@ class BddPointer:
         ...
 
 class BddVariableSetBuilder:
-    def __init__(self, variables: list[str] | None = None) -> None:
+    def __init__(self, variables: Sequence[str] | None = None) -> None:
         """
         Create a new `BddVariableSetBuilder`, optionally initialized with the given list of variables.
         """
@@ -99,14 +99,14 @@ class BddVariableSetBuilder:
         ...
     def add(self, name: str) -> BddVariable:
         ...
-    def add_all(self, names: list[str]) -> list[BddVariable]:
+    def add_all(self, names: Sequence[str]) -> list[BddVariable]:
         ...
     def build(self) -> BddVariableSet:
         ...
 
 
 class BddVariableSet:
-    def __init__(self, variables: int | list[str]) -> None:
+    def __init__(self, variables: int | Sequence[str]) -> None:
         """
         A `BddVariableSet` is typically created using a list of variable names. However, you can also create
         an "anonymous" `BddVariableSet` using a variable count `n`. In such a case, the variables are automatically
@@ -150,9 +150,9 @@ class BddVariableSet:
         ...
     def mk_dnf(self, clauses: Sequence[BoolClauseType]) -> Bdd:
         ...
-    def mk_sat_exactly_k(self, k: int, variables: list[BddVariableType] | None) -> Bdd:
+    def mk_sat_exactly_k(self, k: int, variables: Sequence[BddVariableType] | None = None) -> Bdd:
         ...
-    def mk_sat_up_to_k(self, k: int, variables: list[BddVariableType] | None) -> Bdd:
+    def mk_sat_up_to_k(self, k: int, variables: Sequence[BddVariableType] | None = None) -> Bdd:
         ...
     def eval_expression(self, expression: BoolExpressionType) -> Bdd:
         ...
@@ -161,16 +161,18 @@ class BddVariableSet:
 
 
 class Bdd:
-    def __init__(self,
-         ctx: Bdd | BddValuation | BddPartialValuation | BddVariableSet,
-         data: None | bytes | str = None
-    ) -> None:
+    @overload
+    def __init__(self, valuation: BddValuation | BddPartialValuation) -> None: ...
+    @overload
+    def __init__(self, ctx: BddVariableSet, data: bytes | str) -> None: ...
+    def __init__(self, ctx, data) -> None:
         """
         A `Bdd` can be created as:
-         - A copy of a different `Bdd`.
+
          - A conjunction of literals defined by a `BddValuation` or a `BddPartialValuation`.
-         - Deserialization of a string created with `Bdd.data_string()`.
-         - Deserialization of bytes created with `Bdd.data_bytes()`.
+         - Deserialization of an object created with `Bdd.data_string()` or `Bdd.data_bytes()`.
+
+        When deserializing, a `BddVariableSet` has to be provided to interpret individual BDD variables.
         """
     def __eq__(self, other) -> bool:
         ...
@@ -298,7 +300,7 @@ class Bdd:
     def apply_nested(
         left: Bdd,
         right: Bdd,
-        variables: list[BddVariableType],
+        variables: Sequence[BddVariableType],
         outer_function: Callable[[None | bool, None | bool], None | bool],
         inner_function: Callable[[None | bool, None | bool], None | bool],
     ) -> Bdd:
@@ -307,7 +309,7 @@ class Bdd:
     def apply_with_exists(
             left: Bdd,
             right: Bdd,
-            variables: list[BddVariableType],
+            variables: Sequence[BddVariableType],
             function: Callable[[None | bool, None | bool], None | bool],
     ) -> Bdd:
         ...
@@ -315,17 +317,17 @@ class Bdd:
     def apply_with_for_all(
             left: Bdd,
             right: Bdd,
-            variables: list[BddVariableType],
+            variables: Sequence[BddVariableType],
             function: Callable[[None | bool, None | bool], None | bool],
     ) -> Bdd:
         ...
-    def r_pick(self, variables: BddVariableType | list[BddVariableType]) -> Bdd:
+    def r_pick(self, variables: BddVariableType | Sequence[BddVariableType]) -> Bdd:
         ...
-    def r_pick_random(self, variables: BddVariableType | list[BddVariableType], seed: int | None = None) -> Bdd:
+    def r_pick_random(self, variables: BddVariableType | Sequence[BddVariableType], seed: int | None = None) -> Bdd:
         ...
-    def r_exist(self, variables: BddVariableType | list[BddVariableType]) -> Bdd:
+    def r_exist(self, variables: BddVariableType | Sequence[BddVariableType]) -> Bdd:
         ...
-    def r_for_all(self, variables: BddVariableType | list[BddVariableType]) -> Bdd:
+    def r_for_all(self, variables: BddVariableType | Sequence[BddVariableType]) -> Bdd:
         ...
     def r_restrict(self, values: BoolClauseType) -> Bdd:
         ...
@@ -343,7 +345,7 @@ class Bdd:
         ...
     def valuation_most_negative(self) -> BddValuation | None:
         ...
-    def valuation_iterator(self) -> BddValuationIterator:
+    def valuation_iterator(self) -> Iterator[BddValuation]:
         ...
     def clause_first(self) -> BddPartialValuation | None:
         ...
@@ -353,44 +355,24 @@ class Bdd:
         ...
     def clause_necessary(self) -> BddPartialValuation | None:
         ...
-    def clause_iterator(self) -> BddClauseIterator:
+    def clause_iterator(self) -> Iterator[BddPartialValuation]:
         ...
     def substitute(self, variable: BddVariableType, function: Bdd) -> Bdd:
         ...
-    def rename(self, replace_with: list[tuple[BddVariableType, BddVariableType]]) -> Bdd:
-        ...
-
-class BddValuationIterator:
-    def __init__(self, bdd: Bdd) -> None:
-        """
-        Create a new iterator over all satisfying `BddValuation` objects of a `Bdd`.
-        """
-    def __iter__(self) -> BddValuationIterator:
-        ...
-    def __next__(self) -> BddValuation:
-        ...
-
-class BddClauseIterator:
-    def __init__(self, bdd: Bdd) -> None:
-        """
-        Create a new iterator over all DNF clauses (i.e. `BddPartialValuation` objects) of a `Bdd`.
-        """
-    def __iter__(self) -> BddClauseIterator:
-        ...
-    def __next__(self) -> BddPartialValuation:
+    def rename(self, replace_with: Sequence[tuple[BddVariableType, BddVariableType]]) -> Bdd:
         ...
 
 class BddPartialValuation:
-    def __init__(self,
-        ctx: BddValuation | BddPartialValuation | BddVariableSet,
-        values: None | dict[BddVariableType, BoolType] = None
-    ) -> None:
+    @overload
+    def __init__(self, valuation: BddValuation | BddPartialValuation): ...
+    @overload
+    def __init__(self, ctx: BddVariableSet, values: Mapping[BddVariable, BoolType] | Mapping[str, BoolType]): ...
+    def __init__(self, ctx, values) -> None:
         """
         A `BddPartialValuation` can be created as:
-         - A copy of a `BddValuation`.
-         - A copy of a `BddPartialValuation`.
-         - From a `BddVariableSet` "context" and a `dict[BddVariableType, BoolType]` dictionary, assuming the
-         dictionary only contains variables that are valid in the provided context.
+         - A copy of data from a `BddValuation` or a `BddPartialValuation`.
+         - From a `BddVariableSet` "context" and a `BddVariableType -> BoolType` mapping, assuming the
+           mapping only contains variables that are valid in the provided context.
         """
     def __eq__(self, other) -> bool:
         ...
@@ -430,16 +412,16 @@ class BddPartialValuation:
         ...
 
 class BddValuation:
-    def __init__(self,
-         ctx: BddValuation | BddPartialValuation | BddVariableSet,
-         values: None | list[BoolType] = None,
-    ) -> None:
+    @overload
+    def __init__(self, valuation: BddValuation | BddPartialValuation): ...
+    @overload
+    def __init__(self, ctx: BddVariableSet, values: Sequence[BoolType] | None = None): ...
+    def __init__(self, ctx, values) -> None:
         """
         A `BddValuation` can be created as:
          - A copy of a different `BddValuation`.
-         - A copy of a `BddPartialValuation`, assuming it specifies the
-           values of all relevant variables.
-         - From a list of `BoolType` values, as long as its length is exactly
+         - A copy of a `BddPartialValuation`, assuming it specifies the values of all relevant variables.
+         - From a list of `BoolType` values and a `BddVariableSet` context, as long as its length is exactly
            the variable count.
         """
     def __hash__(self) -> int:
@@ -492,13 +474,15 @@ class BooleanExpression:
         ...
     def __root__(self) -> BooleanExpression:
         ...
-    def __call__(self,
-                 valuation: None | dict[str, int] | dict[str, bool] = None,
-                 **kwargs: int | bool
-    ) -> bool:
-        ...
+    @overload
+    def __call__(self) -> bool: ...
+    @overload
+    def __call__(self, valuation: Mapping[str, BoolType]) -> bool: ...
+    @overload
+    def __call__(self, **kwargs: BoolType) -> bool: ...
+    def __call__(self) -> bool: ...
     @staticmethod
-    def mk_const(value: bool | int) -> BooleanExpression:
+    def mk_const(value: BoolType) -> BooleanExpression:
         ...
     @staticmethod
     def mk_var(name: str) -> BooleanExpression:
@@ -522,9 +506,9 @@ class BooleanExpression:
     def mk_xor(left: BooleanExpression, right: BooleanExpression) -> BooleanExpression:
         ...
     @staticmethod
-    def mk_conjunction(items: list[BooleanExpression]) -> BooleanExpression: ...
+    def mk_conjunction(items: Sequence[BooleanExpression]) -> BooleanExpression: ...
     @staticmethod
-    def mk_disjunction(items: list[BooleanExpression]) -> BooleanExpression: ...
+    def mk_disjunction(items: Sequence[BooleanExpression]) -> BooleanExpression: ...
     def is_const(self) -> bool:
         ...
     def is_var(self) -> bool:
@@ -626,12 +610,13 @@ class ParameterId:
 
 class RegulatoryGraph:
     def __init__(self,
-                 variables: None | list[str] = None,
-                 regulations: None | list[NamedRegulation] | list[str] = None
+                 variables: Sequence[str] | None = None,
+                 regulations: Sequence[Regulation[str] | str] | None = None
     ) -> None:
         """
         A `RegulatoryGraph` can be constructed from two optional arguments:
-         - A list of variable names. If this list is not given, it is inferred from the list of regulations.
+         - A list of variable names. If this list is not given, it is inferred from the list of regulations (inferred
+           variables are sorted alphabetically).
          - A list of regulations. These can be either `NamedRegulation` dictionaries, or string objects compatible
            with the `.aeon` format notation.
 
@@ -676,21 +661,21 @@ class RegulatoryGraph:
         ...
     def regulation_count(self) -> int:
         ...
-    def regulations(self) -> list[IdRegulation]:
+    def regulations(self) -> list[Regulation[VariableId]]:
         ...
     def regulation_strings(self) -> list[str]:
         ...
-    def find_regulation(self, source: VariableIdType, target: VariableIdType) -> None | IdRegulation:
+    def find_regulation(self, source: VariableIdType, target: VariableIdType) -> Regulation[VariableId] | None:
         ...
-    def add_regulation(self, regulation: NamedRegulation | IdRegulation | str) -> None:
+    def add_regulation(self, regulation: Regulation[VariableIdType] | str) -> None:
         ...
-    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> IdRegulation:
+    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> Regulation[VariableId]:
         ...
-    def ensure_regulation(self, regulation: NamedRegulation | IdRegulation | str) -> None | IdRegulation:
+    def ensure_regulation(self, regulation: Regulation[VariableIdType] | str) -> Regulation[VariableId] | None:
         ...
-    def extend(self, variables: list[str]) -> RegulatoryGraph:
+    def extend(self, variables: Sequence[str]) -> RegulatoryGraph:
         ...
-    def drop(self, variables: VariableIdType | VariableCollection) -> RegulatoryGraph:
+    def drop(self, variables: VariableIdType | Sequence[VariableIdType]) -> RegulatoryGraph:
         ...
     def inline_variable(self, variable: VariableIdType) -> RegulatoryGraph:
         ...
@@ -698,22 +683,34 @@ class RegulatoryGraph:
         ...
     def successors(self, variable: VariableIdType) -> set[VariableId]:
         ...
-    def backward_reachable(self, pivots: VariableIdType | VariableCollection, subgraph: VariableCollection | None = None) -> set[VariableId]:
+    def backward_reachable(self,
+                           pivots: VariableIdType | Sequence[VariableIdType],
+                           subgraph: Sequence[VariableIdType] | None = None
+                           ) -> set[VariableId]:
         ...
-    def forward_reachable(self, pivots: VariableIdType | VariableCollection, subgraph: VariableCollection | None = None) -> set[VariableId]:
+    def forward_reachable(self,
+                          pivots: VariableIdType | Sequence[VariableIdType],
+                          subgraph: Sequence[VariableIdType] | None = None
+                          ) -> set[VariableId]:
         ...
-    def feedback_vertex_set(self, parity: SignType | None = None, subgraph: VariableCollection | None = None) -> set[VariableId]:
+    def feedback_vertex_set(self,
+                            parity: SignType | None = None,
+                            subgraph: Sequence[VariableIdType] | None = None
+                            ) -> set[VariableId]:
         ...
-    def independent_cycles(self, parity: SignType | None = None, subgraph: VariableCollection | None = None) -> list[list[VariableId]]:
+    def independent_cycles(self,
+                           parity: SignType | None = None,
+                           subgraph: Sequence[VariableIdType] | None = None
+                           ) -> list[list[VariableId]]:
         ...
-    def strongly_connected_components(self, subgraph: VariableCollection | None = None) -> list[set[VariableId]]:
+    def strongly_connected_components(self, subgraph: Sequence[VariableIdType] | None = None) -> list[set[VariableId]]:
         ...
-    def weakly_connected_components(self, subgraph: VariableCollection | None = None) -> list[set[VariableId]]:
+    def weakly_connected_components(self, subgraph: Sequence[VariableIdType] | None = None) -> list[set[VariableId]]:
         ...
     def shortest_cycle(self,
                        pivot: VariableIdType,
                        parity: SignType | None = None,
-                       subgraph: VariableCollection | None = None,
+                       subgraph: Sequence[VariableIdType] | None = None,
                        length: int | None = None
     ) -> list[VariableId] | None:
         ...
@@ -721,10 +718,10 @@ class RegulatoryGraph:
 class BooleanNetwork(RegulatoryGraph):
     def __init__(
             self,
-            variables: None | list[str] = None,
-            regulations: None | list[NamedRegulation] | list[str] = None,
-            parameters: None | list[tuple[str, int]] = None,
-            functions: None | list[None | str] | dict[str, str] = None,
+            variables: Sequence[str] | None = None,
+            regulations: Sequence[Regulation[str] | str] = None,
+            parameters: Sequence[tuple[str, int]] | None = None,
+            functions: Sequence[str | None] | Mapping[str, str] = None,
     ) -> None:
         """
         A new `BooleanNetwork` is constructed in a similar fashion to `RegulatoryGraph`, but additionally
@@ -760,15 +757,15 @@ class BooleanNetwork(RegulatoryGraph):
         ...
     def set_variable_name(self, variable: VariableIdType, name: str) -> None:
         ...
-    def add_regulation(self, regulation: IdRegulation | NamedRegulation | str) -> None:
+    def add_regulation(self, regulation: Regulation[VariableIdType] | str) -> None:
         ...
-    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> IdRegulation:
+    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> Regulation[VariableId]:
         ...
-    def ensure_regulation(self, regulation: IdRegulation | NamedRegulation | str) -> None | IdRegulation:
+    def ensure_regulation(self, regulation: Regulation[VariableIdType] | str) -> Regulation[VariableId] | None:
         ...
-    def extend(self, variables: list[str]) -> BooleanNetwork:
+    def extend(self, variables: Sequence[str]) -> BooleanNetwork:
         ...
-    def drop(self, variables: VariableIdType | VariableCollection) -> BooleanNetwork:
+    def drop(self, variables: VariableIdType | Sequence[VariableIdType]) -> BooleanNetwork:
         ...
     def inline_variable(self, variable: VariableIdType, repair_graph: bool = False) -> BooleanNetwork:
         ...
@@ -810,12 +807,11 @@ class BooleanNetwork(RegulatoryGraph):
         ...
     def inline_constants(
             self, infer_constants: bool = False, repair_graph: bool = False
-    ) -> BooleanNetwork:
-        ...
-    def inline_inputs(self, infer_inputs: bool = False, repair_graph: bool = False) -> BooleanNetwork:
-        ...
-    def prune_unused_parameters(self) -> BooleanNetwork:
-        ...
+    ) -> BooleanNetwork: ...
+    def inline_inputs(
+            self, infer_inputs: bool = False, repair_graph: bool = False
+    ) -> BooleanNetwork: ...
+    def prune_unused_parameters(self) -> BooleanNetwork: ...
 
 class UpdateFunction:
     def __init__(self, ctx: BooleanNetwork, value: str | UpdateFunction | BooleanExpression):
@@ -851,8 +847,10 @@ class UpdateFunction:
     def mk_var(ctx: BooleanNetwork, variable: VariableIdType) -> UpdateFunction:
         ...
     @staticmethod
-    def mk_param(ctx: BooleanNetwork, parameter: ParameterIdType, arguments: list[UpdateFunction] | list[VariableId] | list[str]) -> UpdateFunction:
-        ...
+    def mk_param(ctx: BooleanNetwork,
+                 parameter: ParameterIdType,
+                 arguments: Sequence[UpdateFunction | VariableId | str]
+                 ) -> UpdateFunction: ...
     @staticmethod
     def mk_not(value: UpdateFunction) -> UpdateFunction:
         ...
@@ -875,10 +873,10 @@ class UpdateFunction:
     def mk_binary(op: BinaryOperator, left: UpdateFunction, right: UpdateFunction) -> UpdateFunction:
         ...
     @staticmethod
-    def mk_conjunction(ctx: BooleanNetwork, args: list[UpdateFunction] | list[str]) -> UpdateFunction:
+    def mk_conjunction(ctx: BooleanNetwork, args: Sequence[UpdateFunction | str]) -> UpdateFunction:
         ...
     @staticmethod
-    def mk_disjunction(ctx: BooleanNetwork, args: list[UpdateFunction] | list[str]) -> UpdateFunction:
+    def mk_disjunction(ctx: BooleanNetwork, args: Sequence[UpdateFunction | str]) -> UpdateFunction:
         ...
     def is_const(self) -> bool:
         ...
@@ -932,9 +930,9 @@ class UpdateFunction:
         ...
     def rename_all(self,
                    new_ctx: None | BooleanNetwork,
-                   variables: dict[str, str] | dict[VariableId, VariableId] | dict[str, VariableId] | dict[VariableId, str],
-                   parameters: dict[str, str] | dict[ParameterId, ParameterId] | dict[str, ParameterId] | dict[ParameterId, str]) -> UpdateFunction:
-        ...
+                   variables: Mapping[str, VariableIdType] | Mapping[VariableId, VariableIdType],
+                   parameters: Mapping[str, ParameterIdType] | Mapping[ParameterId, ParameterIdType]
+                   ) -> UpdateFunction: ...
     def simplify_constants(self) -> UpdateFunction:
         ...
     def distribute_negation(self) -> UpdateFunction:
@@ -978,7 +976,10 @@ class ModelAnnotation:
 
 class SymbolicContext:
 
-    def __init__(self, network: BooleanNetwork, extra_variables: dict[str, int] | dict[VariableId, int]):
+    def __init__(self,
+                 network: BooleanNetwork,
+                 extra_variables: Mapping[str, int] | Mapping[VariableId, int] | None = None
+                 ) -> None:
         """
         A `SymbolicContext` is created by providing a `BooleanNetwork` and optional
         `extra_variables` dictionary.
@@ -1006,8 +1007,8 @@ class SymbolicContext:
     def network_variables(self) -> list[VariableId]: ...
     def network_bdd_variables(self) -> list[BddVariable]: ...
     def find_network_variable(self, variable: VariableIdType | BddVariable) -> None | VariableId: ...
-    def find_network_bdd_variable(self, variable: VariableIdType | BddVariable) -> None | BddVariable: ...
-    def get_network_variable_name(self, variable: VariableIdType | BddVariable) -> str: ...
+    def find_network_bdd_variable(self, variable: VariableIdType) -> None | BddVariable: ...
+    def get_network_variable_name(self, variable: VariableIdType) -> str: ...
     def extra_bdd_variable_count(self) -> int: ...
     def extra_bdd_variables_list(self) -> list[BddVariable]: ...
     def extra_bdd_variables(self) -> dict[VariableId, list[BddVariable]]: ...
@@ -1028,9 +1029,9 @@ class SymbolicContext:
     def get_function_arity(self, function: VariableId | ParameterId | str) -> int: ...
     def get_function_table(self, function: VariableId | ParameterId | str) -> list[tuple[list[bool], BddVariable]]: ...
     def mk_constant(self, value: BoolType) -> Bdd: ...
-    def mk_network_variable(self, variable: VariableIdType | BddVariable) -> Bdd: ...
-    def mk_extra_bdd_variable(self, variable: VariableIdType | BddVariable | None = None, index: int | None = None) -> Bdd: ...
-    def mk_function(self, function: VariableId | ParameterId | str, arguments: Iterable[UpdateFunction | Bdd | str]) -> Bdd: ...
+    def mk_network_variable(self, variable: VariableIdType) -> Bdd: ...
+    def mk_extra_bdd_variable(self, variable: VariableIdType | None = None, index: int | None = None) -> Bdd: ...
+    def mk_function(self, function: VariableId | ParameterId | str, arguments: Sequence[UpdateFunction | Bdd | str]) -> Bdd: ...
     def mk_update_function(self, function: UpdateFunction) -> Bdd: ...
     def bdd_variable_set(self) -> BddVariableSet: ...
     def transfer_from(self, bdd: Bdd, old_ctx: SymbolicContext) -> Bdd: ...
@@ -1064,7 +1065,7 @@ class ColorSet:
     def pick_singleton(self) -> ColorSet: ...
     def symbolic_size(self) -> int: ...
     def to_bdd(self) -> Bdd: ...
-    def items(self, retained: Iterable[VariableId | ParameterId | str | BddVariable] | None = None) -> Iterator[ColorModel]: ...
+    def items(self, retained: Sequence[VariableId | ParameterId | str] | None = None) -> Iterator[ColorModel]: ...
 
 class ColorModel:
     def __ctx__(self) -> SymbolicContext: ...
@@ -1082,7 +1083,7 @@ class ColorModel:
     @overload
     def instantiate(self, item: BooleanNetwork) -> BooleanNetwork: ...
     @overload
-    def instantiate(self, item: ParameterId | VariableId | str, args: Iterable[UpdateFunction | Bdd | str]) -> UpdateFunction: ...
+    def instantiate(self, item: ParameterId | VariableId | str, args: Sequence[UpdateFunction | Bdd | str]) -> UpdateFunction: ...
     def instantiate(self, item, args): ...
 
 class VertexSet:
@@ -1112,7 +1113,7 @@ class VertexSet:
     def pick_singleton(self) -> VertexSet: ...
     def symbolic_size(self) -> int: ...
     def to_bdd(self) -> Bdd: ...
-    def items(self, retained: None | list[str] | list[VariableId] | list[BddVariable] = None) -> Iterator[VertexModel]: ...
+    def items(self, retained: Sequence[str | VariableId] | None = None) -> Iterator[VertexModel]: ...
 
 class VertexModel:
     def __ctx__(self) -> SymbolicContext: ...
@@ -1162,14 +1163,17 @@ class ColoredVertexSet:
     def pick_singleton(self) -> ColoredVertexSet: ...
     def to_bdd(self) -> Bdd: ...
     def items(self,
-              retained_variables: Iterable[VariableId | BddVariable | str] | None = None,
-              retained_functions: Iterable[VariableId | ParameterId | BddVariable | str] | None = None
+              retained_variables: Sequence[VariableId | str] | None = None,
+              retained_functions: Sequence[VariableId | ParameterId | str] | None = None
               ) -> Iterator[tuple[ColorModel, VertexModel]]: ...
 
 class AsynchronousGraph:
 
-    def __init__(self, network: BooleanNetwork, context: SymbolicContext | None = None,
-            unit_bdd: Bdd | None = None) -> AsynchronousGraph:
+    def __init__(self,
+                 network: BooleanNetwork,
+                 context: SymbolicContext | None = None,
+                 unit_bdd: Bdd | None = None
+                 ) -> None:
         """
         A new `AsynchronousGraph` is constructed from a `BooleanNetwork`. Optionally, you can also provide
         a `SymbolicContext` (that is compatible with said network), or a `unit_bdd` which restricts the set
@@ -1195,9 +1199,15 @@ class AsynchronousGraph:
     def mk_unit_vertices(self) -> VertexSet: ...
     def transfer_colors_from(self, colors: ColorSet, original_ctx: AsynchronousGraph) -> ColorSet: ...
     def transfer_vertices_from(self, vertices: VertexSet, original_ctx: AsynchronousGraph) -> VertexSet: ...
+    @overload
+    def transfer_from(self, set: ColorSet, original_ctx: AsynchronousGraph) -> ColorSet: ...
+    @overload
+    def transfer_from(self, set: VertexSet, original_ctx: AsynchronousGraph) -> VertexSet: ...
+    @overload
     def transfer_from(self, set: ColoredVertexSet, original_ctx: AsynchronousGraph) -> ColoredVertexSet: ...
-    def mk_subspace(self, subspace: dict[VariableId, bool] | dict[VariableId, Literal[0,1]] | dict[str, bool] | dict[str, Literal[0,1]]) -> ColoredVertexSet: ...
-    def mk_subspace_vertices(self, subspace: dict[VariableId, bool] | dict[VariableId, Literal[0,1]] | dict[str, bool] | dict[str, Literal[0,1]]) -> VertexSet: ...
+    def transfer_from(self, set, original_ctx): ...
+    def mk_subspace(self, subspace: Mapping[VariableId, BoolType] | Mapping[str, BoolType]) -> ColoredVertexSet: ...
+    def mk_subspace_vertices(self, subspace: Mapping[VariableId, BoolType] | Mapping[str, BoolType]) -> VertexSet: ...
     def mk_update_function(self, variable: VariableIdType) -> Bdd: ...
     def post(self, set: ColoredVertexSet) -> ColoredVertexSet: ...
     #def post_out(self, set: ColoredVertexSet) -> ColoredVertexSet: ...
@@ -1227,20 +1237,14 @@ class AsynchronousGraph:
 BddVariableType: TypeAlias = BddVariable | str
 VariableIdType: TypeAlias = VariableId | str
 ParameterIdType: TypeAlias = ParameterId | str
-BoolType: TypeAlias = Literal[0, 1] | bool
+BoolType: TypeAlias = bool | int
 SignType: TypeAlias = Literal["positive", "+", "negative", "-"] | bool
 BinaryOperator: TypeAlias = Literal["and", "or", "imp", "iff", "xor"]
-VariableCollection: TypeAlias = list[str] | list[VariableId] | set[str] | set[VariableId]
-DynamicValuation: TypeAlias = dict[BddVariable, bool] | dict[BddVariable, Literal[0,1]] | dict[str, bool] | dict[str, Literal[0,1]]
-BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | DynamicValuation
+BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | Mapping[str, BoolType] | Mapping[BddVariable, BoolType]
 BoolExpressionType: TypeAlias = BooleanExpression | str
-class NamedRegulation(TypedDict):
-    source: str
-    target: str
-    sign: NotRequired[SignType]
-    essential: NotRequired[BoolType]
-class IdRegulation(TypedDict):
-    source: VariableId
-    target: VariableId
-    sign: NotRequired[SignType]
-    essential: NotRequired[BoolType]
+IDT = TypeVar('IDT')
+class Regulation(TypedDict, Generic[IDT]):
+    source: IDT
+    target: IDT
+    sign: SignType | None
+    essential: BoolType

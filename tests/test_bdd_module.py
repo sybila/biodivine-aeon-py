@@ -160,7 +160,7 @@ def test_bdd_valuation():
 def test_bdd_partial_valuation():
     ctx = BddVariableSet(["a", "b", "c"])
 
-    assert len(BddPartialValuation(ctx)) == 0
+    assert len(BddPartialValuation(ctx, {})) == 0
 
     val_1 = BddPartialValuation(ctx, {'a': 0, 'b': 1})
     val_2 = BddPartialValuation(BddValuation(ctx, [0, 1, 0]))

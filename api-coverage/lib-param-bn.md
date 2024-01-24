@@ -1932,15 +1932,13 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::transfer_colors_from</code></td>
-            <td><code>AsynchronousGraph.transfer_colors_from</code></td>
+            <td rowspan="3"><code>AsynchronousGraph.transfer_from</code></td>
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::transfer_vertices_from</code></td>
-            <td><code>AsynchronousGraph.transfer_vertices_from</code></td>
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::transfer_from</code></td>
-            <td><code>AsynchronousGraph.transfer_from</code></td>
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::vertex</code></td>

@@ -29,13 +29,13 @@ pub struct Bdd {
 ///
 /// Intuitively, these clauses together represent a disjunctive normal form of the underlying Boolean function.
 #[pyclass(module = "biodivine_aeon")]
-pub struct BddClauseIterator(Py<Bdd>, BddPathIterator<'static>);
+pub struct _BddClauseIterator(Py<Bdd>, BddPathIterator<'static>);
 
 /// An iterator over all satisfying valuations (`BddValuation`) of a `Bdd`.
 ///
 /// Intuitively, these valuation together represent the `1` rows of a truth table of the underlying Boolean function.
 #[pyclass(module = "biodivine_aeon")]
-pub struct BddValuationIterator(Py<Bdd>, BddSatisfyingValuations<'static>);
+pub struct _BddValuationIterator(Py<Bdd>, BddSatisfyingValuations<'static>);
 
 #[pymethods]
 impl Bdd {
@@ -869,8 +869,8 @@ impl Bdd {
     }
 
     /// An iterator over all `BddValuation` objects that satisfy this `Bdd`.
-    pub fn valuation_iterator(self_: Py<Bdd>, py: Python) -> BddValuationIterator {
-        BddValuationIterator::new(py, self_)
+    pub fn valuation_iterator(self_: Py<Bdd>, py: Python) -> _BddValuationIterator {
+        _BddValuationIterator::new(py, self_)
     }
 
     /// Pick the lexicographically first satisfying clause of this `Bdd`.
@@ -923,8 +923,8 @@ impl Bdd {
     }
 
     /// An iterator over all DNF clauses (i.e. `BddPartialValuation` objects) that satisfy this `Bdd`.
-    pub fn clause_iterator(self_: Py<Bdd>, py: Python) -> BddClauseIterator {
-        BddClauseIterator::new(py, self_)
+    pub fn clause_iterator(self_: Py<Bdd>, py: Python) -> _BddClauseIterator {
+        _BddClauseIterator::new(py, self_)
     }
 
     /// Replace the occurrence of a given `variable` with a specific `function`.
@@ -990,9 +990,9 @@ impl Bdd {
 }
 
 #[pymethods]
-impl BddValuationIterator {
+impl _BddValuationIterator {
     #[new]
-    pub fn new(py: Python, bdd: Py<Bdd>) -> BddValuationIterator {
+    pub fn new(py: Python, bdd: Py<Bdd>) -> _BddValuationIterator {
         // This hack allows us to "launder" lifetimes between Rust and Python.
         // It is only safe because we copy the `Bdd` and attach it to the "laundered" reference,
         // so there is no (realistic) way the reference can outlive the copy of the `Bdd`.
@@ -1004,7 +1004,7 @@ impl BddValuationIterator {
                 unsafe { (bdd_ref.as_native() as *const RsBdd).as_ref().unwrap() };
             bdd_ref.sat_valuations()
         };
-        BddValuationIterator(bdd, iterator)
+        _BddValuationIterator(bdd, iterator)
     }
 
     pub fn __str__(&self) -> String {
@@ -1028,9 +1028,9 @@ impl BddValuationIterator {
 }
 
 #[pymethods]
-impl BddClauseIterator {
+impl _BddClauseIterator {
     #[new]
-    pub fn new(py: Python, bdd: Py<Bdd>) -> BddClauseIterator {
+    pub fn new(py: Python, bdd: Py<Bdd>) -> _BddClauseIterator {
         // See `BddValuationIterator` for discussion why this is safe.
         let iterator = {
             let bdd_ref = bdd.borrow(py);
@@ -1038,7 +1038,7 @@ impl BddClauseIterator {
                 unsafe { (bdd_ref.as_native() as *const RsBdd).as_ref().unwrap() };
             bdd_ref.sat_clauses()
         };
-        BddClauseIterator(bdd, iterator)
+        _BddClauseIterator(bdd, iterator)
     }
 
     pub fn __str__(&self) -> String {

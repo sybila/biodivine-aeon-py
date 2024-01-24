@@ -137,49 +137,31 @@ impl AsynchronousGraph {
         VertexSet::mk_native(self.ctx.clone(), self.native.mk_unit_vertices())
     }
 
-    /// Transfer a `ColorSet` from a compatible `AsynchronousGraph` into the encoding of this graph.
-    pub fn transfer_colors_from(
-        &self,
-        colors: &ColorSet,
-        original_ctx: &AsynchronousGraph,
-    ) -> PyResult<ColorSet> {
-        if let Some(native) = self
-            .as_native()
-            .transfer_colors_from(colors.as_native(), original_ctx.as_native())
-        {
-            Ok(ColorSet::mk_native(self.ctx.clone(), native))
-        } else {
-            throw_runtime_error("The two contexts are not compatible.")
-        }
-    }
-
-    /// Transfer a `VertexSet` from a compatible `AsynchronousGraph` into the encoding of this graph.
-    pub fn transfer_vertices_from(
-        &self,
-        vertices: &VertexSet,
-        original_ctx: &AsynchronousGraph,
-    ) -> PyResult<VertexSet> {
-        if let Some(native) = self
-            .as_native()
-            .transfer_vertices_from(vertices.as_native(), original_ctx.as_native())
-        {
-            Ok(VertexSet::mk_native(self.ctx.clone(), native))
-        } else {
-            throw_runtime_error("The two contexts are not compatible.")
-        }
-    }
-
-    /// Transfer a `ColoredVertexSet` from a compatible `AsynchronousGraph` into the encoding of this graph.
+    /// Transfer a symbolic set (`ColorSet`, `VertexSet`, or `ColoredVertexSet`) from a compatible `AsynchronousGraph`
+    /// into the encoding of this graph.
     pub fn transfer_from(
         &self,
-        set: &ColoredVertexSet,
+        py: Python,
+        set: &PyAny,
         original_ctx: &AsynchronousGraph,
-    ) -> PyResult<ColoredVertexSet> {
-        if let Some(native) = self
-            .as_native()
-            .transfer_from(set.as_native(), original_ctx.as_native())
-        {
-            Ok(ColoredVertexSet::mk_native(self.ctx.clone(), native))
+    ) -> PyResult<PyObject> {
+        let set = if let Ok(set) = set.extract::<ColorSet>() {
+            self.as_native()
+                .transfer_colors_from(set.as_native(), original_ctx.as_native())
+                .map(|it| ColorSet::mk_native(self.ctx.clone(), it).into_py(py))
+        } else if let Ok(set) = set.extract::<VertexSet>() {
+            self.as_native()
+                .transfer_vertices_from(set.as_native(), original_ctx.as_native())
+                .map(|it| VertexSet::mk_native(self.ctx.clone(), it).into_py(py))
+        } else if let Ok(set) = set.extract::<ColoredVertexSet>() {
+            self.as_native()
+                .transfer_from(set.as_native(), original_ctx.as_native())
+                .map(|it| ColoredVertexSet::mk_native(self.ctx.clone(), it).into_py(py))
+        } else {
+            return throw_type_error("Expected `ColorSet`, `VartexSet`, or `ColoredVertexSet`.");
+        };
+        if let Some(set) = set {
+            Ok(set)
         } else {
             throw_runtime_error("The two contexts are not compatible.")
         }

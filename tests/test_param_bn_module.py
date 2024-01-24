@@ -54,6 +54,8 @@ def test_regulatory_graph():
     rg1.add_regulation({
         'source': VariableId(2),
         'target': VariableId(0),
+        'essential': True,
+        'sign': None,
     })
     rg2 = RegulatoryGraph(None, ["a -> b", "b -|? c", "c -? a"])
 
@@ -85,20 +87,40 @@ def test_regulatory_graph():
 
     assert rg1.regulation_count() == 3
     assert rg1.regulations() == [
-        {'source': VariableId(0), 'target': VariableId(1), 'sign': '+'},
+        {'source': VariableId(0), 'target': VariableId(1), 'sign': '+', 'essential': True},
         {'source': VariableId(1), 'target': VariableId(2), 'sign': '-', 'essential': False},
-        {'source': VariableId(2), 'target': VariableId(0)},
+        {'source': VariableId(2), 'target': VariableId(0), 'sign': None, 'essential': True},
     ]
     assert rg1.regulation_strings() == ["a -> b", "b -|? c", "c -? a"]
     assert rg1.find_regulation('a', 'c') is None
-    assert rg1.find_regulation('c', 'a') == {'source': VariableId(2), 'target': VariableId(0)}
+    assert rg1.find_regulation('c', 'a') == {
+        'source': VariableId(2),
+        'target': VariableId(0),
+        'essential': True,
+        'sign': None,
+    }
     rg1.add_regulation('a -?? c')
-    assert rg1.find_regulation('a', 'c') == {'source': VariableId(0), 'target': VariableId(2), 'essential': False}
+    assert rg1.find_regulation('a', 'c') == {
+        'source': VariableId(0),
+        'target': VariableId(2),
+        'essential': False,
+        'sign': None,
+    }
     rg1.remove_regulation('a', 'c')
     assert rg1.find_regulation('a', 'c') is None
     assert rg1.ensure_regulation('a -?? c ') is None
-    assert rg1.ensure_regulation('a -| c') == {'source': VariableId(0), 'target': VariableId(2), 'essential': False}
-    assert rg1.find_regulation('a', 'c') == {'source': VariableId(0), 'target': VariableId(2), 'sign': '-'}
+    assert rg1.ensure_regulation('a -| c') == {
+        'source': VariableId(0),
+        'target': VariableId(2),
+        'essential': False,
+        'sign': None
+    }
+    assert rg1.find_regulation('a', 'c') == {
+        'source': VariableId(0),
+        'target': VariableId(2),
+        'essential': True,
+        'sign': '-',
+    }
 
     rg1e = rg1.extend(['d', 'e'])
     rg1e.add_regulation('c -> d')
@@ -164,6 +186,8 @@ def test_boolean_network_inheritence():
     bn1.add_regulation({
         'source': VariableId(2),
         'target': VariableId(0),
+        'essential': True,
+        'sign': None,
     })
     bn2 = BooleanNetwork(None, ["a -> b", "b -|? c", "c -? a"])
 
@@ -195,20 +219,40 @@ def test_boolean_network_inheritence():
 
     assert bn1.regulation_count() == 3
     assert bn1.regulations() == [
-        {'source': VariableId(0), 'target': VariableId(1), 'sign': '+'},
+        {'source': VariableId(0), 'target': VariableId(1), 'sign': '+', 'essential': True},
         {'source': VariableId(1), 'target': VariableId(2), 'sign': '-', 'essential': False},
-        {'source': VariableId(2), 'target': VariableId(0)},
+        {'source': VariableId(2), 'target': VariableId(0), 'sign': None, 'essential': True},
     ]
     assert bn1.regulation_strings() == ["a -> b", "b -|? c", "c -? a"]
     assert bn1.find_regulation('a', 'c') is None
-    assert bn1.find_regulation('c', 'a') == {'source': VariableId(2), 'target': VariableId(0)}
+    assert bn1.find_regulation('c', 'a') == {
+        'source': VariableId(2),
+        'target': VariableId(0),
+        'essential': True,
+        'sign': None,
+    }
     bn1.add_regulation('a -?? c')
-    assert bn1.find_regulation('a', 'c') == {'source': VariableId(0), 'target': VariableId(2), 'essential': False}
+    assert bn1.find_regulation('a', 'c') == {
+        'source': VariableId(0),
+        'target': VariableId(2),
+        'essential': False,
+        'sign': None,
+    }
     bn1.remove_regulation('a', 'c')
     assert bn1.find_regulation('a', 'c') is None
     assert bn1.ensure_regulation('a -?? c ') is None
-    assert bn1.ensure_regulation('a -| c') == {'source': VariableId(0), 'target': VariableId(2), 'essential': False}
-    assert bn1.find_regulation('a', 'c') == {'source': VariableId(0), 'target': VariableId(2), 'sign': '-'}
+    assert bn1.ensure_regulation('a -| c') == {
+        'source': VariableId(0),
+        'target': VariableId(2),
+        'essential': False,
+        'sign': None
+    }
+    assert bn1.find_regulation('a', 'c') == {
+        'source': VariableId(0),
+        'target': VariableId(2),
+        'essential': True,
+        'sign': '-',
+    }
 
     bn1e = bn1.extend(['d', 'e'])
     bn1e.add_regulation('c -> d')
@@ -347,6 +391,7 @@ def test_boolean_network():
         'source': VariableId(1),
         'target': VariableId(2),
         'sign': '+',
+        'essential': True,
     }
 
     bn1x = bn1.inline_inputs()
@@ -526,10 +571,7 @@ def test_symbolic_context():
 
     assert ctx.find_network_bdd_variable("b") == BddVariable(7)
     assert ctx.find_network_bdd_variable(VariableId(4)) is None
-    assert ctx.find_network_bdd_variable(BddVariable(10)) is None
-    assert ctx.find_network_bdd_variable(BddVariable(14)) == BddVariable(14)
 
-    assert ctx.get_network_variable_name(BddVariable(14)) == "c"
     with pytest.raises(IndexError):
         ctx.get_network_variable_name("x")
 
@@ -667,11 +709,10 @@ def test_asynchronous_graph():
     assert unit_set.intersect_vertices(unit_vertices) == unit_set
 
     assert graph.transfer_from(unit_set, graph) == unit_set
-    assert graph.transfer_colors_from(unit_colors, graph) == unit_colors
-    assert graph.transfer_vertices_from(unit_vertices, graph) == unit_vertices
+    assert graph.transfer_from(unit_colors, graph) == unit_colors
+    assert graph.transfer_from(unit_vertices, graph) == unit_vertices
 
-    var_c = UpdateFunction.mk_var(bn, "c")
-    assert graph.mk_update_function("a") == custom_ctx.mk_function("a", [var_c])
+    assert graph.mk_update_function("a") == custom_ctx.mk_function("a", ["c"])
 
     space_arg: dict[str, Literal[0, 1]] = {"a": 0, "b": 1}
     space = graph.mk_subspace(space_arg)

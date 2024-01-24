@@ -12,8 +12,8 @@ pub mod op_function;
 
 pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<bdd::Bdd>()?;
-    module.add_class::<bdd::BddValuationIterator>()?;
-    module.add_class::<bdd::BddClauseIterator>()?;
+    module.add_class::<bdd::_BddValuationIterator>()?;
+    module.add_class::<bdd::_BddClauseIterator>()?;
     module.add_class::<boolean_expression::BooleanExpression>()?;
     module.add_class::<bdd_variable::BddVariable>()?;
     module.add_class::<bdd_pointer::BddPointer>()?;

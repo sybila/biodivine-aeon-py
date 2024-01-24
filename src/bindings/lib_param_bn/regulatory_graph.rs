@@ -691,6 +691,7 @@ impl RegulatoryGraph {
             let monotonicity = item
                 .get_item("sign")?
                 .or(item.get_item("monotonicity")?) // backwards compatibility
+                .and_then(|it| if it.is_none() { None } else { Some(it) })
                 .map(resolve_sign)
                 .transpose()?;
 
@@ -710,11 +711,9 @@ impl RegulatoryGraph {
         let target = VariableId::from(regulation.get_target());
         result.set_item("source", source.into_py(py))?;
         result.set_item("target", target.into_py(py))?;
-        if !regulation.is_observable() {
-            result.set_item("essential", false)?;
-        }
+        result.set_item("essential", regulation.is_observable().into_py(py))?;
         match regulation.get_monotonicity() {
-            None => (),
+            None => result.set_item("sign", Option::<&str>::None.into_py(py))?,
             Some(Monotonicity::Activation) => result.set_item("sign", "+")?,
             Some(Monotonicity::Inhibition) => result.set_item("sign", "-")?,
         }

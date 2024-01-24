@@ -1,12 +1,34 @@
+from typing import TypeAlias, Literal, TypedDict, Mapping, TypeVar, Generic
+
+# Counterintuitively, these two lines should actually reexport the native PyO3 module here. But it is a bit of a hack
+# which does not work super reliably. Refer to the PyO3 guide for how this should be handled if it stops working.
 import biodivine_aeon
 from .biodivine_aeon import *
-from typing import TypeAlias, Literal, TypedDict, NotRequired
 
+# Replace module-level documentation.
 __doc__ = biodivine_aeon.__doc__
-# For some reason, the following is recommended, but will cause some of the documentation
-# to disappear.
-# if hasattr(biodivine_aeon, "__all__"):
-#     __all__ = biodivine_aeon.__all__
+
+# The "__all__" list allows us to control what items are exported from the module. It has to be built as a single
+# assignment, because the interpreter will cache its contents (i.e. subsequent updates are not taken into account).
+# We include all Python-only types that we have in this file, plus all classes from the native module as long as
+# they do not start with an underscore. We can also use this to influence the order in which items appear
+# in documentation.
+assert hasattr(biodivine_aeon, "__all__")
+__all__ = [
+              'LOG_NOTHING',
+              'LOG_ESSENTIAL',
+              'LOG_VERBOSE',
+              'LOG_LEVEL',
+              'BddVariableType',
+              'VariableIdType',
+              'ParameterIdType',
+              'BoolType',
+              'SignType',
+              'BinaryOperator',
+              'BoolClauseType',
+              'BoolExpressionType',
+              'Regulation',
+          ] + [x for x in biodivine_aeon.__all__ if not x.startswith("_")]
 
 LOG_NOTHING: Literal[0] = 0
 """
@@ -29,11 +51,11 @@ errors or warnings, just a rough estimate of resources being used. Note that the
 into every algorithm. While we try to reduce this overhead as much as possible, especially `LOG_VERBOSE` can have
 measurable impact in shorter computations. For longer computations, the overhead should tend towards zero. 
 
- - `LOG_NOTHING`: No logging messages are printed.
- - `LOG_ESSENTIAL`: Logging messages are printed when resource consumption exceeds what is considered "trivial" in the context
-   of a particular algorithm.
- - `LOG_VERBOSE`: Prints all progress messages. This setting is useful for in-depth comparisons between algorithms, but can
-   be overwhelming under normal circumstances.
+ - `LOG_NOTHING`: No logging messages are printed. 
+ - `LOG_ESSENTIAL`: Logging messages are printed when resource 
+ consumption exceeds what is considered "trivial" in the context of a particular algorithm. 
+ - `LOG_VERBOSE`: Prints all progress messages. This setting is useful for in-depth comparisons between algorithms, 
+ but can be overwhelming under normal circumstances.
    
 When `biodivine_aeon` is first loaded, the module determines if it is running in a normal Python script, or
 in an interactive environment (interpreter shell, jupyter notebook, etc.). If an interactive environment is detected,
@@ -65,9 +87,11 @@ or you can use a "raw" `str` name. However, using names instead of IDs in freque
 running code incurs a performance penalty.
 """
 
-BoolType: TypeAlias = Literal[0, 1] | bool
+BoolType: TypeAlias = bool | int
 """
 Most methods can also accept `0`/`1` wherever `False`/`True` would be typically required.
+
+ > Note that `typing.Literal` is not used here due to how it behaves when typechecking in mappings/collections.
 """
 
 SignType: TypeAlias = Literal["positive", "+", "negative", "-"] | bool
@@ -81,24 +105,7 @@ BinaryOperator: TypeAlias = Literal["and", "or", "imp", "iff", "xor"]
 Lists the supported Boolean binary operators.
 """
 
-VariableCollection: TypeAlias = VariableId | str | list[str] | list[VariableId] | set[str] | set[VariableId]
-"""
-Describes a "collection of network variables". This can be either a list of variables, or a set of variables, 
-such that each variable is represented using either a string or a `VariableId`. In practice, you can even mix 
-types in lists and sets, but this does not really work well with `mypy`, so we provide this simplified 
-type signature instead.
-"""
-
-DynamicValuation: TypeAlias = dict[BddVariable, bool] | dict[BddVariable, Literal[0, 1]] | dict[str, bool] | dict[
-    str, Literal[0, 1]]
-"""
-Describes types that can be converted into `BddPartialValuation`, or `BddValuation` (assuming the values of all 
-variables are set). In practice, this is in fact implemented as `dict[BddVariableType, BoolType]`. 
-But type inference in `mypy` gets confused by all the nested `Union` types and requires extra annotations even
-in trivial cases. To avoid this, we instead list the most common cases explicitly.   
-"""
-
-BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | DynamicValuation
+BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | Mapping[str, BoolType] | Mapping[BddVariable, BoolType]
 """
 A Boolean clause represents a collection of literals. This can be either done through one of the valuation types, 
 or through a regular dictionary. However, any representation other than `BddPartialValuation` incurs a performance
@@ -111,25 +118,21 @@ A `BooleanExpression` can be typically also substituted with its "raw" string re
 requires the expression to be repeatedly parsed whenever used and is thus slower and more error prone.
 """
 
+IDT = TypeVar('IDT')
 
-class NamedRegulation(TypedDict):
-    source: str
-    target: str
-    sign: NotRequired[SignType]
-    essential: NotRequired[BoolType]
+
+class Regulation(TypedDict, Generic[IDT]):
+    source: IDT
+    target: IDT
+    sign: SignType | None
+    essential: BoolType
     """
-    A typed dictionary that stores data about a single regulation.
+    A typed dictionary that stores data about a single regulation. Parametrized by an "identifier type" which 
+    can be either `str` or `VariableId`.
+    
+    Typically both `str` and `VariableId` are accepted as inputs, but only `VariableId` is provided as output.
     
     For backwards compatibility purposes, the `sign` key is also equivalent to `monotonicity` and `essential`
     is equivalent to `observable`. However, we do not include this in the type hints to discourage the
     usage of these deprecated dictionary keys.
-    """
-
-class IdRegulation(TypedDict):
-    source: VariableId
-    target: VariableId
-    sign: NotRequired[SignType]
-    essential: NotRequired[BoolType]
-    """
-    The same as `NamedRegulation`, but uses `VariableId` objects instead of string names when referring to variables.
     """
