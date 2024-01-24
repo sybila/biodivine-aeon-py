@@ -657,6 +657,11 @@ impl SymbolicContext {
         if let Ok(function) = function.extract::<UpdateFunction>() {
             return Ok(self.as_native().mk_fn_update_true(function.as_native()));
         }
+        if let Ok(variable) = function.extract::<VariableId>() {
+            return Ok(self
+                .as_native()
+                .mk_state_variable_is_true(*variable.as_native()));
+        }
         if let Ok(function) = function.extract::<&str>() {
             let fake_network = self.mk_fake_network();
             return match FnUpdate::try_from_str(function, &fake_network) {
