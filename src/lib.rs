@@ -1,5 +1,6 @@
 use pyo3::exceptions::{PyIndexError, PyInterruptedError, PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use pyo3::{PyResult, Python};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
@@ -40,15 +41,17 @@ fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
         }
     }
     // This should detect if we are running in a shell, as opposed to a script.
+    // Context:
+    // https://stackoverflow.com/questions/2356399/tell-if-python-is-in-interactive-mode
     // https://stackoverflow.com/questions/6108330/checking-for-interactive-shell-in-a-python-script
     let sys = PyModule::import(py, "sys")?;
-    let stdin = sys.getattr("__stdin__")?;
-    let is_shell = stdin.call_method("isatty", (), None)?;
-    if let Ok(true) = is_shell.extract::<bool>() {
+    let locals = PyDict::new(py);
+    locals.set_item("sys", sys)?;
+    let has_ps = py.eval("hasattr(sys, 'ps1')", None, Some(locals))?;
+    if let Ok(true) = has_ps.extract::<bool>() {
         println!("Detected interactive mode. Log level set to `LOG_ESSENTIAL`.");
         return module.setattr("LOG_LEVEL", 1);
     }
-    println!("Log level set to 0.");
     module.setattr("LOG_LEVEL", 0)
 }
 
