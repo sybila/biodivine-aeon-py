@@ -32,3 +32,8 @@ When you update the Rust dependency, you should:
 
 > Remember to use `--features solver-z3` when building the public API for
 > `lib-param-bn`.
+
+Some notes about writing bindings:
+  - For argument types, use `Sequence` and `Mapping` instead of `list` nad `dict`.
+  - For conversion methods that create a copy/new item, use `to_*`.
+  - For conversion methods that return a reference to some inner python object, use `get_` or no prefix.

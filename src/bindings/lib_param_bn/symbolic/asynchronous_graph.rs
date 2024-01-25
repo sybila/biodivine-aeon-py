@@ -78,7 +78,7 @@ impl AsynchronousGraph {
     }
 
     /// The underlying `SymbolicContext` of this graph.
-    pub fn to_symbolic_context(&self) -> Py<SymbolicContext> {
+    pub fn symbolic_context(&self) -> Py<SymbolicContext> {
         self.ctx.clone()
     }
 

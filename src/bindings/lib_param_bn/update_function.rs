@@ -4,6 +4,7 @@ use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsExpression;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -484,19 +485,42 @@ impl UpdateFunction {
             .collect()
     }
 
-    /// Create a copy of this `UpdateFunction` with every occurrence of the specified variable substituted
-    /// for the specified update function.
-    pub fn substitute_variable(
-        &self,
-        py: Python,
-        variable: &PyAny,
-        function: &PyAny,
-    ) -> PyResult<UpdateFunction> {
-        let substitution = Self::new(py, self.ctx.clone(), function)?;
-        let variable = self.ctx.borrow(py).as_ref().resolve_variable(variable)?;
-        let subst = self
-            .value
-            .substitute_variable(variable, substitution.as_native());
+    /// Create a copy of this `UpdateFunction` with every occurrence of the specified variables substituted
+    /// for the corresponding function.
+    ///
+    ///  > Note that at the moment, there is no substitution method for parameters, since we don't have a concept
+    ///    of an "expression with holes" which we could use here.
+    pub fn substitute_all(&self, py: Python, substitution: &PyDict) -> PyResult<UpdateFunction> {
+        let mut vars = HashMap::new();
+        let bn = self.ctx.borrow(py);
+        for (k, v) in substitution {
+            let k = bn.as_ref().resolve_variable(k)?;
+            let v = Self::new(py, self.ctx.clone(), v)?;
+            vars.insert(k, v);
+        }
+
+        fn rec(
+            _self: &FnUpdate,
+            vars: &HashMap<biodivine_lib_param_bn::VariableId, UpdateFunction>,
+        ) -> FnUpdate {
+            match _self {
+                FnUpdate::Const(value) => FnUpdate::Const(*value),
+                FnUpdate::Var(var) => vars
+                    .get(var)
+                    .map(|it| it.as_native().clone())
+                    .unwrap_or_else(|| FnUpdate::Var(*var)),
+                FnUpdate::Param(param, args) => {
+                    let args = args.iter().map(|it| rec(it, vars)).collect::<Vec<_>>();
+                    FnUpdate::Param(*param, args)
+                }
+                FnUpdate::Not(inner) => FnUpdate::mk_not(rec(inner, vars)),
+                FnUpdate::Binary(op, left, right) => {
+                    FnUpdate::mk_binary(*op, rec(left, vars), rec(right, vars))
+                }
+            }
+        }
+
+        let subst = rec(self.value, &vars);
         Ok(UpdateFunction::new_raw(self.ctx.clone(), Arc::new(subst)))
     }
 
@@ -586,6 +610,36 @@ impl UpdateFunction {
     pub fn to_and_or_normal_form(&self) -> UpdateFunction {
         let transformed = self.value.to_and_or_normal_form();
         UpdateFunction::new_raw(self.ctx.clone(), Arc::new(transformed))
+    }
+
+    /// Convert the `UpdateFunction` to a `BooleanExpression`, as long as the function contains no uninterpreted
+    /// functions (otherwise throws a `RuntimeError`).
+    pub fn as_expression(&self, py: Python) -> PyResult<BooleanExpression> {
+        fn rec(
+            self_: &FnUpdate,
+            ctx: &biodivine_lib_param_bn::BooleanNetwork,
+        ) -> PyResult<RsExpression> {
+            match self_ {
+                FnUpdate::Const(value) => Ok(RsExpression::Const(*value)),
+                FnUpdate::Var(id) => Ok(RsExpression::Variable(ctx.get_variable_name(*id).clone())),
+                FnUpdate::Param(_, _) => throw_runtime_error("Function contains parameters."),
+                FnUpdate::Not(inner) => Ok(RsExpression::Not(Box::new(rec(inner, ctx)?))),
+                FnUpdate::Binary(op, left, right) => {
+                    let left = rec(left, ctx)?;
+                    let right = rec(right, ctx)?;
+                    Ok(match *op {
+                        BinaryOp::And => RsExpression::And(Box::new(left), Box::new(right)),
+                        BinaryOp::Or => RsExpression::Or(Box::new(left), Box::new(right)),
+                        BinaryOp::Xor => RsExpression::Xor(Box::new(left), Box::new(right)),
+                        BinaryOp::Iff => RsExpression::Iff(Box::new(left), Box::new(right)),
+                        BinaryOp::Imp => RsExpression::Imp(Box::new(left), Box::new(right)),
+                    })
+                }
+            }
+        }
+
+        let result = rec(self.value, self.ctx.borrow(py).as_native())?;
+        Ok(BooleanExpression::new_raw(Arc::new(result)))
     }
 }
 

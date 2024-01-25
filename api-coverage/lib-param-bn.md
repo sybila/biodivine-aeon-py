@@ -880,7 +880,7 @@ to an underlying "context" in which it was created to resolve variable and funct
         </tr>
         <tr>
             <td><code>FnUpdate::substitute_variable</code></td>
-            <td><code>UpdateFunction.substitute_variable</code></td>
+            <td><code>UpdateFunction.substitute_all</code></td>
         </tr>
         <tr>
             <td><code>FnUpdate::rename_all</code></td>
@@ -909,6 +909,10 @@ to an underlying "context" in which it was created to resolve variable and funct
         <tr>
             <td><code>FnUpdate::walk_postorder</code></td>
             <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>UpdateFunction::as_expression</code></td>
         </tr>
     </tbody>
 </table>
@@ -1864,7 +1868,7 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::symbolic_context</code></td>
-            <td><code>AsynchronousGraph.to_symbolic_context</code></td>
+            <td><code>AsynchronousGraph.symbolic_context</code></td>
         </tr>
         <tr><td colspan="2" align="center">Network introspection</td></tr>
         <tr>

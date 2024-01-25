@@ -484,9 +484,9 @@ def test_update_function():
     assert expr.support_variables() == {VariableId(0), VariableId(1), VariableId(2)}
     assert expr.support_parameters() == {ParameterId(1)}
 
-    assert expr.substitute_variable("b", "f(b & a)") == UpdateFunction(bn1, "(a & f(b & a)) | g(f(b & a), !c)")
+    assert expr.substitute_all({"b": "f(b & a)"}) == UpdateFunction(bn1, "(a & f(b & a)) | g(f(b & a), !c)")
     assert expr.rename_all(bn2, {'a': 'd', 'b': 'c', 'c': 'b'}, {'g': 'h'}) == UpdateFunction(bn2, "(d & c) | h(c, !b)")
-    assert expr.substitute_variable("b", "true").simplify_constants() == UpdateFunction(bn1, "a | g(true, !c)")
+    assert expr.substitute_all({"b": "true"}).simplify_constants() == UpdateFunction(bn1, "a | g(true, !c)")
     assert UpdateFunction(bn1, "!(a & b)").distribute_negation() == UpdateFunction(bn1, "!a | !b")
     assert UpdateFunction(bn1, "a ^ b").to_and_or_normal_form() == UpdateFunction(bn1, "(a | b) & !(a & b)")
     assert UpdateFunction(bn1, "a <=> b").to_and_or_normal_form() == UpdateFunction(bn1, "(a & b) | (!a & !b)")
@@ -666,7 +666,7 @@ def test_asynchronous_graph():
     graph = AsynchronousGraph(bn, context=custom_ctx, unit_bdd=custom_unit)
 
     assert str(graph) == f"AsynchronousGraph({custom_ctx})"
-    assert graph.to_symbolic_context() == custom_ctx
+    assert graph.symbolic_context() == custom_ctx
 
     assert graph.network_variable_count() == 3
     assert graph.network_variable_names() == ["a", "b", "c"]
