@@ -1,7 +1,3 @@
-
-pub mod biodivine_lib_param_bn::fixed_points
-
-
 pub struct biodivine_lib_param_bn::fixed_points::FixedPoints
 impl biodivine_lib_param_bn::fixed_points::FixedPoints
 pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::naive_symbolic(stg: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
@@ -11,12 +7,6 @@ pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_iterator<'a>(
 pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_merge(universe: &biodivine_lib_bdd::BddVariableSet, to_merge: alloc::vec::Vec<biodivine_lib_bdd::Bdd>, project: std::collections::hash::set::HashSet<biodivine_lib_bdd::BddVariable>) -> biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_projection<'a>(network: &biodivine_lib_param_bn::BooleanNetwork, stg: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, retain_state: &[biodivine_lib_param_bn::VariableId], retain_function: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
 pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_vertices(stg: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
-
-
-pub mod biodivine_lib_param_bn::sbml
-pub mod biodivine_lib_param_bn::sbml::export
-pub mod biodivine_lib_param_bn::sbml::import
-pub type biodivine_lib_param_bn::sbml::Layout = std::collections::hash::map::HashMap<alloc::string::String, (f64, f64)>
 
 
 pub struct biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability
@@ -29,7 +19,6 @@ pub fn biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability:
 pub fn biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::reach_fwd_basic(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
 
 
-
 pub struct biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint
 impl biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint
 pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::fix_regulation(ctx: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, old_regulation: &biodivine_lib_param_bn::Regulation, fn_is_true: &biodivine_lib_bdd::Bdd) -> core::option::Option<biodivine_lib_param_bn::Regulation>
@@ -38,92 +27,6 @@ pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_ac
 pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_inhibition(ctx: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, fn_is_true: &biodivine_lib_bdd::Bdd, input: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_observability(ctx: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, fn_is_true: &biodivine_lib_bdd::Bdd, input: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::Bdd
 
-pub struct biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-impl biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::approx_cardinality(&self) -> f64
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::copy(&self, bdd: biodivine_lib_bdd::Bdd) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::exact_cardinality(&self) -> num_bigint::bigint::BigInt
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::fn_update_projection<'a>(&self, functions: &[biodivine_lib_param_bn::VariableId], context: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::FnUpdateProjection<'a>
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::into_bdd(self) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::is_singleton(&self) -> bool
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::new(bdd: biodivine_lib_bdd::Bdd, context: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::raw_projection(&self, eliminate: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::symbolic_size(&self) -> usize
-impl biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::colors(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::intersect_colors(&self, colors: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors) -> Self
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::intersect_spaces(&self, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkSpaces) -> Self
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::minus_colors(&self, colors: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors) -> Self
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::minus_spaces(&self, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkSpaces) -> Self
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::pick_color(&self) -> Self
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::pick_singleton(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::pick_space(&self) -> Self
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::spaces(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-impl core::clone::Clone for biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::clone(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-impl core::cmp::Eq for biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-impl core::cmp::PartialEq for biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::eq(&self, other: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> bool
-impl core::hash::Hash for biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl<T> biodivine_lib_param_bn::biodivine_std::traits::Set for biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces where T: BddSet + core::clone::Clone
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::intersect(&self, other: &T) -> T
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::is_empty(&self) -> bool
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::is_subset(&self, other: &T) -> bool
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::minus(&self, other: &T) -> T
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces::union(&self, other: &T) -> T
-
-
-pub struct biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-impl biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::approx_cardinality(&self) -> f64
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::exact_cardinality(&self) -> num_bigint::bigint::BigInt
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::into_bdd(self) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::is_singleton(&self) -> bool
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::iter(&self) -> biodivine_lib_param_bn::trap_spaces::SpaceIterator
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::new(bdd: biodivine_lib_bdd::Bdd, context: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext) -> biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::pick_singleton(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::raw_projection(&self, eliminate: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::symbolic_size(&self) -> usize
-impl core::clone::Clone for biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::clone(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-impl core::cmp::Eq for biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-impl core::cmp::PartialEq for biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::eq(&self, other: &biodivine_lib_param_bn::trap_spaces::NetworkSpaces) -> bool
-impl core::hash::Hash for biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl core::iter::traits::collect::IntoIterator for biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub type biodivine_lib_param_bn::trap_spaces::NetworkSpaces::IntoIter = biodivine_lib_param_bn::trap_spaces::SpaceIterator
-pub type biodivine_lib_param_bn::trap_spaces::NetworkSpaces::Item = biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::into_iter(self) -> Self::IntoIter
-impl<T> biodivine_lib_param_bn::biodivine_std::traits::Set for biodivine_lib_param_bn::trap_spaces::NetworkSpaces where T: BddSet + core::clone::Clone
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::intersect(&self, other: &T) -> T
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::is_empty(&self) -> bool
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::is_subset(&self, other: &T) -> bool
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::minus(&self, other: &T) -> T
-pub fn biodivine_lib_param_bn::trap_spaces::NetworkSpaces::union(&self, other: &T) -> T
-
-
-pub struct biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext
-impl biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::bdd_variable_set(&self) -> &biodivine_lib_bdd::BddVariableSet
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::get_negative_variable(&self, var: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::BddVariable
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::get_positive_variable(&self, var: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::BddVariable
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::get_state_variable(&self, var: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::BddVariable
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::inner_context(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_can_go_to_true(&self, function: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_empty_colored_spaces(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_empty_spaces(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_space(&self, space: &biodivine_lib_param_bn::Space) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_sub_spaces(&self, spaces: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_super_spaces(&self, spaces: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_unit_bdd(&self) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_unit_colored_spaces(&self, graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::mk_unit_spaces(&self) -> biodivine_lib_param_bn::trap_spaces::NetworkSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::new(network: &biodivine_lib_param_bn::BooleanNetwork) -> biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext
-
 
 pub struct biodivine_lib_param_bn::trap_spaces::TrapSpaces
 impl biodivine_lib_param_bn::trap_spaces::TrapSpaces
@@ -131,37 +34,3 @@ pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::essential_symbolic(netwo
 pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::maximize(ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
 pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::minimal_symbolic(network: &biodivine_lib_param_bn::BooleanNetwork, ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, restriction: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
 pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::minimize(ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-
-
-pub struct biodivine_lib_param_bn::Space(_)
-impl biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::count_any(&self) -> usize
-pub fn biodivine_lib_param_bn::Space::count_fixed(&self) -> usize
-pub fn biodivine_lib_param_bn::Space::from_values(bn: &biodivine_lib_param_bn::BooleanNetwork, values: alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, bool)>) -> biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::intersect(&self, other: &biodivine_lib_param_bn::Space) -> core::option::Option<biodivine_lib_param_bn::Space>
-pub fn biodivine_lib_param_bn::Space::new(network: &biodivine_lib_param_bn::BooleanNetwork) -> biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::new_raw(num_vars: usize) -> biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::to_values(&self) -> alloc::vec::Vec<(biodivine_lib_param_bn::VariableId, bool)>
-impl core::clone::Clone for biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::clone(&self) -> biodivine_lib_param_bn::Space
-impl core::cmp::Eq for biodivine_lib_param_bn::Space
-impl core::cmp::PartialEq for biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::eq(&self, other: &biodivine_lib_param_bn::Space) -> bool
-impl core::cmp::PartialOrd for biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::partial_cmp(&self, other: &Self) -> core::option::Option<core::cmp::Ordering>
-impl core::fmt::Display for biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
-impl core::hash::Hash for biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl core::ops::index::Index<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::Space
-pub type biodivine_lib_param_bn::Space::Output = biodivine_lib_param_bn::ExtendedBoolean
-pub fn biodivine_lib_param_bn::Space::index(&self, index: biodivine_lib_param_bn::VariableId) -> &Self::Output
-impl core::ops::index::IndexMut<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::index_mut(&mut self, index: biodivine_lib_param_bn::VariableId) -> &mut Self::Output
-
-impl core::ops::index::Index<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::Space
-pub type biodivine_lib_param_bn::Space::Output = biodivine_lib_param_bn::ExtendedBoolean
-pub fn biodivine_lib_param_bn::Space::index(&self, index: biodivine_lib_param_bn::VariableId) -> &Self::Output
-
-impl core::ops::index::IndexMut<biodivine_lib_param_bn::VariableId> for biodivine_lib_param_bn::Space
-pub fn biodivine_lib_param_bn::Space::index_mut(&mut self, index: biodivine_lib_param_bn::VariableId) -> &mut Self::Output

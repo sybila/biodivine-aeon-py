@@ -41,7 +41,7 @@ use std::collections::HashMap;
 ///  > Whenever a `SymbolicContext` returns a list of sortable objects (like `BddVariable`,
 /// `VariableId`, or `ParameterId`), it is expected that these objects are sorted.
 ///
-#[pyclass(module = "biodivine_aeon", frozen)]
+#[pyclass(module = "biodivine_aeon", frozen, subclass)]
 #[derive(Clone)]
 pub struct SymbolicContext {
     native: biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext,
@@ -650,6 +650,15 @@ impl SymbolicContext {
 }
 
 impl SymbolicContext {
+    pub fn wrap_native(
+        py: Python,
+        ctx: biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext,
+    ) -> PyResult<SymbolicContext> {
+        Ok(SymbolicContext {
+            bdd_vars: Py::new(py, BddVariableSet::from(ctx.bdd_variable_set().clone()))?,
+            native: ctx,
+        })
+    }
     pub fn resolve_function_bdd(&self, function: &PyAny) -> PyResult<biodivine_lib_bdd::Bdd> {
         if let Ok(function) = function.extract::<Bdd>() {
             return Ok(function.as_native().clone());

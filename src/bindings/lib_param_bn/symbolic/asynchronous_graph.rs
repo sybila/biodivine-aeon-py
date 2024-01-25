@@ -167,7 +167,7 @@ impl AsynchronousGraph {
         }
     }
 
-    /// Create a symbolic `ColoredVertexSet` of consisting of unit colors and vertices with the specified variables
+    /// Create a symbolic `ColoredVertexSet` consisting of unit colors and vertices with the specified variables
     /// fixed to their respective values.
     pub fn mk_subspace(&self, subspace: &PyAny) -> PyResult<ColoredVertexSet> {
         let valuation = self.resolve_subspace_valuation(subspace)?;

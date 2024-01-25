@@ -149,7 +149,7 @@ impl Bdd {
         (self.ctx.clone(), self.data_bytes(py))
     }
 
-    fn __ctx__(&self) -> Py<BddVariableSet> {
+    pub fn __ctx__(&self) -> Py<BddVariableSet> {
         self.ctx.clone()
     }
 

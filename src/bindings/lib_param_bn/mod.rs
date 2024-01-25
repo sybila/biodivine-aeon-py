@@ -19,14 +19,21 @@ pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<model_annotation::ModelAnnotationRoot>()?;
     module.add_class::<model_annotation::ModelAnnotation>()?;
     module.add_class::<symbolic::symbolic_context::SymbolicContext>()?;
+    module.add_class::<symbolic::symbolic_space_context::SymbolicSpaceContext>()?;
     module.add_class::<symbolic::set_vertex::VertexSet>()?;
     module.add_class::<symbolic::set_vertex::_VertexModelIterator>()?;
     module.add_class::<symbolic::model_vertex::VertexModel>()?;
     module.add_class::<symbolic::set_color::ColorSet>()?;
     module.add_class::<symbolic::set_color::_ColorModelIterator>()?;
     module.add_class::<symbolic::model_color::ColorModel>()?;
+    module.add_class::<symbolic::set_spaces::SpaceSet>()?;
+    module.add_class::<symbolic::set_spaces::_SpaceModelIterator>()?;
+    module.add_class::<symbolic::model_space::SpaceModel>()?;
     module.add_class::<symbolic::set_colored_vertex::ColoredVertexSet>()?;
     module.add_class::<symbolic::set_colored_vertex::_ColorVertexModelIterator>()?;
+    module.add_class::<symbolic::set_colored_space::ColoredSpaceSet>()?;
+    module.add_class::<symbolic::set_colored_space::_ColorSpaceModelIterator>()?;
     module.add_class::<symbolic::asynchronous_graph::AsynchronousGraph>()?;
+
     Ok(())
 }

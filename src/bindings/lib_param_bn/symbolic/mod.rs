@@ -1,7 +1,11 @@
 pub mod asynchronous_graph;
 pub mod model_color;
+pub mod model_space;
 pub mod model_vertex;
 pub mod set_color;
+pub mod set_colored_space;
 pub mod set_colored_vertex;
+pub mod set_spaces;
 pub mod set_vertex;
 pub mod symbolic_context;
+pub mod symbolic_space_context;

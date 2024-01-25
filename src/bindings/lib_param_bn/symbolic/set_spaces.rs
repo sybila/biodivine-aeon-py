@@ -1,13 +1,13 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
-use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::symbolic::model_space::SpaceModel;
+use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use biodivine_lib_param_bn::symbolic_async_graph::GraphVertices;
+use biodivine_lib_param_bn::trap_spaces::NetworkSpaces;
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -16,58 +16,58 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
-/// A symbolic representation of a set of "vertices", i.e. valuations of variables
+/// A symbolic representation of a set of "spaces", i.e. hypercubes in the state space
 /// of a particular `BooleanNetwork`.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
-pub struct VertexSet {
-    ctx: Py<SymbolicContext>,
-    native: GraphVertices,
+pub struct SpaceSet {
+    ctx: Py<SymbolicSpaceContext>,
+    native: NetworkSpaces,
 }
 
-/// An internal class used for iterating over `VertexModel` instances of a `VertexSet`.
+/// An internal class used for iterating over `SpaceModel` instances of a `VertexSet`.
 #[pyclass(module = "biodivine_aeon")]
-pub struct _VertexModelIterator {
-    ctx: Py<SymbolicContext>,
+pub struct _SpaceModelIterator {
+    ctx: Py<SymbolicSpaceContext>,
     native: OwnedRawSymbolicIterator,
 }
 
-impl AsNative<GraphVertices> for VertexSet {
-    fn as_native(&self) -> &GraphVertices {
+impl AsNative<NetworkSpaces> for SpaceSet {
+    fn as_native(&self) -> &NetworkSpaces {
         &self.native
     }
 
-    fn as_native_mut(&mut self) -> &mut GraphVertices {
+    fn as_native_mut(&mut self) -> &mut NetworkSpaces {
         &mut self.native
     }
 }
 
 #[pymethods]
-impl VertexSet {
-    /// Normally, a new `VertexSet` is derived using an `AsynchronousGraph`. However, in some
-    /// cases you may want to create it manually from a `SymbolicContext` and a `Bdd`.
+impl SpaceSet {
+    /// Normally, a new `SpaceSet` is derived using a `SymbolicSpaceContext`. However, in some
+    /// cases you may want to create it manually from a `SymbolicSpaceContext` and a `Bdd`.
     ///
     /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
-    /// a valid set of vertices.
+    /// a valid set of spaces.
     #[new]
-    pub fn new(py: Python, ctx: Py<SymbolicContext>, bdd: &Bdd) -> Self {
+    pub fn new(ctx: Py<SymbolicSpaceContext>, bdd: &Bdd) -> Self {
         Self {
             ctx: ctx.clone(),
-            native: GraphVertices::new(bdd.as_native().clone(), ctx.borrow(py).as_native()),
+            native: NetworkSpaces::new(bdd.as_native().clone(), ctx.get().as_native()),
         }
     }
 
     fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         match op {
-            CompareOp::Eq => VertexSet::semantic_eq(self, other).into_py(py),
-            CompareOp::Ne => VertexSet::semantic_eq(self, other).not().into_py(py),
+            CompareOp::Eq => SpaceSet::semantic_eq(self, other).into_py(py),
+            CompareOp::Ne => SpaceSet::semantic_eq(self, other).not().into_py(py),
             _ => py.NotImplemented(),
         }
     }
 
     fn __str__(&self) -> String {
         format!(
-            "VertexSet(cardinality={}, symbolic_size={})",
+            "SpaceSet(cardinality={}, symbolic_size={})",
             self.cardinality(),
             self.symbolic_size(),
         )
@@ -75,7 +75,7 @@ impl VertexSet {
 
     fn __repr__(&self) -> String {
         format!(
-            "VertexSet(cardinality={}, symbolic_size={})",
+            "SpaceSet(cardinality={}, symbolic_size={})",
             self.cardinality(),
             self.symbolic_size(),
         )
@@ -95,11 +95,11 @@ impl VertexSet {
         hasher.finish()
     }
 
-    fn __iter__(&self) -> PyResult<_VertexModelIterator> {
-        self.items(None)
+    fn __iter__(&self, py: Python) -> PyResult<_SpaceModelIterator> {
+        self.items(None, py)
     }
 
-    /// Returns the number of vertices that are represented in this set.
+    /// Returns the number of spaces that are represented in this set.
     pub fn cardinality(&self) -> BigInt {
         self.as_native().exact_cardinality()
     }
@@ -131,17 +131,12 @@ impl VertexSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single vertex.
+    /// True if this set is a singleton, i.e. a single subspace.
     fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
 
-    /// True if this set is a subspace, i.e. it can be expressed using a single conjunctive clause.
-    fn is_subspace(&self) -> bool {
-        self.as_native().is_subspace()
-    }
-
-    /// Deterministically pick a subset of this set that contains exactly a single vertex.
+    /// Deterministically pick a subset of this set that contains exactly a single subspace.
     ///
     /// If this set is empty, the result is also empty.
     fn pick_singleton(&self) -> Self {
@@ -153,48 +148,49 @@ impl VertexSet {
         self.as_native().symbolic_size()
     }
 
-    /// Obtain the underlying `Bdd` of this `VertexSet`.
+    /// Obtain the underlying `Bdd` of this `SpaceSet`.
     fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
-        Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
+        Bdd::new_raw_2(ctx.as_ref().bdd_variable_set(), rs_bdd)
     }
 
-    /// Returns an iterator over all vertices in this `VertexSet` with an optional projection to a subset
-    /// of network variables.
+    /// Returns an iterator over all sub-spaces in this `SpaceSet` with an optional projection to
+    /// a subset of network variables.
     ///
-    /// When no `retained` collection is specified, this is equivalent to `VertexSet.__iter__`. However, if a retained
-    /// set is given, the resulting iterator only considers unique combinations of the `retained` variables.
-    /// Consequently, the resulting `VertexModel` instances will fail with an `IndexError` if a value of a variable
-    /// outside of the `retained` set is requested.
+    /// When no `retained` collection is specified, this is equivalent to `SpaceSet.__iter__`.
+    /// However, if a retained set is given, the resulting iterator only considers unique
+    /// valuations for the `retained` variables. Consequently, the resulting `SpaceModel` instances
+    /// will fail with an `IndexError` if a value of a variable outside the `retained` set is
+    /// requested.
     #[pyo3(signature = (retained = None))]
-    fn items(&self, retained: Option<&PyList>) -> PyResult<_VertexModelIterator> {
-        let ctx = self.ctx.get();
+    fn items(&self, retained: Option<&PyList>, py: Python) -> PyResult<_SpaceModelIterator> {
+        let ctx = self.ctx.borrow(py);
         let retained = if let Some(retained) = retained {
-            retained
-                .iter()
-                .map(|it| {
-                    ctx.resolve_network_variable(it)
-                        .map(|it| ctx.as_native().get_state_variable(it))
-                })
-                .collect::<PyResult<Vec<_>>>()?
+            let mut retained_vars = Vec::new();
+            for var in retained {
+                let var = ctx.as_ref().resolve_network_variable(var)?;
+                retained_vars.push(ctx.as_native().get_positive_variable(var));
+                retained_vars.push(ctx.as_native().get_negative_variable(var));
+            }
+            retained_vars
         } else {
-            self.ctx.get().as_native().state_variables().clone()
+            ctx.as_ref().as_native().all_extra_state_variables().clone()
         };
         let projection = RawProjection::new(retained, self.as_native().as_bdd());
-        Ok(_VertexModelIterator {
+        Ok(_SpaceModelIterator {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
         })
     }
 }
 
-impl VertexSet {
-    pub fn mk_native(ctx: Py<SymbolicContext>, native: GraphVertices) -> Self {
-        Self { ctx, native }
+impl SpaceSet {
+    pub fn wrap_native(ctx: Py<SymbolicSpaceContext>, native: NetworkSpaces) -> SpaceSet {
+        SpaceSet { ctx, native }
     }
 
-    pub fn mk_derived(&self, native: GraphVertices) -> Self {
+    pub fn mk_derived(&self, native: NetworkSpaces) -> Self {
         Self {
             ctx: self.ctx.clone(),
             native,
@@ -213,14 +209,14 @@ impl VertexSet {
 }
 
 #[pymethods]
-impl _VertexModelIterator {
+impl _SpaceModelIterator {
     fn __iter__(self_: Py<Self>) -> Py<Self> {
         self_
     }
 
-    fn __next__(&mut self) -> Option<VertexModel> {
+    fn __next__(&mut self) -> Option<SpaceModel> {
         self.native
             .next()
-            .map(|it| VertexModel::new_native(self.ctx.clone(), it))
+            .map(|it| SpaceModel::new_native(self.ctx.clone(), it))
     }
 }

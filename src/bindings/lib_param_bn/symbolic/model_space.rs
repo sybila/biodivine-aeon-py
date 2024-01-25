@@ -1,0 +1,147 @@
+use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
+use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::{throw_index_error, AsNative};
+use pyo3::{pyclass, pymethods, Py, PyAny, PyResult, Python};
+use std::collections::HashMap;
+
+/// Represents a single space stored in a `SpaceSet` (or a `ColoredSpaceSet`), or a projection
+/// of said space to the chosen variables.
+///
+/// Behaves like an immutable dictionary: Boolean variable values can be queried using
+/// a `VariableId`, a string name, or a `BddVariable`. If the value is unconstrained, the result
+/// is `None`. If the variable is projected away, the operation throws an `IndexError`.
+#[pyclass(module = "biodivine_aeon", frozen)]
+#[derive(Clone)]
+pub struct SpaceModel {
+    ctx: Py<SymbolicSpaceContext>,
+    native: biodivine_lib_bdd::BddPartialValuation,
+}
+
+#[pymethods]
+impl SpaceModel {
+    /// Access the underlying `SymbolicSpaceContext` connected to this `SpaceModel`.
+    pub fn __ctx__(&self) -> Py<SymbolicSpaceContext> {
+        self.ctx.clone()
+    }
+
+    pub fn __str__(&self) -> String {
+        let ctx = self.ctx.get().as_native().inner_context();
+        let items = self
+            .to_values()
+            .into_iter()
+            .map(|(var, value)| {
+                let name = ctx.get_network_variable_name(var);
+                if let Some(value) = value {
+                    format!("'{}': {}", name, i32::from(value))
+                } else {
+                    format!("'{}': *", name)
+                }
+            })
+            .collect::<Vec<_>>();
+        format!("SpaceModel({{{}}})", items.join(", "))
+    }
+
+    /// The number of actual values in this `VertexModel` (i.e. retained network variables).
+    pub fn __len__(&self) -> usize {
+        self.to_values().len()
+    }
+
+    pub fn __getitem__(&self, key: &PyAny, py: Python) -> PyResult<Option<bool>> {
+        let ctx = self.ctx.borrow(py);
+        let variable = ctx.as_ref().resolve_network_variable(key)?;
+        let p = ctx.as_native().get_positive_variable(variable);
+        let n = ctx.as_native().get_negative_variable(variable);
+        let p = self.native.get_value(p);
+        let n = self.native.get_value(n);
+        match (p, n) {
+            (Some(true), Some(false)) => Ok(Some(true)),
+            (Some(false), Some(true)) => Ok(Some(false)),
+            (Some(true), Some(true)) => Ok(None),
+            _ => throw_index_error(format!(
+                "Variable `{}` not available in this projection.",
+                ctx.as_ref().as_native().get_network_variable_name(variable)
+            )),
+        }
+    }
+
+    pub fn __contains__(&self, key: &PyAny, py: Python) -> PyResult<bool> {
+        let ctx = self.ctx.borrow(py);
+        let variable = ctx.as_ref().resolve_network_variable(key)?;
+        let p = ctx.as_native().get_positive_variable(variable);
+        let n = ctx.as_native().get_negative_variable(variable);
+        Ok(self.native.has_value(p) && self.native.has_value(n))
+    }
+
+    /// The actual "retained" network variables in this model.
+    ///
+    /// This is the list of all network variables if no projection was applied.
+    pub fn keys(&self) -> Vec<VariableId> {
+        let values = self.to_values();
+        values
+            .into_iter()
+            .map(|(it, _)| VariableId::from(it))
+            .collect()
+    }
+
+    /// The list of values for individual variables from `SpaceModel.keys`.
+    pub fn values(&self) -> Vec<Option<bool>> {
+        let values = self.to_values();
+        values.into_iter().map(|(_, it)| it).collect()
+    }
+
+    /// The list of key-value pairs represented in this symbolic model.
+    pub fn items(&self) -> Vec<(VariableId, Option<bool>)> {
+        self.to_values()
+            .into_iter()
+            .map(|(a, b)| (VariableId::from(a), b))
+            .collect()
+    }
+
+    /// The same as `SpaceModel.items`, but returns a dictionary instead.
+    pub fn to_dict(&self) -> HashMap<VariableId, Option<bool>> {
+        self.to_values()
+            .into_iter()
+            .map(|(a, b)| (VariableId::from(a), b))
+            .collect()
+    }
+
+    /// Return the underlying `BddPartialValuation` for this symbolic model.
+    pub fn to_valuation(&self, py: Python) -> BddPartialValuation {
+        BddPartialValuation::new_raw(
+            self.ctx.borrow(py).as_ref().bdd_variable_set(),
+            self.native.clone(),
+        )
+    }
+}
+
+impl SpaceModel {
+    pub fn new_native(
+        ctx: Py<SymbolicSpaceContext>,
+        native: biodivine_lib_bdd::BddPartialValuation,
+    ) -> SpaceModel {
+        SpaceModel { ctx, native }
+    }
+
+    fn to_values(&self) -> Vec<(biodivine_lib_param_bn::VariableId, Option<bool>)> {
+        // Only return extra variables:
+        let mut result = Vec::new();
+        let ctx = self.ctx.get().as_native();
+        let ctx_inner = ctx.inner_context();
+        for var in ctx_inner.network_variables() {
+            let (p, n) = (
+                ctx.get_positive_variable(var),
+                ctx.get_negative_variable(var),
+            );
+            let p = self.native.get_value(p);
+            let n = self.native.get_value(n);
+            match (p, n) {
+                (Some(true), Some(false)) => result.push((var, Some(true))),
+                (Some(false), Some(true)) => result.push((var, Some(false))),
+                (Some(true), Some(true)) => result.push((var, None)),
+                _ => continue,
+            }
+        }
+        result
+    }
+}

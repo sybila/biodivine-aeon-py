@@ -874,3 +874,51 @@ def test_symbolic_iterators():
         assert fn_b is not None
         fn_b = i.instantiate(fn_b)
         assert str(fn_b) in {"a", "a & c", "a & !c"}
+
+    ctx = SymbolicSpaceContext(bn)
+
+    unit_spaces = ctx.mk_unit_spaces()
+
+    assert sum(1 for _ in unit_spaces) == unit_spaces.cardinality()
+
+    for s in unit_spaces.items(["b", "c"]):
+        assert "a" not in s
+        assert s["b"] in [True, False, None]
+        assert s["c"] in [True, False, None]
+        with pytest.raises(IndexError):
+            assert s["a"]
+        assert s.keys() == [VariableId(1), VariableId(2)]
+        assert s["b"] == s.values()[0]
+        assert s.items()[1] == (VariableId(2), s[VariableId(2)])
+        assert s.to_dict() == dict(s.items())
+
+    unit_colored_spaces = ctx.mk_unit_colored_spaces(AsynchronousGraph(bn, ctx))
+    b = ctx.mk_singleton(b_space)
+    c = ctx.mk_singleton(c_space)
+    colored_spaces = unit_colored_spaces.intersect_spaces(b.union(c))
+
+    assert sum(1 for _ in unit_colored_spaces) == unit_colored_spaces.cardinality()
+
+    for (i, s) in colored_spaces.items(retained_variables=["b", "c"], retained_functions=["f"]):
+        assert "c" not in i
+        assert "a" not in i
+        assert "a" not in s
+        assert "b" in s
+        assert "c" in s
+
+        assert s["b"] or s["c"]
+        with pytest.raises(IndexError):
+            assert s["a"]
+
+        assert s.keys() == [VariableId(1), VariableId(2)]
+        assert s["b"] == s.values()[0]
+        assert s.items()[1] == (VariableId(2), s[VariableId(2)])
+        assert s.to_dict() == dict(s.items())
+
+        fn_b = bn.get_update_function("b")
+        assert fn_b is not None
+        fn_b = i.instantiate(fn_b)
+        assert str(fn_b) in {"a", "a & c", "a & !c"}
+
+
+

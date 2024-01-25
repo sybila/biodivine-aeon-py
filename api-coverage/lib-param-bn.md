@@ -31,13 +31,19 @@ An `ExtendedBoolean` is simply `bool | None`.
 
 Finally, a `BinaryOp` is `and`/`or`/`imp`/`iff`/`xor`.
 
-### `Variable`, `Parameter` and `Regulation`
+### `Variable`, `Parameter`, `Regulation`, `Space`, and `SbmlLayout`
 
 Since these don't really have much use (`Variable` only contains the name,
 `Parameter` name and arity), we don't have them in Python. Instead, you
 can ask for a name/arity using a "context object".
 
-For `Regulation`, we can instead use a `TypedDict` and we should be ok. 
+For `Regulation`, we can instead use a `TypedDict` and we should be ok.
+
+For `Space`, we default to normal Python dictionaries. It's easier to 
+include dynamic types in those.
+
+For `SbmlLayout`, we currently do not provide any way to access this.
+This will be later added once the SBML library matures.
 
 ## `VariableId` and `ParameterId` (frozen)
 
@@ -1247,7 +1253,103 @@ Right now, `FunctionTable` is not exported. Instead, we just convert it to a `li
     </tbody>
 </table>
 
-## `ColorSet`, `VertexSet`, and `ColoredVertexSet` (`frozen`)
+## `SymbolicSpaceContext` (`frozen`)
+
+Inherits from `SymbolicContext`. Extra symbolic variables are still accessible
+using the normal methods, but new methods are added to facilitate the mapping.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::new</code></td>
+            <td><code>SymbolicSpaceContext.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::eq</code></td>
+            <td><code>SymbolicSpaceContext.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicSpaceContext.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicSpaceContext.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SymbolicSpaceContext.__deepcopy__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Symbolic variable mapping</td></tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::get_negative_variable</code></td>
+            <td><code>SymbolicSpaceContext.get_negative_space_variable</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::get_positive_variable</code></td>
+            <td><code>SymbolicSpaceContext.get_positive_space_variable</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Encoding methods</td></tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_can_go_to_true</code></td>
+            <td><code>SymbolicSpaceContext.mk_can_go_to_true</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_empty_colored_spaces</code></td>
+            <td><code>SymbolicSpaceContext.mk_empty_colored_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_empty_spaces</code></td>
+            <td><code>SymbolicSpaceContext.mk_empty_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_unit_colored_spaces</code></td>
+            <td><code>SymbolicSpaceContext.mk_unit_colored_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_unit_spaces</code></td>
+            <td><code>SymbolicSpaceContext.mk_unit_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_unit_bdd</code></td>
+            <td><code>SymbolicSpaceContext.mk_unit_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_sub_spaces</code></td>
+            <td><code>SymbolicSpaceContext.mk_sub_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_super_spaces</code></td>
+            <td><code>SymbolicSpaceContext.mk_super_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_space</code></td>
+            <td><code>SymbolicSpaceContext.mk_singleton</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::bdd_variable_set</code></td>
+            <td><i>inherited</i></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::get_state_variable</code></td>
+            <td><i>inherited</i></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::inner_context</code></td>
+            <td><i>automatically through inheritence</i></td>
+        </tr>
+    </tbody>
+</table>
+
+## `ColorSet`, `VertexSet`, `SpaceSet`, `ColoredVertexSet`, and `ColoredSpaceSet` (`frozen`)
 
 Currently, symbolic sets hold a reference to the underlying `SymbolicContext`. As such, they
 cannot be serialized easily. For now, you should use BDD serialization instead.
@@ -1490,6 +1592,102 @@ see below.
     <tbody>
         <tr><td colspan="2" align="center">Special methods</td></tr>
         <tr>
+            <td><code>NetworkSpaces::new</code></td>
+            <td><code>SpaceSet.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::eq</code></td>
+            <td><code>SpaceSet.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceSet.__str__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::clone</code></td>
+            <td><code>SpaceSet.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceSet.__deepcopy__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::hash</code></td>
+            <td><code>SpaceSet.__hash__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::iter</code></td>
+            <td rowspan="2"><code>SpaceSet.__iter__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::into_iter</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Set operations</td></tr>
+        <tr>
+            <td><code>NetworkSpaces::approx_cardinality</code></td>
+            <td rowspan="2"><code>SpaceSet.cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::exact_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::intersect</code></td>
+            <td><code>SpaceSet.intersect</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::minus</code></td>
+            <td><code>SpaceSet.minus</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::union</code></td>
+            <td><code>SpaceSet.union</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::is_empty</code></td>
+            <td><code>SpaceSet.is_empty</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::is_subset</code></td>
+            <td><code>SpaceSet.is_subset</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::is_singleton</code></td>
+            <td><code>SpaceSet.is_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::pick_singleton</code></td>
+            <td><code>SpaceSet.pick_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::symbolic_size</code></td>
+            <td><code>SpaceSet.symbolic_size</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>NetworkSpaces::as_bdd</code></td>
+            <td rowspan="2"><code>SpaceSet.to_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::into_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::raw_projection</code></td>
+            <td><code>SpaceSet.items</code></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
             <td><code>GraphColoredVertices::new</code></td>
             <td><code>ColoredVertexSet.__init__</code></td>
         </tr>
@@ -1554,10 +1752,6 @@ see below.
             <td><code>ColoredVertexSet.is_subspace</code></td>
         </tr>
         <tr>
-            <td><code>GraphColoredVertices::pick_singleton</code></td>
-            <td><code>ColoredVertexSet.pick_singleton</code></td>
-        </tr>
-        <tr>
             <td><code>GraphColoredVertices::symbolic_size</code></td>
             <td><code>ColoredVertexSet.symbolic_size</code></td>
         </tr>
@@ -1579,7 +1773,7 @@ see below.
         </tr>
         <tr>
             <td><code>GraphColoredVertices::minus_colors</code></td>
-            <td><code>ColoredVertexSet.minus_vertices</code></td>
+            <td><code>ColoredVertexSet.minus_colors</code></td>
         </tr>
         <tr>
             <td><code>GraphColoredVertices::minus_vertices</code></td>
@@ -1636,6 +1830,138 @@ see below.
         </tr>
     </tbody>
 </table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::new</code></td>
+            <td><code>ColoredSpaceSet.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::eq</code></td>
+            <td><code>ColoredSpaceSet.__richcmp__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredSpaceSet.__str__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::clone</code></td>
+            <td><code>ColoredSpaceSet.__copy__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredSpaceSet.__deepcopy__</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::hash</code></td>
+            <td><code>ColoredSpaceSet.__hash__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredSpaceSet.__iter__</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Set operations</td></tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::approx_cardinality</code></td>
+            <td rowspan="2"><code>ColoredSpaceSet.cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::exact_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::intersect</code></td>
+            <td><code>ColoredSpaceSet.intersect</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::minus</code></td>
+            <td><code>ColoredSpaceSet.minus</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::union</code></td>
+            <td><code>ColoredSpaceSet.union</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::is_empty</code></td>
+            <td><code>ColoredSpaceSet.is_empty</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::is_subset</code></td>
+            <td><code>ColoredSpaceSet.is_subset</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::is_singleton</code></td>
+            <td><code>ColoredSpaceSet.is_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::symbolic_size</code></td>
+            <td><code>ColoredSpaceSet.symbolic_size</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::colors</code></td>
+            <td><code>ColoredSpaceSet.colors</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::spaces</code></td>
+            <td><code>ColoredSpaceSet.spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::intersect_colors</code></td>
+            <td><code>ColoredSpaceSet.intersect_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::intersect_spaces</code></td>
+            <td><code>ColoredSpaceSet.intersect_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::minus_colors</code></td>
+            <td><code>ColoredSpaceSet.minus_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::minus_spaces</code></td>
+            <td><code>ColoredSpaceSet.minus_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::pick_color</code></td>
+            <td><code>ColoredSpaceSet.pick_color</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::pick_space</code></td>
+            <td><code>ColoredSpaceSet.pick_space</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::pick_singleton</code></td>
+            <td><code>ColoredSpaceSet.pick_singleton</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::as_bdd</code></td>
+            <td rowspan="2"><code>ColoredSpaceSet.to_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::into_bdd</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::copy</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::fn_update_projection</code></td>
+            <td rowspan="2"><code>ColoredSpaceSet.items</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::raw_projection</code></td>
+        </tr>
+    </tbody>
+</table>
+
 
 ## Symbolic iterators
 
@@ -1802,7 +2128,82 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
     </tbody>
 </table>
 
-#### `_ColorVertexModelIterator`
+### `_SpaceModelIterator` and `SpaceModel`
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>_SpaceModelIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>_SpaceModelIterator.__next__</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.__ctx__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.__str__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.__len__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.__getitem__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.__contains__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.keys</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.values</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.items</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.to_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.to_valuation</code></td>
+        </tr>
+    </tbody>
+</table>
+
+
+#### `_ColorVertexModelIterator` and `_ColorSpaceModelIterator`
 
 <table>
     <thead>
@@ -1820,6 +2221,26 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         <tr>
             <td></td>
             <td><code>_ColorVertexModelIterator.__next__</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Special methods</td></tr>
+        <tr>
+            <td></td>
+            <td><code>_ColorSpaceModelIterator.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>_ColorSpaceModelIterator.__next__</code></td>
         </tr>
     </tbody>
 </table>
