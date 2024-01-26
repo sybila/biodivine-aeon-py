@@ -719,9 +719,9 @@ class BooleanNetwork(RegulatoryGraph):
     def __init__(
             self,
             variables: Sequence[str] | None = None,
-            regulations: Sequence[Regulation[str] | str] = None,
+            regulations: Sequence[Regulation[str] | str] | None = None,
             parameters: Sequence[tuple[str, int]] | None = None,
-            functions: Sequence[str | None] | Mapping[str, str] = None,
+            functions: Sequence[str | None] | Mapping[str, str] | None = None,
     ) -> None:
         """
         A new `BooleanNetwork` is constructed in a similar fashion to `RegulatoryGraph`, but additionally
@@ -1359,6 +1359,28 @@ class AsynchronousGraph:
     def var_can_pre(self, var: VariableIdType, set: ColoredVertexSet) -> ColoredVertexSet: ...
     def var_can_pre_out(self, var: VariableIdType, set: ColoredVertexSet) -> ColoredVertexSet: ...
     def var_can_pre_within(self, var: VariableIdType, set: ColoredVertexSet) -> ColoredVertexSet: ...
+
+class TrapSpaces:
+    @staticmethod
+    def minimize(ctx: SymbolicSpaceContext, set: ColoredSpaceSet) -> ColoredSpaceSet: ...
+    @staticmethod
+    def maximize(ctx: SymbolicSpaceContext, set: ColoredSpaceSet) -> ColoredSpaceSet: ...
+    @staticmethod
+    def essential_symbolic(network: BooleanNetwork, ctx: SymbolicSpaceContext, restriction: ColoredSpaceSet) -> ColoredSpaceSet: ...
+    @staticmethod
+    def minimal_symbolic(network: BooleanNetwork, ctx: SymbolicSpaceContext, restriction: ColoredSpaceSet) -> ColoredSpaceSet: ...
+
+class FixedPoints:
+    @staticmethod
+    def symbolic(graph: AsynchronousGraph, set: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def symbolic_vertices(graph: AsynchronousGraph, set: ColoredVertexSet) -> VertexSet: ...
+    @staticmethod
+    def symbolic_colors(graph: AsynchronousGraph, set: ColoredVertexSet) -> ColorSet: ...
+
+class Attractors:
+    @staticmethod
+    def attractors(graph: AsynchronousGraph, set: ColoredVertexSet) -> list[ColoredVertexSet]: ...
 
 BddVariableType: TypeAlias = BddVariable | str
 VariableIdType: TypeAlias = VariableId | str

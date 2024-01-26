@@ -1,14 +1,3 @@
-pub struct biodivine_lib_param_bn::fixed_points::FixedPoints
-impl biodivine_lib_param_bn::fixed_points::FixedPoints
-pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::naive_symbolic(stg: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
-pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic(stg: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
-pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_colors(stg: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
-pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_iterator<'a>(stg: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, size_limit: usize) -> biodivine_lib_param_bn::fixed_points::SymbolicIterator<'a>
-pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_merge(universe: &biodivine_lib_bdd::BddVariableSet, to_merge: alloc::vec::Vec<biodivine_lib_bdd::Bdd>, project: std::collections::hash::set::HashSet<biodivine_lib_bdd::BddVariable>) -> biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_projection<'a>(network: &biodivine_lib_param_bn::BooleanNetwork, stg: &'a biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, retain_state: &[biodivine_lib_param_bn::VariableId], retain_function: &[biodivine_lib_param_bn::VariableId]) -> biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::MixedProjection<'a>
-pub fn biodivine_lib_param_bn::fixed_points::FixedPoints::symbolic_vertices(stg: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, restriction: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
-
-
 pub struct biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability
 impl biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability
 pub fn biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::reach<F: core::ops::function::Fn(&biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, biodivine_lib_param_bn::VariableId) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, step: F) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
@@ -26,11 +15,3 @@ pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::infer
 pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_activation(ctx: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, fn_is_true: &biodivine_lib_bdd::Bdd, input: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_inhibition(ctx: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, fn_is_true: &biodivine_lib_bdd::Bdd, input: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_observability(ctx: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext, fn_is_true: &biodivine_lib_bdd::Bdd, input: biodivine_lib_param_bn::VariableId) -> biodivine_lib_bdd::Bdd
-
-
-pub struct biodivine_lib_param_bn::trap_spaces::TrapSpaces
-impl biodivine_lib_param_bn::trap_spaces::TrapSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::essential_symbolic(network: &biodivine_lib_param_bn::BooleanNetwork, ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, restriction: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::maximize(ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::minimal_symbolic(network: &biodivine_lib_param_bn::BooleanNetwork, ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, restriction: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces
-pub fn biodivine_lib_param_bn::trap_spaces::TrapSpaces::minimize(ctx: &biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext, spaces: &biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces) -> biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces

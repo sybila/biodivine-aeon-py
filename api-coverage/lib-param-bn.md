@@ -2557,3 +2557,94 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
     </tbody>
 </table>
+
+## Algorithm classes
+
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Algorithm methods</td></tr>
+        <tr>
+            <td><code>TrapSpaces::minimize</code></td>
+            <td><code>TrapSpaces.minimize</code></td>
+        </tr>
+        <tr>
+            <td><code>TrapSpaces::maximize</code></td>
+            <td><code>TrapSpaces.maximize</code></td>
+        </tr>
+        <tr>
+            <td><code>TrapSpaces::essential_symbolic</code></td>
+            <td><code>TrapSpaces.essential_symbolic</code></td>
+        </tr>
+        <tr>
+            <td><code>TrapSpaces::minimal_symbolic</code></td>
+            <td><code>TrapSpaces.minimal_symbolic</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Algorithm methods</td></tr>
+        <tr>
+            <td><code>FixedPoints::symbolic</code></td>
+            <td><code>FixedPoints.symbolic</code></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::symbolic_vertices</code></td>
+            <td><code>FixedPoints.symbolic_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::symbolic_colors</code></td>
+            <td><code>FixedPoints.symbolic_colors</code></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::naive_symbolic</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::symbolic_iterator</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::symbolic_merge</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::symbolic_projection</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::naive_symbolic</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::solver_iterator</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::solver_vertex_iterator</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::colver_color_iterator</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>FixedPoints::make_fixed_points_solver</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>

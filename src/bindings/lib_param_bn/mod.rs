@@ -1,6 +1,7 @@
 use pyo3::prelude::PyModule;
 use pyo3::PyResult;
 
+pub mod algorithms;
 pub mod boolean_network;
 pub mod fixed_points;
 pub mod model_annotation;
@@ -34,6 +35,8 @@ pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<symbolic::set_colored_space::ColoredSpaceSet>()?;
     module.add_class::<symbolic::set_colored_space::_ColorSpaceModelIterator>()?;
     module.add_class::<symbolic::asynchronous_graph::AsynchronousGraph>()?;
-
+    module.add_class::<algorithms::trap_spaces::TrapSpaces>()?;
+    module.add_class::<algorithms::fixed_points::FixedPoints>()?;
+    module.add_class::<algorithms::attractors::Attractors>()?;
     Ok(())
 }

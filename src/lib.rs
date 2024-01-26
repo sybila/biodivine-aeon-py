@@ -27,7 +27,7 @@ mod bindings;
 /// possible -- ideally, the stuff in here should be eventually published to crates.io and turned
 /// into a dependency.
 ///
-//mod internal;
+mod internal;
 mod pyo3_utils;
 
 fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
@@ -53,6 +53,11 @@ fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
         return module.setattr("LOG_LEVEL", 1);
     }
     module.setattr("LOG_LEVEL", 0)
+}
+
+fn global_log_level(py: Python) -> PyResult<usize> {
+    let module = PyModule::import(py, "biodivine_aeon")?;
+    module.getattr("LOG_LEVEL")?.extract()
 }
 
 /// AEON.py is a library...

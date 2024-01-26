@@ -31,7 +31,7 @@ where
     }
     true
 }
-
+/*
 /// Fully compute reachable states from `initial` inside `universe` using transitions under
 /// `variables`.
 ///
@@ -50,7 +50,7 @@ pub fn reach_fwd(
         }
     }
     set
-}
+}*/
 
 /// Fully compute back-reachable states from `initial` inside `universe` using transitions under
 /// `variables`.
