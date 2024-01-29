@@ -123,6 +123,11 @@ jobs:
     # This also tests that compilation with dynamic Z3 linking is not broken.
     needs: check
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Linux builds run with all supported versions of python. Other
+        # operating systems just run the latest recommended version.
+        python: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - name: Checkout.
         uses: actions/checkout@v4
@@ -137,7 +142,7 @@ jobs:
       - name: Setup Python.
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.python }}
           architecture: x64
       - uses: dtolnay/rust-toolchain@stable
         with:
