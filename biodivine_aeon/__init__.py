@@ -1,7 +1,8 @@
-from typing import Literal, TypedDict, Mapping, Union
+from typing import Literal, TypedDict, Mapping, Union, Optional
 
 # Notes on Python version updates:
 #  - TODO: If we ever move to 3.10, we can start using `TypeAlias`.
+#  - TODO: If we ever move to 3.10, we can start using `|` instead of `Union` (and stop using `Optional`).
 #  - TODO: If we ever move to 3.11, we can start using `Generic` and `TypedDict` together.
 #  - TODO: If we ever move to 3.12, we can start using `type` instead of `TypeAlias`.
 #  - TODO: If we ever move to 3.12, we can start using special syntax for generics.
@@ -34,6 +35,8 @@ __all__ = [
               'BoolClauseType',
               'BoolExpressionType',
               'Regulation',
+              'IdRegulation',
+              'NamedRegulation',
           ] + [x for x in biodivine_aeon.__all__ if not x.startswith("_")]
 
 LOG_NOTHING: Literal[0] = 0
@@ -72,35 +75,35 @@ while interactive environments should print some progress messages for non-trivi
 sure to get in touch.) 
 """
 
-BddVariableType = BddVariable | str
+BddVariableType = Union[BddVariable, str]
 """
 You can typically refer to a `Bdd` variable using its `BddVariable` ID object,
 or you can use a "raw" `str` name. However, using names instead of IDs in frequently
 running code incurs a performance penalty.
 """
 
-VariableIdType = VariableId | str
+VariableIdType = Union[VariableId, str]
 """
 You can typically refer to a network variable using its `VariableId` typed index,
 or you can use a "raw" `str` name. However, using names instead of IDs in frequently
 running code incurs a performance penalty.
 """
 
-ParameterIdType = ParameterId | str
+ParameterIdType = Union[ParameterId, str]
 """
 You can typically refer to a network parameter using its `ParameterId` typed index,
 or you can use a "raw" `str` name. However, using names instead of IDs in frequently
 running code incurs a performance penalty.
 """
 
-BoolType = bool | int
+BoolType = Union[bool, int]
 """
 Most methods can also accept `0`/`1` wherever `False`/`True` would be typically required.
 
  > Note that `typing.Literal` is not used here due to how it behaves when typechecking in mappings/collections.
 """
 
-SignType = Literal["positive", "+", "negative", "-"] | bool
+SignType = Union[bool, Literal["positive", "+", "negative", "-"]]
 """
 Sign is used in the context of regulatory networks to indicate positive/negative interaction,
 but can be also used for more general graph concepts, like positive/negative cycle.
@@ -111,14 +114,14 @@ BinaryOperator = Literal["and", "or", "imp", "iff", "xor"]
 Lists the supported Boolean binary operators.
 """
 
-BoolClauseType = BddPartialValuation | BddValuation | Mapping[str, BoolType] | Mapping[BddVariable, BoolType]
+BoolClauseType = Union[BddPartialValuation, BddValuation, Mapping[str, BoolType], Mapping[BddVariable, BoolType]]
 """
 A Boolean clause represents a collection of literals. This can be either done through one of the valuation types, 
 or through a regular dictionary. However, any representation other than `BddPartialValuation` incurs a performance
 penalty due to conversion.
 """
 
-BoolExpressionType = BooleanExpression | str
+BoolExpressionType = Union[BooleanExpression, str]
 """
 A `BooleanExpression` can be typically also substituted with its "raw" string representation. However, this
 requires the expression to be repeatedly parsed whenever used and is thus slower and more error prone.
@@ -128,7 +131,7 @@ requires the expression to be repeatedly parsed whenever used and is thus slower
 # class Regulation(TypedDict, Generic[IDT]):
 #     source: IDT
 #     target: IDT
-#     sign: SignType | None
+#     sign: Optional[SignType]
 #     essential: BoolType
 #     """
 #     A typed dictionary that stores data about a single regulation. Parametrized by an "identifier type" which 
@@ -144,7 +147,7 @@ requires the expression to be repeatedly parsed whenever used and is thus slower
 class IdRegulation(TypedDict):
     source: VariableId
     target: VariableId
-    sign: SignType | None
+    sign: Optional[SignType]
     essential: BoolType
     """
     See `Regulation` type alias.
@@ -153,12 +156,12 @@ class IdRegulation(TypedDict):
 class NamedRegulation(TypedDict):
     source: str
     target: str
-    sign: SignType | None
+    sign: Optional[SignType]
     essential: BoolType
     """
     See `Regulation` type alias.
     """
-    
+
 Regulation = Union[IdRegulation, NamedRegulation]
 """
 A typed dictionary that stores data about a single regulation. Parametrized by an "identifier type" which 

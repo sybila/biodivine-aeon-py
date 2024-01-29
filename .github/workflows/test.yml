@@ -124,6 +124,7 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         # Linux builds run with all supported versions of python. Other
         # operating systems just run the latest recommended version.
