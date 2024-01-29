@@ -1,4 +1,4 @@
-from typing import TypeAlias, Literal, Callable, Sequence, TypedDict, Iterator, overload, Mapping, TypeVar, Generic
+from typing import Literal, Callable, Sequence, TypedDict, Iterator, overload, Mapping, Union
 
 LOG_NOTHING: Literal[0]
 LOG_ESSENTIAL: Literal[1]
@@ -611,7 +611,7 @@ class ParameterId:
 class RegulatoryGraph:
     def __init__(self,
                  variables: Sequence[str] | None = None,
-                 regulations: Sequence[Regulation[str] | str] | None = None
+                 regulations: Sequence[NamedRegulation | str] | None = None
     ) -> None:
         """
         A `RegulatoryGraph` can be constructed from two optional arguments:
@@ -661,17 +661,17 @@ class RegulatoryGraph:
         ...
     def regulation_count(self) -> int:
         ...
-    def regulations(self) -> list[Regulation[VariableId]]:
+    def regulations(self) -> list[IdRegulation]:
         ...
     def regulation_strings(self) -> list[str]:
         ...
-    def find_regulation(self, source: VariableIdType, target: VariableIdType) -> Regulation[VariableId] | None:
+    def find_regulation(self, source: VariableIdType, target: VariableIdType) -> IdRegulation | None:
         ...
-    def add_regulation(self, regulation: Regulation[str] | Regulation[VariableId] | str) -> None:
+    def add_regulation(self, regulation: Regulation | str) -> None:
         ...
-    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> Regulation[VariableId]:
+    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> IdRegulation:
         ...
-    def ensure_regulation(self, regulation: Regulation[str] | Regulation[VariableId] | str) -> Regulation[VariableId] | None:
+    def ensure_regulation(self, regulation: Regulation | str) -> IdRegulation | None:
         ...
     def extend(self, variables: Sequence[str]) -> RegulatoryGraph:
         ...
@@ -719,7 +719,7 @@ class BooleanNetwork(RegulatoryGraph):
     def __init__(
             self,
             variables: Sequence[str] | None = None,
-            regulations: Sequence[Regulation[str] | str] | None = None,
+            regulations: Sequence[NamedRegulation | str] | None = None,
             parameters: Sequence[tuple[str, int]] | None = None,
             functions: Sequence[str | None] | Mapping[str, str] | None = None,
     ) -> None:
@@ -757,11 +757,11 @@ class BooleanNetwork(RegulatoryGraph):
         ...
     def set_variable_name(self, variable: VariableIdType, name: str) -> None:
         ...
-    def add_regulation(self, regulation: Regulation[str] | Regulation[VariableId] | str) -> None:
+    def add_regulation(self, regulation: Regulation | str) -> None:
         ...
-    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> Regulation[VariableId]:
+    def remove_regulation(self, source: VariableIdType, target: VariableIdType) -> IdRegulation:
         ...
-    def ensure_regulation(self, regulation: Regulation[str] | Regulation[VariableId] | str) -> Regulation[VariableId] | None:
+    def ensure_regulation(self, regulation: Regulation | str) -> IdRegulation | None:
         ...
     def extend(self, variables: Sequence[str]) -> BooleanNetwork:
         ...
@@ -1382,17 +1382,28 @@ class Attractors:
     @staticmethod
     def attractors(graph: AsynchronousGraph, set: ColoredVertexSet) -> list[ColoredVertexSet]: ...
 
-BddVariableType: TypeAlias = BddVariable | str
-VariableIdType: TypeAlias = VariableId | str
-ParameterIdType: TypeAlias = ParameterId | str
-BoolType: TypeAlias = bool | int
-SignType: TypeAlias = Literal["positive", "+", "negative", "-"] | bool
-BinaryOperator: TypeAlias = Literal["and", "or", "imp", "iff", "xor"]
-BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | Mapping[str, BoolType] | Mapping[BddVariable, BoolType]
-BoolExpressionType: TypeAlias = BooleanExpression | str
-IDT = TypeVar('IDT', covariant=True)
-class Regulation(TypedDict, Generic[IDT]):
-    source: IDT
-    target: IDT
+BddVariableType = BddVariable | str
+VariableIdType = VariableId | str
+ParameterIdType = ParameterId | str
+BoolType = bool | int
+SignType = Literal["positive", "+", "negative", "-"] | bool
+BinaryOperator = Literal["and", "or", "imp", "iff", "xor"]
+BoolClauseType = BddPartialValuation | BddValuation | Mapping[str, BoolType] | Mapping[BddVariable, BoolType]
+BoolExpressionType = BooleanExpression | str
+# IDT = TypeVar('IDT', covariant=True)
+# class Regulation(TypedDict, Generic[IDT]):
+#     source: IDT
+#     target: IDT
+#     sign: SignType | None
+#     essential: BoolType
+class IdRegulation(TypedDict):
+    source: VariableId
+    target: VariableId
     sign: SignType | None
     essential: BoolType
+class NamedRegulation(TypedDict):
+    source: str
+    target: str
+    sign: SignType | None
+    essential: BoolType
+Regulation = Union[IdRegulation, NamedRegulation]

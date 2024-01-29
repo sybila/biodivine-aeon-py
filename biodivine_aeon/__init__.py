@@ -1,4 +1,10 @@
-from typing import TypeAlias, Literal, TypedDict, Mapping, TypeVar, Generic
+from typing import Literal, TypedDict, Mapping, Union
+
+# Notes on Python version updates:
+#  - TODO: If we ever move to 3.10, we can start using `TypeAlias`.
+#  - TODO: If we ever move to 3.11, we can start using `Generic` and `TypedDict` together.
+#  - TODO: If we ever move to 3.12, we can start using `type` instead of `TypeAlias`.
+#  - TODO: If we ever move to 3.12, we can start using special syntax for generics.
 
 # Counterintuitively, these two lines should actually reexport the native PyO3 module here. But it is a bit of a hack
 # which does not work super reliably. Refer to the PyO3 guide for how this should be handled if it stops working.
@@ -66,73 +72,103 @@ while interactive environments should print some progress messages for non-trivi
 sure to get in touch.) 
 """
 
-BddVariableType: TypeAlias = BddVariable | str
+BddVariableType = BddVariable | str
 """
 You can typically refer to a `Bdd` variable using its `BddVariable` ID object,
 or you can use a "raw" `str` name. However, using names instead of IDs in frequently
 running code incurs a performance penalty.
 """
 
-VariableIdType: TypeAlias = VariableId | str
+VariableIdType = VariableId | str
 """
 You can typically refer to a network variable using its `VariableId` typed index,
 or you can use a "raw" `str` name. However, using names instead of IDs in frequently
 running code incurs a performance penalty.
 """
 
-ParameterIdType: TypeAlias = ParameterId | str
+ParameterIdType = ParameterId | str
 """
 You can typically refer to a network parameter using its `ParameterId` typed index,
 or you can use a "raw" `str` name. However, using names instead of IDs in frequently
 running code incurs a performance penalty.
 """
 
-BoolType: TypeAlias = bool | int
+BoolType = bool | int
 """
 Most methods can also accept `0`/`1` wherever `False`/`True` would be typically required.
 
  > Note that `typing.Literal` is not used here due to how it behaves when typechecking in mappings/collections.
 """
 
-SignType: TypeAlias = Literal["positive", "+", "negative", "-"] | bool
+SignType = Literal["positive", "+", "negative", "-"] | bool
 """
 Sign is used in the context of regulatory networks to indicate positive/negative interaction,
 but can be also used for more general graph concepts, like positive/negative cycle.
 """
 
-BinaryOperator: TypeAlias = Literal["and", "or", "imp", "iff", "xor"]
+BinaryOperator = Literal["and", "or", "imp", "iff", "xor"]
 """
 Lists the supported Boolean binary operators.
 """
 
-BoolClauseType: TypeAlias = BddPartialValuation | BddValuation | Mapping[str, BoolType] | Mapping[BddVariable, BoolType]
+BoolClauseType = BddPartialValuation | BddValuation | Mapping[str, BoolType] | Mapping[BddVariable, BoolType]
 """
 A Boolean clause represents a collection of literals. This can be either done through one of the valuation types, 
 or through a regular dictionary. However, any representation other than `BddPartialValuation` incurs a performance
 penalty due to conversion.
 """
 
-BoolExpressionType: TypeAlias = BooleanExpression | str
+BoolExpressionType = BooleanExpression | str
 """
 A `BooleanExpression` can be typically also substituted with its "raw" string representation. However, this
 requires the expression to be repeatedly parsed whenever used and is thus slower and more error prone.
 """
 
-IDT = TypeVar('IDT', covariant=True)
+# IDT = TypeVar('IDT', covariant=True)
+# class Regulation(TypedDict, Generic[IDT]):
+#     source: IDT
+#     target: IDT
+#     sign: SignType | None
+#     essential: BoolType
+#     """
+#     A typed dictionary that stores data about a single regulation. Parametrized by an "identifier type" which 
+#     can be either `str` or `VariableId`.
+    
+#     Typically both `str` and `VariableId` are accepted as inputs, but only `VariableId` is provided as output.
+    
+#     For backwards compatibility purposes, the `sign` key is also equivalent to `monotonicity` and `essential`
+#     is equivalent to `observable`. However, we do not include this in the type hints to discourage the
+#     usage of these deprecated dictionary keys.
+#     """
 
-
-class Regulation(TypedDict, Generic[IDT]):
-    source: IDT
-    target: IDT
+class IdRegulation(TypedDict):
+    source: VariableId
+    target: VariableId
     sign: SignType | None
     essential: BoolType
     """
-    A typed dictionary that stores data about a single regulation. Parametrized by an "identifier type" which 
-    can be either `str` or `VariableId`.
-    
-    Typically both `str` and `VariableId` are accepted as inputs, but only `VariableId` is provided as output.
-    
-    For backwards compatibility purposes, the `sign` key is also equivalent to `monotonicity` and `essential`
-    is equivalent to `observable`. However, we do not include this in the type hints to discourage the
-    usage of these deprecated dictionary keys.
+    See `Regulation` type alias.
     """
+
+class NamedRegulation(TypedDict):
+    source: str
+    target: str
+    sign: SignType | None
+    essential: BoolType
+    """
+    See `Regulation` type alias.
+    """
+    
+Regulation = Union[IdRegulation, NamedRegulation]
+"""
+A typed dictionary that stores data about a single regulation. Parametrized by an "identifier type" which 
+can be either `str` or `VariableId`.
+    
+Typically both `str` and `VariableId` are accepted as inputs, but only `VariableId` is provided as output.
+    
+For backwards compatibility purposes, the `sign` key is also equivalent to `monotonicity` and `essential`
+is equivalent to `observable`. However, we do not include this in the type hints to discourage the
+usage of these deprecated dictionary keys.
+
+ > For backwards compatibility, the type is currently not generic, but provided as two separate aliases.
+"""
