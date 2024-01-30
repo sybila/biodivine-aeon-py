@@ -38,5 +38,6 @@ pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<algorithms::trap_spaces::TrapSpaces>()?;
     module.add_class::<algorithms::fixed_points::FixedPoints>()?;
     module.add_class::<algorithms::attractors::Attractors>()?;
+    module.add_class::<algorithms::percolation::Percolation>()?;
     Ok(())
 }

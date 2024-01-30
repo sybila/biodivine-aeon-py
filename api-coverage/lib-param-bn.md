@@ -2648,3 +2648,19 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
     </tbody>
 </table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Algorithm methods</td></tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::percolate_space</code></td>
+            <td><code>Percolation.percolate_subspace</code></td>
+        </tr>
+    </tbody>
+</table>

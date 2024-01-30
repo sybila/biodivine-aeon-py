@@ -1386,6 +1386,10 @@ class Attractors:
     @staticmethod
     def attractors(graph: AsynchronousGraph, set: ColoredVertexSet) -> list[ColoredVertexSet]: ...
 
+class Percolation:
+    @staticmethod
+    def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
+
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]
 ParameterIdType = Union[ParameterId, str]
