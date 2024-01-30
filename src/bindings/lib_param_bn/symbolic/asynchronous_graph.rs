@@ -417,6 +417,6 @@ impl AsynchronousGraph {
             }
             return Ok(result);
         }
-        throw_type_error("Expected a dictionary of VariableIdType keys and BoolType values.")
+        throw_type_error("Expected a dictionary of `VariableIdType` keys and `BoolType` values.")
     }
 }
