@@ -2664,3 +2664,39 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
     </tbody>
 </table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Algorithm methods</td></tr>
+        <tr>
+            <td><code>Reachability::reach_fwd</code></td>
+            <td><code>Reachability.reach_fwd</code></td>
+        </tr>
+        <tr>
+            <td><code>Reachability::reach_bwd</code></td>
+            <td><code>Reachability.reach_bwd</code></td>
+        </tr>
+        <tr>
+            <td><code>Reachability::reach</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Reachability::reach_basic_saturation</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Reachability::reach_fwd_basic</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Reachability::reach_bwd_basic</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>

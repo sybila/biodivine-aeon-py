@@ -20,7 +20,9 @@ When you update the Rust dependency, you should:
   things like equality or ordering, as PyO3 does not generate these 
   automatically, even if the original structures implement the respective traits. 
   See [Python data model](https://docs.python.org/3/reference/datamodel.html) 
-  for more details.
+  for more details. 
+- You can also specify `__copy__` and `__deepcopy__` methods
+  that should work with the default Python `copy` module.
 - Finally, under ideal conditions, we would like to ensure that most types
   are [pickle-friendly](https://docs.python.org/3/library/pickle.html). Usually,
   this can be achieved by implementing `__getstate__` and `__setstate__` (see

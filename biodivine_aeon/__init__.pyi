@@ -1390,6 +1390,12 @@ class Percolation:
     @staticmethod
     def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
 
+class Reachability:
+    @staticmethod
+    def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]
 ParameterIdType = Union[ParameterId, str]
