@@ -1,4 +1,5 @@
 use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::{resolve_boolean, resolve_sign, richcmp_eq_by_key};
 use crate::{runtime_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
@@ -28,6 +29,32 @@ use std::collections::HashSet;
 #[derive(Clone, Wrapper)]
 pub struct RegulatoryGraph(biodivine_lib_param_bn::RegulatoryGraph);
 
+impl NetworkVariableContext for RegulatoryGraph {
+    fn resolve_network_variable(
+        &self,
+        variable: &PyAny,
+    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
+        if let Ok(id) = variable.extract::<VariableId>() {
+            return if id.__index__() < self.variable_count() {
+                Ok(*id.as_native())
+            } else {
+                throw_index_error(format!("Unknown variable ID `{}`.", id.__index__()))
+            };
+        }
+        if let Ok(name) = variable.extract::<String>() {
+            return if let Some(var) = self.as_native().find_variable(name.as_str()) {
+                Ok(var)
+            } else {
+                throw_index_error(format!("Unknown variable name `{}`.", name))
+            };
+        }
+        throw_type_error("Expected `VariableId` or `str`.")
+    }
+
+    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
+        self.as_native().get_variable_name(variable).to_string()
+    }
+}
 #[pymethods]
 impl RegulatoryGraph {
     /// To construct a `RegulatoryGraph`, you have to provide:
@@ -47,7 +74,7 @@ impl RegulatoryGraph {
         let (regulations, inferred_variables) = if let Some(regulations) = regulations.as_ref() {
             let mut data = Vec::new();
             for item in regulations {
-                data.push(Self::resolve_regulation(None, item)?);
+                data.push(Self::resolve_regulation::<RegulatoryGraph>(None, item)?);
             }
             let mut variables = HashSet::new();
             for (s, _, _, t) in &data {
@@ -189,14 +216,14 @@ impl RegulatoryGraph {
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
     /// such variable does not exist.
     pub fn get_variable_name(&self, variable: &PyAny) -> PyResult<String> {
-        let var = self.resolve_variable(variable)?;
+        let var = self.resolve_network_variable(variable)?;
         Ok(self.0.get_variable_name(var).clone())
     }
 
     /// Update the variable name of the provided `variable`. This does not change the
     /// corresponding `VariableId`.
     pub fn set_variable_name(&mut self, variable: &PyAny, name: &str) -> PyResult<()> {
-        let var = self.resolve_variable(variable)?;
+        let var = self.resolve_network_variable(variable)?;
         self.0.set_variable_name(var, name).map_err(runtime_error)
     }
 
@@ -232,8 +259,8 @@ impl RegulatoryGraph {
         source: &PyAny,
         target: &PyAny,
     ) -> PyResult<Option<&'a PyDict>> {
-        let source = self.resolve_variable(source)?;
-        let target = self.resolve_variable(target)?;
+        let source = self.resolve_network_variable(source)?;
+        let target = self.resolve_network_variable(target)?;
         if let Some(regulation) = self.as_native().find_regulation(source, target) {
             Self::encode_regulation(py, regulation).map(Some)
         } else {
@@ -263,8 +290,8 @@ impl RegulatoryGraph {
         source: &PyAny,
         target: &PyAny,
     ) -> PyResult<&'a PyDict> {
-        let source = self.resolve_variable(source)?;
-        let target = self.resolve_variable(target)?;
+        let source = self.resolve_network_variable(source)?;
+        let target = self.resolve_network_variable(target)?;
         let removed = self
             .as_native_mut()
             .remove_regulation(source, target)
@@ -363,7 +390,7 @@ impl RegulatoryGraph {
     /// a result that is functionally compatible with the original regulatory graph. Of course, you can use
     /// `RegulatoryGraph.remove_regulation` to explicitly remove the self-loop before inlining the variable.
     pub fn inline_variable(&self, variable: &PyAny) -> PyResult<RegulatoryGraph> {
-        let variable = self.resolve_variable(variable)?;
+        let variable = self.resolve_network_variable(variable)?;
         let bn = biodivine_lib_param_bn::BooleanNetwork::new(self.as_native().clone());
         let Some(bn) = bn.inline_variable(variable, false) else {
             return throw_runtime_error("Variable has a self-regulation.");
@@ -373,7 +400,7 @@ impl RegulatoryGraph {
 
     /// Compute the `set` of all predecessors (regulators) of a specific variable.
     pub fn predecessors(&self, variable: &PyAny) -> PyResult<HashSet<VariableId>> {
-        let variable = self.resolve_variable(variable)?;
+        let variable = self.resolve_network_variable(variable)?;
         Ok(self
             .as_native()
             .regulators(variable)
@@ -384,7 +411,7 @@ impl RegulatoryGraph {
 
     /// Compute the `set` of all successors (targets) of a specific variable.
     pub fn successors(&self, variable: &PyAny) -> PyResult<HashSet<VariableId>> {
-        let variable = self.resolve_variable(variable)?;
+        let variable = self.resolve_network_variable(variable)?;
         Ok(self
             .as_native()
             .targets(variable)
@@ -550,7 +577,7 @@ impl RegulatoryGraph {
         subgraph: Option<&PyAny>,
         length: Option<usize>,
     ) -> PyResult<Option<Vec<VariableId>>> {
-        let pivot = self.resolve_variable(pivot)?;
+        let pivot = self.resolve_network_variable(pivot)?;
         let subgraph = self.resolve_subgraph(subgraph)?;
         let length = length.unwrap_or(usize::MAX);
         let sd_graph = SdGraph::from(self.as_native());
@@ -581,11 +608,11 @@ impl RegulatoryGraph {
         let mut result = HashSet::new();
         if let Ok(list) = variables.downcast::<PyList>() {
             for item in list {
-                result.insert(self.resolve_variable(item)?);
+                result.insert(self.resolve_network_variable(item)?);
             }
         } else if let Ok(set) = variables.downcast::<PySet>() {
             for item in set {
-                result.insert(self.resolve_variable(item)?);
+                result.insert(self.resolve_network_variable(item)?);
             }
         } else {
             return throw_type_error("Expected `set` or `list`.");
@@ -600,7 +627,7 @@ impl RegulatoryGraph {
         &self,
         data: &PyAny,
     ) -> PyResult<HashSet<biodivine_lib_param_bn::VariableId>> {
-        let result = if let Ok(variable) = self.resolve_variable(data) {
+        let result = if let Ok(variable) = self.resolve_network_variable(data) {
             HashSet::from_iter([variable])
         } else if let Ok(variables) = self.resolve_subgraph(Some(data)) {
             variables
@@ -608,30 +635,6 @@ impl RegulatoryGraph {
             return throw_type_error("Expected a single variable or a collection of variables.");
         };
         Ok(result)
-    }
-
-    /// Try to find a [biodivine_lib_param_bn::VariableId] that matches the given `variable` object in this
-    /// regulatory graph. If the variable does not exists, returns an `IndexError`. If the `variable` object is
-    /// not [VariableId] or [String], returns a `TypeError`.
-    pub fn resolve_variable(
-        &self,
-        variable: &PyAny,
-    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
-        if let Ok(id) = variable.extract::<VariableId>() {
-            return if id.__index__() < self.variable_count() {
-                Ok(*id.as_native())
-            } else {
-                throw_index_error(format!("Unknown variable ID `{}`.", id.__index__()))
-            };
-        }
-        if let Ok(name) = variable.extract::<String>() {
-            return if let Some(var) = self.0.find_variable(name.as_str()) {
-                Ok(var)
-            } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
-            };
-        }
-        throw_type_error("Expected `VariableId` or `str`.")
     }
 
     /// Extract regulation data from a dynamic `regulation` object. The regulation object can be either a string
@@ -642,8 +645,8 @@ impl RegulatoryGraph {
     /// The function has two modes: If `ctx` is `None`, the function can only read regulation objects where `source`
     /// and `target` are represented using string names. If `ctx` is specified, then these can also be `VariableId`
     /// objects that are resolved to variable names using `ctx`.
-    pub fn resolve_regulation(
-        ctx: Option<&RegulatoryGraph>,
+    pub fn resolve_regulation<T: NetworkVariableContext>(
+        ctx: Option<&T>,
         regulation: &PyAny,
     ) -> PyResult<(String, Option<Sign>, bool, String)> {
         if let Ok(item) = regulation.extract::<String>() {
@@ -667,11 +670,11 @@ impl RegulatoryGraph {
             };
 
             let (source, target) = if let Some(ctx) = ctx {
-                let source = ctx.resolve_variable(source)?;
-                let target = ctx.resolve_variable(target)?;
+                let source = ctx.resolve_network_variable(source)?;
+                let target = ctx.resolve_network_variable(target)?;
                 (
-                    ctx.as_native().get_variable_name(source).clone(),
-                    ctx.as_native().get_variable_name(target).clone(),
+                    ctx.get_network_variable_name(source).clone(),
+                    ctx.get_network_variable_name(target).clone(),
                 )
             } else {
                 let Ok(source) = source.extract::<String>() else {

@@ -2,6 +2,7 @@ use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsExpression;
@@ -99,7 +100,7 @@ impl UpdateFunction {
     /// Test if a variable or a parameter is used by this `UpdateFunction`.
     fn __contains__(&self, py: Python, item: &PyAny) -> PyResult<bool> {
         let ctx = self.ctx.borrow(py);
-        if let Ok(variable) = ctx.as_ref().resolve_variable(item) {
+        if let Ok(variable) = ctx.as_ref().resolve_network_variable(item) {
             Ok(self.value.contains_variable(variable))
         } else if let Ok(parameter) = ctx.resolve_parameter(item) {
             Ok(self.value.contains_parameter(parameter))
@@ -127,7 +128,7 @@ impl UpdateFunction {
         ctx: Py<BooleanNetwork>,
         variable: &PyAny,
     ) -> PyResult<UpdateFunction> {
-        let variable = ctx.borrow(py).as_ref().resolve_variable(variable)?;
+        let variable = ctx.borrow(py).as_ref().resolve_network_variable(variable)?;
         let fun = FnUpdate::mk_var(variable);
         Ok(Self::new_raw(ctx, Arc::new(fun)))
     }
@@ -494,7 +495,7 @@ impl UpdateFunction {
         let mut vars = HashMap::new();
         let bn = self.ctx.borrow(py);
         for (k, v) in substitution {
-            let k = bn.as_ref().resolve_variable(k)?;
+            let k = bn.as_ref().resolve_network_variable(k)?;
             let v = Self::new(py, self.ctx.clone(), v)?;
             vars.insert(k, v);
         }
@@ -547,8 +548,8 @@ impl UpdateFunction {
             let new_ctx = new_ctx.borrow(py);
             if let Some(variables) = variables {
                 for (k, v) in variables {
-                    let k = old_ctx.as_ref().resolve_variable(k)?;
-                    let v = new_ctx.as_ref().resolve_variable(v)?;
+                    let k = old_ctx.as_ref().resolve_network_variable(k)?;
+                    let v = new_ctx.as_ref().resolve_network_variable(v)?;
                     rename_variables.insert(k, v);
                 }
             }
@@ -563,8 +564,8 @@ impl UpdateFunction {
             let new_ctx = self.ctx.borrow(py);
             if let Some(variables) = variables {
                 for (k, v) in variables {
-                    let k = old_ctx.as_ref().resolve_variable(k)?;
-                    let v = new_ctx.as_ref().resolve_variable(v)?;
+                    let k = old_ctx.as_ref().resolve_network_variable(k)?;
+                    let v = new_ctx.as_ref().resolve_network_variable(v)?;
                     rename_variables.insert(k, v);
                 }
             }

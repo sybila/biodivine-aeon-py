@@ -1,6 +1,7 @@
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::{index_error, AsNative};
 use pyo3::{pyclass, pymethods, Py, PyAny, PyResult};
 use std::collections::HashMap;

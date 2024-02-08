@@ -1396,6 +1396,16 @@ class Reachability:
     @staticmethod
     def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
 
+class RegulationConstraint:
+    @staticmethod
+    def mk_activation(ctx: SymbolicContext, function: Bdd, variable: VariableIdType) -> Bdd: ...
+    @staticmethod
+    def mk_inhibition(ctx: SymbolicContext, function: Bdd, variable: VariableIdType) -> Bdd: ...
+    @staticmethod
+    def mk_essential(ctx: SymbolicContext, function: Bdd, variable: VariableIdType) -> Bdd: ...
+    @staticmethod
+    def infer_sufficient_regulation(ctx: SymbolicContext, source: VariableIdType, target: VariableIdType, function: Bdd) -> Optional[IdRegulation]: ...
+
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]
 ParameterIdType = Union[ParameterId, str]

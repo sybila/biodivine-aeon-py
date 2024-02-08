@@ -1,7 +1,7 @@
-use pyo3::prelude::*;
-use crate::{AsNative, global_log_level};
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::{global_log_level, AsNative};
+use pyo3::prelude::*;
 
 /// An "algorithm object" that facilitates reachability procedures, i.e. iterative computation
 /// of successors (or predecessors) of a particular symbolic set.
@@ -12,7 +12,6 @@ pub struct Reachability {
 
 #[pymethods]
 impl Reachability {
-
     /// Compute the (colored) set of vertices that are forward-reachable from the given
     /// initial set.
     ///
@@ -30,9 +29,8 @@ impl Reachability {
             |g, s, v| g.var_post_out(v, s),
             global_log_level(py)?,
             &|| py.check_signals(),
-        ).map(|it| {
-            ColoredVertexSet::mk_native(graph.symbolic_context(), it)
-        })
+        )
+        .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))
     }
 
     /// Compute the (colored) set of vertices that are backward-reachable from the given
@@ -52,9 +50,7 @@ impl Reachability {
             |g, s, v| g.var_pre_out(v, s),
             global_log_level(py)?,
             &|| py.check_signals(),
-        ).map(|it| {
-            ColoredVertexSet::mk_native(graph.symbolic_context(), it)
-        })
+        )
+        .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))
     }
-
 }

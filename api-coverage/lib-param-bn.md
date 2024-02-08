@@ -2700,3 +2700,35 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
     </tbody>
 </table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2" align="center">Algorithm methods</td></tr>
+        <tr>
+            <td><code>RegulationConstraint::mk_activation</code></td>
+            <td><code>RegulationConstraint.mk_activation</code></td>
+        </tr>
+        <tr>
+            <td><code>RegulationConstraint::mk_inhibition</code></td>
+            <td><code>RegulationConstraint.mk_inhibition</code></td>
+        </tr>
+        <tr>
+            <td><code>RegulationConstraint::mk_observable</code></td>
+            <td><code>RegulationConstraint.mk_essential</code></td>
+        </tr>
+        <tr>
+            <td><code>RegulationConstraint::infer_sufficient_regulation</code></td>
+            <td><code>RegulationConstraint.infer_sufficient_regulation</code></td>
+        </tr>
+        <tr>
+            <td><code>Reachability::fix_regulation</code></td>
+            <td><i>Requires some new code to create regulation objects.</i></td>
+        </tr>
+    </tbody>
+</table>

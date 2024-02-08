@@ -5,6 +5,7 @@ use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{index_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_param_bn::FnUpdate;
@@ -49,6 +50,43 @@ pub struct SymbolicContext {
     bdd_vars: Py<BddVariableSet>,
 }
 
+impl NetworkVariableContext for SymbolicContext {
+    fn resolve_network_variable(
+        &self,
+        variable: &PyAny,
+    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
+        if let Ok(id) = variable.extract::<VariableId>() {
+            return if id.__index__() < self.as_native().num_state_variables() {
+                Ok(*id.as_native())
+            } else {
+                throw_index_error(format!("Invalid variable ID `{}`.", id.__index__()))
+            };
+        }
+        if let Ok(id) = variable.extract::<BddVariable>() {
+            return self
+                .as_native()
+                .find_state_variable(id.into())
+                .ok_or_else(|| {
+                    index_error(format!(
+                        "BDD variable `{}` is not a network variable.",
+                        id.__index__()
+                    ))
+                });
+        }
+        if let Ok(name) = variable.extract::<&str>() {
+            return self
+                .as_native()
+                .find_network_variable(name)
+                .ok_or_else(|| index_error(format!("Unknown variable name `{}`.", name)));
+        }
+        throw_type_error("Expected `VariableId`, `BddVariable` or `str`.")
+    }
+
+    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
+        self.as_native().get_network_variable_name(variable)
+    }
+}
+
 impl AsNative<biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext> for SymbolicContext {
     fn as_native(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext {
         &self.native
@@ -88,7 +126,7 @@ impl SymbolicContext {
         let mut extra = HashMap::new();
         if let Some(extra_variables) = extra_variables {
             for (k, v) in extra_variables {
-                let k = bn.as_ref().resolve_variable(k)?;
+                let k = bn.as_ref().resolve_network_variable(k)?;
                 let v = v.extract::<u16>()?;
                 extra.insert(k, v);
             }
@@ -739,37 +777,6 @@ impl SymbolicContext {
             };
         }
         throw_type_error("Expected `ParameterId`, `VariableId`, or string name.")
-    }
-
-    pub fn resolve_network_variable(
-        &self,
-        variable: &PyAny,
-    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
-        if let Ok(id) = variable.extract::<VariableId>() {
-            return if id.__index__() < self.as_native().num_state_variables() {
-                Ok(*id.as_native())
-            } else {
-                throw_index_error(format!("Invalid variable ID `{}`.", id.__index__()))
-            };
-        }
-        if let Ok(id) = variable.extract::<BddVariable>() {
-            return self
-                .as_native()
-                .find_state_variable(id.into())
-                .ok_or_else(|| {
-                    index_error(format!(
-                        "BDD variable `{}` is not a network variable.",
-                        id.__index__()
-                    ))
-                });
-        }
-        if let Ok(name) = variable.extract::<&str>() {
-            return self
-                .as_native()
-                .find_network_variable(name)
-                .ok_or_else(|| index_error(format!("Unknown variable name `{}`.", name)));
-        }
-        throw_type_error("Expected `VariableId`, `BddVariable` or `str`.")
     }
 
     /// Create a network that contains all relevant variables and parameters, but no regulations or update

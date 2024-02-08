@@ -1,5 +1,5 @@
 use pyo3::prelude::PyModule;
-use pyo3::PyResult;
+use pyo3::{PyAny, PyResult};
 
 pub mod algorithms;
 pub mod boolean_network;
@@ -39,5 +39,16 @@ pub fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<algorithms::fixed_points::FixedPoints>()?;
     module.add_class::<algorithms::attractors::Attractors>()?;
     module.add_class::<algorithms::percolation::Percolation>()?;
+    module.add_class::<algorithms::reachability::Reachability>()?;
+    module.add_class::<algorithms::regulation_constraint::RegulationConstraint>()?;
     Ok(())
+}
+
+/// A trait implemented by types that can resolve a `VariableId` based on its name.
+pub trait NetworkVariableContext {
+    fn resolve_network_variable(
+        &self,
+        variable: &PyAny,
+    ) -> PyResult<biodivine_lib_param_bn::VariableId>;
+    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String;
 }

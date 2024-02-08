@@ -5,6 +5,7 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSe
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::resolve_boolean;
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;

@@ -5,6 +5,7 @@ use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGra
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{throw_type_error, AsNative};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;

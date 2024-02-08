@@ -2,6 +2,7 @@ use super::regulatory_graph::RegulatoryGraph;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{runtime_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
@@ -33,6 +34,33 @@ use std::sync::Arc;
 #[pyclass(module="biodivine_aeon", extends=RegulatoryGraph)]
 #[derive(Clone, Wrapper)]
 pub struct BooleanNetwork(biodivine_lib_param_bn::BooleanNetwork);
+
+impl NetworkVariableContext for BooleanNetwork {
+    fn resolve_network_variable(
+        &self,
+        variable: &PyAny,
+    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
+        if let Ok(id) = variable.extract::<VariableId>() {
+            return if id.__index__() < self.as_native().num_vars() {
+                Ok(*id.as_native())
+            } else {
+                throw_index_error(format!("Unknown variable ID `{}`.", id.__index__()))
+            };
+        }
+        if let Ok(name) = variable.extract::<String>() {
+            return if let Some(var) = self.as_native().as_graph().find_variable(name.as_str()) {
+                Ok(var)
+            } else {
+                throw_index_error(format!("Unknown variable name `{}`.", name))
+            };
+        }
+        throw_type_error("Expected `VariableId` or `str`.")
+    }
+
+    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
+        self.as_native().get_variable_name(variable).to_string()
+    }
+}
 
 #[pymethods]
 impl BooleanNetwork {
@@ -202,7 +230,7 @@ impl BooleanNetwork {
         variable: &PyAny,
         name: &str,
     ) -> PyResult<()> {
-        let var = self_.as_ref().resolve_variable(variable)?;
+        let var = self_.as_ref().resolve_network_variable(variable)?;
         self_
             .as_mut()
             .as_native_mut()
@@ -247,8 +275,8 @@ impl BooleanNetwork {
         source: &PyAny,
         target: &PyAny,
     ) -> PyResult<&'a PyDict> {
-        let source = self_.as_ref().resolve_variable(source)?;
-        let target = self_.as_ref().resolve_variable(target)?;
+        let source = self_.as_ref().resolve_network_variable(source)?;
+        let target = self_.as_ref().resolve_network_variable(target)?;
 
         if let Some(update) = self_.as_native().get_update_function(target) {
             if update.collect_arguments().contains(&source) {
@@ -463,7 +491,7 @@ impl BooleanNetwork {
         variable: &PyAny,
         repair_graph: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let variable = self_.as_ref().resolve_variable(variable)?;
+        let variable = self_.as_ref().resolve_network_variable(variable)?;
         let Some(bn) = self_.as_native().inline_variable(variable, repair_graph) else {
             return throw_runtime_error("Variable has a self-regulation.");
         };
@@ -633,7 +661,7 @@ impl BooleanNetwork {
     ) -> PyResult<Option<UpdateFunction>> {
         let fun = {
             let self_ref = self_.borrow(py);
-            let variable = self_ref.as_ref().resolve_variable(variable)?;
+            let variable = self_ref.as_ref().resolve_network_variable(variable)?;
             self_ref.as_native().get_update_function(variable).clone()
         };
         if let Some(fun) = fun {
@@ -667,7 +695,7 @@ impl BooleanNetwork {
             return throw_type_error("Expected `UpdateFunction` or `str`.");
         };
         let mut bn = self_.borrow_mut(py);
-        let variable = bn.as_ref().resolve_variable(variable)?;
+        let variable = bn.as_ref().resolve_network_variable(variable)?;
         bn.as_native_mut()
             .set_update_function(variable, new_fun)
             .map_err(runtime_error)?;
