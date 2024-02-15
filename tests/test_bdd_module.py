@@ -357,11 +357,11 @@ def test_bdd():
     assert bdd_true.r_pick_random('a', seed=1) != bdd_true.r_pick_random('a', seed=2)
     assert bdd_true.r_pick_random('a', seed=1) == bdd_true.r_pick_random('a', seed=1)
 
-    assert bdd_x.r_exist('b') != bdd_x.r_for_all('b')
+    assert bdd_x.r_exists('b') != bdd_x.r_for_all('b')
     assert bdd_clause.r_for_all('c') == bdd_clause
-    assert bdd_val.r_exist('c') == bdd_clause
+    assert bdd_val.r_exists('c') == bdd_clause
     assert bdd_val.r_for_all('c').is_false()
-    assert bdd_x.r_select({'b': True}).r_exist('b') == bdd_x.r_restrict({'b': True})
+    assert bdd_x.r_select({'b': True}).r_exists('b') == bdd_x.r_restrict({'b': True})
 
     assert bdd_false.valuation_first() is None
     assert bdd_x.witness() == BddValuation(ctx, [1, 1, 0])
