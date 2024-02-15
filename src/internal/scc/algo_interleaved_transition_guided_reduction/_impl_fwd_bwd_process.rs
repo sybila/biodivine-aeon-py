@@ -4,6 +4,7 @@ use crate::internal::scc::algo_interleaved_transition_guided_reduction::{
 use crate::internal::scc::algo_saturated_reachability::reachability_step;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
+use pyo3::PyResult;
 
 impl BwdProcess {
     pub fn new(initial: GraphColoredVertices, universe: GraphColoredVertices) -> BwdProcess {
@@ -32,7 +33,7 @@ impl FwdProcess {
 }
 
 impl Process for BwdProcess {
-    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> bool {
+    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> PyResult<bool> {
         reachability_step(
             &mut self.bwd,
             &self.universe,
@@ -52,7 +53,7 @@ impl Process for BwdProcess {
 }
 
 impl Process for FwdProcess {
-    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> bool {
+    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> PyResult<bool> {
         reachability_step(
             &mut self.fwd,
             &self.universe,

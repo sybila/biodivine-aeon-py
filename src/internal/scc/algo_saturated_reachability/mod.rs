@@ -1,6 +1,8 @@
+use crate::bindings::global_interrupt;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
+use pyo3::PyResult;
 
 /// Performs one reachability step using the saturation scheme.
 ///
@@ -14,22 +16,24 @@ pub fn reachability_step<F>(
     universe: &GraphColoredVertices,
     variables: &[VariableId],
     step: F,
-) -> bool
+) -> PyResult<bool>
 where
     F: Fn(VariableId, &GraphColoredVertices) -> GraphColoredVertices,
 {
     if variables.is_empty() {
-        return true;
+        return Ok(true);
     }
     for var in variables.iter().rev() {
+        global_interrupt()?;
         let stepped = step(*var, set).minus(set).intersect(universe);
 
         if !stepped.is_empty() {
             *set = set.union(&stepped);
-            return false;
+            return Ok(false);
         }
     }
-    true
+
+    Ok(true)
 }
 /*
 /// Fully compute reachable states from `initial` inside `universe` using transitions under
@@ -62,12 +66,12 @@ pub fn reach_bwd(
     initial: &GraphColoredVertices,
     universe: &GraphColoredVertices,
     variables: &[VariableId],
-) -> GraphColoredVertices {
+) -> PyResult<GraphColoredVertices> {
     let mut set = initial.clone();
     loop {
-        if reachability_step(&mut set, universe, variables, |v, s| graph.var_pre(v, s)) {
+        if reachability_step(&mut set, universe, variables, |v, s| graph.var_pre(v, s))? {
             break;
         }
     }
-    set
+    Ok(set)
 }

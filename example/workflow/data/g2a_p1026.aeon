@@ -1,0 +1,23 @@
+#position:CtrA:111.66352760384814,126.42721496242696
+CtrA -> CtrA
+GcrA -> CtrA
+CcrM -| CtrA
+SciP -| CtrA
+#position:GcrA:100.3490877216902,240.07968457434436
+$GcrA:(!CtrA & DnaA)
+CtrA -| GcrA
+DnaA -> GcrA
+#position:CcrM:19.5,36.69417762322472
+CtrA -> CcrM
+CcrM -| CcrM
+SciP -| CcrM
+#position:SciP:112.86364349451134,24.5
+$SciP:(CtrA & !DnaA)
+CtrA -> SciP
+DnaA -| SciP
+#position:DnaA:20.80798906179652,148.90428148236617
+$DnaA:(((CtrA & !GcrA) & !DnaA) & CcrM)
+CtrA -> DnaA
+GcrA -| DnaA
+DnaA -| DnaA
+CcrM -> DnaA

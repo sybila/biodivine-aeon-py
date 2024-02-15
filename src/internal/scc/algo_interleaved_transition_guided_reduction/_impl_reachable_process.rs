@@ -5,6 +5,7 @@ use crate::internal::scc::algo_saturated_reachability::reach_bwd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
+use pyo3::PyResult;
 
 impl ReachableProcess {
     pub fn new(
@@ -21,8 +22,8 @@ impl ReachableProcess {
 }
 
 impl Process for ReachableProcess {
-    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> bool {
-        if self.fwd.step(scheduler, graph) {
+    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> PyResult<bool> {
+        if self.fwd.step(scheduler, graph)? {
             let fwd_set = self.fwd.get_reachable_set();
 
             // If fwd set is not the whole universe, it probably has a basin.
@@ -32,7 +33,7 @@ impl Process for ReachableProcess {
                     fwd_set,
                     scheduler.get_universe(),
                     scheduler.get_active_variables(),
-                )
+                )?
                 .minus(fwd_set);
                 if !basin_only.is_empty() {
                     scheduler.discard_vertices(&basin_only);
@@ -45,9 +46,9 @@ impl Process for ReachableProcess {
                 scheduler.get_universe().clone(),
                 graph,
             ));
-            true
+            Ok(true)
         } else {
-            false
+            Ok(false)
         }
     }
 

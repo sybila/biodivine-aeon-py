@@ -5,8 +5,10 @@
 //! a very reasonable amount of time.
 //!
 
+use crate::bindings::global_interrupt;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
+use pyo3::PyResult;
 
 mod _impl_extended_component_process;
 mod _impl_fwd_bwd_process;
@@ -23,10 +25,11 @@ mod _impl_scheduler;
 pub fn interleaved_transition_guided_reduction(
     graph: &SymbolicAsyncGraph,
     initial: GraphColoredVertices,
-) -> (GraphColoredVertices, Vec<VariableId>) {
+) -> PyResult<(GraphColoredVertices, Vec<VariableId>)> {
     let variables = graph.variables().collect::<Vec<_>>();
     let mut scheduler = Scheduler::new(initial, variables);
     for variable in graph.variables() {
+        global_interrupt()?;
         scheduler.spawn(ReachableProcess::new(
             variable,
             graph,
@@ -35,10 +38,11 @@ pub fn interleaved_transition_guided_reduction(
     }
 
     while !scheduler.is_done() {
-        scheduler.step(graph);
+        global_interrupt()?;
+        scheduler.step(graph)?;
     }
 
-    scheduler.finalize()
+    Ok(scheduler.finalize())
 }
 
 /// **(internal)** A process trait is a unit of work that is managed by a `Scheduler`.
@@ -52,7 +56,7 @@ trait Process {
     /// provided by `Scheduler` for cancellation.
     ///
     /// Returns true if the process cannot perform more steps.
-    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> bool;
+    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> PyResult<bool>;
 
     /// Approximate symbolic complexity of the process.
     fn weight(&self) -> usize;

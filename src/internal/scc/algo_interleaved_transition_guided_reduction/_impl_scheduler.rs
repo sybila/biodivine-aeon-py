@@ -2,6 +2,7 @@ use crate::internal::scc::algo_interleaved_transition_guided_reduction::{Process
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
+use pyo3::PyResult;
 
 impl Scheduler {
     /// Create a new `Scheduler` with initial universe and active variables.
@@ -61,9 +62,9 @@ impl Scheduler {
     }
 
     /// If possible, perform one computational step for one of the processes.
-    pub fn step(&mut self, graph: &SymbolicAsyncGraph) {
+    pub fn step(&mut self, graph: &SymbolicAsyncGraph) -> PyResult<()> {
         if self.is_done() {
-            return;
+            return Ok(());
         }
 
         // First, apply to_discard in all processes:
@@ -80,10 +81,12 @@ impl Scheduler {
 
         // Perform one step in a process
         if let Some((_, mut process)) = self.processes.pop() {
-            let is_done = process.step(self, graph);
+            let is_done = process.step(self, graph)?;
             if !is_done {
-                self.processes.push((process.weight(), process))
+                self.processes.push((process.weight(), process));
             }
         }
+
+        Ok(())
     }
 }
