@@ -363,7 +363,8 @@ def test_bdd():
     assert bdd_val.r_for_all('c').is_false()
     assert bdd_x.r_select({'b': True}).r_exists('b') == bdd_x.r_restrict({'b': True})
 
-    assert bdd_false.valuation_first() is None
+    with pytest.raises(RuntimeError):
+        bdd_false.valuation_first()
     assert bdd_x.witness() == BddValuation(ctx, [1, 1, 0])
     assert bdd_x.valuation_first() == BddValuation(ctx, [0, 1, 0])
     assert bdd_x.valuation_last() == BddValuation(ctx, [1, 1, 1])
@@ -371,7 +372,8 @@ def test_bdd():
     assert bdd_x.valuation_most_positive() == BddValuation(ctx, [1, 1, 1])
     assert bdd_x.valuation_most_negative() == BddValuation(ctx, [0, 1, 0])
 
-    assert bdd_false.clause_first() is None
+    with pytest.raises(RuntimeError):
+        bdd_false.clause_first()
     assert bdd_x.clause_first() == dnf_basic[0]
     assert bdd_x.clause_last() == dnf_basic[1]
     assert bdd_x.clause_random(seed=1) != bdd_x.clause_random(seed=2)

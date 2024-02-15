@@ -4,7 +4,9 @@ use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::bindings::lib_bdd::op_function::{OpFunction2, OpFunction3};
-use crate::{throw_interrupted_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{
+    runtime_error, throw_interrupted_error, throw_runtime_error, throw_type_error, AsNative,
+};
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_bdd::{BddPathIterator, BddSatisfyingValuations};
 use num_bigint::BigInt;
@@ -18,6 +20,9 @@ use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 use std::io::Cursor;
 
+/// BDD (binary decision diagram) is an acyclic, directed graph which is used to represent a
+/// Boolean function. BDDs can be used to efficiently represent large sets of states, functions,
+/// or spaces.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct Bdd {
@@ -830,24 +835,27 @@ impl Bdd {
     }
 
     /// Pick a single satisfying valuation from this `Bdd`.
-    pub fn witness(&self) -> Option<BddValuation> {
+    pub fn witness(&self) -> PyResult<BddValuation> {
         self.as_native()
             .sat_witness()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Pick the lexicographically first valuation from this `Bdd`.
-    pub fn valuation_first(&self) -> Option<BddValuation> {
+    pub fn valuation_first(&self) -> PyResult<BddValuation> {
         self.as_native()
             .first_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Pick the lexicographically last valuation from this `Bdd`.
-    pub fn valuation_last(&self) -> Option<BddValuation> {
+    pub fn valuation_last(&self) -> PyResult<BddValuation> {
         self.as_native()
             .last_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Pick a randomized valuation from this `Bdd`.
@@ -858,7 +866,7 @@ impl Bdd {
     ///
     /// You can make the process randomized but deterministic by specifying a fixed `seed`.
     #[pyo3(signature = (seed = None))]
-    pub fn valuation_random(&self, seed: Option<u64>) -> Option<BddValuation> {
+    pub fn valuation_random(&self, seed: Option<u64>) -> PyResult<BddValuation> {
         fn inner<R: Rng>(bdd: &RsBdd, rng: &mut R) -> Option<biodivine_lib_bdd::BddValuation> {
             bdd.random_valuation(rng)
         }
@@ -869,21 +877,25 @@ impl Bdd {
         } else {
             inner(self.as_native(), &mut rand::thread_rng())
         };
-        result.map(|it| BddValuation::new_raw(self.ctx.clone(), it))
+        result
+            .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Pick the valuation with the most `true` variables.
-    pub fn valuation_most_positive(&self) -> Option<BddValuation> {
+    pub fn valuation_most_positive(&self) -> PyResult<BddValuation> {
         self.as_native()
             .most_positive_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Pick the valuation with the most `false` variables.
-    pub fn valuation_most_negative(&self) -> Option<BddValuation> {
+    pub fn valuation_most_negative(&self) -> PyResult<BddValuation> {
         self.as_native()
             .most_negative_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// An iterator over all `BddValuation` objects that satisfy this `Bdd`.
@@ -892,17 +904,19 @@ impl Bdd {
     }
 
     /// Pick the lexicographically first satisfying clause of this `Bdd`.
-    pub fn clause_first(&self) -> Option<BddPartialValuation> {
+    pub fn clause_first(&self) -> PyResult<BddPartialValuation> {
         self.as_native()
             .first_clause()
             .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Pick the lexicographically last satisfying clause of this `Bdd`.
-    pub fn clause_last(&self) -> Option<BddPartialValuation> {
+    pub fn clause_last(&self) -> PyResult<BddPartialValuation> {
         self.as_native()
             .last_clause()
             .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Pick a randomized satisfying clause from this `Bdd`.
@@ -913,7 +927,7 @@ impl Bdd {
     ///
     /// You can make the process randomized but deterministic by specifying a fixed `seed`.
     #[pyo3(signature = (seed = None))]
-    pub fn clause_random(&self, seed: Option<u64>) -> Option<BddPartialValuation> {
+    pub fn clause_random(&self, seed: Option<u64>) -> PyResult<BddPartialValuation> {
         fn inner<R: Rng>(
             bdd: &RsBdd,
             rng: &mut R,
@@ -926,7 +940,9 @@ impl Bdd {
         } else {
             inner(self.as_native(), &mut rand::thread_rng())
         };
-        result.map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
+        result
+            .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// Compute the most restrictive conjunctive clause that covers all satisfying valuations of this BDD.
@@ -934,10 +950,11 @@ impl Bdd {
     /// In other words, if you compute the BDD corresponding to the resulting partial valuation, the resulting BDD
     /// will be a superset of this BDD, and it will be the smallest superset that can be described using
     /// a single clause.
-    pub fn clause_necessary(&self) -> Option<BddPartialValuation> {
+    pub fn clause_necessary(&self) -> PyResult<BddPartialValuation> {
         self.as_native()
             .necessary_clause()
             .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
     /// An iterator over all DNF clauses (i.e. `BddPartialValuation` objects) that satisfy this `Bdd`.
