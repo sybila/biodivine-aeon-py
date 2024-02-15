@@ -321,7 +321,13 @@ def test_boolean_network():
         functions={"b": "a | f(c)"}
     )
 
+    rg = RegulatoryGraph(
+        variables=["a", "b", "c"],
+        regulations=["a -> b", "b -?? c", "c -|? b"]
+    )
+
     assert bn1 == bn2
+    assert bn1.to_graph() == BooleanNetwork(rg).to_graph()
 
     assert str(bn1) == "BooleanNetwork(variables=3, regulations=3, explicit_parameters=1, implicit_parameters=2)"
     assert bn1 == eval(repr(bn1))

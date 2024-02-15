@@ -75,12 +75,24 @@ impl BooleanNetwork {
     #[new]
     #[pyo3(signature = (variables = None, regulations = None, parameters = None, functions = None))]
     fn new(
-        variables: Option<Vec<String>>,
+        variables: Option<&PyAny>,
         regulations: Option<Vec<&PyAny>>,
         parameters: Option<Vec<(String, u32)>>,
         functions: Option<&PyAny>,
     ) -> PyResult<(BooleanNetwork, RegulatoryGraph)> {
-        let rg = RegulatoryGraph::new(variables, regulations)?;
+        let rg = if let Some(x) = variables {
+            if let Ok(rg) = x.extract::<RegulatoryGraph>() {
+                rg
+            } else if let Ok(list) = x.extract::<Vec<String>>() {
+                RegulatoryGraph::new(Some(list), regulations)?
+            } else {
+                return throw_type_error(
+                    "Expected `RegulatoryGraph` or `list[str]` of variable names.",
+                );
+            }
+        } else {
+            RegulatoryGraph::new(None, regulations)?
+        };
         // The functions could be either a `Vec<Option<String>>` or `HashMap<String, String>`.
         // Technically we could also allow FnUpdate, but that would be a huge pain to resolve
         // correctly and probably won't be used.
@@ -127,7 +139,7 @@ impl BooleanNetwork {
     }
 
     pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
-        // The BN and its underlying RG should be up to date, hence it should be ok to just compare the BN.
+        // The BN and its underlying RG should be up-to-date, hence it should be ok to just compare the BN.
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
@@ -506,11 +518,11 @@ impl BooleanNetwork {
 
     /// Try to load a Boolean network from the contents of a `.bnet` model file.
     ///
-    /// Note that this is currently only a "best effort" implementation and you may encounter
+    /// Note that this is currently only a "best effort" implementation, and you may encounter
     /// unsupported `.bnet` models.
     ///
     /// We also support some features that `.bnet` does not, in particular, you can use
-    /// Boolean constants (`true`/`false`|. However, there are also other things that we do not
+    /// Boolean constants (`true`/`false`|. However, there are other things that we do not
     /// support, since `.bnet` can essentially use R syntax to define more complex functions,
     /// but in practice this is not used anywhere.
     ///
@@ -839,7 +851,7 @@ impl BooleanNetwork {
     }
 
     /// Try to find a [biodivine_lib_param_bn::ParameterId] that matches the given `parameter` object in this
-    /// Boolean network. If the parameter does not exists, returns an `IndexError`. If the `parameter` object is
+    /// Boolean network. If the parameter does not exist, returns an `IndexError`. If the `parameter` object is
     /// not [ParameterId] or [String], returns a `TypeError`.
     pub fn resolve_parameter(
         &self,

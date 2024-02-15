@@ -722,16 +722,23 @@ class RegulatoryGraph:
         ...
 
 class BooleanNetwork(RegulatoryGraph):
+    @overload
+    def __init__(self, rg: RegulatoryGraph) -> None: ...
+    @overload
     def __init__(
             self,
             variables: Optional[Sequence[str]] = None,
             regulations: Optional[Sequence[Union[NamedRegulation, str]]] = None,
             parameters: Optional[Sequence[tuple[str, int]]] = None,
             functions: Optional[Union[Sequence[Optional[str]], Mapping[str, str]]] = None,
-    ) -> None:
+    ) -> None: ...
+    @overload
+    def __init__(self, variables, regulations, parameters, functions) -> None:
         """
         A new `BooleanNetwork` is constructed in a similar fashion to `RegulatoryGraph`, but additionally
         allows a list (or dictionary) of string update functions and a dictionary of explicit parameters.
+
+        You can also build it *from* a `RegulatoryGraph` directly.
 
         If variables are not specified, they can be inferred from the list of regulations. However, either
         variables *or* regulations need to be specified in a non-empty network. That is, variables and regulations
