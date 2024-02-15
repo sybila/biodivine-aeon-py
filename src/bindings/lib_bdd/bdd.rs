@@ -203,16 +203,27 @@ impl Bdd {
         )
     }
 
-    /// Build a list of `BddPartialValuation` objects that represents a **disjunctive normal form** of this
-    /// Boolean function.
+    /// Build a list of `BddPartialValuation` objects that represents a **disjunctive normal form**
+    /// of this Boolean function.
+    ///
+    /// When `optimize` is set to `True`, the method dynamically optimizes the BDD to obtain
+    /// a smaller DNF. This process can be non-trivial for large BDDs. However, for such BDDs,
+    /// we usually can't enumerate the full DNF anyway, hence the optimization is enabled by
+    /// default. When `optimize` is set to `False`, the result should be equivalent to the
+    /// actual canonical clauses of this BDD as reported by `Bdd.clause_iterator`.
     ///
     /// See also `BddVariableSet.mk_dnf`.
-    fn to_dnf(&self) -> Vec<BddPartialValuation> {
-        self.as_native()
-            .to_dnf()
+    #[pyo3(signature = (optimize = true))]
+    fn to_dnf(&self, py: Python, optimize: bool) -> PyResult<Vec<BddPartialValuation>> {
+        let native = if optimize {
+            self.as_native()._to_optimized_dnf(&|| py.check_signals())?
+        } else {
+            self.as_native().to_dnf()
+        };
+        Ok(native
             .into_iter()
             .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
-            .collect()
+            .collect())
     }
 
     /// Build a list of `BddPartialValuation` objects that represents a **conjunctive normal form** of this
@@ -267,7 +278,7 @@ impl Bdd {
         // Semantic equality check needs to verify that A <=> B is a tautology,
         // which is the same as checking if A XOR B is a contradiction.
         // We actually don't have to compute the whole result though, we just need to know
-        // if it is `false`. Hence we can stop once the result size exceeds one node.
+        // if it is `false`. Hence, we can stop once the result size exceeds one node.
         // Other comparison operators are implemented using similar logic.
         RsBdd::binary_op_with_limit(
             1,
@@ -285,7 +296,7 @@ impl Bdd {
     /// just check whether it is a tautology.
     pub fn implies(&self, other: &Bdd) -> bool {
         // (A <= B) if and only if A implies B, meaning (!A or B) is a tautology.
-        // Hence (A & !B) must be a contradiction.
+        // Hence, (A & !B) must be a contradiction.
         RsBdd::binary_op_with_limit(
             1,
             self.as_native(),
@@ -377,6 +388,13 @@ impl Bdd {
                 self.as_native().exact_cardinality()
             }
         }
+    }
+
+    /// Compute the number of canonical clauses of this `Bdd`. These are the disjunctive clauses
+    /// reported by `Bdd.clause_iterator`. Clause cardinality can be thus used as the expected
+    /// item count for this iterator.
+    pub fn clause_cardinality(&self) -> BigInt {
+        self.as_native().exact_clause_cardinality()
     }
 
     /// Computes a logical negation (i.e. $\neg f$) of this `Bdd`.
@@ -929,7 +947,7 @@ impl Bdd {
 
     /// Replace the occurrence of a given `variable` with a specific `function`.
     ///
-    /// Note that at the moment, the result is not well defined if `function` also depends on the substituted
+    /// Note that at the moment, the result is not well-defined if `function` also depends on the substituted
     /// variable (the variable is eliminated both from the original `Bdd` and from `function`). We are planning
     /// to fix this in the future.
     pub fn substitute(&self, variable: &PyAny, function: &Bdd) -> PyResult<Bdd> {
@@ -997,7 +1015,7 @@ impl _BddValuationIterator {
         // It is only safe because we copy the `Bdd` and attach it to the "laundered" reference,
         // so there is no (realistic) way the reference can outlive the copy of the `Bdd`.
         // Fortunately, the iterator items are clones and do not reference the `Bdd` directly,
-        // so the "laundered" references do not spread beyond the internal code of the iterator.
+        // so the "laundered" pointer does not spread beyond the internal code of the iterator.
         let iterator = {
             let bdd_ref = bdd.borrow(py);
             let bdd_ref: &'static RsBdd =

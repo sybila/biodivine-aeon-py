@@ -257,9 +257,13 @@ def test_bdd():
     assert BddPartialValuation(ctx, {'a': True, 'b': True}) == BddPartialValuation(ctx, {'a': 1, 'b': 1})
     # (!a & b & c) | (a & b)
     dnf = bdd_x.to_dnf()
+    dnf_basic = bdd_x.to_dnf(optimize=False)
+    # For a very simple BDD like this, the optimization does not really do much.
+    assert len(dnf) == len(dnf_basic)
+    assert len(dnf_basic) == bdd_x.clause_cardinality()
     assert len(dnf) == 2
-    assert dnf[0] == BddPartialValuation(ctx, {'a': False, 'b': True, 'c': False})
-    assert dnf[1] == BddPartialValuation(ctx, {'a': True, 'b': True})
+    assert dnf[0] == BddPartialValuation(ctx, {'a': True, 'b': True})
+    assert dnf[1] == BddPartialValuation(ctx, {'a': False, 'b': True, 'c': False})
     # (a | b) & (a | !b | !c) & (!a | b)
     cnf = bdd_x.to_cnf()
     assert len(cnf) == 3
@@ -368,8 +372,8 @@ def test_bdd():
     assert bdd_x.valuation_most_negative() == BddValuation(ctx, [0, 1, 0])
 
     assert bdd_false.clause_first() is None
-    assert bdd_x.clause_first() == dnf[0]
-    assert bdd_x.clause_last() == dnf[1]
+    assert bdd_x.clause_first() == dnf_basic[0]
+    assert bdd_x.clause_last() == dnf_basic[1]
     assert bdd_x.clause_random(seed=1) != bdd_x.clause_random(seed=2)
     assert bdd_clause.clause_necessary() == BddPartialValuation(ctx, {'a': False, 'b': True})
 

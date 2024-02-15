@@ -21,7 +21,6 @@ impl core::fmt::Debug for biodivine_lib_bdd::boolean_expression::BooleanExpressi
 pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for biodivine_lib_bdd::boolean_expression::BooleanExpression
 pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
-impl core::marker::StructuralEq for biodivine_lib_bdd::boolean_expression::BooleanExpression
 impl core::marker::StructuralPartialEq for biodivine_lib_bdd::boolean_expression::BooleanExpression
 impl core::marker::Send for biodivine_lib_bdd::boolean_expression::BooleanExpression
 impl core::marker::Sync for biodivine_lib_bdd::boolean_expression::BooleanExpression
@@ -69,6 +68,10 @@ pub mod biodivine_lib_bdd::tutorial::p06_bdd_advanced_operations
 pub macro biodivine_lib_bdd::bdd!
 pub struct biodivine_lib_bdd::Bdd(_)
 impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::_to_optimized_dnf<E, I: core::ops::function::Fn() -> core::result::Result<(), E>>(&self, interrupt: &I) -> core::result::Result<alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>, E>
+pub fn biodivine_lib_bdd::Bdd::to_dnf(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::to_optimized_dnf(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>
+impl biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::and(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::and_not(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::binary_op<T>(left: &biodivine_lib_bdd::Bdd, right: &biodivine_lib_bdd::Bdd, op_function: T) -> biodivine_lib_bdd::Bdd where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
@@ -90,6 +93,7 @@ pub fn biodivine_lib_bdd::Bdd::binary_op_with_for_all<F>(left: &biodivine_lib_bd
 impl biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::cardinality(&self) -> f64
 pub fn biodivine_lib_bdd::Bdd::exact_cardinality(&self) -> num_bigint::bigint::BigInt
+pub fn biodivine_lib_bdd::Bdd::exact_clause_cardinality(&self) -> num_bigint::bigint::BigInt
 pub fn biodivine_lib_bdd::Bdd::high_link_of(&self, node: biodivine_lib_bdd::BddPointer) -> biodivine_lib_bdd::BddPointer
 pub fn biodivine_lib_bdd::Bdd::is_clause(&self) -> bool
 pub fn biodivine_lib_bdd::Bdd::is_false(&self) -> bool
@@ -153,8 +157,6 @@ pub fn biodivine_lib_bdd::Bdd::sat_valuations(&self) -> biodivine_lib_bdd::BddSa
 impl biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::to_cnf(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>
 impl biodivine_lib_bdd::Bdd
-pub fn biodivine_lib_bdd::Bdd::to_dnf(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>
-impl biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::to_dot_string(&self, variables: &biodivine_lib_bdd::BddVariableSet, zero_pruned: bool) -> alloc::string::String
 pub fn biodivine_lib_bdd::Bdd::write_as_dot_string(&self, output: &mut dyn std::io::Write, variables: &biodivine_lib_bdd::BddVariableSet, zero_pruned: bool) -> core::result::Result<(), std::io::error::Error>
 impl biodivine_lib_bdd::IntoBdd for &biodivine_lib_bdd::Bdd
@@ -174,7 +176,6 @@ impl core::fmt::Display for biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
 impl core::hash::Hash for biodivine_lib_bdd::Bdd
 pub fn biodivine_lib_bdd::Bdd::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl core::marker::StructuralEq for biodivine_lib_bdd::Bdd
 impl core::marker::StructuralPartialEq for biodivine_lib_bdd::Bdd
 impl core::marker::Send for biodivine_lib_bdd::Bdd
 impl core::marker::Sync for biodivine_lib_bdd::Bdd
@@ -222,7 +223,7 @@ impl core::clone::Clone for biodivine_lib_bdd::BddPartialValuation
 pub fn biodivine_lib_bdd::BddPartialValuation::clone(&self) -> biodivine_lib_bdd::BddPartialValuation
 impl core::cmp::Eq for biodivine_lib_bdd::BddPartialValuation
 impl core::cmp::PartialEq for biodivine_lib_bdd::BddPartialValuation
-pub fn biodivine_lib_bdd::BddPartialValuation::eq(&self, other: &biodivine_lib_bdd::BddPartialValuation) -> bool
+pub fn biodivine_lib_bdd::BddPartialValuation::eq(&self, other: &Self) -> bool
 impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::BddPartialValuation
 pub fn biodivine_lib_bdd::BddPartialValuation::from(value: biodivine_lib_bdd::BddValuation) -> Self
 impl core::convert::TryFrom<biodivine_lib_bdd::BddPartialValuation> for biodivine_lib_bdd::BddValuation
@@ -233,9 +234,7 @@ pub fn biodivine_lib_bdd::BddPartialValuation::default() -> Self
 impl core::fmt::Debug for biodivine_lib_bdd::BddPartialValuation
 pub fn biodivine_lib_bdd::BddPartialValuation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::hash::Hash for biodivine_lib_bdd::BddPartialValuation
-pub fn biodivine_lib_bdd::BddPartialValuation::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl core::marker::StructuralEq for biodivine_lib_bdd::BddPartialValuation
-impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::hash<H: core::hash::Hasher>(&self, state: &mut H)
 impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddPartialValuation
 pub type biodivine_lib_bdd::BddPartialValuation::Output = core::option::Option<bool>
 pub fn biodivine_lib_bdd::BddPartialValuation::index(&self, index: biodivine_lib_bdd::BddVariable) -> &Self::Output
@@ -332,7 +331,6 @@ pub fn biodivine_lib_bdd::BddPointer::fmt(&self, f: &mut core::fmt::Formatter<'_
 impl core::hash::Hash for biodivine_lib_bdd::BddPointer
 pub fn biodivine_lib_bdd::BddPointer::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::Copy for biodivine_lib_bdd::BddPointer
-impl core::marker::StructuralEq for biodivine_lib_bdd::BddPointer
 impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddPointer
 impl core::marker::Send for biodivine_lib_bdd::BddPointer
 impl core::marker::Sync for biodivine_lib_bdd::BddPointer
@@ -431,7 +429,6 @@ impl core::fmt::Display for biodivine_lib_bdd::BddValuation
 pub fn biodivine_lib_bdd::BddValuation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
 impl core::hash::Hash for biodivine_lib_bdd::BddValuation
 pub fn biodivine_lib_bdd::BddValuation::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
-impl core::marker::StructuralEq for biodivine_lib_bdd::BddValuation
 impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddValuation
 impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddValuation
 pub type biodivine_lib_bdd::BddValuation::Output = bool
@@ -523,7 +520,6 @@ pub fn biodivine_lib_bdd::BddVariable::fmt(&self, f: &mut core::fmt::Formatter<'
 impl core::hash::Hash for biodivine_lib_bdd::BddVariable
 pub fn biodivine_lib_bdd::BddVariable::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::Copy for biodivine_lib_bdd::BddVariable
-impl core::marker::StructuralEq for biodivine_lib_bdd::BddVariable
 impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddVariable
 impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddPartialValuation
 pub type biodivine_lib_bdd::BddPartialValuation::Output = core::option::Option<bool>

@@ -626,7 +626,10 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::to_dnf</code></td>
-            <td><code>Bdd.to_dnf</code></td>
+            <td rowspan="2"><code>Bdd.to_dnf</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::(_)to_optimized_dnf</code></td>
         </tr>
         <tr>
             <td><code>Bdd::to_cnf</code></td>
@@ -701,6 +704,10 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::exact_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::exact_clause_cardinality</code></td>
+            <td><code>Bdd.clause_cardinality</code></td>
         </tr>
         <tr><td colspan="2" align="center">Boolean operations</td></tr>
         <tr>
