@@ -103,6 +103,10 @@ impl SpaceSet {
         self.items(None, py)
     }
 
+    fn __ctx__(&self) -> Py<SymbolicSpaceContext> {
+        self.ctx.clone()
+    }
+
     /// Returns the number of spaces that are represented in this set.
     pub fn cardinality(&self) -> BigInt {
         self.as_native().exact_cardinality()

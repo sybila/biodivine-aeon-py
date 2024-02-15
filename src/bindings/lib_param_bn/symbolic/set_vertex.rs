@@ -102,6 +102,10 @@ impl VertexSet {
         self.items(None)
     }
 
+    fn __ctx__(&self) -> Py<SymbolicContext> {
+        self.ctx.clone()
+    }
+
     /// Returns the number of vertices that are represented in this set.
     pub fn cardinality(&self) -> BigInt {
         self.as_native().exact_cardinality()

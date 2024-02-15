@@ -1401,6 +1401,10 @@ see below.
             <td><code>GraphColors::hash</code></td>
             <td><code>ColorSet.__hash__</code></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorSet.__ctx__</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Set operations</td></tr>
         <tr>
             <td><code>GraphColors::approx_cardinality</code></td>
@@ -1504,6 +1508,10 @@ see below.
         <tr>
             <td><code>GraphVertices::hash</code></td>
             <td><code>VertexSet.__hash__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexSet.__ctx__</code></td>
         </tr>
         <tr>
             <td><code>GraphVertices::iter</code></td>
@@ -1631,6 +1639,10 @@ see below.
             <td><code>SpaceSet.__hash__</code></td>
         </tr>
         <tr>
+            <td></td>
+            <td><code>SpaceSet.__ctx__</code></td>
+        </tr>
+        <tr>
             <td><code>NetworkSpaces::iter</code></td>
             <td rowspan="2"><code>SpaceSet.__iter__</code></td>
         </tr>
@@ -1733,6 +1745,10 @@ see below.
         <tr>
             <td></td>
             <td><code>ColoredVertexSet.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredVertexSet.__ctx__</code></td>
         </tr>
         <tr><td colspan="2" align="center">Set operations</td></tr>
         <tr>
@@ -1890,6 +1906,10 @@ see below.
         <tr>
             <td></td>
             <td><code>ColoredSpaceSet.__iter__</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColoredSpaceSet.__ctx__</code></td>
         </tr>
         <tr><td colspan="2" align="center">Set operations</td></tr>
         <tr>

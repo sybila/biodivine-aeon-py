@@ -114,6 +114,10 @@ impl ColoredSpaceSet {
         self.items(None, None, py)
     }
 
+    fn __ctx__(&self) -> Py<SymbolicSpaceContext> {
+        self.ctx.clone()
+    }
+
     /// Returns the number of space-color pairs that are represented in this set.
     fn cardinality(&self) -> BigInt {
         self.as_native().exact_cardinality()

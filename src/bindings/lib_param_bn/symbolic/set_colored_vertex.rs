@@ -114,6 +114,10 @@ impl ColoredVertexSet {
         self.items(None, None)
     }
 
+    fn __ctx__(&self) -> Py<SymbolicContext> {
+        self.ctx.clone()
+    }
+
     /// Returns the number of vertex-color pairs that are represented in this set.
     fn cardinality(&self) -> BigInt {
         self.as_native().exact_cardinality()
