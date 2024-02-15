@@ -800,7 +800,7 @@ impl Bdd {
     ///
     /// In terms of first-order logic, this is equivalent to applying the $\exists$ operator to the underlying
     /// Boolean function.
-    pub fn r_exist(&self, variables: &PyAny) -> PyResult<Bdd> {
+    pub fn r_exists(&self, variables: &PyAny) -> PyResult<Bdd> {
         let variables = self.ctx.get().resolve_variables(variables)?;
         Ok(self.new_from(self.as_native().exists(&variables)))
     }
