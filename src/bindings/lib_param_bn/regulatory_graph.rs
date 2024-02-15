@@ -1,7 +1,10 @@
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::{resolve_boolean, resolve_sign, richcmp_eq_by_key};
-use crate::{runtime_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{
+    global_log_level, runtime_error, throw_index_error, throw_runtime_error, throw_type_error,
+    AsNative,
+};
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
 use biodivine_lib_param_bn::{Monotonicity, SdGraph, Sign};
 use macros::Wrapper;
@@ -471,6 +474,7 @@ impl RegulatoryGraph {
     #[pyo3(signature = (parity = None, subgraph = None))]
     pub fn feedback_vertex_set(
         &self,
+        py: Python,
         parity: Option<&PyAny>,
         subgraph: Option<&PyAny>,
     ) -> PyResult<HashSet<VariableId>> {
@@ -478,9 +482,18 @@ impl RegulatoryGraph {
         let restriction = self.resolve_subgraph(subgraph)?;
         let fvs = if let Some(parity) = parity {
             let parity = resolve_sign(parity)?;
-            sd_graph.restricted_parity_feedback_vertex_set(&restriction, parity)
+            sd_graph._restricted_parity_feedback_vertex_set(
+                &restriction,
+                parity,
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?
         } else {
-            sd_graph.restricted_feedback_vertex_set(&restriction)
+            sd_graph._restricted_feedback_vertex_set(
+                &restriction,
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?
         };
         Ok(fvs.into_iter().map(VariableId::from).collect())
     }
@@ -500,6 +513,7 @@ impl RegulatoryGraph {
     #[pyo3(signature = (parity = None, subgraph = None))]
     pub fn independent_cycles(
         &self,
+        py: Python,
         parity: Option<&PyAny>,
         subgraph: Option<&PyAny>,
     ) -> PyResult<Vec<Vec<VariableId>>> {
@@ -507,9 +521,16 @@ impl RegulatoryGraph {
         let restriction = self.resolve_subgraph(subgraph)?;
         let cycles = if let Some(parity) = parity {
             let parity = resolve_sign(parity)?;
-            sd_graph.restricted_independent_parity_cycles(&restriction, parity)
+            sd_graph._restricted_independent_parity_cycles(
+                &restriction,
+                parity,
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?
         } else {
-            sd_graph.restricted_independent_cycles(&restriction)
+            sd_graph._restricted_independent_cycles(&restriction, global_log_level(py)?, &|| {
+                py.check_signals()
+            })?
         };
         let cycles = cycles
             .into_iter()
@@ -527,12 +548,16 @@ impl RegulatoryGraph {
     #[pyo3(signature = (subgraph = None))]
     pub fn strongly_connected_components(
         &self,
+        py: Python,
         subgraph: Option<&PyAny>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
         let subgraph = self.resolve_subgraph(subgraph)?;
-        let components = self
-            .as_native()
-            .restricted_strongly_connected_components(&subgraph);
+        let sd_graph = SdGraph::from(self.as_native());
+        let components = sd_graph._restricted_strongly_connected_components(
+            &subgraph,
+            global_log_level(py)?,
+            &|| py.check_signals(),
+        )?;
         Ok(components
             .into_iter()
             .map(|c| c.into_iter().map(|it| it.into()).collect())
@@ -546,11 +571,16 @@ impl RegulatoryGraph {
     #[pyo3(signature = (subgraph = None))]
     pub fn weakly_connected_components(
         &self,
+        py: Python,
         subgraph: Option<&PyAny>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
         let subgraph = self.resolve_subgraph(subgraph)?;
         let sd_graph = SdGraph::from(self.as_native());
-        let components = sd_graph.restricted_weakly_connected_components(&subgraph);
+        let components = sd_graph._restricted_weakly_connected_components(
+            &subgraph,
+            global_log_level(py)?,
+            &|| py.check_signals(),
+        )?;
         Ok(components
             .into_iter()
             .map(|c| c.into_iter().map(|it| it.into()).collect())

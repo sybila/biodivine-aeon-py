@@ -18,6 +18,7 @@ use pyo3::types::PyList;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 
 use crate::bindings::lib_param_bn::symbolic::model_space::SpaceModel;
+use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
@@ -304,6 +305,17 @@ impl ColoredSpaceSet {
             retained_implicit,
             retained_explicit,
         })
+    }
+
+    /// Produce a set of vertices that are contained within the subspaces represented in this set.
+    pub fn to_colored_vertices(
+        &self,
+        ctx: Py<SymbolicSpaceContext>,
+        py: Python,
+    ) -> PyResult<ColoredVertexSet> {
+        let native = self.as_native().to_colored_vertices(ctx.get().as_native());
+        let parent = ctx.extract::<Py<SymbolicContext>>(py)?;
+        Ok(ColoredVertexSet::mk_native(parent, native))
     }
 }
 

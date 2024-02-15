@@ -336,10 +336,10 @@ as in Rust due to use of default argument values and polymorphism.
             <td><code>RegulatoryGraph::parity_feedback_vertex_set</code></td>
         </tr>
         <tr>
-            <td><code>SdGraph::restricted_feedback_vertex_set</code></td>
+            <td><code>SdGraph::(_)restricted_feedback_vertex_set</code></td>
         </tr>
         <tr>
-            <td><code>SdGraph::restricted_parity_feedback_vertex_set</code></td>
+            <td><code>SdGraph::(_)restricted_parity_feedback_vertex_set</code></td>
         </tr>
         <tr>
             <td><code>RegulatoryGraph::independent_cycles</code></td>
@@ -350,10 +350,10 @@ as in Rust due to use of default argument values and polymorphism.
             <td><code>RegulatoryGraph::independent_parity_cycles</code></td>
         </tr>
         <tr>
-            <td><code>SdGraph::restricted_independent_cycles</code></td>
+            <td><code>SdGraph::(_)restricted_independent_cycles</code></td>
         </tr>
         <tr>
-            <td><code>SdGraph::restricted_parity_independent_cycles</code></td>
+            <td><code>SdGraph::(_)restricted_parity_independent_cycles</code></td>
         </tr>
         <tr>
             <td><code>RegulatoryGraph::strongly_connected_components</code></td>
@@ -370,7 +370,7 @@ as in Rust due to use of default argument values and polymorphism.
 </code></td>
         </tr>
         <tr>
-            <td><code>SdGraph::restricted_strongly_connected_components</code></td>
+            <td><code>SdGraph::(_)restricted_strongly_connected_components</code></td>
         </tr>
         <tr>
             <td><code>SdGraph::strongly_connected_components</code></td>
@@ -382,7 +382,7 @@ as in Rust due to use of default argument values and polymorphism.
 ></td>
         </tr>
         <tr>
-            <td><code>SdGraph::restricted_weakly_connected_components</code></td> 
+            <td><code>SdGraph::(_)restricted_weakly_connected_components</code></td> 
         </tr>
         <tr>
             <td><code>RegulatoryGraph::shortest_cycle</code></td>
@@ -397,14 +397,6 @@ as in Rust due to use of default argument values and polymorphism.
         </tr>
         <tr>
             <td><code>SdGraph::shortest_parity_cycle</code></td>
-        </tr>
-        <tr>
-            <td><code>SdGraph::shortest_cycle_length</code></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><code>SdGraph::shortest_parity_cycle_length</code></td>
-<td></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -611,6 +603,10 @@ we export trivial iterators as lists.
         <tr>
             <td><code>BooleanNetwork::infer_valid_graph</code></td>
             <td><code>BooleanNetwork.infer_valid_graph</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::remove_static_constraints</code></td>
+            <td><code>BooleanNetwork.remove_regulation_constraints</code></td>
         </tr>
         <tr>
             <td><code>BooleanNetwork::inline_constants</code></td>
@@ -1142,7 +1138,7 @@ Right now, `FunctionTable` is not exported. Instead, we just convert it to a `li
             <td><code>SymbolicContext.implicit_functions_count</code></td>
         </tr>
         <tr>
-            <td></td>
+            <td><code>SymbolicContext::network_implicit_parameters</code></td>
             <td><code>SymbolicContext.implicit_functions</code></td>
         </tr>
         <tr>
@@ -1179,7 +1175,10 @@ Right now, `FunctionTable` is not exported. Instead, we just convert it to a `li
         </tr>
         <tr>
             <td><code>SymbolicContext::get_network_parameter_arity</code></td>
-            <td><code>SymbolicContext.get_function_arity</code></td>
+            <td rowspan="2"><code>SymbolicContext.get_function_arity</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::get_network_implicit_parameter_arity</code></td>
         </tr>
         <tr>
             <td><code>SymbolicContext::get_explicit_function_table</code></td>
@@ -1215,6 +1214,10 @@ Right now, `FunctionTable` is not exported. Instead, we just convert it to a `li
         <tr>
             <td><code>SymbolicContext::mk_fn_update_true</code></td>
             <td><code>SymbolicContext.mk_update_function</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicContext::mk_function_table_true</code></td>
+            <td></td>
         </tr>
         <tr><td colspan="2" align="center">Decoding methods</td></tr>
         <tr>
@@ -1298,7 +1301,7 @@ using the normal methods, but new methods are added to facilitate the mapping.
         </tr>
         <tr><td colspan="2" align="center">Encoding methods</td></tr>
         <tr>
-            <td><code>SymbolicSpaceContext::mk_can_go_to_true</code></td>
+            <td><code>SymbolicSpaceContext::(_)mk_can_go_to_true</code></td>
             <td><code>SymbolicSpaceContext.mk_can_go_to_true</code></td>
         </tr>
         <tr>
@@ -1322,16 +1325,24 @@ using the normal methods, but new methods are added to facilitate the mapping.
             <td><code>SymbolicSpaceContext.mk_unit_bdd</code></td>
         </tr>
         <tr>
-            <td><code>SymbolicSpaceContext::mk_sub_spaces</code></td>
+            <td><code>SymbolicSpaceContext::(_)mk_sub_spaces</code></td>
             <td><code>SymbolicSpaceContext.mk_sub_spaces</code></td>
         </tr>
         <tr>
-            <td><code>SymbolicSpaceContext::mk_super_spaces</code></td>
+            <td><code>SymbolicSpaceContext::(_)mk_super_spaces</code></td>
             <td><code>SymbolicSpaceContext.mk_super_spaces</code></td>
         </tr>
         <tr>
             <td><code>SymbolicSpaceContext::mk_space</code></td>
             <td><code>SymbolicSpaceContext.mk_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::spaces_to_vertices</code></td>
+            <td><code>SymbolicSpaceContext.spaces_to_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::vertices_to_spaces</code></td>
+            <td><code>SymbolicSpaceContext.vertices_to_spaces</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -1548,6 +1559,10 @@ see below.
             <td><code>GraphVertices::symbolic_size</code></td>
             <td><code>VertexSet.symbolic_size</code></td>
         </tr>
+        <tr>
+            <td><code>GraphVertices::to_singleton_spaces</code></td>
+            <td><code>GraphVertices.to_singleton_spaces</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
             <td><code>GraphVertices::as_bdd</code></td>
@@ -1661,6 +1676,10 @@ see below.
         <tr>
             <td><code>NetworkSpaces::symbolic_size</code></td>
             <td><code>SpaceSet.symbolic_size</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::to_vertices</code></td>
+            <td><code>SpaceSet.to_vertices</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -1790,6 +1809,10 @@ see below.
         <tr>
             <td><code>GraphColoredVertices::pick_singleton</code></td>
             <td><code>ColoredVertexSet.pick_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>GraphColoredVertices::to_singleton_spaces</code></td>
+            <td><code>ColoredVertexSet.to_singleton_spaces</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -1939,6 +1962,10 @@ see below.
         <tr>
             <td><code>NetworkColoredSpaces::pick_singleton</code></td>
             <td><code>ColoredSpaceSet.pick_singleton</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::to_colored_vertices</code></td>
+            <td><code>ColoredSpaceSet.to_colored_vertices</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -2312,6 +2339,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
             <td><code>SymbolicAsyncGraph::get_variable_name</code></td>
             <td><code>AsynchronousGraph.get_network_variable_name</code></td>
         </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::reconstruct_network</code></td>
+            <td><code>AsynchronousGraph.reconstruct_network</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Symbolic constructors</td></tr>
         <tr>
             <td><code>SymbolicAsyncGraph::empty_colored_vertices</code></td>
@@ -2541,7 +2572,7 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::inline_symbolic</code></td>
-            <td></td>
+            <td><code>SymbolicAsyncGraph::inline_variable_symbolic</code></td>
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::restrict</code></td>
@@ -2571,19 +2602,19 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
     <tbody>
         <tr><td colspan="2" align="center">Algorithm methods</td></tr>
         <tr>
-            <td><code>TrapSpaces::minimize</code></td>
+            <td><code>TrapSpaces::(_)minimize</code></td>
             <td><code>TrapSpaces.minimize</code></td>
         </tr>
         <tr>
-            <td><code>TrapSpaces::maximize</code></td>
+            <td><code>TrapSpaces::(_)maximize</code></td>
             <td><code>TrapSpaces.maximize</code></td>
         </tr>
         <tr>
-            <td><code>TrapSpaces::essential_symbolic</code></td>
+            <td><code>TrapSpaces::(_)essential_symbolic</code></td>
             <td><code>TrapSpaces.essential_symbolic</code></td>
         </tr>
         <tr>
-            <td><code>TrapSpaces::minimal_symbolic</code></td>
+            <td><code>TrapSpaces::(_)minimal_symbolic</code></td>
             <td><code>TrapSpaces.minimal_symbolic</code></td>
         </tr>
     </tbody>
@@ -2599,15 +2630,15 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
     <tbody>
         <tr><td colspan="2" align="center">Algorithm methods</td></tr>
         <tr>
-            <td><code>FixedPoints::symbolic</code></td>
+            <td><code>FixedPoints::(_)symbolic</code></td>
             <td><code>FixedPoints.symbolic</code></td>
         </tr>
         <tr>
-            <td><code>FixedPoints::symbolic_vertices</code></td>
+            <td><code>FixedPoints::(_)symbolic_vertices</code></td>
             <td><code>FixedPoints.symbolic_vertices</code></td>
         </tr>
         <tr>
-            <td><code>FixedPoints::symbolic_colors</code></td>
+            <td><code>FixedPoints::(_)symbolic_colors</code></td>
             <td><code>FixedPoints.symbolic_colors</code></td>
         </tr>
         <tr>
@@ -2619,7 +2650,7 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
             <td></td>
         </tr>
         <tr>
-            <td><code>FixedPoints::symbolic_merge</code></td>
+            <td><code>FixedPoints::(_)symbolic_merge</code></td>
             <td></td>
         </tr>
         <tr>
@@ -2683,11 +2714,11 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
             <td><code>Reachability.reach_bwd</code></td>
         </tr>
         <tr>
-            <td><code>Reachability::reach</code></td>
+            <td><code>Reachability::(_)reach</code></td>
             <td></td>
         </tr>
         <tr>
-            <td><code>Reachability::reach_basic_saturation</code></td>
+            <td><code>Reachability::(_)reach_basic_saturation</code></td>
             <td></td>
         </tr>
         <tr>

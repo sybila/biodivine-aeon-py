@@ -7,7 +7,7 @@ use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
-use crate::{throw_type_error, AsNative};
+use crate::{global_log_level, throw_type_error, AsNative};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
 use biodivine_lib_param_bn::trap_spaces::{NetworkColoredSpaces, NetworkSpaces};
 use biodivine_lib_param_bn::{ExtendedBoolean, Space};
@@ -23,6 +23,7 @@ use pyo3::types::PyDict;
 /// having any extra variables aside from those used for space representation. However, nothing
 /// fundamentally prevents us from including additional variables in the future.
 #[pyclass(module="biodivine_aeon", extends=SymbolicContext, frozen)]
+#[derive(Clone)]
 pub struct SymbolicSpaceContext(biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext);
 
 impl AsNative<biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext> for SymbolicSpaceContext {
@@ -68,10 +69,26 @@ impl SymbolicSpaceContext {
         self_.clone()
     }
 
-    /* TODO: Enable later.
-    fn __deepcopy__(self_: PyRef<SymbolicSpaceContext>, _memo: &PyAny) -> (SymbolicSpaceContext, SymbolicContext) {
-        (self_.clone(), self_.as_ref().clone())
-    }*/
+    fn __deepcopy__(
+        self_: PyRef<SymbolicSpaceContext>,
+        _memo: &PyAny,
+        py: Python,
+    ) -> PyResult<Py<SymbolicSpaceContext>> {
+        let tuple = (self_.clone(), self_.as_ref().clone());
+        Py::new(py, tuple)
+    }
+
+    /// See `SymbolicContext.eliminate_network_variable`.
+    pub fn eliminate_network_variable(
+        self_: PyRef<SymbolicSpaceContext>,
+        variable: &PyAny,
+        py: Python,
+    ) -> PyResult<Py<SymbolicSpaceContext>> {
+        let inner = self_.as_ref().eliminate_network_variable(variable)?;
+        let variable = self_.as_ref().resolve_network_variable(variable)?;
+        let native = self_.as_native().eliminate_network_variable(variable);
+        Py::new(py, (SymbolicSpaceContext(native), inner))
+    }
 
     /// The symbolic variable that encodes the fact that a specified `network_variable` can have value `True`
     /// in a particular subspace.
@@ -108,11 +125,13 @@ impl SymbolicSpaceContext {
     /// **WARNING:** The resulting BDD also allows invalid space encodings, mostly because
     /// these are to some extent still interesting in some applications. You'll need to
     /// intersect it with `SymbolicSpaceContext.mk_unit_bdd`.
-    pub fn mk_can_go_to_true(&self, function: &Bdd) -> Bdd {
-        Bdd::new_raw_2(
-            function.__ctx__(),
-            self.as_native().mk_can_go_to_true(function.as_native()),
-        )
+    pub fn mk_can_go_to_true(&self, py: Python, function: &Bdd) -> PyResult<Bdd> {
+        let bdd = self.as_native()._mk_can_go_to_true(
+            function.as_native(),
+            global_log_level(py)?,
+            &|| py.check_signals(),
+        );
+        bdd.map(|it| Bdd::new_raw_2(function.__ctx__(), it))
     }
 
     /// Compute an empty colored subspace relation.
@@ -185,17 +204,29 @@ impl SymbolicSpaceContext {
     ) -> PyResult<PyObject> {
         let ctx = self_.get();
         if let Ok(set) = set.extract::<ColoredSpaceSet>() {
-            let bdd = ctx.as_native().mk_sub_spaces(set.as_native().as_bdd());
+            let bdd = ctx.as_native()._mk_sub_spaces(
+                set.as_native().as_bdd(),
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?;
             let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
             return Ok(ColoredSpaceSet::wrap_native(self_.clone(), set).into_py(py));
         }
         if let Ok(set) = set.extract::<SpaceSet>() {
-            let bdd = ctx.as_native().mk_sub_spaces(set.as_native().as_bdd());
+            let bdd = ctx.as_native()._mk_sub_spaces(
+                set.as_native().as_bdd(),
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?;
             let set = NetworkSpaces::new(bdd, ctx.as_native());
             return Ok(SpaceSet::wrap_native(self_.clone(), set).into_py(py));
         }
         if let Ok(bdd) = set.extract::<Bdd>() {
-            let bdd = ctx.as_native().mk_sub_spaces(bdd.as_native());
+            let bdd =
+                ctx.as_native()
+                    ._mk_sub_spaces(bdd.as_native(), global_log_level(py)?, &|| {
+                        py.check_signals()
+                    })?;
             let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
             return Ok(bdd.into_py(py));
         }
@@ -213,17 +244,29 @@ impl SymbolicSpaceContext {
     ) -> PyResult<PyObject> {
         let ctx = self_.get();
         if let Ok(set) = set.extract::<ColoredSpaceSet>() {
-            let bdd = ctx.as_native().mk_super_spaces(set.as_native().as_bdd());
+            let bdd = ctx.as_native()._mk_super_spaces(
+                set.as_native().as_bdd(),
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?;
             let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
             return Ok(ColoredSpaceSet::wrap_native(self_.clone(), set).into_py(py));
         }
         if let Ok(set) = set.extract::<SpaceSet>() {
-            let bdd = ctx.as_native().mk_super_spaces(set.as_native().as_bdd());
+            let bdd = ctx.as_native()._mk_super_spaces(
+                set.as_native().as_bdd(),
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?;
             let set = NetworkSpaces::new(bdd, ctx.as_native());
             return Ok(SpaceSet::wrap_native(self_.clone(), set).into_py(py));
         }
         if let Ok(bdd) = set.extract::<Bdd>() {
-            let bdd = ctx.as_native().mk_super_spaces(bdd.as_native());
+            let bdd = ctx.as_native()._mk_super_spaces(
+                bdd.as_native(),
+                global_log_level(py)?,
+                &|| py.check_signals(),
+            )?;
             let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
             return Ok(bdd.into_py(py));
         }
@@ -253,6 +296,27 @@ impl SymbolicSpaceContext {
         let bdd = self_.get().as_native().mk_space(&space);
         let set = NetworkSpaces::new(bdd, self_.get().as_native());
         Ok(SpaceSet::wrap_native(self_.clone(), set))
+    }
+
+    /// A utility method which "materializes" the network spaces in the dual encoding into
+    /// a set of vertices that reside in these places.
+    ///
+    /// See also `SymbolicSpaceContext::vertices_to_spaces`, but note that these operations
+    /// are not invertible, that is `vertices_to_spaces(spaces_to_vertices(x))` does not
+    /// produce the original set `x`.
+    pub fn spaces_to_vertices(&self, bdd: &Bdd) -> Bdd {
+        let native = self.as_native().spaces_to_vertices(bdd.as_native());
+        Bdd::new_raw_2(bdd.__ctx__(), native)
+    }
+
+    /// Convert a set of vertices into a set of singleton spaces. That is, for each vertex,
+    /// the corresponding space is created.
+    ///
+    /// In other words, this does not try to decompose the set into maximal spaces or anything
+    /// like that, it converts each vertex 1:1 into a space.
+    pub fn vertices_to_spaces(&self, bdd: &Bdd) -> Bdd {
+        let native = self.as_native().vertices_to_spaces(bdd.as_native());
+        Bdd::new_raw_2(bdd.__ctx__(), native)
     }
 }
 

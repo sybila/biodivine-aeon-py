@@ -1,6 +1,8 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
+use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd as RsBdd;
@@ -167,7 +169,7 @@ impl VertexSet {
     /// When no `retained` collection is specified, this is equivalent to `VertexSet.__iter__`. However, if a retained
     /// set is given, the resulting iterator only considers unique combinations of the `retained` variables.
     /// Consequently, the resulting `VertexModel` instances will fail with an `IndexError` if a value of a variable
-    /// outside of the `retained` set is requested.
+    /// outside the `retained` set is requested.
     #[pyo3(signature = (retained = None))]
     fn items(&self, retained: Option<&PyList>) -> PyResult<_VertexModelIterator> {
         let ctx = self.ctx.get();
@@ -187,6 +189,12 @@ impl VertexSet {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
         })
+    }
+
+    /// Represent this set of vertices as a set of singleton subspaces instead.
+    pub fn to_singleton_spaces(&self, ctx: Py<SymbolicSpaceContext>) -> SpaceSet {
+        let native = self.as_native().to_singleton_spaces(ctx.get().as_native());
+        SpaceSet::wrap_native(ctx, native)
     }
 }
 

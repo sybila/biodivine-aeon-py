@@ -394,6 +394,10 @@ def test_boolean_network():
         'essential': True,
     }
 
+    for reg in bn1x.remove_regulation_constraints().regulations():
+        assert not reg['essential']
+        assert reg['sign'] is None
+
     bn1x = bn1.inline_inputs()
     assert bn1x.explicit_parameter_names() == ["f", "a"]
     assert bn1x.find_explicit_parameter("a") == ParameterId(1)
@@ -648,7 +652,149 @@ def test_symbolic_context():
     assert ctx_e.bdd_variable_set() == ctx.bdd_variable_set()
     assert ctx.transfer_from(c, ctx) == ctx.mk_network_variable("c")
     assert len(ctx_e.functions_bdd_variables_list()) == len(ctx.functions_bdd_variables_list())
-    assert len(ctx_e.functions_bdd_variables()) < len(ctx.functions_bdd_variables())
+    # The implicit function of `a` got transformed into an explicit parameter.
+    assert len(ctx_e.functions_bdd_variables()) == len(ctx.functions_bdd_variables())
+    assert ctx_e.find_function('a') is not None
+    assert ctx.find_function('a') is not None
+
+
+def test_symbolic_space_context():
+    # First the overloads, the new things are at the end of the method.
+    bn = BooleanNetwork(
+        variables=["a", "b", "c"],
+        regulations=["a -> b", "c -| b", "a -> a", "b -| c"],
+        parameters=[("f", 2)],
+        functions=[None, "a | f(a, c)", None]
+    )
+
+    ctx = SymbolicSpaceContext(bn)
+    ctx_c = ctx.to_canonical_context()
+    bdd_vars = ctx.bdd_variable_set()
+
+    assert ctx.to_canonical_context() == ctx.to_canonical_context()
+    assert ctx != ctx_c
+
+    assert str(ctx) == ("SymbolicSpaceContext(network_variables=3, space_variables=6, explicit_functions=1, "
+                        "implicit_functions=2)")
+
+    assert ctx == copy.copy(ctx)
+    assert ctx == copy.deepcopy(ctx)
+
+    assert ctx.network_variable_count() == 3
+    assert ctx.network_variable_names() == ["a", "b", "c"]
+    assert ctx.network_variables() == [VariableId(x) for x in range(3)]
+    # This is just hand computed.
+    assert ctx.network_bdd_variables() == [BddVariable(0), BddVariable(5), BddVariable(12)]
+    assert ctx.find_network_variable("b") == VariableId(1)
+    assert ctx.find_network_variable(VariableId(4)) is None
+    assert ctx.find_network_variable(BddVariable(12)) == VariableId(2)
+
+    assert ctx.find_network_bdd_variable("b") == BddVariable(5)
+    assert ctx.find_network_bdd_variable(VariableId(4)) is None
+
+    with pytest.raises(IndexError):
+        ctx.get_network_variable_name("x")
+
+    assert ctx.extra_bdd_variable_count() == 6
+    assert ctx.extra_bdd_variables_list() == [BddVariable(x) for x in [1, 2, 6, 7, 13, 14]]
+    assert ctx.extra_bdd_variables() == {
+        VariableId(0): [BddVariable(x) for x in [1, 2]],
+        VariableId(1): [BddVariable(x) for x in [6, 7]],
+        VariableId(2): [BddVariable(x) for x in [13, 14]],
+    }
+
+    assert ctx.explicit_function_count() == 1
+    assert ctx.explicit_functions() == [ParameterId(0)]
+    assert ctx.explicit_functions_bdd_variables_list() == [BddVariable(x) for x in [8, 9, 10, 11]]
+    assert ctx.explicit_functions_bdd_variables() == {ParameterId(0): [BddVariable(x) for x in [8, 9, 10, 11]]}
+
+    assert ctx.implicit_function_count() == 2
+    assert ctx.implicit_functions() == [VariableId(0), VariableId(2)]
+    assert ctx.implicit_functions_bdd_variables_list() == [BddVariable(x) for x in [3, 4, 15, 16]]
+    assert ctx.implicit_functions_bdd_variables() == {
+        VariableId(0): [BddVariable(x) for x in [3, 4]],
+        VariableId(2): [BddVariable(x) for x in [15, 16]],
+    }
+
+    assert ctx.function_count() == 3
+    assert ctx.functions() == [ParameterId(0), VariableId(0), VariableId(2)]
+    assert ctx.functions_bdd_variables_list() == [BddVariable(x) for x in [3, 4, 8, 9, 10, 11, 15, 16]]
+    assert ctx.functions_bdd_variables() == {
+        ParameterId(0): [BddVariable(x) for x in [8, 9, 10, 11]],
+        VariableId(0): [BddVariable(x) for x in [3, 4]],
+        VariableId(2): [BddVariable(x) for x in [15, 16]],
+    }
+
+    assert ctx.find_function("f") == ParameterId(0)
+    assert ctx.find_function("a") == VariableId(0)
+    assert ctx.find_function(ParameterId(1)) is None
+    assert ctx.find_function(VariableId(4)) is None
+    assert ctx.find_function(BddVariable(10)) == ParameterId(0)
+    assert ctx.find_function(BddVariable(15)) == VariableId(2)
+    assert ctx.find_function(BddVariable(7)) is None
+
+    assert ctx.get_function_name(VariableId(0)) == "a"
+    assert ctx.get_function_name(ParameterId(0)) == "f"
+    with pytest.raises(IndexError):
+        ctx.get_function_name("b")
+
+    assert ctx.get_function_arity(VariableId(0)) == 1
+    assert ctx.get_function_arity("f") == 2
+
+    assert ctx.get_function_table("f") == [
+        ([False, False], BddVariable(8)),
+        ([True, False], BddVariable(9)),
+        ([False, True], BddVariable(10)),
+        ([True, True], BddVariable(11)),
+    ]
+    assert ctx.get_function_table("a") == [
+        ([False], BddVariable(3)),
+        ([True], BddVariable(4)),
+    ]
+
+    assert ctx.mk_constant(1) == bdd_vars.mk_const(1)
+    assert ctx.mk_network_variable("a") == bdd_vars.mk_literal("a", True)
+    assert ctx.mk_extra_bdd_variable("a", 1) == bdd_vars.mk_literal(BddVariable(2), True)
+    a = ctx.mk_network_variable("a")
+    c = ctx.mk_network_variable("c")
+    fn_b = bn.get_update_function("b")
+    assert fn_b is not None
+    assert ctx.mk_update_function(fn_b) == ctx.mk_function("f", [a, c]).l_or(a)
+
+    fn = ctx.mk_update_function(fn_b)
+    assert ctx_c.transfer_from(fn, ctx) != fn
+
+    ctx_e = ctx.eliminate_network_variable("a")
+    assert isinstance(ctx_e, SymbolicSpaceContext)
+    assert ctx_e != ctx
+    assert ctx_e.bdd_variable_set() == ctx.bdd_variable_set()
+    assert ctx.transfer_from(c, ctx) == ctx.mk_network_variable("c")
+    assert len(ctx_e.functions_bdd_variables_list()) == len(ctx.functions_bdd_variables_list())
+    # The implicit function of `a` got transformed into an explicit parameter.
+    assert len(ctx_e.functions_bdd_variables()) == len(ctx.functions_bdd_variables())
+    assert ctx_e.find_function('a') is not None
+    assert ctx.find_function('a') is not None
+
+    unit = ctx.mk_unit_bdd()
+    unit_support = unit.support_set()
+    assert len(unit_support) == ctx.network_variable_count() * 2
+    for var in ctx.network_variables():
+        assert ctx.get_positive_space_variable(var) in unit_support
+        assert ctx.get_negative_space_variable(var) in unit_support
+
+    stg = AsynchronousGraph(bn, ctx)
+    assert ctx.mk_empty_spaces().is_empty()
+    assert ctx.mk_empty_colored_spaces().is_empty()
+    assert ctx.mk_unit_spaces().cardinality() == 27
+    assert ctx.mk_unit_colored_spaces(stg).spaces() == ctx.mk_unit_spaces()
+
+    space = ctx.mk_singleton({'a': True, 'c': False})
+    assert ctx.mk_sub_spaces(space).cardinality() == 3
+    assert ctx.mk_super_spaces(space).cardinality() == 4
+
+    # We don't really know what the result should be here, but it should not be a constant.
+    fn_b_bdd = ctx.mk_update_function(fn_b)
+    assert not ctx.mk_can_go_to_true(fn_b_bdd).is_false() and not ctx.mk_can_go_to_true(fn_b_bdd).is_true()
 
 
 def test_asynchronous_graph():
@@ -746,6 +892,18 @@ def test_asynchronous_graph():
         assert graph.var_can_post(var, space) == can_post
         can_pre = graph.var_can_pre_out(var, space).union(graph.var_can_pre_within(var, space))
         assert graph.var_can_pre(var, space) == can_pre
+
+    bn = BooleanNetwork.from_aeon("""
+        a -> b
+        b -| c
+        c -> b
+        c -| a
+        $a: !c
+        $b: a & c
+        $c: !b
+    """)
+    stg = AsynchronousGraph(bn)
+    assert stg.reconstruct_network() == bn
 
 
 def test_symbolic_iterators():

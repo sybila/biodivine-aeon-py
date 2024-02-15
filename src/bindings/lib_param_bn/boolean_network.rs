@@ -744,6 +744,13 @@ impl BooleanNetwork {
             .and_then(|it| BooleanNetwork(it).export_to_python(py))
     }
 
+    /// Make a copy of this `BooleanNetwork` with all constraints on the regulations removed.
+    /// In particular, every regulation is set to non-essential with an unknown sign.
+    pub fn remove_regulation_constraints(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        let native = self.as_native().remove_static_constraints();
+        BooleanNetwork(native).export_to_python(py)
+    }
+
     /// Similar to `BooleanNetwork.inline_inputs`, but inlines constant values (i.e. `x=true` or
     /// `x=false`).
     ///

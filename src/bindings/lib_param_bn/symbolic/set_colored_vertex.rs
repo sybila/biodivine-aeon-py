@@ -2,8 +2,10 @@ use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::AsNative;
 use biodivine_lib_bdd::Bdd as RsBdd;
@@ -227,7 +229,7 @@ impl ColoredVertexSet {
     /// When no `retained` collections are specified, this is equivalent to `ColoredVertexSet.__iter__`. However, if
     /// a retained collection is given, the resulting iterator only considers unique combinations of the `retained`
     /// functions and variables. Consequently, the resulting `ColorModel` and `VertexModel` instances will fail with
-    /// an `IndexError` if a value outside of the `retained` set is requested.
+    /// an `IndexError` if a value outside the `retained` set is requested.
     ///
     /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is equivalent to
     /// `set.colors().items()`. Similarly, with `retained_variables = None` and `retained_functions = []`, this is
@@ -298,6 +300,12 @@ impl ColoredVertexSet {
             retained_implicit,
             retained_explicit,
         })
+    }
+
+    /// Represent this colored set of vertices as a colored set of singleton subspaces instead.
+    pub fn to_singleton_spaces(&self, ctx: Py<SymbolicSpaceContext>) -> ColoredSpaceSet {
+        let native = self.as_native().to_singleton_spaces(ctx.get().as_native());
+        ColoredSpaceSet::wrap_native(ctx, native)
     }
 }
 

@@ -44,6 +44,14 @@ impl UpdateFunction {
         let fun = if let Ok(value) = value.extract::<&str>() {
             FnUpdate::try_from_str(value, ctx.borrow(py).as_native()).map_err(runtime_error)?
         } else if let Ok(value) = value.extract::<UpdateFunction>() {
+            if value.ctx.as_ptr() == ctx.as_ptr() {
+                return Ok(value);
+            }
+            // TODO:
+            //  This is a very bad method which tries to avoid translating
+            //  IDs from one function to the other. But it is not a great idea, because
+            //  the string conversion can be a little finicky, especially if parameters
+            //  are involved.
             let value = value.__str__(py);
             FnUpdate::try_from_str(value.as_str(), ctx.borrow(py).as_native())
                 .map_err(runtime_error)?

@@ -17,6 +17,9 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
+use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
+use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+
 /// A symbolic representation of a set of "spaces", i.e. hypercubes in the state space
 /// of a particular `BooleanNetwork`.
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -183,6 +186,13 @@ impl SpaceSet {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
         })
+    }
+
+    /// Produce a set of vertices that are contained within the subspaces represented in this set.
+    pub fn to_vertices(&self, ctx: Py<SymbolicSpaceContext>, py: Python) -> PyResult<VertexSet> {
+        let native = self.as_native().to_vertices(ctx.get().as_native());
+        let parent = ctx.extract::<Py<SymbolicContext>>(py)?;
+        Ok(VertexSet::mk_native(parent, native))
     }
 }
 

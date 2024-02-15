@@ -18,6 +18,19 @@ pub struct AsynchronousGraph {
     native: SymbolicAsyncGraph,
 }
 
+impl NetworkVariableContext for AsynchronousGraph {
+    fn resolve_network_variable(
+        &self,
+        variable: &PyAny,
+    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
+        NetworkVariableContext::resolve_network_variable(self.ctx.get(), variable)
+    }
+
+    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
+        NetworkVariableContext::get_network_variable_name(self.ctx.get(), variable)
+    }
+}
+
 impl AsNative<SymbolicAsyncGraph> for AsynchronousGraph {
     fn as_native(&self) -> &SymbolicAsyncGraph {
         &self.native
@@ -106,6 +119,20 @@ impl AsynchronousGraph {
     /// The name of a particular network variable.
     pub fn get_network_variable_name(&self, variable: &PyAny) -> PyResult<String> {
         self.ctx.get().get_network_variable_name(variable)
+    }
+
+    /// Try to reconstruct the underlying `BooleanNetwork` from the symbolic functions of
+    /// this `AsynchronousGraph`.
+    ///
+    /// This is only possible when the graph does not use any non-trivial uninterpreted functions
+    /// (i.e. arity more than zero), because there is no suitable way to reconstruct
+    /// a function expression form a partially specified function. The only exception are
+    /// implicit parameters (i.e. fully erased functions) that can be reconstructed as well.
+    pub fn reconstruct_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        let Some(native) = self.native.reconstruct_network() else {
+            return throw_runtime_error("Cannot reconstruct network: complex parameters found.");
+        };
+        BooleanNetwork::from(native).export_to_python(py)
     }
 
     /// Return an empty `ColoredVertexSet`.
@@ -401,6 +428,46 @@ impl AsynchronousGraph {
             self.as_native()
                 .var_can_pre_within(variable, set.as_native()),
         ))
+    }
+
+    /// Compute a version of the `AsynchronousGraph` where the specified variable is inlined.
+    ///
+    /// This is similar to `BooleanNetwork.inline_variable`, but performs the operation
+    /// symbolically on the `Bdd` update functions, not syntactically on the `UpdateFunction`
+    /// of the `BooleanNetwork`.
+    ///
+    /// As such, the result is often much smaller than the syntactic inlining. However, the
+    /// process does not produce an actual `BooleanNetwork` and is slightly unusual in the
+    /// context of `biodivine_aeon`: The new system uses new `VariableId` identifiers,
+    /// shifted due to the removed network variable. However, to maintain compatibility
+    /// with the original `AsynchronousGraph`, it uses the same underlying `BddVariableSet`.
+    ///
+    /// In other words, the variable is inlined inside the `AsynchronousGraph`, but still
+    /// (theoretically) exists in the symbolic representation, it is just eliminated everywhere,
+    /// including the `SymbolicContext` of the `AsynchronousGraph`.
+    ///
+    /// *Currently, variables with a self-regulation cannot be inlined (raised a `RuntimeError`).*
+    pub fn inline_variable_symbolic(
+        &self,
+        py: Python,
+        variable: &PyAny,
+    ) -> PyResult<AsynchronousGraph> {
+        let variable = self.resolve_network_variable(variable)?;
+        let Some(native_reduced) = self.native.inline_symbolic(variable) else {
+            let name = self.as_native().get_variable_name(variable);
+            return throw_runtime_error(format!(
+                "Cannot inline `{}`. Self-regulation detected.",
+                name
+            ));
+        };
+
+        let native_ctx = native_reduced.symbolic_context().clone();
+        let py_ctx = SymbolicContext::wrap_native(py, native_ctx)?;
+        let py_ctx = Py::new(py, py_ctx)?;
+        Ok(AsynchronousGraph {
+            native: native_reduced,
+            ctx: py_ctx,
+        })
     }
 }
 

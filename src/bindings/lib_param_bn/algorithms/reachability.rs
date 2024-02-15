@@ -23,7 +23,7 @@ impl Reachability {
         graph: &AsynchronousGraph,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach(
+        biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach_basic_saturation(
             graph.as_native(),
             initial.as_native(),
             |g, s, v| g.var_post_out(v, s),
@@ -44,7 +44,7 @@ impl Reachability {
         graph: &AsynchronousGraph,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach(
+        biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach_basic_saturation(
             graph.as_native(),
             initial.as_native(),
             |g, s, v| g.var_pre_out(v, s),
