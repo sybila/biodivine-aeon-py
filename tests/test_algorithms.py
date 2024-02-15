@@ -16,8 +16,8 @@ def test_algorithms():
     assert fixed_point_vertices == fixed_points.vertices()
     assert fixed_point_colors == fixed_points.colors()
 
-    minimal_traps = TrapSpaces.minimal_symbolic(bn, ctx, space_unit)
-    essential_traps = TrapSpaces.essential_symbolic(bn, ctx, space_unit)
+    minimal_traps = TrapSpaces.minimal_symbolic(ctx, graph, space_unit)
+    essential_traps = TrapSpaces.essential_symbolic(ctx, graph, space_unit)
     minimal_trap_states = minimal_traps.to_colored_vertices(ctx)
     maximal_traps = TrapSpaces.maximize(ctx, essential_traps)
 

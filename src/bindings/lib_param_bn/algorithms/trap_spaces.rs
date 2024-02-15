@@ -1,4 +1,4 @@
-use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
+use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::{global_log_level, AsNative};
@@ -18,13 +18,13 @@ impl TrapSpaces {
     #[staticmethod]
     pub fn essential_symbolic(
         py: Python,
-        network: &BooleanNetwork,
         ctx: Py<SymbolicSpaceContext>,
+        graph: &AsynchronousGraph,
         restriction: &ColoredSpaceSet,
     ) -> PyResult<ColoredSpaceSet> {
         let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_essential_symbolic(
-            network.as_native(),
             ctx.get().as_native(),
+            graph.as_native(),
             restriction.as_native(),
             global_log_level(py)?,
             &|| py.check_signals(),
@@ -40,13 +40,13 @@ impl TrapSpaces {
     #[staticmethod]
     pub fn minimal_symbolic(
         py: Python,
-        network: &BooleanNetwork,
         ctx: Py<SymbolicSpaceContext>,
+        graph: &AsynchronousGraph,
         restriction: &ColoredSpaceSet,
     ) -> PyResult<ColoredSpaceSet> {
         let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
-            network.as_native(),
             ctx.get().as_native(),
+            graph.as_native(),
             restriction.as_native(),
             global_log_level(py)?,
             &|| py.check_signals(),
