@@ -94,3 +94,6 @@ docs/_build/
 # Code coverage data
 *.profraw
 coverage.lcov
+
+# Ignore generated documentation.
+docs
