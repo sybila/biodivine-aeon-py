@@ -401,6 +401,15 @@ impl RegulatoryGraph {
         Ok(RegulatoryGraph(bn.as_graph().clone()))
     }
 
+    /// Make a copy of this `RegulatoryGraph` with all constraints on the regulations removed.
+    /// In particular, every regulation is set to non-essential with an unknown sign.
+    pub fn remove_regulation_constraints(&self, py: Python) -> PyResult<RegulatoryGraph> {
+        let native = self.as_native();
+        let bn = biodivine_lib_param_bn::BooleanNetwork::new(native.clone());
+        let bn = bn.remove_static_constraints();
+        Ok(RegulatoryGraph(bn.as_graph().clone()))
+    }
+
     /// Compute the `set` of all predecessors (regulators) of a specific variable.
     pub fn predecessors(&self, variable: &PyAny) -> PyResult<HashSet<VariableId>> {
         let variable = self.resolve_network_variable(variable)?;

@@ -296,6 +296,10 @@ as in Rust due to use of default argument values and polymorphism.
         </tr>
         <tr>
             <td></td>
+            <td><code>RegulatoryGraph::remove_regulation_constraints</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>RegulatoryGraph::inline_variable</code></td>
         </tr>
         <tr><td colspan="2" align="center">Graph exploration and algorithms</td></tr>
