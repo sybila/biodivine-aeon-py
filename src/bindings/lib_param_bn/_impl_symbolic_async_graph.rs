@@ -254,7 +254,9 @@ impl PySymbolicAsyncGraph {
             return throw_runtime_error(format!("Artiy mismatch for variable {name}."));
         }*/
         let ctx = self.as_native().symbolic_context();
-        let table = ctx.get_implicit_function_table(id.into());
+        let Some(table) = ctx.get_implicit_function_table(id.into()) else {
+            return throw_runtime_error("Variable does not have an implicit function.");
+        };
         let mut bdd = ctx.mk_constant(false);
         for (row, bdd_var) in table {
             if row == inputs {

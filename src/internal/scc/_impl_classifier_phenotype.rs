@@ -35,7 +35,8 @@ impl ClassifierPhenotype {
                 let mut combination_colors = graph.mk_unit_colors();
                 let mut phen_group_names: Vec<String> = Vec::new();
                 for (p, _) in c {
-                    combination_colors = combination_colors.intersect(&single_component_classification.get(p).unwrap());
+                    combination_colors = combination_colors
+                        .intersect(&single_component_classification.get(p).unwrap());
                     phen_group_names.push(p.to_string());
                 }
                 combination_colors = combination_colors.minus(&taken_colors);
@@ -78,8 +79,13 @@ impl ClassifierPhenotype {
         let mut fully_classified: HashMap<String, GraphColors> = HashMap::new();
         let mut taken_colors = graph.mk_empty_colors();
 
-        eligible_class_clusters.sort_by(|v1, v2| {v1.iter().filter(|y| {*y == &"#".to_string()}).count().cmp(&v2.iter().filter(|y| {*y == &"#".to_string()}).count())});
-        for cluster in eligible_class_clusters  {
+        eligible_class_clusters.sort_by(|v1, v2| {
+            v1.iter()
+                .filter(|y| *y == &"#".to_string())
+                .count()
+                .cmp(&v2.iter().filter(|y| *y == &"#".to_string()).count())
+        });
+        for cluster in eligible_class_clusters {
             let mut belonging_colors = graph.mk_unit_colors();
             for (actual_classes, required_class) in
                 zip(classified_components.iter(), cluster.iter())

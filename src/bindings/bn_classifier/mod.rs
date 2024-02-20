@@ -23,7 +23,10 @@ use pyo3::PyResult;
 pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(run_hctl_classification, module)?)?;
     module.add_function(wrap_pyfunction!(run_attractor_classification, module)?)?;
-    module.add_function(wrap_pyfunction!(run_phenotype_attractor_classification, module)?)?;
+    module.add_function(wrap_pyfunction!(
+        run_phenotype_attractor_classification,
+        module
+    )?)?;
     module.add_function(wrap_pyfunction!(save_class_archive, module)?)?;
     module.add_function(wrap_pyfunction!(load_class_archive, module)?)?;
     module.add_function(wrap_pyfunction!(get_model_assertions, module)?)?;

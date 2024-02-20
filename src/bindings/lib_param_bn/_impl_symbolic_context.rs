@@ -124,12 +124,10 @@ impl PySymbolicContext {
     pub fn get_implicit_function_table(
         &self,
         variable: PyVariableId,
-    ) -> Vec<(Vec<bool>, PyBddVariable)> {
+    ) -> Option<Vec<(Vec<bool>, PyBddVariable)>> {
         self.as_native()
             .get_implicit_function_table(variable.into())
-            .into_iter()
-            .map(|(k, v)| (k, v.into()))
-            .collect()
+            .map(|it| it.into_iter().map(|(k, v)| (k, v.into())).collect())
     }
 
     pub fn get_explicit_function_table(
@@ -191,10 +189,13 @@ impl PySymbolicContext {
         variable: PyVariableId,
         arguments: Vec<PyVariableId>,
     ) -> PyResult<PyBdd> {
-        let required_variables = self
+        let Some(table) = self
             .as_native()
             .get_implicit_function_table(variable.into())
-            .symbolic_variables();
+        else {
+            return throw_runtime_error("Variable does not have an implicit function.");
+        };
+        let required_variables = table.symbolic_variables();
         let valuation = read_valuation(
             self.as_native().bdd_variable_set(),
             required_variables,

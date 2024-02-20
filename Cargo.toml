@@ -17,14 +17,14 @@ static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
 pyo3 = { version = "0.20.0", features = ["abi3-py37", "extension-module"] }
-biodivine-lib-param-bn = { version="0.5.2", features=["solver-z3"] }
-biodivine-lib-bdd = "0.5.7"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "a79a2c1" }
+biodivine-lib-param-bn = { version="0.5.9", features=["solver-z3"] }
+biodivine-lib-bdd = "0.5.11"
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "fb6f5e7014694435236061dfce1816db10e03733" }
 biodivine-hctl-model-checker = "0.2.2"
 rand = "0.8.5"
 macros = { path = "macros" }
 zip = "0.6.6"
-itertools = "0.11.0"
+itertools = "0.12.1"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
