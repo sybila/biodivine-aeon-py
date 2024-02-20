@@ -1,6 +1,6 @@
 [package]
 name = "biodivine-aeon-py"
-version = "0.0.9-alpha3"
+version = "0.0.9-alpha4"
 edition = "2021"
 
 [lib]
@@ -8,6 +8,7 @@ name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
 [features]
+default = ["static-z3"]
 # For releases, we want to include Z3 statically, so that users
 # don't have to install it (or break compatibility with new versions).
 # So for CI builds, this feature is enabled, but for local builds,
