@@ -3,12 +3,12 @@ use crate::bindings::lib_param_bn::{
     PyBooleanNetwork, PyGraphColoredVertices, PyGraphColors, PyGraphVertices, PyParameterId,
     PySymbolicAsyncGraph, PyVariableId,
 };
-use crate::bindings::pbn_control::{PyControlMap, PyPerturbationGraph, PyPhenotypeControlMap};
+use crate::bindings::pbn_control::{PyAttractorControlMap, PyPhenotypeControlMap, PyPerturbationGraph};
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::VariableId;
 use biodivine_pbn_control::perturbation::PerturbationGraph;
-use biodivine_pbn_control::phenotype_control::PhenotypeOscillationType;
+use biodivine_pbn_control::control::PhenotypeOscillationType;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
@@ -182,7 +182,7 @@ impl PyPerturbationGraph {
     pub fn fix_perturbation(
         &self,
         variable: &PyAny,
-        value: Option<bool>,
+        value: Option<&bool>,
     ) -> PyResult<PyGraphColoredVertices> {
         let variable = self.find_variable(variable)?;
         Ok(self
@@ -227,7 +227,8 @@ impl PyPerturbationGraph {
         source: Vec<bool>,
         target: Vec<bool>,
         compute_params: Option<&PyGraphColors>,
-    ) -> PyControlMap {
+        verbose: bool,
+    ) -> PyAttractorControlMap {
         let compute_params = compute_params
             .map(|it| it.as_native())
             .unwrap_or_else(|| self.as_native().unit_colors());
@@ -236,6 +237,7 @@ impl PyPerturbationGraph {
                 &ArrayBitVector::from_bool_vector(source),
                 &ArrayBitVector::from_bool_vector(target),
                 compute_params,
+                verbose
             )
             .into()
     }
@@ -251,7 +253,8 @@ impl PyPerturbationGraph {
         source: Vec<bool>,
         target: Vec<bool>,
         compute_params: Option<&PyGraphColors>,
-    ) -> PyControlMap {
+        verbose: bool,
+    ) -> PyAttractorControlMap {
         let compute_params = compute_params
             .map(|it| it.as_native())
             .unwrap_or_else(|| self.as_native().unit_colors());
@@ -260,6 +263,7 @@ impl PyPerturbationGraph {
                 &ArrayBitVector::from_bool_vector(source),
                 &ArrayBitVector::from_bool_vector(target),
                 compute_params,
+                verbose
             )
             .into()
     }
@@ -275,7 +279,8 @@ impl PyPerturbationGraph {
         source: Vec<bool>,
         target: Vec<bool>,
         compute_params: Option<&PyGraphColors>,
-    ) -> PyControlMap {
+        verbose: bool,
+    ) -> PyAttractorControlMap {
         let compute_params = compute_params
             .map(|it| it.as_native())
             .unwrap_or_else(|| self.as_native().unit_colors());
@@ -284,6 +289,7 @@ impl PyPerturbationGraph {
                 &ArrayBitVector::from_bool_vector(source),
                 &ArrayBitVector::from_bool_vector(target),
                 compute_params,
+                verbose
             )
             .into()
     }
