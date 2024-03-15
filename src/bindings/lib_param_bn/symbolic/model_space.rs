@@ -1,10 +1,13 @@
+use std::collections::HashMap;
+
+use pyo3::{pyclass, pymethods, Py, PyAny, PyResult, Python};
+
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
+use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::{throw_index_error, AsNative};
-use pyo3::{pyclass, pymethods, Py, PyAny, PyResult, Python};
-use std::collections::HashMap;
 
 /// Represents a single space stored in a `SpaceSet` (or a `ColoredSpaceSet`), or a projection
 /// of said space to the chosen variables.
@@ -113,6 +116,20 @@ impl SpaceModel {
             self.ctx.borrow(py).as_ref().bdd_variable_set(),
             self.native.clone(),
         )
+    }
+
+    /// Return a `SpaceSet` where all the variables are fixed according
+    /// to the values in this `SpaceModel`. Variables that are not present in the `SpaceModel`
+    /// are unrestricted, meaning their value can be any of `0`, `1`, and `*`.
+    pub fn to_symbolic(&self) -> SpaceSet {
+        let ctx = self.ctx.get();
+        let bdd = ctx
+            .as_native()
+            .bdd_variable_set()
+            .mk_conjunctive_clause(&self.native);
+        let bdd = ctx.as_native().mk_unit_bdd().and(&bdd);
+        let native = biodivine_lib_param_bn::trap_spaces::NetworkSpaces::new(bdd, ctx.as_native());
+        SpaceSet::wrap_native(self.ctx.clone(), native)
     }
 }
 

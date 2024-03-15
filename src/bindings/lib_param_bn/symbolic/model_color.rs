@@ -1,6 +1,7 @@
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
+use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
@@ -152,6 +153,23 @@ impl ColorModel {
         )
     }
 
+    /// Return a `ColorSet` where all the implicit and explicit parameters are fixed according
+    /// to the values in this `ColorModel`. Parameters that are not present in the `ColorModel`
+    /// are unrestricted.
+    ///
+    /// Note that this does not apply any constraints that may be relevant in the
+    /// `AsynchronousGraph` that was used to create this model.
+    pub fn to_symbolic(&self) -> ColorSet {
+        let ctx = self.ctx.get();
+        let bdd = ctx
+            .as_native()
+            .bdd_variable_set()
+            .mk_conjunctive_clause(&self.native);
+        let native =
+            biodivine_lib_param_bn::symbolic_async_graph::GraphColors::new(bdd, ctx.as_native());
+        ColorSet::mk_native(self.ctx.clone(), native)
+    }
+
     /// The `ColorModel.instantiate` method is used to "fill in" the actual implementation of
     /// the uninterpreted functions defined in this `ColorModel` into an object that depends on
     /// this implementation.
@@ -165,13 +183,13 @@ impl ColorModel {
     ///    a string name), the method returns an `UpdateFunction` that is an interpretation of the
     ///    uninterpreted function with specified `args` under this model. This is equivalent to
     ///    computing `SymbolicContext.mk_function` and then instantiating this function. Note that
-    ///    in this situation, the `args` argument is required and it must match the arity of the
+    ///    in this situation, the `args` argument is required, and it must match the arity of the
     ///    uninterpreted function.
     ///
     /// *Note that in some cases, instantiating an `UpdateFunction` with two different
     /// interpretations can lead to the same `UpdateFunction`. This happens if parts of the
     /// function are redundant. For example, `f(x) | !f(x)` always instantiates to `true`,
-    /// regardless of the interpretation of `f`. Hence you can assume that while interpretations
+    /// regardless of the interpretation of `f`. Hence, you can assume that while interpretations
     /// (i.e. `model["f"]`) are unique within a set, the instantiations of more complex functions
     /// that depend on them are not.*
     #[pyo3(signature = (item, args = None))]

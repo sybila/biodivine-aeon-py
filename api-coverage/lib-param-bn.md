@@ -2098,6 +2098,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
             <td></td>
             <td><code>VertexModel.to_valuation</code></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexModel.to_symbolic</code></td>
+        </tr>
     </tbody>
 </table>
 
@@ -2171,6 +2175,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         <tr>
             <td></td>
             <td><code>ColorModel.to_valuation</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.to_symbolic</code></td>
         </tr>
         <tr>
             <td></td>
@@ -2249,6 +2257,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         <tr>
             <td></td>
             <td><code>SpaceModel.to_valuation</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceModel.to_symbolic</code></td>
         </tr>
     </tbody>
 </table>

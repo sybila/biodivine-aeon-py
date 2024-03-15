@@ -1,10 +1,13 @@
+use std::collections::HashMap;
+
+use pyo3::{pyclass, pymethods, Py, PyAny, PyResult};
+
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
+use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::{index_error, AsNative};
-use pyo3::{pyclass, pymethods, Py, PyAny, PyResult};
-use std::collections::HashMap;
 
 /// Represents a single vertex stored in a `VertexSet` (or a `ColoredVertexSet`), or a projection
 /// of said vertex to the chosen variables.
@@ -109,6 +112,20 @@ impl VertexModel {
     /// Return the underlying `BddPartialValuation` for this symbolic model.
     pub fn to_valuation(&self) -> BddPartialValuation {
         BddPartialValuation::new_raw(self.ctx.get().bdd_variable_set(), self.native.clone())
+    }
+
+    /// Return a `VertexSet` where all the variables are fixed according
+    /// to the values in this `VertexModel`. Variables that are not present in the `VertexModel`
+    /// are unrestricted.
+    pub fn to_symbolic(&self) -> VertexSet {
+        let ctx = self.ctx.get();
+        let bdd = ctx
+            .as_native()
+            .bdd_variable_set()
+            .mk_conjunctive_clause(&self.native);
+        let native =
+            biodivine_lib_param_bn::symbolic_async_graph::GraphVertices::new(bdd, ctx.as_native());
+        VertexSet::mk_native(self.ctx.clone(), native)
     }
 }
 

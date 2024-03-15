@@ -940,6 +940,8 @@ def test_symbolic_iterators():
         assert vertex["b"] == vertex.values()[1]
         assert vertex.items()[0] == (VariableId(0), vertex[VariableId(0)])
         assert vertex.to_dict() == dict(vertex.items())
+        assert vertex.to_symbolic().is_singleton()
+        assert vertex.to_symbolic() == graph.mk_subspace_vertices(vertex.to_dict())
 
     assert sum(1 for _ in b_or_c) == 6
 
@@ -952,6 +954,8 @@ def test_symbolic_iterators():
         assert vertex["b"] == vertex.values()[0]
         assert vertex.items()[1] == (VariableId(2), vertex[VariableId(2)])
         assert vertex.to_dict() == dict(vertex.items())
+        assert vertex.to_symbolic().is_subspace()
+        assert vertex.to_symbolic() == graph.mk_subspace_vertices(vertex.to_dict())
 
     assert sum(1 for _ in b_or_c.items(["b", "c"])) == 3
 
@@ -985,6 +989,9 @@ def test_symbolic_iterators():
         assert str(fn_c_in_a) in {"true", "false", "!a"}
         fn_c_in_b = i.instantiate("c", ["b"])
         assert str(fn_c_in_b) in {"true", "false", "!b"}
+
+        assert i.to_symbolic().is_singleton()
+        assert i.to_symbolic().is_subset(graph.mk_function_colors("f", i["f"]))
 
     # This is basically a mix of tests for ColorSet and VertexSet
 
@@ -1061,6 +1068,8 @@ def test_symbolic_iterators():
         assert s["b"] == s.values()[0]
         assert s.items()[1] == (VariableId(2), s[VariableId(2)])
         assert s.to_dict() == dict(s.items())
+        # Should always contain three spaces with different values of "a".
+        assert s.to_symbolic().cardinality() == 3
 
     unit_colored_spaces = ctx.mk_unit_colored_spaces(AsynchronousGraph(bn, ctx))
     b = ctx.mk_singleton(b_space)
