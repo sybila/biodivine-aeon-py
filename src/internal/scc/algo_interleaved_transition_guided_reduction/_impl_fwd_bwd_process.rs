@@ -1,10 +1,12 @@
+use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
+use pyo3::PyResult;
+
 use crate::internal::scc::algo_interleaved_transition_guided_reduction::{
     BwdProcess, FwdProcess, Process, Scheduler,
 };
 use crate::internal::scc::algo_saturated_reachability::reachability_step;
-use biodivine_lib_param_bn::biodivine_std::traits::Set;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
-use pyo3::PyResult;
+use crate::log_essential;
 
 impl BwdProcess {
     pub fn new(initial: GraphColoredVertices, universe: GraphColoredVertices) -> BwdProcess {
@@ -34,12 +36,26 @@ impl FwdProcess {
 
 impl Process for BwdProcess {
     fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> PyResult<bool> {
-        reachability_step(
+        let result = reachability_step(
             &mut self.bwd,
             &self.universe,
             scheduler.get_active_variables(),
             |var, set| graph.var_pre(var, set),
-        )
+        );
+
+        let problem_size = self.bwd.symbolic_size();
+        if log_essential(scheduler.log_level, problem_size) {
+            let current = self.bwd.approx_cardinality();
+            let max = scheduler.universe.approx_cardinality();
+            println!(
+                " >> [BWD process] Reachability progress: {}[nodes:{}] candidates ({:.2} log-%).",
+                current,
+                problem_size,
+                (current.log2() / max.log2()) * 100.0
+            );
+        }
+
+        result
     }
 
     fn weight(&self) -> usize {
@@ -54,12 +70,26 @@ impl Process for BwdProcess {
 
 impl Process for FwdProcess {
     fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> PyResult<bool> {
-        reachability_step(
+        let result = reachability_step(
             &mut self.fwd,
             &self.universe,
             scheduler.get_active_variables(),
             |var, set| graph.var_post(var, set),
-        )
+        );
+
+        let problem_size = self.fwd.symbolic_size();
+        if log_essential(scheduler.log_level, problem_size) {
+            let current = self.fwd.approx_cardinality();
+            let max = scheduler.universe.approx_cardinality();
+            println!(
+                " >> [BWD process] Reachability progress: {}[nodes:{}] candidates ({:.2} log-%).",
+                current,
+                problem_size,
+                (current.log2() / max.log2()) * 100.0
+            );
+        }
+
+        result
     }
 
     fn weight(&self) -> usize {

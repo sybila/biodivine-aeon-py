@@ -6,6 +6,7 @@
 //!
 
 use crate::bindings::global_interrupt;
+use crate::should_log;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
 use pyo3::PyResult;
@@ -25,13 +26,23 @@ mod _impl_scheduler;
 pub fn interleaved_transition_guided_reduction(
     graph: &SymbolicAsyncGraph,
     initial: GraphColoredVertices,
+    to_reduce: &[VariableId],
+    log_level: usize,
 ) -> PyResult<(GraphColoredVertices, Vec<VariableId>)> {
+    if should_log(log_level) {
+        println!(
+            "Start interleaved transition guided reduction with {}[nodes:{}] candidates.",
+            initial.approx_cardinality(),
+            initial.symbolic_size()
+        );
+    }
+
     let variables = graph.variables().collect::<Vec<_>>();
-    let mut scheduler = Scheduler::new(initial, variables);
-    for variable in graph.variables() {
+    let mut scheduler = Scheduler::new(initial, variables, log_level);
+    for variable in to_reduce {
         global_interrupt()?;
         scheduler.spawn(ReachableProcess::new(
-            variable,
+            *variable,
             graph,
             scheduler.get_universe().clone(),
         ));
@@ -42,7 +53,17 @@ pub fn interleaved_transition_guided_reduction(
         scheduler.step(graph)?;
     }
 
-    Ok(scheduler.finalize())
+    let result = scheduler.finalize();
+
+    if should_log(log_level) {
+        println!(
+            "Interleaved transition guided reduction finished with {}[nodes:{}] candidates.",
+            result.0.approx_cardinality(),
+            result.0.symbolic_size()
+        );
+    }
+
+    Ok(result)
 }
 
 /// **(internal)** A process trait is a unit of work that is managed by a `Scheduler`.
@@ -72,6 +93,7 @@ struct Scheduler {
     universe: GraphColoredVertices,
     processes: Vec<(usize, Box<dyn Process>)>,
     to_discard: Option<GraphColoredVertices>,
+    log_level: usize,
 }
 
 /// **(internal)** Basic backward reachability process.

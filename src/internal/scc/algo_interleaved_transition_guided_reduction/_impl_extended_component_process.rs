@@ -1,11 +1,13 @@
-use crate::internal::scc::algo_interleaved_transition_guided_reduction::{
-    BwdProcess, ExtendedComponentProcess, Process, Scheduler,
-};
-use crate::internal::scc::algo_saturated_reachability::reach_bwd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
 use pyo3::PyResult;
+
+use crate::internal::scc::algo_interleaved_transition_guided_reduction::{
+    BwdProcess, ExtendedComponentProcess, Process, Scheduler,
+};
+use crate::internal::scc::algo_saturated_reachability::reach_bwd;
+use crate::{log_essential, should_log};
 
 impl ExtendedComponentProcess {
     pub fn new(
@@ -28,6 +30,13 @@ impl Process for ExtendedComponentProcess {
         if self.bwd.step(scheduler, graph)? {
             let extended_component = self.bwd.get_reachable_set();
             let bottom = self.fwd_set.minus(extended_component);
+
+            if log_essential(scheduler.log_level, extended_component.symbolic_size()) {
+                println!(
+                    " > Completed extended component for {} transitions.",
+                    self.variable
+                );
+            }
 
             // This is a modification of the original TGR in order to allow faster checking
             // of regions that are not trap sets but might still contain attractors.
@@ -55,13 +64,29 @@ impl Process for ExtendedComponentProcess {
             };
 
             if !bottom.is_empty() {
+                if log_essential(scheduler.log_level, bottom.symbolic_size()) {
+                    println!(
+                        " > Start pruning the basin of {} extended component.",
+                        self.variable
+                    );
+                }
                 let basin_only = reach_bwd(
                     graph,
                     &bottom,
                     scheduler.get_universe(),
                     scheduler.get_active_variables(),
+                    scheduler.log_level,
                 )?
                 .minus(&bottom);
+
+                if should_log(scheduler.log_level) {
+                    println!(
+                        " > Discarded {} instances based on the {} extended component.",
+                        basin_only.approx_cardinality(),
+                        self.variable
+                    );
+                }
+
                 if !basin_only.is_empty() {
                     scheduler.discard_vertices(&basin_only);
                 }

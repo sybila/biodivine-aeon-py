@@ -60,6 +60,18 @@ fn global_log_level(py: Python) -> PyResult<usize> {
     module.getattr("LOG_LEVEL")?.extract()
 }
 
+const LOG_NOTHING: usize = 0;
+const LOG_ESSENTIAL: usize = 1;
+const LOG_VERBOSE: usize = 2;
+
+fn log_essential(log_level: usize, symbolic_size: usize) -> bool {
+    log_level >= LOG_VERBOSE || (symbolic_size > 100_000 && log_level >= LOG_ESSENTIAL)
+}
+
+fn should_log(log_level: usize) -> bool {
+    log_level > LOG_NOTHING
+}
+
 /// AEON.py is a library...
 #[pymodule]
 fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {

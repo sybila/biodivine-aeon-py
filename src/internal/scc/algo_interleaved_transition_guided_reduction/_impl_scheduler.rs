@@ -1,17 +1,24 @@
-use crate::internal::scc::algo_interleaved_transition_guided_reduction::{Process, Scheduler};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
 use pyo3::PyResult;
 
+use crate::internal::scc::algo_interleaved_transition_guided_reduction::{Process, Scheduler};
+use crate::{log_essential, should_log};
+
 impl Scheduler {
     /// Create a new `Scheduler` with initial universe and active variables.
-    pub fn new(initial: GraphColoredVertices, variables: Vec<VariableId>) -> Scheduler {
+    pub fn new(
+        initial: GraphColoredVertices,
+        variables: Vec<VariableId>,
+        log_level: usize,
+    ) -> Scheduler {
         Scheduler {
             active_variables: variables,
             universe: initial,
             processes: Vec::new(),
             to_discard: None,
+            log_level,
         }
     }
 
@@ -74,16 +81,31 @@ impl Scheduler {
                 *w = process.weight();
             }
             self.to_discard = None;
+
+            if should_log(self.log_level) {
+                println!(
+                    " > State space reduced to {}[nodes:{}].",
+                    self.universe.approx_cardinality(),
+                    self.universe.symbolic_size(),
+                );
+            }
         }
 
         // Second, put the best process in the last place
         self.processes.sort_by_key(|(w, _)| usize::MAX - (*w));
+
+        let total_weight = self.processes.iter().map(|it| it.1.weight()).sum::<usize>();
 
         // Perform one step in a process
         if let Some((_, mut process)) = self.processes.pop() {
             let is_done = process.step(self, graph)?;
             if !is_done {
                 self.processes.push((process.weight(), process));
+            } else if log_essential(self.log_level, total_weight) {
+                println!(
+                    " > Finished ITGR process. {} processes remaining.",
+                    self.processes.len()
+                );
             }
         }
 

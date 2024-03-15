@@ -1,4 +1,5 @@
 use crate::bindings::global_interrupt;
+use crate::log_essential;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
@@ -66,11 +67,24 @@ pub fn reach_bwd(
     initial: &GraphColoredVertices,
     universe: &GraphColoredVertices,
     variables: &[VariableId],
+    log_level: usize,
 ) -> PyResult<GraphColoredVertices> {
     let mut set = initial.clone();
     loop {
         if reachability_step(&mut set, universe, variables, |v, s| graph.var_pre(v, s))? {
             break;
+        }
+
+        let problem_size = set.symbolic_size();
+        if log_essential(log_level, problem_size) {
+            let current = set.approx_cardinality();
+            let max = universe.approx_cardinality();
+            println!(
+                " >> [BWD process] Reachability progress: {}[nodes:{}] candidates ({:.2} log-%).",
+                current,
+                problem_size,
+                (current.log2() / max.log2()) * 100.0
+            );
         }
     }
     Ok(set)
