@@ -329,6 +329,9 @@ impl SymbolicSpaceContext {
         let mut result = Vec::new();
         if let Ok(dict) = subspace.downcast::<PyDict>() {
             for (k, v) in dict {
+                if v.is_none() {
+                    continue;
+                }
                 let k = self_.borrow(py).as_ref().resolve_network_variable(k)?;
                 let v = resolve_boolean(v)?;
                 result.push((k, v));
