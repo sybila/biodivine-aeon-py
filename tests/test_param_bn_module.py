@@ -860,6 +860,12 @@ def test_asynchronous_graph():
     assert unit_set.intersect_colors(unit_colors) == unit_set
     assert unit_set.intersect_vertices(unit_vertices) == unit_set
 
+    assert graph.mk_function_colors("f", "true").is_subspace()
+    assert graph.mk_function_colors("a", "x_0").intersect(graph.mk_function_colors("a", "!x_0")).is_empty()
+
+    assert graph.mk_function_colors("f", "true").is_subset(graph.mk_function_row_colors("f", [0], True))
+    assert graph.mk_function_colors("a", "x_0").is_subset(graph.mk_function_row_colors("a", [1], True))
+
     assert graph.transfer_from(unit_set, graph) == unit_set
     assert graph.transfer_from(unit_colors, graph) == unit_colors
     assert graph.transfer_from(unit_vertices, graph) == unit_vertices

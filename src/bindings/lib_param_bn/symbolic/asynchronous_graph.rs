@@ -1,16 +1,22 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::resolve_boolean;
-use crate::{throw_runtime_error, throw_type_error, AsNative};
-use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;
+use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
+use biodivine_lib_bdd::BddValuation;
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
+use either::{Left, Right};
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
+use std::collections::HashMap;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct AsynchronousGraph {
@@ -163,6 +169,176 @@ impl AsynchronousGraph {
     /// Return a "unit" (i.e. full) `VertexSet`.
     pub fn mk_unit_vertices(&self) -> VertexSet {
         VertexSet::mk_native(self.ctx.clone(), self.native.mk_unit_vertices())
+    }
+
+    /// Compute the set of colors where the function of the given `id` outputs the specified
+    /// `value` for the given input `row`.
+    ///
+    /// Note that this does not reflect the static constraints of the underlying network. It simply
+    /// outputs all functions where given inputs evaluate to the given output.
+    pub fn mk_function_row_colors(
+        &self,
+        function: &PyAny,
+        row: &PyList,
+        value: &PyAny,
+    ) -> PyResult<ColorSet> {
+        let ctx = self.ctx.get();
+        let output = resolve_boolean(value)?;
+        let table = match ctx.resolve_function(function)? {
+            Left(var) => ctx.as_native().get_implicit_function_table(var).unwrap(),
+            Right(par) => ctx.as_native().get_explicit_function_table(par),
+        };
+        let arity = table.arity as usize;
+        if row.len() != arity {
+            return throw_runtime_error(format!(
+                "Expected {} argument(s), but {} found.",
+                arity,
+                row.len()
+            ));
+        }
+
+        let mut input = Vec::new();
+        for it in row {
+            input.push(resolve_boolean(it)?);
+        }
+
+        for (i, var) in table {
+            if i == input {
+                let bdd = ctx.as_native().bdd_variable_set().mk_literal(var, output);
+                let native_set = biodivine_lib_param_bn::symbolic_async_graph::GraphColors::new(
+                    bdd,
+                    ctx.as_native(),
+                );
+                return Ok(ColorSet::mk_native(self.ctx.clone(), native_set));
+            }
+        }
+
+        unreachable!("The table does not cover all inputs.");
+    }
+
+    /// Compute a set of colors that corresponds to the given function interpretation
+    /// (functions other than `id` remain unconstrained).
+    ///
+    /// Note that the result of this operation does not have to be a subset of
+    /// `AsynchronousGraph.mk_unit_colors`. In other words, this method allows you to
+    /// also create instances of colors that represent valid functions, but are disallowed
+    /// by the regulation constraints.
+    ///
+    /// The first argument must identify an unknown function (i.e. explicit or implicit parameter).
+    /// The second argument then represents a Boolean function of the arity prescribed for the
+    /// specified unknown function. Such a Boolean function can be represented as:
+    ///  - A `BooleanExpression` (or a string that parses into a `BooleanExpression`) which
+    ///    uses only variables `x_0 ... x_{A-1}` (`A` being the function arity).
+    ///  - A `Bdd` that only depends on the first `A` symbolic variables.
+    ///
+    /// In both cases, the support set of the function can be of course a subset of the prescribed
+    /// variables (e.g. `x_0 | x_3` is allowed for a function with `A=4`, even though `x_1` and
+    /// `x_2` are unused).
+    pub fn mk_function_colors(&self, function: &PyAny, value: &PyAny) -> PyResult<ColorSet> {
+        let ctx = self.ctx.get();
+        let table = match ctx.resolve_function(function)? {
+            Left(var) => ctx.as_native().get_implicit_function_table(var).unwrap(),
+            Right(par) => ctx.as_native().get_explicit_function_table(par),
+        };
+        let arity = table.arity as usize;
+
+        let mut color_valuation = biodivine_lib_bdd::BddPartialValuation::empty();
+
+        if let Ok(bdd) = value.extract::<Bdd>() {
+            // Ensure that the function only depends on the expected variables.
+            let support = bdd.as_native().support_set();
+            for var in support {
+                if var.to_index() >= arity {
+                    return throw_runtime_error(format!(
+                        "Provided function uses `BddVariable({})`, but expects {} variables.",
+                        var.to_index(),
+                        arity,
+                    ));
+                }
+            }
+
+            let mut val = BddValuation::new(vec![false; usize::from(bdd.as_native().num_vars())]);
+            for (inputs, var) in table {
+                for (i, x) in inputs.into_iter().enumerate() {
+                    val[biodivine_lib_bdd::BddVariable::from_index(i)] = x;
+                }
+                color_valuation[var] = Some(bdd.as_native().eval_in(&val));
+            }
+        } else {
+            let expr = BooleanExpression::resolve_expression(value)?;
+            let expected_support = (0..arity)
+                .map(|it| (format!("x_{}", it), it))
+                .collect::<HashMap<_, _>>();
+
+            // A helper function which evaluates while mapping variables to indices 1:1.
+            fn eval(
+                values: &[bool],
+                names: &HashMap<String, usize>,
+                e: &RsBooleanExpression,
+            ) -> PyResult<bool> {
+                match e {
+                    RsBooleanExpression::Const(x) => Ok(*x),
+                    RsBooleanExpression::Variable(x) => {
+                        let index = names.get(x).cloned().ok_or_else(|| {
+                            runtime_error(format!(
+                                "Provided function uses variable `{}`, but expects {} variables.",
+                                x,
+                                names.len(),
+                            ))
+                        })?;
+                        Ok(values[index])
+                    }
+                    RsBooleanExpression::Not(inner) => {
+                        eval(values, names, inner.as_ref()).map(|it| !it)
+                    }
+                    RsBooleanExpression::And(l, r) => {
+                        let l = eval(values, names, l.as_ref())?;
+                        let r = eval(values, names, r.as_ref())?;
+
+                        Ok(l && r)
+                    }
+                    RsBooleanExpression::Or(l, r) => {
+                        let l = eval(values, names, l.as_ref())?;
+                        let r = eval(values, names, r.as_ref())?;
+
+                        Ok(l || r)
+                    }
+                    RsBooleanExpression::Imp(l, r) => {
+                        let l = eval(values, names, l.as_ref())?;
+                        let r = eval(values, names, r.as_ref())?;
+
+                        Ok(!l || r)
+                    }
+                    RsBooleanExpression::Iff(l, r) => {
+                        let l = eval(values, names, l.as_ref())?;
+                        let r = eval(values, names, r.as_ref())?;
+
+                        Ok(l == r)
+                    }
+                    RsBooleanExpression::Xor(l, r) => {
+                        let l = eval(values, names, l.as_ref())?;
+                        let r = eval(values, names, r.as_ref())?;
+
+                        Ok(l != r)
+                    }
+                }
+            }
+
+            for (inputs, var) in table {
+                let result = eval(&inputs, &expected_support, expr.as_native())?;
+                color_valuation[var] = Some(result);
+            }
+        }
+
+        let bdd = self
+            .ctx
+            .get()
+            .bdd_variable_set()
+            .get()
+            .as_native()
+            .mk_conjunctive_clause(&color_valuation);
+        let colors = GraphColors::new(bdd, self.symbolic_context().get().as_native());
+        Ok(ColorSet::mk_native(self.symbolic_context().clone(), colors))
     }
 
     /// Transfer a symbolic set (`ColorSet`, `VertexSet`, or `ColoredVertexSet`) from a compatible `AsynchronousGraph`

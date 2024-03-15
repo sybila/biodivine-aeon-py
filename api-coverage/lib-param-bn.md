@@ -2411,6 +2411,14 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
             <td><code>SymbolicAsyncGraph::mk_unit_vertices</code></td>
         </tr>
         <tr>
+            <td></td>
+            <td><code>AsynchronousGraph.mk_function_colors</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>AsynchronousGraph.mk_function_row_colors</code></td>
+        </tr>
+        <tr>
             <td><code>SymbolicAsyncGraph::transfer_colors_from</code></td>
             <td rowspan="3"><code>AsynchronousGraph.transfer_from</code></td>
         </tr>
@@ -2423,9 +2431,9 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         <tr>
             <td><code>SymbolicAsyncGraph::vertex</code></td>
             <td rowspan="5">
-                <code>SymbolicAsyncGraph.mk_subspace</code>
+                <code>AsynchronousGraph.mk_subspace</code>
                 <br>
-                <code>SymbolicAsyncGraph.mk_subspace_vertices</code>
+                <code>AsynchronousGraph.mk_subspace_vertices</code>
             </td>
         </tr>
         <tr>
@@ -2596,7 +2604,7 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::inline_symbolic</code></td>
-            <td><code>SymbolicAsyncGraph::inline_variable_symbolic</code></td>
+            <td><code>AsynchronousGraph::inline_variable_symbolic</code></td>
         </tr>
         <tr>
             <td><code>SymbolicAsyncGraph::restrict</code></td>
