@@ -31,7 +31,10 @@ pub fn resolve_boolean(value: &PyAny) -> PyResult<bool> {
             return Ok(true);
         }
     }
-    throw_type_error("Expected `True`/`False` or `1`/`0`.")
+    throw_type_error(format!(
+        "Expected `True`/`False` or `1`/`0`. Found `{}`.",
+        value.str()?.to_str()?
+    ))
 }
 
 pub fn resolve_sign(value: &PyAny) -> PyResult<Sign> {
