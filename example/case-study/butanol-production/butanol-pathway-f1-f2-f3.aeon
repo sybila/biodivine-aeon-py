@@ -137,56 +137,56 @@ spo0A_p -| buk1
 sigH -> sigF
 spoIIE -? sigF
 spoIIAB -| sigF
-$3_hydroxybutyryl_CoA: ((crt | hbd) | acetoacetyl_CoA)
+$3_hydroxybutyryl_CoA: crt | hbd | acetoacetyl_CoA
 $AbrB: !spo0A_p
 $EtfAB: NADH
-$acetaldehyde: (acetyl_CoA | ald)
-$acetate: (((pta & acetone) | (glucose___PTS & acetone)) | ack)
-$acetic_acid: ((acetyl_p & acetate) & !sporulation)
-$acetoacetate: ((ctfB | acetoacetyl_CoA) | ctfA)
-$acetoacetyl_CoA: (((ctfB | thlA) | hbd) | acetyl_CoA)
-$acetone: ((adc & !sporulation) | (acetoacetate & !sporulation))
-$acetyl_CoA: ((((acetate & acetoacetyl_CoA) | thlA) | pyruvate) | pfo)
+$acetaldehyde: acetyl_CoA | ald
+$acetate: (pta & acetone) | (glucose___PTS & acetone) | ack
+$acetic_acid: acetyl_p & acetate & !sporulation
+$acetoacetate: ctfB | acetoacetyl_CoA | ctfA
+$acetoacetyl_CoA: ctfB | thlA | hbd | acetyl_CoA
+$acetone: (adc & !sporulation) | (acetoacetate & !sporulation)
+$acetyl_CoA: (acetate & acetoacetyl_CoA) | thlA | pyruvate | pfo
 $acetyl_p: acetyl_CoA
 $ack: !(spo0A_p | sporulation)
 $adc: spo0A_p
 $adhA: spo0A_p
 $adhB: spo0A_p
-$ald: (spo0A_p | sigK)
+$ald: spo0A_p | sigK
 $bcd: !(sporulation | spo0A_p)
 $bdhAB: spo0A_p
 $buk1: !(sporulation | spo0A_p)
-$butanal: ((ald | butyryl_CoA) | bdhAB)
-$butanol: (((((bdhAB & !sporulation) | (adhB & !sporulation)) | (butanal & !sporulation)) | (adhA & !sporulation)) | (NAD_P_H & !sporulation))
-$butyrate: (((buk1 & !butyrate) | (glucose___PTS & !butyrate)) | (ptb & !butyrate))
-$butyric_acid: ((butyryl_p & butyrate) & !sporulation)
-$butyryl_CoA: ((((bcd | crotonoyl_CoA) | (butyrate & acetoacetyl_CoA)) | EtfAB) | ald)
+$butanal: ald | butyryl_CoA | bdhAB
+$butanol: (bdhAB & !sporulation) | (adhB & !sporulation) | (butanal & !sporulation) | (adhA & !sporulation) | (NAD_P_H & !sporulation)
+$butyrate: (buk1 & !butyrate) | (glucose___PTS & !butyrate) | (ptb & !butyrate)
+$butyric_acid: butyryl_p & butyrate & !sporulation
+$butyryl_CoA: bcd | crotonoyl_CoA | (butyrate & acetoacetyl_CoA) | EtfAB | ald
 $butyryl_p: butyryl_CoA
-$cell_membrane: ((glucose & !((acetone | butanol) | ethanol)) | (butyrate & !(acetone | ethanol)))
-$crotonoyl_CoA: ((crt | 3_hydroxybutyryl_CoA) | ferredoxin)
+$cell_membrane: (glucose & !(acetone | butanol | ethanol)) | (butyrate & !(acetone | ethanol))
+$crotonoyl_CoA: crt | 3_hydroxybutyryl_CoA | ferredoxin
 $crt: !(spo0A_p | sporulation)
 $ctfA: spo0A_p
 $ctfB: spo0A_p
-$ethanol: (((adhA & !(ald | sporulation)) | (acetaldehyde & !(ald | sporulation))) | (adhB & !(ald | sporulation)))
+$ethanol: (adhA & !(ald | sporulation)) | (acetaldehyde & !(ald | sporulation)) | (adhB & !(ald | sporulation))
 $ferredoxin: Rnf
-$glucose___PTS: (glucose & (PTS & f_2(cell_membrane, sporulation)))
+$glucose___PTS: glucose & PTS & f_2(cell_membrane, sporulation)
 $hbd: !(sporulation | spo0A_p)
-$lactate: (pyruvate & !ferredoxin)
-$lactic_acid: (lactate & !sporulation)
+$lactate: pyruvate & !ferredoxin
+$lactic_acid: lactate & !sporulation
 $pta: !(spo0A_p | sporulation)
 $ptb: !(spo0A_p | sporulation)
 $pyk: pfk
-$pyruvate: ((((pyk | glucose___PTS) | pgi) | fba) | gap_pgk_tpi_pgm__X276_23705_eno)
-$sigE: (sigF | spo0A_p)
-$sigF: ((spoIIE & !(spoIIAB & !spoIIE)) | (sigH & !(spoIIAB & !spoIIE)))
+$pyruvate: pyk | glucose___PTS | pgi | fba | gap_pgk_tpi_pgm__X276_23705_eno
+$sigE: sigF | spo0A_p
+$sigF: (spoIIE & !(spoIIAB & !spoIIE)) | (sigH & !(spoIIAB & !spoIIE))
 $sigG: sigE
 $sigH: sigA
 $sigK: sigG
-$spo0A: (sigK | spo0A_p)
-$spo0A_p: (spo0A & (phosphorylation & f_1(sigA, sporulation)))
-$spoIIAA: ((spo0A_p & sigH) | spoIIE)
-$spoIIAB: (spo0A_p & f_3(sigH, spoIIAA, spoIIE))
-$spoIIAB_p: ((spoIIAB & phosphorylation) | (phosphorylation & spoIIAB))
-$spoIIA_p: (spoIIAB & spoIIAA)
-$sporulation: (((((sigK & (!cell_membrane & sigA)) | (spo0A_p & !cell_membrane)) | (sigH & !cell_membrane)) | (sigG & (!cell_membrane & sigA))) | (sigE & (sigA & !cell_membrane)))
+$spo0A: sigK | spo0A_p
+$spo0A_p: spo0A & phosphorylation & f_1(sigA, sporulation)
+$spoIIAA: (spo0A_p & sigH) | spoIIE
+$spoIIAB: spo0A_p & f_3(sigH, spoIIAA, spoIIE)
+$spoIIAB_p: (spoIIAB & phosphorylation) | (phosphorylation & spoIIAB)
+$spoIIA_p: spoIIAB & spoIIAA
+$sporulation: (sigK & !cell_membrane & sigA) | (spo0A_p & !cell_membrane) | (sigH & !cell_membrane) | (sigG & !cell_membrane & sigA) | (sigE & sigA & !cell_membrane)
 $thlA: spo0A_p

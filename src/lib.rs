@@ -1,5 +1,6 @@
-use pyo3::exceptions::{PyRuntimeError, PyTypeError};
+use pyo3::exceptions::{PyIndexError, PyInterruptedError, PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use pyo3::{PyResult, Python};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
@@ -27,16 +28,56 @@ mod bindings;
 /// into a dependency.
 ///
 mod internal;
+mod pyo3_utils;
 
-/// A Python module implemented in Rust.
+fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
+    // This should be an error when running as a script or a normal shell, but returns a name in notebooks.
+    // https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
+    let is_notebook = py.eval("get_ipython().__class__.__name__", None, None);
+    if let Ok(is_notebook) = is_notebook {
+        if let Ok(is_notebook) = is_notebook.extract::<&str>() {
+            println!("Detected IPython (`{is_notebook}`). Log level set to `LOG_ESSENTIAL`.");
+            return module.setattr("LOG_LEVEL", 1);
+        }
+    }
+    // This should detect if we are running in a shell, as opposed to a script.
+    // Context:
+    // https://stackoverflow.com/questions/2356399/tell-if-python-is-in-interactive-mode
+    // https://stackoverflow.com/questions/6108330/checking-for-interactive-shell-in-a-python-script
+    let sys = PyModule::import(py, "sys")?;
+    let locals = PyDict::new(py);
+    locals.set_item("sys", sys)?;
+    let has_ps = py.eval("hasattr(sys, 'ps1')", None, Some(locals))?;
+    if let Ok(true) = has_ps.extract::<bool>() {
+        println!("Detected interactive mode. Log level set to `LOG_ESSENTIAL`.");
+        return module.setattr("LOG_LEVEL", 1);
+    }
+    module.setattr("LOG_LEVEL", 0)
+}
+
+fn global_log_level(py: Python) -> PyResult<usize> {
+    let module = PyModule::import(py, "biodivine_aeon")?;
+    module.getattr("LOG_LEVEL")?.extract()
+}
+
+const LOG_NOTHING: usize = 0;
+const LOG_ESSENTIAL: usize = 1;
+const LOG_VERBOSE: usize = 2;
+
+fn log_essential(log_level: usize, symbolic_size: usize) -> bool {
+    log_level >= LOG_VERBOSE || (symbolic_size > 100_000 && log_level >= LOG_ESSENTIAL)
+}
+
+fn should_log(log_level: usize) -> bool {
+    log_level > LOG_NOTHING
+}
+
+/// AEON.py is a library...
 #[pymodule]
-fn biodivine_aeon(_py: Python, module: &PyModule) -> PyResult<()> {
+fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {
+    set_log_level(py, module)?;
     bindings::lib_bdd::register(module)?;
     bindings::lib_param_bn::register(module)?;
-    bindings::aeon::register(module)?;
-    bindings::pbn_control::register(module)?;
-    bindings::hctl_model_checker::register(module)?;
-    bindings::bn_classifier::register(module)?;
     Ok(())
 }
 
@@ -73,4 +114,25 @@ where
     A: Send + Sync + IntoPy<Py<PyAny>>,
 {
     PyRuntimeError::new_err(message)
+}
+
+fn throw_index_error<T, A: 'static>(message: A) -> PyResult<T>
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
+    Err(PyIndexError::new_err(message))
+}
+
+fn index_error<A: 'static>(message: A) -> PyErr
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
+    PyIndexError::new_err(message)
+}
+
+fn throw_interrupted_error<T, A: 'static>(message: A) -> PyResult<T>
+where
+    A: Send + Sync + IntoPy<Py<PyAny>>,
+{
+    Err(PyInterruptedError::new_err(message))
 }
