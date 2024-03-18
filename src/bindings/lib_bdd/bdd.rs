@@ -957,6 +957,34 @@ impl Bdd {
             .ok_or_else(|| runtime_error("BDD is empty."))
     }
 
+    /// Compute the `BddPartialValuation` that occurs among the `Bdd.clause_iterator` items and
+    /// has the highest amount of fixed variables.
+    ///
+    /// Note that this is not the most fixed valuation among *all valuations* that
+    /// satisfy this function (that is always a full valuation of all BDD variables). In other
+    /// words, the result of this operation tells you more about the *structure* of a `Bdd` than
+    /// the underlying Boolean function itself.
+    pub fn clause_most_fixed(&self) -> PyResult<BddPartialValuation> {
+        self.as_native()
+            .most_fixed_clause()
+            .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
+    }
+
+    /// Compute the `BddPartialValuation` that occurs among the `Bdd.clause_iterator` items and
+    /// has the lowest amount of fixed variables.
+    ///
+    /// Note that this is not the most free valuation among *all valuations* that
+    /// satisfy this function (that would require a more thorough optimization algorithm). In other
+    /// words, the result of this operation tells you more about the *structure* of a `Bdd` than
+    /// the underlying Boolean function itself.
+    pub fn clause_most_free(&self) -> PyResult<BddPartialValuation> {
+        self.as_native()
+            .most_free_clause()
+            .map(|it| BddPartialValuation::new_raw(self.ctx.clone(), it))
+            .ok_or_else(|| runtime_error("BDD is empty."))
+    }
+
     /// An iterator over all DNF clauses (i.e. `BddPartialValuation` objects) that satisfy this `Bdd`.
     pub fn clause_iterator(self_: Py<Bdd>, py: Python) -> _BddClauseIterator {
         _BddClauseIterator::new(py, self_)

@@ -378,6 +378,8 @@ def test_bdd():
     assert bdd_x.clause_last() == dnf_basic[1]
     assert bdd_x.clause_random(seed=1) != bdd_x.clause_random(seed=2)
     assert bdd_clause.clause_necessary() == BddPartialValuation(ctx, {'a': False, 'b': True})
+    assert bdd_clause.clause_most_free() == BddPartialValuation(ctx, {'a': False, 'b': True})
+    assert bdd_clause.clause_most_fixed() == BddPartialValuation(ctx, {'a': False, 'b': True})
 
     expected = Bdd(BddPartialValuation(ctx, {'a': False, 'c': True}))
     assert bdd_clause.substitute('b', var_c) == expected
