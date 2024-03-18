@@ -1,23 +1,27 @@
-use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
-use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
-use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::AsNative;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+use std::ops::Not;
+
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use biodivine_lib_param_bn::symbolic_async_graph::GraphVertices;
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphVertices};
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
-use std::ops::Not;
+
+use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
+use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
+use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::AsNative;
 
 /// A symbolic representation of a set of "vertices", i.e. valuations of variables
 /// of a particular `BooleanNetwork`.
@@ -165,6 +169,17 @@ impl VertexSet {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
         Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
+    }
+
+    /// Extend this set of vertices with all the colors from the given set.
+    ///
+    /// This is essentially a cartesian product with the given `ColorSet`.
+    fn extend_with_colors(&self, colors: &ColorSet) -> ColoredVertexSet {
+        let colors = colors.as_native().as_bdd();
+        let bdd = self.native.as_bdd().and(colors);
+        let ctx = self.ctx.get();
+        let native_set = GraphColoredVertices::new(bdd, ctx.as_native());
+        ColoredVertexSet::mk_native(self.ctx.clone(), native_set)
     }
 
     /// Returns an iterator over all vertices in this `VertexSet` with an optional projection to a subset

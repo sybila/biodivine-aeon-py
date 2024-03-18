@@ -1,24 +1,27 @@
-use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::symbolic::model_space::SpaceModel;
-use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::AsNative;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+use std::ops::Not;
+
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use biodivine_lib_param_bn::trap_spaces::NetworkSpaces;
+use biodivine_lib_param_bn::trap_spaces::{NetworkColoredSpaces, NetworkSpaces};
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
-use std::ops::Not;
 
+use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::symbolic::model_space::SpaceModel;
+use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::AsNative;
 
 /// A symbolic representation of a set of "spaces", i.e. hypercubes in the state space
 /// of a particular `BooleanNetwork`.
@@ -103,7 +106,7 @@ impl SpaceSet {
         self.items(None, py)
     }
 
-    fn __ctx__(&self) -> Py<SymbolicSpaceContext> {
+    pub fn __ctx__(&self) -> Py<SymbolicSpaceContext> {
         self.ctx.clone()
     }
 
@@ -161,6 +164,17 @@ impl SpaceSet {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
         Bdd::new_raw_2(ctx.as_ref().bdd_variable_set(), rs_bdd)
+    }
+
+    /// Extend this set of spaces with all the colors from the given set.
+    ///
+    /// This is essentially a cartesian product with the given `ColorSet`.
+    fn extend_with_colors(&self, colors: &ColorSet) -> ColoredSpaceSet {
+        let colors = colors.as_native().as_bdd();
+        let bdd = self.native.as_bdd().and(colors);
+        let ctx = self.ctx.get();
+        let native_set = NetworkColoredSpaces::new(bdd, ctx.as_native());
+        ColoredSpaceSet::wrap_native(self.ctx.clone(), native_set)
     }
 
     /// Returns an iterator over all sub-spaces in this `SpaceSet` with an optional projection to

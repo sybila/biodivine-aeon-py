@@ -1,22 +1,28 @@
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
-use pyo3::basic::CompareOp;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
-use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
-use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::AsNative;
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
+use biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces;
 use either::Either;
 use num_bigint::BigInt;
+use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+
+use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
+use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
+use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
+use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::AsNative;
 
 /// A symbolic representation of a set of "colours", i.e. interpretations of explicit and
 /// implicit parameters within a particular `BooleanNetwork`.
@@ -169,13 +175,35 @@ impl ColorSet {
         Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
     }
 
+    /// Extend this set of colors with all the vertices from the given set.
+    ///
+    /// This is essentially a cartesian product with the given `VertexSet`.
+    fn extend_with_vertices(&self, vertices: &VertexSet) -> ColoredVertexSet {
+        let vertices = vertices.as_native().as_bdd();
+        let bdd = self.native.as_bdd().and(vertices);
+        let ctx = self.ctx.get();
+        let native_set = GraphColoredVertices::new(bdd, ctx.as_native());
+        ColoredVertexSet::mk_native(self.ctx.clone(), native_set)
+    }
+
+    /// Extend this set of colors with all the spaces from the given set.
+    ///
+    /// This is essentially a cartesian product with the given `SpaceSet`.
+    fn extend_with_spaces(&self, spaces: &SpaceSet) -> ColoredSpaceSet {
+        let space_bdd = spaces.as_native().as_bdd();
+        let bdd = self.native.as_bdd().and(space_bdd);
+        let ctx = spaces.__ctx__();
+        let native_set = NetworkColoredSpaces::new(bdd, ctx.get().as_native());
+        ColoredSpaceSet::wrap_native(ctx, native_set)
+    }
+
     /// Returns an iterator over all interpretations in this `ColorSet` with an optional projection to a subset
     /// of uninterpreted functions.
     ///
     /// When no `retained` collection is specified, this is equivalent to `ColorSet.__iter__`. However, if a retained
     /// set is given, the resulting iterator only considers unique combinations of the `retained` functions.
     /// Consequently, the resulting `ColorModel` instances will fail with an `IndexError` if a value of a function
-    /// outside of the `retained` set is requested.
+    /// outside the `retained` set is requested.
     #[pyo3(signature = (retained = None))]
     fn items(&self, retained: Option<&PyList>) -> PyResult<_ColorModelIterator> {
         let ctx = self.ctx.get();

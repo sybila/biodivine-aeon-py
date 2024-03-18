@@ -1453,6 +1453,14 @@ see below.
             <td><code>GraphColors::symbolic_size</code></td>
             <td><code>ColorSet.symbolic_size</code></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorSet.extend_with_vertices</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorSet.extend_with_spaces</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
             <td><code>GraphColors::as_bdd</code></td>
@@ -1573,7 +1581,11 @@ see below.
         </tr>
         <tr>
             <td><code>GraphVertices::to_singleton_spaces</code></td>
-            <td><code>GraphVertices.to_singleton_spaces</code></td>
+            <td><code>VertexSet.to_singleton_spaces</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexSet.extend_with_colors</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -1696,6 +1708,10 @@ see below.
         <tr>
             <td><code>NetworkSpaces::to_vertices</code></td>
             <td><code>SpaceSet.to_vertices</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>SpaceSet.extend_with_colors</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>

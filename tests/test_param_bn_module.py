@@ -802,6 +802,9 @@ def test_symbolic_space_context():
     fn_b_bdd = ctx.mk_update_function(fn_b)
     assert not ctx.mk_can_go_to_true(fn_b_bdd).is_false() and not ctx.mk_can_go_to_true(fn_b_bdd).is_true()
 
+    assert ctx.mk_unit_spaces().extend_with_colors(stg.mk_unit_colors()) == ctx.mk_unit_colored_spaces(stg)
+    assert stg.mk_unit_colors().extend_with_spaces(ctx.mk_unit_spaces()) == ctx.mk_unit_colored_spaces(stg)
+
 
 def test_asynchronous_graph():
     bn = BooleanNetwork.from_aeon("""
@@ -916,6 +919,9 @@ def test_asynchronous_graph():
     """)
     stg = AsynchronousGraph(bn)
     assert stg.reconstruct_network() == bn
+
+    assert stg.mk_unit_vertices().extend_with_colors(stg.mk_unit_colors()) == stg.mk_unit_colored_vertices()
+    assert stg.mk_unit_colors().extend_with_vertices(stg.mk_unit_vertices()) == stg.mk_unit_colored_vertices()
 
 
 def test_symbolic_iterators():
