@@ -6,7 +6,6 @@ use crate::bindings::lib_param_bn::{
 use crate::bindings::pbn_control::{PyAttractorControlMap, PyPhenotypeControlMap, PyPerturbationGraph};
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
-use biodivine_lib_param_bn::symbolic_async_graph::GraphVertices;
 use biodivine_lib_param_bn::VariableId;
 use biodivine_pbn_control::perturbation::PerturbationGraph;
 use biodivine_pbn_control::control::PhenotypeOscillationType;
@@ -172,25 +171,6 @@ impl PyPerturbationGraph {
             .strong_basin(&ArrayBitVector::from_bool_vector(target))
             .into()
     }
-    //
-    // /// Return a `ColoredVertexSet` where the given variable is perturbed. Optionally,
-    // /// a constant value can be provided to further restrict the set to cases where the variable
-    // /// is perturbed to the given value.
-    // ///
-    // /// Variable can be given either as a name or as `VariableId`.
-    // ///
-    // /// If the value cannot be perturbed, returns an empty set.
-    // pub fn fix_perturbation(
-    //     &self,
-    //     variable: &PyAny,
-    //     value: Option<&bool>,
-    // ) -> PyResult<PyGraphColoredVertices> {
-    //     let variable = self.find_variable(variable)?;
-    //     Ok(self
-    //         .as_native()
-    //         .fix_perturbation(variable.into(), value)
-    //         .into())
-    // }
 
     /// Return a `ColorSet` representing the cases where the given variable is not perturbed.
     ///

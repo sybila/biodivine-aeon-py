@@ -1,6 +1,4 @@
 use std::collections::HashMap;
-use biodivine_lib_bdd::Bdd;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use biodivine_pbn_control::control::{AttractorControlMap, PhenotypeControlMap};
 use biodivine_pbn_control::perturbation::PerturbationGraph;
 use pyo3::prelude::*;
@@ -16,12 +14,6 @@ pub(crate) fn register(module: &PyModule) -> PyResult<()> {
     module.add_class::<PyAttractorControlMap>()?;
     Ok(())
 }
-
-// /// A symbolic representation of possible perturbation strategies associated with
-// /// Boolean network parameter valuations.
-// #[pyclass(name = "ControlMap")]
-// #[derive(Clone)]
-// pub struct PyControlMap(dyn ControlMap);
 
 #[pyclass(name = "AttractorControlMap")]
 #[derive(Clone)]

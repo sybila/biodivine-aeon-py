@@ -5,11 +5,7 @@ use crate::AsNative;
 use biodivine_pbn_control::control::PhenotypeControlMap;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use std::collections::HashMap;
-use biodivine_lib_bdd::Bdd;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use biodivine_pbn_control::control::ControlMap;
-use biodivine_pbn_control::perturbation::PerturbationGraph;
 use crate::bindings::pbn_control::py_dict_to_rust_hashmap;
 use crate::bindings::pbn_control::rust_hashmap_to_py_dict;
 
@@ -80,26 +76,3 @@ impl PyPhenotypeControlMap {
             .into()
     }
 }
-
-// impl ControlMap for PyPhenotypeControlMap {
-//     fn new(context: PerturbationGraph, perturbation_set: GraphColoredVertices) -> Self {
-//         todo!()
-//     }
-//
-//     fn as_bdd(&self) -> &Bdd {
-//         todo!()
-//     }
-//
-//     fn as_colored_vertices(&self) -> &GraphColoredVertices {
-//         todo!()
-//     }
-//
-//     fn working_perturbations(&self, min_robustness: f64, verbose: bool, return_all: bool) -> Vec<(HashMap<String, bool>, GraphColors)> {
-//         todo!()
-//     }
-//
-//     fn perturbation_working_colors(&self, perturbation: &HashMap<String, bool>) -> GraphColors {
-//         todo!()
-//     }
-// }
-

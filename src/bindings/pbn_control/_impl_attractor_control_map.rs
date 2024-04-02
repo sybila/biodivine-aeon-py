@@ -1,8 +1,5 @@
-use std::collections::HashMap;
-use biodivine_lib_bdd::Bdd;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use crate::bindings::lib_bdd::PyBdd;
-use crate::bindings::lib_param_bn::{PyGraphColoredVertices, PyVariableId, PyGraphColors};
+use crate::bindings::lib_param_bn::{PyGraphColoredVertices, PyGraphColors};
 use crate::bindings::pbn_control::{PyPerturbationGraph, PyAttractorControlMap};
 use crate::AsNative;
 use biodivine_pbn_control::control::{AttractorControlMap, ControlMap,};
@@ -78,27 +75,3 @@ impl PyAttractorControlMap {
             .into()
     }
 }
-//
-// #[pymethods]
-// impl ControlMap for PyAttractorControlMap {
-//     fn new(context: PerturbationGraph, perturbation_set: GraphColoredVertices) -> Self {
-//         todo!()
-//     }
-//
-//     fn as_bdd(&self) -> &Bdd {
-//         todo!()
-//     }
-//
-//     fn as_colored_vertices(&self) -> &GraphColoredVertices {
-//         todo!()
-//     }
-//
-//     fn working_perturbations(&self, min_robustness: f64, verbose: bool, return_all: bool) -> Vec<(HashMap<String, bool>, GraphColors)> {
-//         todo!()
-//     }
-//
-//     fn perturbation_working_colors(&self, perturbation: &HashMap<String, bool>) -> GraphColors {
-//         todo!()
-//     }
-// }
-
