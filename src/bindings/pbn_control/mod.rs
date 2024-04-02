@@ -4,6 +4,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphCo
 use biodivine_pbn_control::control::{AttractorControlMap, PhenotypeControlMap};
 use biodivine_pbn_control::perturbation::PerturbationGraph;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 mod _impl_attractor_control_map;
 mod _impl_perturbation_graph;
@@ -35,3 +36,26 @@ pub struct PyPerturbationGraph(PerturbationGraph);
 #[pyclass(name = "PhenotypeControlMap")]
 #[derive(Clone)]
 pub struct PyPhenotypeControlMap(PhenotypeControlMap);
+
+
+fn py_dict_to_rust_hashmap(py_dict: &PyDict) -> HashMap<String, bool> {
+    let mut rust_hashmap = HashMap::new();
+
+    for (key, value) in py_dict.iter() {
+        if let (Ok(py_key), Ok(py_value)) = (key.extract::<String>(), value.extract::<bool>()) {
+            rust_hashmap.insert(py_key, py_value);
+        }
+    }
+
+    rust_hashmap
+}
+
+fn rust_hashmap_to_py_dict(py: Python, rust_hashmap: &HashMap<String, bool>) -> Py<PyDict> {
+    let py_dict = PyDict::new(py);
+
+    for (k, v) in rust_hashmap {
+        py_dict.set_item(k, v).unwrap();
+    }
+
+    py_dict.into()
+}

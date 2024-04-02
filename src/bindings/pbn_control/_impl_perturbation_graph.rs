@@ -6,6 +6,7 @@ use crate::bindings::lib_param_bn::{
 use crate::bindings::pbn_control::{PyAttractorControlMap, PyPhenotypeControlMap, PyPerturbationGraph};
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
+use biodivine_lib_param_bn::symbolic_async_graph::GraphVertices;
 use biodivine_lib_param_bn::VariableId;
 use biodivine_pbn_control::perturbation::PerturbationGraph;
 use biodivine_pbn_control::control::PhenotypeOscillationType;
@@ -171,25 +172,25 @@ impl PyPerturbationGraph {
             .strong_basin(&ArrayBitVector::from_bool_vector(target))
             .into()
     }
-
-    /// Return a `ColoredVertexSet` where the given variable is perturbed. Optionally,
-    /// a constant value can be provided to further restrict the set to cases where the variable
-    /// is perturbed to the given value.
-    ///
-    /// Variable can be given either as a name or as `VariableId`.
-    ///
-    /// If the value cannot be perturbed, returns an empty set.
-    pub fn fix_perturbation(
-        &self,
-        variable: &PyAny,
-        value: Option<&bool>,
-    ) -> PyResult<PyGraphColoredVertices> {
-        let variable = self.find_variable(variable)?;
-        Ok(self
-            .as_native()
-            .fix_perturbation(variable.into(), value)
-            .into())
-    }
+    //
+    // /// Return a `ColoredVertexSet` where the given variable is perturbed. Optionally,
+    // /// a constant value can be provided to further restrict the set to cases where the variable
+    // /// is perturbed to the given value.
+    // ///
+    // /// Variable can be given either as a name or as `VariableId`.
+    // ///
+    // /// If the value cannot be perturbed, returns an empty set.
+    // pub fn fix_perturbation(
+    //     &self,
+    //     variable: &PyAny,
+    //     value: Option<&bool>,
+    // ) -> PyResult<PyGraphColoredVertices> {
+    //     let variable = self.find_variable(variable)?;
+    //     Ok(self
+    //         .as_native()
+    //         .fix_perturbation(variable.into(), value)
+    //         .into())
+    // }
 
     /// Return a `ColorSet` representing the cases where the given variable is not perturbed.
     ///
@@ -224,19 +225,34 @@ impl PyPerturbationGraph {
     /// to the given subset.
     pub fn one_step_control(
         &self,
-        source: Vec<bool>,
-        target: Vec<bool>,
-        compute_params: Option<&PyGraphColors>,
-        verbose: bool,
+        source: &PyAny,
+        target: &PyAny,
+        verbose: bool
     ) -> PyAttractorControlMap {
-        let compute_params = compute_params
-            .map(|it| it.as_native())
-            .unwrap_or_else(|| self.as_native().unit_colors());
+        let source_vec: ArrayBitVector;
+        let target_vec: ArrayBitVector;
+
+        if let Ok(s) = source.extract::<PyGraphVertices>() {
+            let native_source = s.as_native().clone().into_iter().next().unwrap();
+            source_vec = native_source;
+        } else {
+            let bool_vec = source.extract::<Vec<bool>>().unwrap();
+            source_vec = ArrayBitVector::from_bool_vector(bool_vec);
+        }
+
+        if let Ok(t) = target.extract::<PyGraphVertices>() {
+            let native_target = t.as_native().clone().into_iter().next().unwrap();
+            target_vec = native_target;
+        } else {
+            let bool_vec = target.extract::<Vec<bool>>().unwrap();
+            target_vec = ArrayBitVector::from_bool_vector(bool_vec);
+        }
+
         self.as_native()
             .one_step_control(
-                &ArrayBitVector::from_bool_vector(source),
-                &ArrayBitVector::from_bool_vector(target),
-                compute_params,
+                &source_vec,
+                &target_vec,
+                self.as_native().unit_colors(),
                 verbose
             )
             .into()
@@ -250,19 +266,34 @@ impl PyPerturbationGraph {
     /// to the given subset.
     pub fn temporary_control(
         &self,
-        source: Vec<bool>,
-        target: Vec<bool>,
-        compute_params: Option<&PyGraphColors>,
-        verbose: bool,
+        source: &PyAny,
+        target: &PyAny,
+        verbose: bool
     ) -> PyAttractorControlMap {
-        let compute_params = compute_params
-            .map(|it| it.as_native())
-            .unwrap_or_else(|| self.as_native().unit_colors());
+        let source_vec: ArrayBitVector;
+        let target_vec: ArrayBitVector;
+
+        if let Ok(s) = source.extract::<PyGraphVertices>() {
+            let native_source = s.as_native().clone().into_iter().next().unwrap();
+            source_vec = native_source;
+        } else {
+            let bool_vec = source.extract::<Vec<bool>>().unwrap();
+            source_vec = ArrayBitVector::from_bool_vector(bool_vec);
+        }
+
+        if let Ok(t) = target.extract::<PyGraphVertices>() {
+            let native_target = t.as_native().clone().into_iter().next().unwrap();
+            target_vec = native_target;
+        } else {
+            let bool_vec = target.extract::<Vec<bool>>().unwrap();
+            target_vec = ArrayBitVector::from_bool_vector(bool_vec);
+        }
+
         self.as_native()
             .temporary_control(
-                &ArrayBitVector::from_bool_vector(source),
-                &ArrayBitVector::from_bool_vector(target),
-                compute_params,
+                &source_vec,
+                &target_vec,
+                self.as_native().unit_colors(),
                 verbose
             )
             .into()
@@ -276,31 +307,38 @@ impl PyPerturbationGraph {
     /// to the given subset.
     pub fn permanent_control(
         &self,
-        source: Vec<bool>,
-        target: Vec<bool>,
-        compute_params: Option<&PyGraphColors>,
-        verbose: bool,
+        source: &PyAny,
+        target: &PyAny,
+        verbose: bool
     ) -> PyAttractorControlMap {
-        let compute_params = compute_params
-            .map(|it| it.as_native())
-            .unwrap_or_else(|| self.as_native().unit_colors());
+        let source_vec: ArrayBitVector;
+        let target_vec: ArrayBitVector;
+
+        if let Ok(s) = source.extract::<PyGraphVertices>() {
+            let native_source = s.as_native().clone().into_iter().next().unwrap();
+            source_vec = native_source;
+        } else {
+            let bool_vec = source.extract::<Vec<bool>>().unwrap();
+            source_vec = ArrayBitVector::from_bool_vector(bool_vec);
+        }
+
+        if let Ok(t) = target.extract::<PyGraphVertices>() {
+            let native_target = t.as_native().clone().into_iter().next().unwrap();
+            target_vec = native_target;
+        } else {
+            let bool_vec = target.extract::<Vec<bool>>().unwrap();
+            target_vec = ArrayBitVector::from_bool_vector(bool_vec);
+        }
+
         self.as_native()
             .permanent_control(
-                &ArrayBitVector::from_bool_vector(source),
-                &ArrayBitVector::from_bool_vector(target),
-                compute_params,
+                &source_vec,
+                &target_vec,
+                self.as_native().unit_colors(),
                 verbose
             )
             .into()
     }
-
-    // pub fn phenotype_permanent_control(
-    //     &self,
-    //     phenotype: GraphVertices,
-    //     admissible_colors_perturbations: GraphColors,
-    //     oscillation: PhenotypeOscillationType,
-    //     verbose: bool
-    // )
 
     pub fn phenotype_permanent_control(
         &self,
