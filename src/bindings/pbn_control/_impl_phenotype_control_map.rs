@@ -57,10 +57,10 @@ impl PyPhenotypeControlMap {
         py: Python,
         min_robustness: f64,
         verbose: bool,
-        return_only_smallest: bool
+        return_all: bool
     ) -> Vec<(Py<PyDict>, PyGraphColors)> {
         self.as_native()
-            .working_perturbations(min_robustness, verbose, return_only_smallest)
+            .working_perturbations(min_robustness, verbose, return_all)
             .iter()
             .map(|i| (rust_hashmap_to_py_dict(py, &i.0), i.1.clone().into()))
             .collect()
