@@ -20,7 +20,7 @@ static-z3 = ["z3/static-link-z3"]
 pyo3 = { version = "0.20.0", features = ["abi3-py37", "extension-module"] }
 biodivine-lib-param-bn = { version="0.5.9", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.11"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "defc197" }
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "6b27f62" }
 biodivine-hctl-model-checker = "0.2.2"
 rand = "0.8.5"
 macros = { path = "macros" }
