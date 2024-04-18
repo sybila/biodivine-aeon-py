@@ -428,6 +428,11 @@ impl BooleanNetwork {
         }
 
         for var in self_.as_native().variables() {
+            if removed.contains(&var) {
+                // Do not copy removed variables.
+                continue;
+            }
+
             let var_name = self_.as_native().get_variable_name(var);
             if let Some(fun) = self_.as_native().get_update_function(var) {
                 let has_removed_variable = fun
@@ -440,8 +445,11 @@ impl BooleanNetwork {
                             var_name,
                             fun.to_string(self_.as_native()).as_str(),
                         )
-                        .unwrap_or_else(|_e| {
-                            unreachable!("Function copy is guaranteed to be valid in the new BN.");
+                        .unwrap_or_else(|e| {
+                            unreachable!(
+                                "Function copy is guaranteed to be valid in the new BN: {}",
+                                e
+                            );
                         });
                 }
             }
@@ -522,7 +530,7 @@ impl BooleanNetwork {
     /// unsupported `.bnet` models.
     ///
     /// We also support some features that `.bnet` does not, in particular, you can use
-    /// Boolean constants (`true`/`false`|. However, there are other things that we do not
+    /// Boolean constants (`true`/`false`). However, there are other things that we do not
     /// support, since `.bnet` can essentially use R syntax to define more complex functions,
     /// but in practice this is not used anywhere.
     ///

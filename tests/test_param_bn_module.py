@@ -8,6 +8,16 @@ from functools import reduce
 from typing import Literal
 
 
+def test_drop():
+    network = BooleanNetwork.from_file("./tests/model-1.aeon")
+    to_remove = []
+    for var in network.variable_names():
+        if len(network.predecessors(var)) == 0 and len(network.successors(var)) == 0:
+            to_remove.append(var)
+    dropped = network.drop(to_remove)
+    assert network.variable_count() == dropped.variable_count() + len(to_remove)
+
+
 def test_variable_id():
     a = VariableId(0)
     b = VariableId(1)
