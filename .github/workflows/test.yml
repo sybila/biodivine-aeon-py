@@ -235,7 +235,7 @@ jobs:
           maturin develop
           pytest ./tests --cov=biodivine_aeon --cov-report xml
           cargo llvm-cov report --lcov --output-path coverage.lcov
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.lcov,coverage.xml
