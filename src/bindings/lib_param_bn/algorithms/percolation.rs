@@ -1,10 +1,12 @@
-use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
-use crate::bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding;
-use crate::AsNative;
+use std::collections::{HashMap, HashSet};
+
 use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
-use std::collections::{HashMap, HashSet};
+
+use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
+use crate::bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding;
+use crate::AsNative;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct Percolation {

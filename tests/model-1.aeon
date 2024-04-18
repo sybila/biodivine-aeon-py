@@ -1,0 +1,98 @@
+Nr2e1 -> Atf3
+Egr1 -> Bhlhe22
+Mef2c -> Bhlhe22
+Zic2 -> Bhlhe22
+Hes1 -> E2f1
+Id2 -> E2f1
+Tead2 -> E2f1
+Nr2e1 -> Egr1
+Ybx1 -| Egr1
+Atf3 -> Ets1
+Hes1 -> Fos
+Klf2 -> Fos
+Mef2c -> Fos
+Nr4a1 -> Fos
+Egr1 -> Foxd2
+Tfap2c -> Foxd2
+Sox1 -> Hes1
+Tcf12 -| Hes1
+Tead2 -> Hes1
+Ets1 -> Hes5
+Sp9 -| Id2
+Fos -> Jun
+Fos -> Lhx2
+Neurod6 -> Lhx2
+Nr2e1 -> Lhx2
+Tcf3 -> Lhx2
+Pou3f2 -| Maf
+Smarca5 -| Mef2c
+Neurod6 -> Neurod2
+Neurod2 -> Neurod6
+E2f1 -> Nfia
+Pou3f1 -> Nfia
+Hes5 -> Nr2e1
+Fos -> Nr2f1
+Ybx1 -| Nr2f1
+E2f4 -> Nr4a1
+Fos -> Nr4a1
+Jun -| Pou3f1
+Maf -| Pou3f1
+Tead2 -> Pou3f1
+Fos -> Pou3f2
+Maf -| Pou3f2
+Zic1 -| Pou3f2
+Hes1 -> Smarca5
+Hes1 -> Sox1
+Fos -> Sp9
+Hes5 -> Sp9
+Hes1 -> Tcf3
+Neurod2 -> Tfap2c
+Foxd2 -| Ybx1
+$Atf3: Nr2e1
+$Bhlhe22: Zic2 | (Egr1 & Mef2c)
+$E2f1: Id2 | (Tead2 & Hes1)
+$E2f4: false
+$Ebf1: true
+$Egr1: Nr2e1 & !Ybx1
+$Emx2: true
+$Ets1: Atf3
+$Etv1: true
+$Fos: (Hes1 & Mef2c) | (Nr4a1 & Klf2)
+$Foxd2: Egr1 | Tfap2c
+$Foxp2: true
+$Hes1: !Tcf12 | (Tead2 & Sox1)
+$Hes5: Ets1
+$Id2: !Sp9
+$Irf4: true
+$Irf8: false
+$Irx5: true
+$Jun: Fos
+$Klf2: true
+$Klf8: true
+$Lhx2: Tcf3 | (Nr2e1 & Neurod6 & Fos)
+$Maf: !Pou3f2
+$Mafb: false
+$Mef2c: !Smarca5
+$Neurod2: Neurod6
+$Neurod6: Neurod2
+$Nfia: E2f1 & Pou3f1
+$Nr2e1: Hes5
+$Nr2f1: Fos & !Ybx1
+$Nr4a1: E2f4 | Fos
+$Nr4a2: true
+$Pbx3: true
+$Pou3f1: !Maf | (Tead2 & !Jun)
+$Pou3f2: !Zic1 | (!Maf & Fos)
+$Smarca5: Hes1
+$Sox1: Hes1
+$Sp9: Fos & Hes5
+$Tal1: false
+$Tcf12: true
+$Tcf3: Hes1
+$Tead2: true
+$Tfap2a: false
+$Tfap2c: Neurod2
+$Tlx2: true
+$Ybx1: !Foxd2
+$Zic1: true
+$Zic2: false

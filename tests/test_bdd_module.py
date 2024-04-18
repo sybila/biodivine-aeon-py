@@ -389,6 +389,7 @@ def test_bdd():
 def test_boolean_expression():
     a = BooleanExpression("a")
     b = BooleanExpression("b")
+    c = BooleanExpression("c")
     expr = BooleanExpression("(a & b) | (b & !c)")
 
     assert str(expr) == "((a & b) | (b & !c))"
@@ -420,6 +421,7 @@ def test_boolean_expression():
     assert BooleanExpression("a => b") == BooleanExpression.mk_imp(a, b)
     assert BooleanExpression("a <=> b") == BooleanExpression.mk_iff(a, b)
     assert BooleanExpression("a ^ b") == BooleanExpression.mk_xor(a, b)
+    assert BooleanExpression("a ? b : c") == BooleanExpression.mk_cond(a, b, c)
 
     assert BooleanExpression("true").is_const() and not BooleanExpression("a").is_const()
     assert BooleanExpression("a").is_var() and not BooleanExpression("true").is_var()
@@ -431,6 +433,7 @@ def test_boolean_expression():
     assert BooleanExpression("a ^ b").is_xor() and not BooleanExpression("a & b").is_xor()
     assert BooleanExpression("a").is_literal() and BooleanExpression("!a").is_literal()
     assert BooleanExpression("a & b").is_binary() and not BooleanExpression("!a").is_binary()
+    assert BooleanExpression("a ? b : c").is_cond() and not BooleanExpression("a ? b : c").is_binary()
 
     assert BooleanExpression("true").as_const()
     assert BooleanExpression("a").as_var() == "a"
@@ -447,10 +450,12 @@ def test_boolean_expression():
     assert BooleanExpression("a & b").as_iff() is None
     assert BooleanExpression("a ^ b").as_xor() == (a, b)
     assert BooleanExpression("a & b").as_xor() is None
+    assert BooleanExpression("a ? b : c").as_cond() == (a, b, c)
     assert BooleanExpression("a").as_literal() == ("a", True)
     assert BooleanExpression("!a").as_literal() == ("a", False)
     assert BooleanExpression("!!a").as_literal() is None
     assert BooleanExpression("a & b").as_binary() == ("and", a, b)
     assert BooleanExpression("a").as_binary() is None
+    assert BooleanExpression("a ? b : c").as_binary() is None
 
     assert expr.support_set() == {"a", "b", "c"}

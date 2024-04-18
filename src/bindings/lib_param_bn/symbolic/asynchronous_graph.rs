@@ -205,10 +205,7 @@ impl AsynchronousGraph {
         for (i, var) in table {
             if i == input {
                 let bdd = ctx.as_native().bdd_variable_set().mk_literal(var, output);
-                let native_set = biodivine_lib_param_bn::symbolic_async_graph::GraphColors::new(
-                    bdd,
-                    ctx.as_native(),
-                );
+                let native_set = GraphColors::new(bdd, ctx.as_native());
                 return Ok(ColorSet::mk_native(self.ctx.clone(), native_set));
             }
         }
@@ -320,6 +317,13 @@ impl AsynchronousGraph {
                         let r = eval(values, names, r.as_ref())?;
 
                         Ok(l != r)
+                    }
+                    RsBooleanExpression::Cond(test, branch1, branch2) => {
+                        if eval(values, names, test.as_ref())? {
+                            eval(values, names, branch1.as_ref())
+                        } else {
+                            eval(values, names, branch2.as_ref())
+                        }
                     }
                 }
             }

@@ -1,7 +1,7 @@
 use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
 use crate::{throw_runtime_error, throw_type_error};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
-use biodivine_lib_bdd::boolean_expression::BooleanExpression::{And, Iff, Imp, Or, Xor};
+use biodivine_lib_bdd::boolean_expression::BooleanExpression::{And, Cond, Iff, Imp, Or, Xor};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
@@ -162,6 +162,20 @@ impl BooleanExpression {
         ))
     }
 
+    /// Return an IF-THEN-ELSE condition of thee `BooleanExpression` values.
+    #[staticmethod]
+    pub fn mk_cond(
+        e_if: &BooleanExpression,
+        e_then: &BooleanExpression,
+        e_else: &BooleanExpression,
+    ) -> BooleanExpression {
+        Self::from_native(Cond(
+            Box::new(e_if.as_native().clone()),
+            Box::new(e_then.as_native().clone()),
+            Box::new(e_else.as_native().clone()),
+        ))
+    }
+
     /// Build an expression which is equivalent to the conjunction of the given items.
     #[staticmethod]
     pub fn mk_conjunction(items: Vec<BooleanExpression>) -> BooleanExpression {
@@ -246,6 +260,11 @@ impl BooleanExpression {
     /// Return true if the root of this expression is a `xor`.
     pub fn is_xor(&self) -> bool {
         matches!(self.as_native(), &Xor(_, _))
+    }
+
+    /// Return true if the root of this expression is an IF-THEN-ELSE condition.
+    pub fn is_cond(&self) -> bool {
+        matches!(self.as_native(), &Cond(_, _, _))
     }
 
     /// Return true if the root of this expression is a literal (`var`/`!var`).
@@ -333,8 +352,21 @@ impl BooleanExpression {
         }
     }
 
+    /// If the root of this expression is an IF-THEN-ELSE, return its three operands,
+    /// or `None` otherwise.
+    pub fn as_cond(&self) -> Option<(BooleanExpression, BooleanExpression, BooleanExpression)> {
+        match self.as_native() {
+            Cond(e_if, e_then, e_else) => Some((
+                self.mk_child_ref(e_if),
+                self.mk_child_ref(e_then),
+                self.mk_child_ref(e_else),
+            )),
+            _ => None,
+        }
+    }
+
     /// If this expression is either `var` or `!var`, return the name of the variable and whether it is positive.
-    /// Otherwise return `None`.
+    /// Otherwise, return `None`.
     pub fn as_literal(&self) -> Option<(String, bool)> {
         match self.as_native() {
             RsBooleanExpression::Variable(name) => Some((name.clone(), true)),
@@ -387,6 +419,11 @@ impl BooleanExpression {
                 And(l, r) | Or(l, r) | Imp(l, r) | Iff(l, r) | Xor(l, r) => {
                     recursive(l, result);
                     recursive(r, result);
+                }
+                Cond(test, branch1, branch2) => {
+                    recursive(test, result);
+                    recursive(branch1, result);
+                    recursive(branch2, result);
                 }
             };
         }
@@ -473,6 +510,13 @@ fn eval(e: &RsBooleanExpression, valuation: &PyDict) -> PyResult<bool> {
             let left = eval(left, valuation)?;
             let right = eval(right, valuation)?;
             Ok(left == right)
+        }
+        Cond(test, branch1, branch2) => {
+            if eval(test, valuation)? {
+                eval(branch1, valuation)
+            } else {
+                eval(branch2, valuation)
+            }
         }
     }
 }

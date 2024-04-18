@@ -130,6 +130,12 @@ This document should be up-to-date with `lib-bdd` version `0.5.9`.
     </tbody>
 </table>
 
+## `BddNode`
+
+We are ignoring `BddNode` for now, because it seems a bit too low level 
+for the current scope of features in AEON.py. But it might be useful to
+explore it in the future.
+
 ## `BddVariableSetBuilder`
 
 <table>
@@ -894,6 +900,14 @@ we will need either complicated generics, or heavy use of `Any`.
             <td><code>Bdd::set_num_vars</code></td>
             <td></td>
         </tr>
+        <tr>
+            <td><code>Bdd::from_nodes</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::to_nodes</code></td>
+            <td></td>
+        </tr>
     </tbody>
 </table>
 
@@ -1051,6 +1065,10 @@ added a bunch of utility methods similar to how `FnUpdate` is expected to work.
             <td><code>BooleanExpression.mk_xor</code></td>
         </tr>
         <tr>
+            <td><code>BooleanExpression::Cond</code></td>
+            <td><code>BooleanExpression.mk_cond</code></td>
+        </tr>
+        <tr>
             <td></td>
             <td><code>BooleanExpression.mk_conjunction</code></td>
         </tr>
@@ -1093,6 +1111,10 @@ added a bunch of utility methods similar to how `FnUpdate` is expected to work.
         </tr>
         <tr>
             <td></td>
+            <td><code>BooleanExpression.is_cond</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>BooleanExpression.is_literal</code></td>
         </tr>
         <tr>
@@ -1131,6 +1153,10 @@ added a bunch of utility methods similar to how `FnUpdate` is expected to work.
         <tr>
             <td></td>
             <td><code>BooleanExpression.as_xor</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BooleanExpression.as_cond</code></td>
         </tr>
         <tr>
             <td></td>
