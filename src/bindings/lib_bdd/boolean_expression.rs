@@ -280,11 +280,13 @@ impl BooleanExpression {
 
     /// Return true if the root of this expression is a binary operator (`and`/`or`/`imp`/`iff`/`xor`).
     pub fn is_binary(&self) -> bool {
-        !matches!(
+        matches!(
             self.as_native(),
-            RsBooleanExpression::Const(_)
-                | RsBooleanExpression::Variable(_)
-                | RsBooleanExpression::Not(_)
+            RsBooleanExpression::And(_, _)
+                | RsBooleanExpression::Or(_, _)
+                | RsBooleanExpression::Xor(_, _)
+                | RsBooleanExpression::Imp(_, _)
+                | RsBooleanExpression::Iff(_, _)
         )
     }
 
