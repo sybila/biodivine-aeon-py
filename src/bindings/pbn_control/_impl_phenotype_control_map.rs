@@ -8,6 +8,8 @@ use pyo3::types::PyDict;
 use biodivine_pbn_control::control::ControlMap;
 use crate::bindings::pbn_control::py_dict_to_rust_hashmap;
 use crate::bindings::pbn_control::rust_hashmap_to_py_dict;
+use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
+use std::collections::HashMap;
 
 
 impl From<PhenotypeControlMap> for PyPhenotypeControlMap {
@@ -68,11 +70,24 @@ impl PyPhenotypeControlMap {
 
     /// Obtain a set of colours for which the given perturbation works
     pub fn perturbation_working_colors(&self, perturbation: &PyDict) -> PyGraphColors {
+        // TEMPORARY WORKAROUND - The translation does not work properly yet in RUST -> go trough full result
         let p = py_dict_to_rust_hashmap(perturbation);
+        let all = self.as_native().working_perturbations(0.01, false, true);
+        let results: Vec<&(HashMap<String, bool>, GraphColors)> = all.iter().filter(|m| (m.0 == p && p == m.0)).collect();
 
-        self.as_native()
-            .perturbation_working_colors(&p)
-            .clone()
-            .into()
+        if results.len() > 1 {
+            panic!("Multiple results matching to perturbation {:?} were found in the full result {:?}", perturbation, all)
+        } else if results.len() == 1 {
+            return  results[0].1.clone().into()
+        } else {
+            return self.as_colored_vertices().minus(&self.as_colored_vertices()).colors().into()
+        }
+
+        // let p = py_dict_to_rust_hashmap(perturbation);
+        //
+        // self.as_native()
+        //     .perturbation_working_colors(&p)
+        //     .clone()
+        //     .into()
     }
 }
