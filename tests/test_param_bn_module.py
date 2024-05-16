@@ -1009,6 +1009,18 @@ def test_symbolic_iterators():
         assert i.to_symbolic().is_singleton()
         assert i.to_symbolic().is_subset(graph.mk_function_colors("f", i["f"]))
 
+    # Instantiation with a subset of networks:
+    for i in unit_colors.items(retained=["f"]):
+        i_bn = i.instantiate(bn)
+        assert i_bn.explicit_parameter_count() == 0
+        assert i_bn.implicit_parameter_count() == 2
+
+        fn_b = bn.get_update_function("b")
+        assert fn_b is not None
+        fn_b = i.instantiate(fn_b)
+        assert str(fn_b) in {"a", "a & c", "a & !c"}
+
+
     # This is basically a mix of tests for ColorSet and VertexSet
 
     unit_colored_set = graph.mk_unit_colored_vertices()
