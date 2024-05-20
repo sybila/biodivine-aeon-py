@@ -93,46 +93,46 @@ trait AsNative<T> {
 }
 
 /// Helper function to quickly throw a type error.
-fn throw_type_error<T, A: 'static>(message: A) -> PyResult<T>
+fn throw_type_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>>,
+    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
 {
     Err(PyTypeError::new_err(message))
 }
 
 /// Helper function to quickly throw a runtime error.
-fn throw_runtime_error<T, A: 'static>(message: A) -> PyResult<T>
+fn throw_runtime_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>>,
+    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
 {
     Err(runtime_error::<A>(message))
 }
 
 /// Helper function to quickly create a runtime error.
-fn runtime_error<A: 'static>(message: A) -> PyErr
+fn runtime_error<A>(message: A) -> PyErr
 where
-    A: Send + Sync + IntoPy<Py<PyAny>>,
+    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
 {
     PyRuntimeError::new_err(message)
 }
 
-fn throw_index_error<T, A: 'static>(message: A) -> PyResult<T>
+fn throw_index_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>>,
+    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
 {
     Err(PyIndexError::new_err(message))
 }
 
-fn index_error<A: 'static>(message: A) -> PyErr
+fn index_error<A>(message: A) -> PyErr
 where
-    A: Send + Sync + IntoPy<Py<PyAny>>,
+    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
 {
     PyIndexError::new_err(message)
 }
 
-fn throw_interrupted_error<T, A: 'static>(message: A) -> PyResult<T>
+fn throw_interrupted_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>>,
+    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
 {
     Err(PyInterruptedError::new_err(message))
 }
