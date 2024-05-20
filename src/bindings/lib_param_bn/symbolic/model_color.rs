@@ -220,6 +220,12 @@ impl ColorModel {
                 );
             }
             let mut bn = network.borrow(py).as_native().clone();
+
+            // This is the expected number of parameters after the ones available in this model
+            // are instantiated.
+            let expected = (bn.num_parameters() + bn.num_implicit_parameters())
+                - (self.retained_implicit.len() + self.retained_explicit.len());
+
             for var in bn.variables() {
                 let function = if let Some(function) = bn.get_update_function(var) {
                     self.instantiate_fn_update(function)?
@@ -236,8 +242,6 @@ impl ColorModel {
                 bn.set_update_function(var, Some(function)).unwrap();
             }
 
-            let expected = (bn.num_parameters() + bn.num_implicit_parameters())
-                - (self.retained_implicit.len() + self.retained_explicit.len());
             let bn = bn.prune_unused_parameters();
             assert_eq!(bn.num_parameters() + bn.num_implicit_parameters(), expected);
 
