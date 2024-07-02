@@ -52,7 +52,7 @@ impl Bdd {
     ///
     #[new]
     #[pyo3(signature = (ctx, data = None))]
-    fn new(ctx: &PyAny, data: Option<&PyAny>) -> PyResult<Bdd> {
+    fn new(ctx: &Bound<'_, PyAny>, data: Option<&Bound<'_, PyAny>>) -> PyResult<Bdd> {
         // A copy of an existing BDD.
         if let Ok(bdd) = ctx.extract::<Bdd>() {
             if data.is_some() {
@@ -97,7 +97,7 @@ impl Bdd {
                             Ok(value) => Ok(Bdd { ctx, value }),
                             Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {}", e)),
                         }
-                    } else if let Ok(string) = data.extract::<&str>() {
+                    } else if let Ok(string) = data.extract::<String>() {
                         let mut reader = Cursor::new(string);
                         match RsBdd::read_as_string(&mut reader) {
                             Ok(value) => Ok(Bdd { ctx, value }),
@@ -150,7 +150,7 @@ impl Bdd {
         )
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> (Py<BddVariableSet>, &'a PyBytes) {
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> (Py<BddVariableSet>, Bound<'a, PyBytes>) {
         (self.ctx.clone(), self.data_bytes(py))
     }
 
@@ -158,11 +158,11 @@ impl Bdd {
         self.ctx.clone()
     }
 
-    fn __call__(&self, py: Python, valuation: &PyAny) -> PyResult<bool> {
+    fn __call__(&self, py: Python, valuation: &Bound<'_, PyAny>) -> PyResult<bool> {
         if let Ok(valuation) = valuation.extract::<BddValuation>() {
             Ok(self.value.eval_in(valuation.as_native()))
         } else {
-            let valuation = BddValuation::new(self.ctx.as_ref(py), Some(valuation))?;
+            let valuation = BddValuation::new(self.ctx.bind(py).as_any(), Some(valuation))?;
             Ok(self.value.eval_in(valuation.as_native()))
         }
     }
@@ -177,8 +177,8 @@ impl Bdd {
     }
 
     /// Convert this `Bdd` into a serialized `bytes` format that can be read using the `Bdd` constructor.
-    fn data_bytes<'a>(&self, py: Python<'a>) -> &'a PyBytes {
-        PyBytes::new(py, &self.as_native().to_bytes())
+    fn data_bytes<'a>(&self, py: Python<'a>) -> Bound<'a, PyBytes> {
+        PyBytes::new_bound(py, &self.as_native().to_bytes())
     }
 
     /// Produce a `graphviz`-compatible `.dot` representation of the underlying graph. If `zero_pruned` is set,
@@ -577,9 +577,9 @@ impl Bdd {
         left: &Bdd,
         right: &Bdd,
         function: Py<PyAny>,
-        flip_left: Option<&PyAny>,
-        flip_right: Option<&PyAny>,
-        flip_output: Option<&PyAny>,
+        flip_left: Option<&Bound<'_, PyAny>>,
+        flip_right: Option<&Bound<'_, PyAny>>,
+        flip_output: Option<&Bound<'_, PyAny>>,
         limit: Option<usize>,
     ) -> PyResult<Bdd> {
         let ctx = left.ctx.get();
@@ -623,10 +623,10 @@ impl Bdd {
         b: &Bdd,
         c: &Bdd,
         function: Py<PyAny>,
-        flip_a: Option<&PyAny>,
-        flip_b: Option<&PyAny>,
-        flip_c: Option<&PyAny>,
-        flip_out: Option<&PyAny>,
+        flip_a: Option<&Bound<'_, PyAny>>,
+        flip_b: Option<&Bound<'_, PyAny>>,
+        flip_c: Option<&Bound<'_, PyAny>>,
+        flip_out: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Bdd> {
         let ctx = a.ctx.get();
         let flip_a = flip_a.map(|it| ctx.resolve_variable(it)).transpose()?;
@@ -657,9 +657,9 @@ impl Bdd {
         left: &Bdd,
         right: &Bdd,
         function: Py<PyAny>,
-        flip_left: Option<&PyAny>,
-        flip_right: Option<&PyAny>,
-        flip_output: Option<&PyAny>,
+        flip_left: Option<&Bound<'_, PyAny>>,
+        flip_right: Option<&Bound<'_, PyAny>>,
+        flip_output: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<(bool, usize)> {
         let ctx = left.ctx.get();
         let flip_left = flip_left.map(|it| ctx.resolve_variable(it)).transpose()?;
@@ -691,7 +691,7 @@ impl Bdd {
         py: Python,
         left: &Bdd,
         right: &Bdd,
-        variables: &PyAny,
+        variables: &Bound<'_, PyAny>,
         outer_function: Py<PyAny>,
         inner_function: Py<PyAny>,
     ) -> PyResult<Bdd> {
@@ -718,7 +718,7 @@ impl Bdd {
         py: Python,
         left: &Bdd,
         right: &Bdd,
-        variables: &PyAny,
+        variables: &Bound<'_, PyAny>,
         function: Py<PyAny>,
     ) -> PyResult<Bdd> {
         let variables = left.ctx.get().resolve_variables(variables)?;
@@ -741,7 +741,7 @@ impl Bdd {
         py: Python,
         left: &Bdd,
         right: &Bdd,
-        variables: &PyAny,
+        variables: &Bound<'_, PyAny>,
         function: Py<PyAny>,
     ) -> PyResult<Bdd> {
         let variables = left.ctx.get().resolve_variables(variables)?;
@@ -772,7 +772,7 @@ impl Bdd {
     /// $b \in B$.
     ///
     /// This operation is biased such that it always tries to select the lexicographically "first" witness.
-    pub fn r_pick(&self, variables: &PyAny) -> PyResult<Bdd> {
+    pub fn r_pick(&self, variables: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let variables = self.ctx.get().resolve_variables(variables)?;
         Ok(self.new_from(self.as_native().pick(&variables)))
     }
@@ -782,7 +782,7 @@ impl Bdd {
     ///
     /// You can make the process randomized but deterministic by specifying a fixed `seed`.
     #[pyo3(signature = (variables, seed = None))]
-    pub fn r_pick_random(&self, variables: &PyAny, seed: Option<u64>) -> PyResult<Bdd> {
+    pub fn r_pick_random(&self, variables: &Bound<'_, PyAny>, seed: Option<u64>) -> PyResult<Bdd> {
         /// Generic helper function to handle both cases.
         fn pick_random_rng<R: Rng>(
             bdd: &Bdd,
@@ -805,7 +805,7 @@ impl Bdd {
     ///
     /// In terms of first-order logic, this is equivalent to applying the $\exists$ operator to the underlying
     /// Boolean function.
-    pub fn r_exists(&self, variables: &PyAny) -> PyResult<Bdd> {
+    pub fn r_exists(&self, variables: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let variables = self.ctx.get().resolve_variables(variables)?;
         Ok(self.new_from(self.as_native().exists(&variables)))
     }
@@ -814,21 +814,21 @@ impl Bdd {
     ///
     /// In terms of first-order logic, this is equivalent to applying the $\forall$ operator to the underlying
     /// Boolean function.
-    pub fn r_for_all(&self, variables: &PyAny) -> PyResult<Bdd> {
+    pub fn r_for_all(&self, variables: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let variables = self.ctx.get().resolve_variables(variables)?;
         Ok(self.new_from(self.as_native().for_all(&variables)))
     }
 
     /// Fix the specified variables to the respective values, and then eliminate the variables using existential
     /// projection.
-    pub fn r_restrict(&self, values: &PyAny) -> PyResult<Bdd> {
+    pub fn r_restrict(&self, values: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let valuation = self.ctx.get().resolve_partial_valuation(values)?;
         let result = self.as_native().restrict(&valuation.to_values());
         Ok(self.new_from(result))
     }
 
     /// Fix the specified variables to the respective values.
-    pub fn r_select(&self, values: &PyAny) -> PyResult<Bdd> {
+    pub fn r_select(&self, values: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let valuation = self.ctx.get().resolve_partial_valuation(values)?;
         let result = self.as_native().select(&valuation.to_values());
         Ok(self.new_from(result))
@@ -995,7 +995,7 @@ impl Bdd {
     /// Note that at the moment, the result is not well-defined if `function` also depends on the substituted
     /// variable (the variable is eliminated both from the original `Bdd` and from `function`). We are planning
     /// to fix this in the future.
-    pub fn substitute(&self, variable: &PyAny, function: &Bdd) -> PyResult<Bdd> {
+    pub fn substitute(&self, variable: &Bound<'_, PyAny>, function: &Bdd) -> PyResult<Bdd> {
         let ctx = self.ctx.get();
         let variable = ctx.resolve_variable(variable)?;
         let result = self.as_native().substitute(variable, function.as_native());
@@ -1007,11 +1007,11 @@ impl Bdd {
     /// At the moment, this operation *cannot* modify the graph structure of the `Bdd`. It can only replace variable
     /// identifiers with new ones. As such, rename operation is only permitted if it does not violate
     /// the current ordering. If this is not satisfied, the method panics.
-    pub fn rename(&self, replace_with: Vec<(&PyAny, &PyAny)>) -> PyResult<Bdd> {
+    pub fn rename<'a>(&self, py: Python<'a>, replace_with: Vec<(Py<PyAny>, Py<PyAny>)>) -> PyResult<Bdd> {
         let mut result = self.value.clone();
         for (a, b) in replace_with {
-            let a = self.ctx.get().resolve_variable(a)?;
-            let b = self.ctx.get().resolve_variable(b)?;
+            let a = self.ctx.get().resolve_variable(a.bind(py))?;
+            let b = self.ctx.get().resolve_variable(b.bind(py))?;
             unsafe {
                 result.rename_variable(a, b);
             }

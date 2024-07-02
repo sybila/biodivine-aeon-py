@@ -46,7 +46,7 @@ pub struct BddVariableSet(biodivine_lib_bdd::BddVariableSet);
 #[pymethods]
 impl BddVariableSet {
     #[new]
-    fn new(variables: &PyAny) -> PyResult<BddVariableSet> {
+    fn new(variables: &Bound<'_, PyAny>) -> PyResult<BddVariableSet> {
         if let Ok(var_count) = variables.extract::<usize>() {
             let Ok(var_count) = u16::try_from(var_count) else {
                 return throw_runtime_error("`BddVariableSet` only supports up to 65k variables.");
@@ -55,10 +55,11 @@ impl BddVariableSet {
                 biodivine_lib_bdd::BddVariableSet::new_anonymous(var_count),
             ));
         }
-        if let Ok(variables) = variables.extract::<Vec<&str>>() {
-            return Ok(BddVariableSet(biodivine_lib_bdd::BddVariableSet::new(
-                &variables,
-            )));
+        if let Ok(variables) = variables.extract::<Vec<String>>() {
+            let str_variables = variables.iter()
+                .map(|it| it.as_str())
+                .collect::<Vec<_>>();
+            return Ok(BddVariableSet(biodivine_lib_bdd::BddVariableSet::new(str_variables.as_slice())));
         }
         throw_type_error("Expected `int` or `list[str]`.")
     }
@@ -80,8 +81,8 @@ impl BddVariableSet {
         format!("BddVariableSet({:?})", names)
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(py, &[self.variable_names()])
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
+        PyTuple::new_bound(py, &[self.variable_names()])
     }
 
     /// Return the number of variables managed by this `BddVariableSet`.
@@ -107,7 +108,7 @@ impl BddVariableSet {
 
     /// Return the `BddVariable` identifier of the requested `variable`, or `None` if the
     /// variable does not exist in this `BddVariableSet`.
-    fn find_variable(&self, variable: &PyAny) -> PyResult<Option<BddVariable>> {
+    fn find_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<Option<BddVariable>> {
         if let Ok(id) = variable.extract::<BddVariable>() {
             return if id.__index__() < self.__len__() {
                 Ok(Some(id))
@@ -123,7 +124,7 @@ impl BddVariableSet {
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
     /// such variable does not exist.
-    pub fn get_variable_name(&self, variable: &PyAny) -> PyResult<String> {
+    pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         let var = self.resolve_variable(variable)?;
         Ok(self.0.name_of(var))
     }
@@ -141,7 +142,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing the constant Boolean function given by `value`.
-    fn mk_const(self_: PyRef<'_, Self>, value: &PyAny) -> PyResult<Bdd> {
+    fn mk_const(self_: PyRef<'_, Self>, value: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let value = resolve_boolean(value)?;
         let value = if value {
             self_.0.mk_true()
@@ -153,7 +154,7 @@ impl BddVariableSet {
 
     /// Create a new `Bdd` representing the literal $variable$ or $\neg variable$, depending
     /// on the given `value`.
-    fn mk_literal(self_: PyRef<'_, Self>, variable: &PyAny, value: &PyAny) -> PyResult<Bdd> {
+    fn mk_literal(self_: PyRef<'_, Self>, variable: &Bound<'_, PyAny>, value: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let value = resolve_boolean(value)?;
         let variable = self_.resolve_variable(variable)?;
         let value = self_.0.mk_literal(variable, value);
@@ -164,7 +165,7 @@ impl BddVariableSet {
     /// (e.g. $x \land y \land \neg z$).
     ///
     /// See also `BoolClauseType`.
-    pub fn mk_conjunctive_clause(self_: PyRef<'_, Self>, clause: &PyAny) -> PyResult<Bdd> {
+    pub fn mk_conjunctive_clause(self_: PyRef<'_, Self>, clause: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let value = if let Ok(valuation) = clause.extract::<BddPartialValuation>() {
             // This is useful because there is no need to copy the inner valuation.
             self_.0.mk_conjunctive_clause(valuation.as_native())
@@ -179,7 +180,7 @@ impl BddVariableSet {
     /// (e.g. $x \lor y \lor \neg z$).
     ///
     /// See also `BoolClauseType`.
-    fn mk_disjunctive_clause(self_: PyRef<'_, Self>, clause: &PyAny) -> PyResult<Bdd> {
+    fn mk_disjunctive_clause(self_: PyRef<'_, Self>, clause: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let value = if let Ok(valuation) = clause.extract::<BddPartialValuation>() {
             // This is useful because there is no need to copy the inner valuation.
             self_.0.mk_disjunctive_clause(valuation.as_native())
@@ -197,10 +198,10 @@ impl BddVariableSet {
     /// the clauses one by one.
     ///
     /// See also `BddVariableSet.mk_disjunctive_clause` and `BoolClauseType`.
-    fn mk_cnf(self_: PyRef<'_, Self>, clauses: Vec<&PyAny>) -> PyResult<Bdd> {
+    fn mk_cnf(self_: PyRef<'_, Self>, clauses: &Bound<'_, PyList>) -> PyResult<Bdd> {
         let clauses: PyResult<Vec<biodivine_lib_bdd::BddPartialValuation>> = clauses
             .into_iter()
-            .map(|it| self_.resolve_partial_valuation(it))
+            .map(|it| self_.resolve_partial_valuation(&it))
             .collect();
         let value = self_.0.mk_cnf(&clauses?);
         Ok(Bdd::new_raw(self_, value))
@@ -213,10 +214,10 @@ impl BddVariableSet {
     /// the clauses one by one.
     ///
     /// See also `BddVariableSet.mk_conjunctive_clause` and `BoolClauseType`.
-    fn mk_dnf(self_: PyRef<'_, Self>, clauses: Vec<&PyAny>) -> PyResult<Bdd> {
+    fn mk_dnf(self_: PyRef<'_, Self>, clauses: &Bound<'_, PyList>) -> PyResult<Bdd> {
         let clauses: PyResult<Vec<biodivine_lib_bdd::BddPartialValuation>> = clauses
             .into_iter()
-            .map(|it| self_.resolve_partial_valuation(it))
+            .map(|it| self_.resolve_partial_valuation(&it))
             .collect();
         let value = self_.0.mk_dnf(&clauses?);
         Ok(Bdd::new_raw(self_, value))
@@ -231,7 +232,7 @@ impl BddVariableSet {
     fn mk_sat_exactly_k(
         self_: PyRef<'_, Self>,
         k: usize,
-        variables: Option<&PyAny>,
+        variables: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Bdd> {
         let variables = if let Some(variables) = variables {
             self_.resolve_variables(variables)?
@@ -251,7 +252,7 @@ impl BddVariableSet {
     fn mk_sat_up_to_k(
         self_: PyRef<'_, Self>,
         k: usize,
-        variables: Option<&PyAny>,
+        variables: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Bdd> {
         let variables = if let Some(variables) = variables {
             self_.resolve_variables(variables)?
@@ -264,7 +265,7 @@ impl BddVariableSet {
 
     /// Evaluate the provided `BoolExpressionType` into a `Bdd`, or throw an error if the
     /// expression is invalid in this context (e.g. has unknown variables).
-    fn eval_expression(self_: PyRef<'_, Self>, expression: &PyAny) -> PyResult<Bdd> {
+    fn eval_expression(self_: PyRef<'_, Self>, expression: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let expression = BooleanExpression::resolve_expression(expression)?;
         match self_.0.safe_eval_expression(expression.as_native()) {
             Some(value) => Ok(Bdd::new_raw(self_, value)),
@@ -294,7 +295,7 @@ impl BddVariableSet {
 }
 
 impl BddVariableSet {
-    pub fn resolve_variable(&self, variable: &PyAny) -> PyResult<biodivine_lib_bdd::BddVariable> {
+    pub fn resolve_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<biodivine_lib_bdd::BddVariable> {
         if let Ok(id) = variable.extract::<BddVariable>() {
             return if id.__index__() < self.__len__() {
                 Ok(*id.as_native())
@@ -314,7 +315,7 @@ impl BddVariableSet {
 
     pub fn resolve_partial_valuation(
         &self,
-        valuation: &PyAny,
+        valuation: &Bound<'_, PyAny>,
     ) -> PyResult<biodivine_lib_bdd::BddPartialValuation> {
         if let Ok(valuation) = valuation.extract::<BddPartialValuation>() {
             return Ok(valuation.as_native().clone());
@@ -326,8 +327,8 @@ impl BddVariableSet {
         if let Ok(values) = valuation.downcast::<PyDict>() {
             let mut result = biodivine_lib_bdd::BddPartialValuation::empty();
             for (key, value) in values {
-                let key = self.resolve_variable(key)?;
-                let value = resolve_boolean(value)?;
+                let key = self.resolve_variable(&key)?;
+                let value = resolve_boolean(&value)?;
                 result[key] = Some(value);
             }
             return Ok(result);
@@ -339,7 +340,7 @@ impl BddVariableSet {
 
     pub fn resolve_variables(
         &self,
-        variables: &PyAny,
+        variables: &Bound<'_, PyAny>,
     ) -> PyResult<Vec<biodivine_lib_bdd::BddVariable>> {
         if let Ok(variable) = self.resolve_variable(variables) {
             return Ok(vec![variable]);
@@ -347,7 +348,7 @@ impl BddVariableSet {
         if let Ok(variables) = variables.downcast::<PyList>() {
             let result = variables
                 .iter()
-                .map(|it| self.resolve_variable(it))
+                .map(|it| self.resolve_variable(&it))
                 .collect::<PyResult<Vec<_>>>();
             return result;
         }

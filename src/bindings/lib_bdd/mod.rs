@@ -1,5 +1,5 @@
-use pyo3::types::PyModule;
-use pyo3::PyResult;
+use pyo3::types::{PyModule, PyModuleMethods};
+use pyo3::{Bound, PyResult};
 
 pub mod bdd;
 pub mod bdd_pointer;
@@ -10,7 +10,7 @@ pub mod bdd_variable_set_builder;
 pub mod boolean_expression;
 pub mod op_function;
 
-pub fn register(module: &PyModule) -> PyResult<()> {
+pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<bdd::Bdd>()?;
     module.add_class::<bdd::_BddValuationIterator>()?;
     module.add_class::<bdd::_BddClauseIterator>()?;

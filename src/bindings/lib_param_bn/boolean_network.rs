@@ -863,7 +863,7 @@ impl BooleanNetwork {
     /// not [ParameterId] or [String], returns a `TypeError`.
     pub fn resolve_parameter(
         &self,
-        parameter: &PyAny,
+        parameter: &Bound<'_, PyAny>,
     ) -> PyResult<biodivine_lib_param_bn::ParameterId> {
         if let Ok(id) = parameter.extract::<ParameterId>() {
             return if id.__index__() < self.explicit_parameter_count() {

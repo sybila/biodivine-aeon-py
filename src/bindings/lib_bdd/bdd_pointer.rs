@@ -39,7 +39,7 @@ pub struct BddPointer(biodivine_lib_bdd::BddPointer);
 impl BddPointer {
     #[new]
     #[pyo3(signature = (value = None))]
-    fn new(value: Option<&PyAny>) -> PyResult<BddPointer> {
+    fn new(value: Option<&Bound<'_, PyAny>>) -> PyResult<BddPointer> {
         let Some(value) = value else {
             return Ok(Self::zero());
         };
@@ -76,8 +76,8 @@ impl BddPointer {
         self.0.to_index()
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
-        PyTuple::new(py, [self.0.to_index()])
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
+        PyTuple::new_bound(py, [self.0.to_index()])
     }
 
     /// Returns the `BddPointer` referencing the `0` terminal node.

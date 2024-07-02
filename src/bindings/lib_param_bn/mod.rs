@@ -1,5 +1,5 @@
-use pyo3::prelude::PyModule;
-use pyo3::{PyAny, PyResult};
+use pyo3::prelude::{PyModule, PyModuleMethods};
+use pyo3::{Bound, PyAny, PyResult};
 
 pub mod algorithms;
 pub mod boolean_network;
@@ -11,7 +11,7 @@ pub mod symbolic;
 pub mod update_function;
 pub mod variable_id;
 
-pub fn register(module: &PyModule) -> PyResult<()> {
+pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<variable_id::VariableId>()?;
     module.add_class::<parameter_id::ParameterId>()?;
     module.add_class::<regulatory_graph::RegulatoryGraph>()?;
@@ -48,7 +48,7 @@ pub fn register(module: &PyModule) -> PyResult<()> {
 pub trait NetworkVariableContext {
     fn resolve_network_variable(
         &self,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<biodivine_lib_param_bn::VariableId>;
     fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String;
 }

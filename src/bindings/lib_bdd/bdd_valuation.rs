@@ -44,7 +44,7 @@ pub struct BddValuation {
 impl BddValuation {
     #[new]
     #[pyo3(signature = (ctx, values = None))]
-    pub fn new(ctx: &PyAny, values: Option<&PyAny>) -> PyResult<BddValuation> {
+    pub fn new(ctx: &Bound<'_, PyAny>, values: Option<&Bound<'_, PyAny>>) -> PyResult<BddValuation> {
         if let Ok(valuation) = ctx.extract::<BddValuation>() {
             if values.is_some() {
                 return throw_type_error("Unexpected second argument.");
@@ -86,7 +86,7 @@ impl BddValuation {
                             }
                             let value = list
                                 .iter()
-                                .map(resolve_boolean)
+                                .map(|it| resolve_boolean(&it))
                                 .collect::<PyResult<Vec<bool>>>()?;
                             let value = biodivine_lib_bdd::BddValuation::new(value);
                             Ok(BddValuation { ctx, value })
@@ -131,13 +131,13 @@ impl BddValuation {
         usize::from(self.value.num_vars())
     }
 
-    fn __getitem__(&self, key: &PyAny) -> PyResult<bool> {
+    fn __getitem__(&self, key: &Bound<'_, PyAny>) -> PyResult<bool> {
         let ctx = self.ctx.get();
         let var = ctx.resolve_variable(key)?;
         Ok(self.value[var])
     }
 
-    fn __setitem__(&mut self, key: &PyAny, value: &PyAny) -> PyResult<()> {
+    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: &Bound<'_, PyAny>) -> PyResult<()> {
         let ctx = self.ctx.get();
         let value = resolve_boolean(value)?;
         let var = ctx.resolve_variable(key)?;
@@ -145,7 +145,7 @@ impl BddValuation {
         Ok(())
     }
 
-    fn __contains__(&self, key: &PyAny) -> bool {
+    fn __contains__(&self, key: &Bound<'_, PyAny>) -> bool {
         let ctx = self.ctx.get();
         ctx.resolve_variable(key).is_ok()
     }
@@ -263,7 +263,7 @@ pub struct BddPartialValuation {
 impl BddPartialValuation {
     #[new]
     #[pyo3(signature = (ctx, values = None))]
-    fn new(ctx: &PyAny, values: Option<&PyAny>) -> PyResult<BddPartialValuation> {
+    fn new(ctx: &Bound<'_, PyAny>, values: Option<&Bound<'_, PyAny>>) -> PyResult<BddPartialValuation> {
         if let Ok(valuation) = ctx.extract::<BddPartialValuation>() {
             if values.is_some() {
                 return throw_type_error("Unexpected second argument.");
@@ -293,8 +293,8 @@ impl BddPartialValuation {
                         let value = dict
                             .iter()
                             .map(|(a, b)| {
-                                let a = ctx.get().resolve_variable(a);
-                                let b = resolve_boolean(b);
+                                let a = ctx.get().resolve_variable(&a);
+                                let b = resolve_boolean(&b);
                                 match (a, b) {
                                     (Ok(a), Ok(b)) => Ok((a, b)),
                                     (Err(e), _) | (_, Err(e)) => Err(e),
@@ -356,13 +356,13 @@ impl BddPartialValuation {
         usize::from(self.value.cardinality())
     }
 
-    fn __getitem__(&self, key: &PyAny) -> PyResult<Option<bool>> {
+    fn __getitem__(&self, key: &Bound<'_, PyAny>) -> PyResult<Option<bool>> {
         let ctx = self.ctx.get();
         let var = ctx.resolve_variable(key)?;
         Ok(self.value[var])
     }
 
-    fn __setitem__(&mut self, key: &PyAny, value: Option<&PyAny>) -> PyResult<()> {
+    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: Option<&Bound<'_, PyAny>>) -> PyResult<()> {
         let ctx = self.ctx.get();
         let value = value.map(resolve_boolean).transpose()?;
         let var = ctx.resolve_variable(key)?;
@@ -370,14 +370,14 @@ impl BddPartialValuation {
         Ok(())
     }
 
-    fn __delitem__(&mut self, key: &PyAny) -> PyResult<()> {
+    fn __delitem__(&mut self, key: &Bound<'_, PyAny>) -> PyResult<()> {
         let ctx = self.ctx.get();
         let var = ctx.resolve_variable(key)?;
         self.value.unset_value(var);
         Ok(())
     }
 
-    fn __contains__(&self, key: &PyAny) -> bool {
+    fn __contains__(&self, key: &Bound<'_, PyAny>) -> bool {
         let ctx = self.ctx.get();
         ctx.resolve_variable(key).is_ok()
     }

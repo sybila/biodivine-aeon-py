@@ -1,7 +1,8 @@
 use crate::throw_type_error;
 use biodivine_lib_param_bn::Sign;
 use pyo3::basic::CompareOp;
-use pyo3::{IntoPy, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, IntoPy, Py, PyAny, PyResult, Python};
+use pyo3::prelude::{PyAnyMethods, PyStringMethods};
 
 /// Compare the equality of two objects based on the given `cmp` operator and a "key" returned by the `key` function
 /// for each of the objects.
@@ -19,7 +20,7 @@ pub fn richcmp_eq_by_key<T: Sized, R: Eq>(
     }
 }
 
-pub fn resolve_boolean(value: &PyAny) -> PyResult<bool> {
+pub fn resolve_boolean(value: &Bound<'_, PyAny>) -> PyResult<bool> {
     if let Ok(value) = value.extract::<bool>() {
         return Ok(value);
     }
@@ -31,13 +32,11 @@ pub fn resolve_boolean(value: &PyAny) -> PyResult<bool> {
             return Ok(true);
         }
     }
-    throw_type_error(format!(
-        "Expected `True`/`False` or `1`/`0`. Found `{}`.",
-        value.str()?.to_str()?
-    ))
+    let repr = value.str()?.to_str()?;
+    throw_type_error(format!("Expected `True`/`False` or `1`/`0`. Found `{}`.", repr))
 }
 
-pub fn resolve_sign(value: &PyAny) -> PyResult<Sign> {
+pub fn resolve_sign(value: &Bound<'_, PyAny>) -> PyResult<Sign> {
     if let Ok(value) = value.extract::<bool>() {
         return if value {
             Ok(Sign::Positive)

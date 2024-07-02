@@ -35,7 +35,7 @@ pub struct RegulatoryGraph(biodivine_lib_param_bn::RegulatoryGraph);
 impl NetworkVariableContext for RegulatoryGraph {
     fn resolve_network_variable(
         &self,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<biodivine_lib_param_bn::VariableId> {
         if let Ok(id) = variable.extract::<VariableId>() {
             return if id.__index__() < self.variable_count() {
@@ -71,7 +71,7 @@ impl RegulatoryGraph {
     #[pyo3(signature = (variables = None, regulations = None))]
     pub fn new(
         variables: Option<Vec<String>>,
-        regulations: Option<Vec<&PyAny>>,
+        regulations: Option<&Bound<'_, PyList>>,
     ) -> PyResult<RegulatoryGraph> {
         // First, try to extract regulation data if it is provided.
         let (regulations, inferred_variables) = if let Some(regulations) = regulations.as_ref() {
@@ -143,7 +143,7 @@ impl RegulatoryGraph {
         self.clone()
     }
 
-    fn __deepcopy__(&self, _memo: &PyAny) -> RegulatoryGraph {
+    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> RegulatoryGraph {
         self.__copy__()
     }
 
@@ -202,7 +202,7 @@ impl RegulatoryGraph {
 
     /// Return a `VariableId` identifier of the requested `variable`, or `None` if the variable
     /// does not exist in this `RegulatoryGraph`.
-    pub fn find_variable(&self, variable: &PyAny) -> PyResult<Option<VariableId>> {
+    pub fn find_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<Option<VariableId>> {
         if let Ok(id) = variable.extract::<VariableId>() {
             return if id.__index__() < self.variable_count() {
                 Ok(Some(id))
@@ -218,14 +218,14 @@ impl RegulatoryGraph {
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
     /// such variable does not exist.
-    pub fn get_variable_name(&self, variable: &PyAny) -> PyResult<String> {
+    pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         let var = self.resolve_network_variable(variable)?;
         Ok(self.0.get_variable_name(var).clone())
     }
 
     /// Update the variable name of the provided `variable`. This does not change the
     /// corresponding `VariableId`.
-    pub fn set_variable_name(&mut self, variable: &PyAny, name: &str) -> PyResult<()> {
+    pub fn set_variable_name(&mut self, variable: &Bound<'_, PyAny>, name: &str) -> PyResult<()> {
         let var = self.resolve_network_variable(variable)?;
         self.0.set_variable_name(var, name).map_err(runtime_error)
     }
@@ -237,8 +237,8 @@ impl RegulatoryGraph {
 
     /// Return the list of all regulations (represented as `IdRegulation` dictionaries) that are currently
     /// managed by this `RegulatoryGraph`.
-    pub fn regulations<'a>(&self, py: Python<'a>) -> PyResult<&'a PyList> {
-        let result = PyList::empty(py);
+    pub fn regulations<'a>(&self, py: Python<'a>) -> PyResult<&Bound<'a, PyList>> {
+        let result = PyList::empty_bound(py);
         for reg in self.as_native().regulations() {
             let reg = Self::encode_regulation(py, reg)?;
             result.append(reg)?;
@@ -259,8 +259,8 @@ impl RegulatoryGraph {
     pub fn find_regulation<'a>(
         &self,
         py: Python<'a>,
-        source: &PyAny,
-        target: &PyAny,
+        source: &Bound<'_, PyAny>,
+        target: &Bound<'_, PyAny>,
     ) -> PyResult<Option<&'a PyDict>> {
         let source = self.resolve_network_variable(source)?;
         let target = self.resolve_network_variable(target)?;
@@ -273,7 +273,7 @@ impl RegulatoryGraph {
 
     /// Add a new regulation to the `RegulatoryGraph`, either using a `NamedRegulation`, `IdRegulation`, or
     /// a string representation compatible with the `.aeon` format.
-    pub fn add_regulation(&mut self, regulation: &PyAny) -> PyResult<()> {
+    pub fn add_regulation(&mut self, regulation: &Bound<'_, PyAny>) -> PyResult<()> {
         let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
         let m = m.as_ref().map(|it| match it {
             Positive => Monotonicity::Activation,
@@ -290,8 +290,8 @@ impl RegulatoryGraph {
     pub fn remove_regulation<'a>(
         &mut self,
         py: Python<'a>,
-        source: &PyAny,
-        target: &PyAny,
+        source: &Bound<'_, PyAny>,
+        target: &Bound<'_, PyAny>,
     ) -> PyResult<&'a PyDict> {
         let source = self.resolve_network_variable(source)?;
         let target = self.resolve_network_variable(target)?;
@@ -310,7 +310,7 @@ impl RegulatoryGraph {
     pub fn ensure_regulation<'a>(
         &mut self,
         py: Python<'a>,
-        regulation: &PyAny,
+        regulation: &Bound<'_, PyAny>,
     ) -> PyResult<Option<&'a PyDict>> {
         // This is a bit inefficient, but should be good enough for now.
         let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
@@ -351,7 +351,7 @@ impl RegulatoryGraph {
     ///
     /// The new graph follows the variable ordering of the old graph, but since there are now variables that are
     /// missing in the new graph, the `VariableId` objects are not compatible with the original graph.
-    pub fn drop(&self, variables: &PyAny) -> PyResult<RegulatoryGraph> {
+    pub fn drop(&self, variables: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
         let to_remove = self
             .resolve_variables(variables)?
             .into_iter()
@@ -392,7 +392,7 @@ impl RegulatoryGraph {
     /// change its behaviour. And as opposed to `RegulatoryGraph.drop`, the intention of this method is to produce
     /// a result that is functionally compatible with the original regulatory graph. Of course, you can use
     /// `RegulatoryGraph.remove_regulation` to explicitly remove the self-loop before inlining the variable.
-    pub fn inline_variable(&self, variable: &PyAny) -> PyResult<RegulatoryGraph> {
+    pub fn inline_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
         let variable = self.resolve_network_variable(variable)?;
         let bn = biodivine_lib_param_bn::BooleanNetwork::new(self.as_native().clone());
         let Some(bn) = bn.inline_variable(variable, false) else {
@@ -411,7 +411,7 @@ impl RegulatoryGraph {
     }
 
     /// Compute the `set` of all predecessors (regulators) of a specific variable.
-    pub fn predecessors(&self, variable: &PyAny) -> PyResult<HashSet<VariableId>> {
+    pub fn predecessors(&self, variable: &Bound<'_, PyAny>) -> PyResult<HashSet<VariableId>> {
         let variable = self.resolve_network_variable(variable)?;
         Ok(self
             .as_native()
@@ -422,7 +422,7 @@ impl RegulatoryGraph {
     }
 
     /// Compute the `set` of all successors (targets) of a specific variable.
-    pub fn successors(&self, variable: &PyAny) -> PyResult<HashSet<VariableId>> {
+    pub fn successors(&self, variable: &Bound<'_, PyAny>) -> PyResult<HashSet<VariableId>> {
         let variable = self.resolve_network_variable(variable)?;
         Ok(self
             .as_native()
@@ -437,8 +437,8 @@ impl RegulatoryGraph {
     /// If `subgraph` is specified, the search is limited to a subgraph induced by the given collection of variables.
     pub fn backward_reachable(
         &self,
-        pivots: &PyAny,
-        subgraph: Option<&PyAny>,
+        pivots: &Bound<'_, PyAny>,
+        subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<HashSet<VariableId>> {
         let pivots = self.resolve_variables(pivots)?;
         let subgraph = self.resolve_subgraph(subgraph)?;
@@ -455,8 +455,8 @@ impl RegulatoryGraph {
     /// If `subgraph` is specified, the search is limited to a subgraph induced by the given collection of variables.
     pub fn forward_reachable(
         &self,
-        pivots: &PyAny,
-        subgraph: Option<&PyAny>,
+        pivots: &Bound<'_, PyAny>,
+        subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<HashSet<VariableId>> {
         let pivots = self.resolve_variables(pivots)?;
         let subgraph = self.resolve_subgraph(subgraph)?;
@@ -484,8 +484,8 @@ impl RegulatoryGraph {
     pub fn feedback_vertex_set(
         &self,
         py: Python,
-        parity: Option<&PyAny>,
-        subgraph: Option<&PyAny>,
+        parity: Option<&Bound<'_, PyAny>>,
+        subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<HashSet<VariableId>> {
         let sd_graph = SdGraph::from(self.as_native());
         let restriction = self.resolve_subgraph(subgraph)?;
@@ -523,8 +523,8 @@ impl RegulatoryGraph {
     pub fn independent_cycles(
         &self,
         py: Python,
-        parity: Option<&PyAny>,
-        subgraph: Option<&PyAny>,
+        parity: Option<&Bound<'_, PyAny>>,
+        subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Vec<Vec<VariableId>>> {
         let sd_graph = SdGraph::from(self.as_native());
         let restriction = self.resolve_subgraph(subgraph)?;
@@ -558,7 +558,7 @@ impl RegulatoryGraph {
     pub fn strongly_connected_components(
         &self,
         py: Python,
-        subgraph: Option<&PyAny>,
+        subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
         let subgraph = self.resolve_subgraph(subgraph)?;
         let sd_graph = SdGraph::from(self.as_native());
@@ -581,7 +581,7 @@ impl RegulatoryGraph {
     pub fn weakly_connected_components(
         &self,
         py: Python,
-        subgraph: Option<&PyAny>,
+        subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
         let subgraph = self.resolve_subgraph(subgraph)?;
         let sd_graph = SdGraph::from(self.as_native());
@@ -611,9 +611,9 @@ impl RegulatoryGraph {
     #[pyo3(signature = (pivot, parity = None, subgraph = None, length = None))]
     pub fn shortest_cycle(
         &self,
-        pivot: &PyAny,
-        parity: Option<&PyAny>,
-        subgraph: Option<&PyAny>,
+        pivot: &Bound<'_, PyAny>,
+        parity: Option<&Bound<'_, PyAny>>,
+        subgraph: Option<&Bound<'_, PyAny>>,
         length: Option<usize>,
     ) -> PyResult<Option<Vec<VariableId>>> {
         let pivot = self.resolve_network_variable(pivot)?;
@@ -637,7 +637,7 @@ impl RegulatoryGraph {
     /// to which an operation should be applied.
     pub fn resolve_subgraph(
         &self,
-        variables: Option<&PyAny>,
+        variables: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<HashSet<biodivine_lib_param_bn::VariableId>> {
         let Some(variables) = variables else {
             // If no value is given, we consider the full sub-graph always.
@@ -664,7 +664,7 @@ impl RegulatoryGraph {
     /// of variables.
     pub fn resolve_variables(
         &self,
-        data: &PyAny,
+        data: &Bound<'_, PyAny>,
     ) -> PyResult<HashSet<biodivine_lib_param_bn::VariableId>> {
         let result = if let Ok(variable) = self.resolve_network_variable(data) {
             HashSet::from_iter([variable])
@@ -686,7 +686,7 @@ impl RegulatoryGraph {
     /// objects that are resolved to variable names using `ctx`.
     pub fn resolve_regulation<T: NetworkVariableContext>(
         ctx: Option<&T>,
-        regulation: &PyAny,
+        regulation: &Bound<'_, PyAny>,
     ) -> PyResult<(String, Option<Sign>, bool, String)> {
         if let Ok(item) = regulation.extract::<String>() {
             let Some((source, monotonicity, observable, target)) =
@@ -724,8 +724,8 @@ impl RegulatoryGraph {
             };
 
             let (source, target) = if let Some(ctx) = ctx {
-                let source = ctx.resolve_network_variable(source)?;
-                let target = ctx.resolve_network_variable(target)?;
+                let source = ctx.resolve_network_variable(&source)?;
+                let target = ctx.resolve_network_variable(&target)?;
                 (
                     ctx.get_network_variable_name(source).clone(),
                     ctx.get_network_variable_name(target).clone(),
@@ -743,13 +743,13 @@ impl RegulatoryGraph {
             let observable = item
                 .get_item("essential")?
                 .or(item.get_item("observable")?) // backwards compatibility
-                .map(resolve_boolean)
+                .map(|it| resolve_boolean(&it))
                 .unwrap_or(Ok(true))?;
             let monotonicity = item
                 .get_item("sign")?
                 .or(item.get_item("monotonicity")?) // backwards compatibility
                 .and_then(|it| if it.is_none() { None } else { Some(it) })
-                .map(resolve_sign)
+                .map(|it| resolve_sign(&it))
                 .transpose()?;
 
             Ok((source, monotonicity, observable, target))
@@ -762,8 +762,8 @@ impl RegulatoryGraph {
     pub fn encode_regulation<'a>(
         py: Python<'a>,
         regulation: &biodivine_lib_param_bn::Regulation,
-    ) -> PyResult<&'a PyDict> {
-        let result = PyDict::new(py);
+    ) -> PyResult<Bound<'a, PyDict>> {
+        let result = PyDict::new_bound(py);
         let source = VariableId::from(regulation.get_regulator());
         let target = VariableId::from(regulation.get_target());
         result.set_item("source", source.into_py(py))?;

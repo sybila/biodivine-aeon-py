@@ -5,7 +5,7 @@ use pyo3::{PyResult, Python};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
 ///
-/// Should be split into sub-modules based on individual crates such that each sub-module
+/// Should be split into submodules based on individual crates such that each submodule
 /// provides a `register` function that allows us to export it into Python here
 /// within the root module.
 ///
@@ -30,12 +30,12 @@ mod bindings;
 mod internal;
 mod pyo3_utils;
 
-fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
+fn set_log_level(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     // This should be an error when running as a script or a normal shell, but returns a name in notebooks.
     // https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
-    let is_notebook = py.eval("get_ipython().__class__.__name__", None, None);
+    let is_notebook = py.eval_bound("get_ipython().__class__.__name__", None, None);
     if let Ok(is_notebook) = is_notebook {
-        if let Ok(is_notebook) = is_notebook.extract::<&str>() {
+        if let Ok(is_notebook) = is_notebook.extract::<String>() {
             println!("Detected IPython (`{is_notebook}`). Log level set to `LOG_ESSENTIAL`.");
             return module.setattr("LOG_LEVEL", 1);
         }
@@ -44,10 +44,10 @@ fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
     // Context:
     // https://stackoverflow.com/questions/2356399/tell-if-python-is-in-interactive-mode
     // https://stackoverflow.com/questions/6108330/checking-for-interactive-shell-in-a-python-script
-    let sys = PyModule::import(py, "sys")?;
-    let locals = PyDict::new(py);
+    let sys = PyModule::import_bound(py, "sys")?;
+    let locals = PyDict::new_bound(py);
     locals.set_item("sys", sys)?;
-    let has_ps = py.eval("hasattr(sys, 'ps1')", None, Some(locals))?;
+    let has_ps = py.eval_bound("hasattr(sys, 'ps1')", None, Some(&locals))?;
     if let Ok(true) = has_ps.extract::<bool>() {
         println!("Detected interactive mode. Log level set to `LOG_ESSENTIAL`.");
         return module.setattr("LOG_LEVEL", 1);
@@ -56,7 +56,7 @@ fn set_log_level(py: Python, module: &PyModule) -> PyResult<()> {
 }
 
 fn global_log_level(py: Python) -> PyResult<usize> {
-    let module = PyModule::import(py, "biodivine_aeon")?;
+    let module = PyModule::import_bound(py, "biodivine_aeon")?;
     module.getattr("LOG_LEVEL")?.extract()
 }
 
@@ -74,7 +74,7 @@ fn should_log(log_level: usize) -> bool {
 
 /// AEON.py is a library...
 #[pymodule]
-fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {
+fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     set_log_level(py, module)?;
     bindings::lib_bdd::register(module)?;
     bindings::lib_param_bn::register(module)?;
@@ -86,7 +86,7 @@ fn biodivine_aeon(py: Python, module: &PyModule) -> PyResult<()> {
 /// on. As such, this can be often used to simplify some conversions.
 ///
 /// Note that you don't need this for "value structs" (i.e. implementing copy), where everything
-/// is copied anyway and references do not do much.
+/// is copied anyway and references aren't relevant.
 trait AsNative<T> {
     fn as_native(&self) -> &T;
     fn as_native_mut(&mut self) -> &mut T;

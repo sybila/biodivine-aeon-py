@@ -27,10 +27,13 @@ pub struct BddVariableSetBuilder(biodivine_lib_bdd::BddVariableSetBuilder);
 impl BddVariableSetBuilder {
     #[new]
     #[pyo3(signature = (variables = None))]
-    fn new(variables: Option<Vec<&str>>) -> BddVariableSetBuilder {
+    fn new(variables: Option<Vec<String>>) -> BddVariableSetBuilder {
         let mut inner = biodivine_lib_bdd::BddVariableSetBuilder::new();
         if let Some(variables) = variables {
-            inner.make_variables(&variables);
+            let str_variables = variables.iter()
+                .map(|it| it.as_str())
+                .collect::<Vec<_>>();
+            inner.make_variables(str_variables.as_slice());
         }
         BddVariableSetBuilder(inner)
     }
@@ -61,9 +64,12 @@ impl BddVariableSetBuilder {
             .collect()
     }
 
-    fn __setstate__(&mut self, state: Vec<&str>) {
+    fn __setstate__(&mut self, state: Vec<String>) {
         self.0 = biodivine_lib_bdd::BddVariableSetBuilder::new();
-        self.0.make_variables(&state);
+        let str_variables = state.iter()
+            .map(|it| it.as_str())
+            .collect::<Vec<_>>();
+        self.0.make_variables(str_variables.as_slice());
     }
 
     /// Add a single new variable to this `BddVariableSetBuilder`.
@@ -75,10 +81,13 @@ impl BddVariableSetBuilder {
 
     /// Add a collection of new variables to this `BddVariableSetBuilder`.
     ///
-    /// Panics if some of variables already exist.
-    fn add_all(&mut self, names: Vec<&str>) -> Vec<BddVariable> {
+    /// Panics if some of the variables already exist.
+    fn add_all(&mut self, names: Vec<String>) -> Vec<BddVariable> {
+        let str_variables = names.iter()
+            .map(|it| it.as_str())
+            .collect::<Vec<_>>();
         self.as_native_mut()
-            .make_variables(&names)
+            .make_variables(str_variables.as_slice())
             .into_iter()
             .map(Into::into)
             .collect()

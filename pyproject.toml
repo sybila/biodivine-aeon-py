@@ -1,11 +1,9 @@
 [build-system]
-requires = ["maturin>=1.4.0,<1.5.0"]
+requires = ["maturin>=1.6.0,<1.7.0"]
 build-backend = "maturin"
 
 [project]
 name = "biodivine_aeon"
-repository = "https://github.com/sybila/biodivine-aeon-py/"
-documentation = "https://biodivine.fi.muni.cz/docs/aeon-py/v0.2.0/"
 description = "Python bindings for the tool AEON."
 version = "1.0.0a8"
 requires-python = ">=3.9"
@@ -15,4 +13,6 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
-
+[project.urls]
+Repository = "https://github.com/sybila/biodivine-aeon-py/"
+Documentation = "https://biodivine.fi.muni.cz/docs/aeon-py/latest/"

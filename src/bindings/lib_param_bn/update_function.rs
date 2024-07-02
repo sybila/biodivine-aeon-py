@@ -9,7 +9,7 @@ use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsExpression;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
@@ -40,9 +40,9 @@ impl UpdateFunction {
     /// is "translated" into the given context (IDs are updated based on matching names), or a `BooleanExpression`,
     /// in which case it also translated using variable names.
     #[new]
-    fn new(py: Python, ctx: Py<BooleanNetwork>, value: &PyAny) -> PyResult<UpdateFunction> {
-        let fun = if let Ok(value) = value.extract::<&str>() {
-            FnUpdate::try_from_str(value, ctx.borrow(py).as_native()).map_err(runtime_error)?
+    fn new(py: Python, ctx: Py<BooleanNetwork>, value: &Bound<'_, PyAny>) -> PyResult<UpdateFunction> {
+        let fun = if let Ok(value) = value.extract::<String>() {
+            FnUpdate::try_from_str(value.as_str(), ctx.borrow(py).as_native()).map_err(runtime_error)?
         } else if let Ok(value) = value.extract::<UpdateFunction>() {
             if value.ctx.as_ptr() == ctx.as_ptr() {
                 return Ok(value);
@@ -106,7 +106,7 @@ impl UpdateFunction {
     }
 
     /// Test if a variable or a parameter is used by this `UpdateFunction`.
-    fn __contains__(&self, py: Python, item: &PyAny) -> PyResult<bool> {
+    fn __contains__(&self, py: Python, item: &Bound<'_, PyAny>) -> PyResult<bool> {
         let ctx = self.ctx.borrow(py);
         if let Ok(variable) = ctx.as_ref().resolve_network_variable(item) {
             Ok(self.value.contains_variable(variable))
@@ -119,7 +119,7 @@ impl UpdateFunction {
 
     /// Return an `UpdateFunction` for a constant value.
     #[staticmethod]
-    pub fn mk_const(ctx: Py<BooleanNetwork>, value: &PyAny) -> PyResult<UpdateFunction> {
+    pub fn mk_const(ctx: Py<BooleanNetwork>, value: &Bound<'_, PyAny>) -> PyResult<UpdateFunction> {
         let value = resolve_boolean(value)?;
         let fun = if value {
             FnUpdate::mk_true()
@@ -134,7 +134,7 @@ impl UpdateFunction {
     pub fn mk_var(
         py: Python,
         ctx: Py<BooleanNetwork>,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<UpdateFunction> {
         let variable = ctx.borrow(py).as_ref().resolve_network_variable(variable)?;
         let fun = FnUpdate::mk_var(variable);
@@ -145,8 +145,8 @@ impl UpdateFunction {
     pub fn mk_param(
         py: Python,
         ctx: Py<BooleanNetwork>,
-        parameter: &PyAny,
-        arguments: Vec<&PyAny>,
+        parameter: &Bound<'_, PyAny>,
+        arguments: &Bound<'_, PyList>,
     ) -> PyResult<UpdateFunction> {
         let parameter = ctx.borrow(py).resolve_parameter(parameter)?;
         let mut args = Vec::new();
@@ -261,12 +261,12 @@ impl UpdateFunction {
     pub fn mk_conjunction(
         py: Python,
         ctx: Py<BooleanNetwork>,
-        args: Vec<&PyAny>,
+        args: &Bound<'_, PyList>,
     ) -> PyResult<UpdateFunction> {
         let mut native_args = Vec::new();
-        for arg in &args {
+        for arg in args.iter() {
             native_args.push(
-                UpdateFunction::new(py, ctx.clone(), arg)?
+                UpdateFunction::new(py, ctx.clone(), &arg)?
                     .as_native()
                     .clone(),
             );
@@ -280,12 +280,12 @@ impl UpdateFunction {
     pub fn mk_disjunction(
         py: Python,
         ctx: Py<BooleanNetwork>,
-        args: Vec<&PyAny>,
+        args: &Bound<'_, PyList>,
     ) -> PyResult<UpdateFunction> {
         let mut native_args = Vec::new();
-        for arg in &args {
+        for arg in args.iter() {
             native_args.push(
-                UpdateFunction::new(py, ctx.clone(), arg)?
+                UpdateFunction::new(py, ctx.clone(), &arg)?
                     .as_native()
                     .clone(),
             );
@@ -499,12 +499,12 @@ impl UpdateFunction {
     ///
     ///  > Note that at the moment, there is no substitution method for parameters, since we don't have a concept
     ///    of an "expression with holes" which we could use here.
-    pub fn substitute_all(&self, py: Python, substitution: &PyDict) -> PyResult<UpdateFunction> {
+    pub fn substitute_all(&self, py: Python, substitution: &Bound<'_, PyDict>) -> PyResult<UpdateFunction> {
         let mut vars = HashMap::new();
         let bn = self.ctx.borrow(py);
         for (k, v) in substitution {
-            let k = bn.as_ref().resolve_network_variable(k)?;
-            let v = Self::new(py, self.ctx.clone(), v)?;
+            let k = bn.as_ref().resolve_network_variable(&k)?;
+            let v = Self::new(py, self.ctx.clone(), &v)?;
             vars.insert(k, v);
         }
 
@@ -545,8 +545,8 @@ impl UpdateFunction {
         &self,
         py: Python,
         new_ctx: Option<Py<BooleanNetwork>>,
-        variables: Option<&PyDict>,
-        parameters: Option<&PyDict>,
+        variables: Option<&Bound<'_, PyDict>>,
+        parameters: Option<&Bound<'_, PyDict>>,
     ) -> PyResult<UpdateFunction> {
         let mut rename_variables = HashMap::new();
         let mut rename_parameters = HashMap::new();
@@ -556,15 +556,15 @@ impl UpdateFunction {
             let new_ctx = new_ctx.borrow(py);
             if let Some(variables) = variables {
                 for (k, v) in variables {
-                    let k = old_ctx.as_ref().resolve_network_variable(k)?;
-                    let v = new_ctx.as_ref().resolve_network_variable(v)?;
+                    let k = old_ctx.as_ref().resolve_network_variable(&k)?;
+                    let v = new_ctx.as_ref().resolve_network_variable(&v)?;
                     rename_variables.insert(k, v);
                 }
             }
             if let Some(parameters) = parameters {
                 for (k, v) in parameters {
-                    let k = old_ctx.resolve_parameter(k)?;
-                    let v = new_ctx.resolve_parameter(v)?;
+                    let k = old_ctx.resolve_parameter(&k)?;
+                    let v = new_ctx.resolve_parameter(&v)?;
                     rename_parameters.insert(k, v);
                 }
             }
@@ -572,15 +572,15 @@ impl UpdateFunction {
             let new_ctx = self.ctx.borrow(py);
             if let Some(variables) = variables {
                 for (k, v) in variables {
-                    let k = old_ctx.as_ref().resolve_network_variable(k)?;
-                    let v = new_ctx.as_ref().resolve_network_variable(v)?;
+                    let k = old_ctx.as_ref().resolve_network_variable(&k)?;
+                    let v = new_ctx.as_ref().resolve_network_variable(&v)?;
                     rename_variables.insert(k, v);
                 }
             }
             if let Some(parameters) = parameters {
                 for (k, v) in parameters {
-                    let k = old_ctx.resolve_parameter(k)?;
-                    let v = new_ctx.resolve_parameter(v)?;
+                    let k = old_ctx.resolve_parameter(&k)?;
+                    let v = new_ctx.resolve_parameter(&v)?;
                     rename_parameters.insert(k, v);
                 }
             }

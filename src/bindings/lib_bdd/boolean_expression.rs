@@ -9,7 +9,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-
+use RsBooleanExpression::{Not, Variable};
 /*
    “Pretend to be good always and even God will be fooled.”
                                    — Kurt Vonnegut
@@ -49,7 +49,7 @@ pub struct BooleanExpression {
 impl BooleanExpression {
     /// Build a new `BooleanExpression`, either as a copy of an existing expression, or from a string representation.
     #[new]
-    fn new(value: &PyAny) -> PyResult<BooleanExpression> {
+    fn new(value: &Bound<'_, PyAny>) -> PyResult<BooleanExpression> {
         Self::resolve_expression(value)
     }
 
@@ -71,11 +71,11 @@ impl BooleanExpression {
         format!("BooleanExpression({:?})", self.__str__())
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> &'a PyTuple {
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
         // Technically, this is a "different" expression because it is created with a completely new `root`,
         // but it is much easier (and more transparent) than serializing the root expression and trying to figure
         // out how to serialize a pointer into the AST.
-        PyTuple::new(py, [self.__str__()])
+        PyTuple::new_bound(py, [self.__str__()])
     }
 
     fn __root__(&self) -> BooleanExpression {
@@ -86,19 +86,19 @@ impl BooleanExpression {
     pub fn __call__(
         &self,
         py: Python,
-        valuation: Option<&PyDict>,
-        kwargs: Option<&PyDict>,
+        valuation: Option<&Bound<'_, PyDict>>,
+        kwargs: Option<&Bound<'_, PyDict>>,
     ) -> PyResult<bool> {
         match (valuation, kwargs) {
             (Some(_), Some(_)) => throw_type_error("Cannot use both explicit and named arguments."),
-            (None, None) => eval(self.as_native(), PyDict::new(py)),
+            (None, None) => eval(self.as_native(), &PyDict::new_bound(py)),
             (Some(v), None) | (None, Some(v)) => eval(self.as_native(), v),
         }
     }
 
     /// Return a `BooleanExpression` of a constant value.
     #[staticmethod]
-    pub fn mk_const(value: &PyAny) -> PyResult<BooleanExpression> {
+    pub fn mk_const(value: &Bound<'_, PyAny>) -> PyResult<BooleanExpression> {
         let value = resolve_boolean(value)?;
         Ok(Self::from_native(RsBooleanExpression::Const(value)))
     }
@@ -106,13 +106,13 @@ impl BooleanExpression {
     /// Return a `BooleanExpression` of a single named variable.
     #[staticmethod]
     pub fn mk_var(name: String) -> BooleanExpression {
-        Self::from_native(RsBooleanExpression::Variable(name))
+        Self::from_native(Variable(name))
     }
 
     /// Return a negation of a `BooleanExpression`.
     #[staticmethod]
     pub fn mk_not(value: &BooleanExpression) -> BooleanExpression {
-        Self::from_native(RsBooleanExpression::Not(Box::new(
+        Self::from_native(Not(Box::new(
             value.as_native().clone(),
         )))
     }
@@ -229,12 +229,12 @@ impl BooleanExpression {
 
     /// Return true if the root of this expression is a variable.
     pub fn is_var(&self) -> bool {
-        matches!(self.as_native(), &RsBooleanExpression::Variable(_))
+        matches!(self.as_native(), &Variable(_))
     }
 
     /// Return true if the root of this expression is a `not`.
     pub fn is_not(&self) -> bool {
-        matches!(self.as_native(), &RsBooleanExpression::Not(_))
+        matches!(self.as_native(), &Not(_))
     }
 
     /// Return true if the root of this expression is an `and`.
@@ -270,9 +270,9 @@ impl BooleanExpression {
     /// Return true if the root of this expression is a literal (`var`/`!var`).
     pub fn is_literal(&self) -> bool {
         match self.as_native() {
-            RsBooleanExpression::Variable(_) => true,
-            RsBooleanExpression::Not(inner) => {
-                matches!(**inner, RsBooleanExpression::Variable(_))
+            Variable(_) => true,
+            Not(inner) => {
+                matches!(**inner, Variable(_))
             }
             _ => false,
         }
@@ -282,11 +282,11 @@ impl BooleanExpression {
     pub fn is_binary(&self) -> bool {
         matches!(
             self.as_native(),
-            RsBooleanExpression::And(_, _)
-                | RsBooleanExpression::Or(_, _)
-                | RsBooleanExpression::Xor(_, _)
-                | RsBooleanExpression::Imp(_, _)
-                | RsBooleanExpression::Iff(_, _)
+            And(_, _)
+                | Or(_, _)
+                | Xor(_, _)
+                | Imp(_, _)
+                | Iff(_, _)
         )
     }
 
@@ -301,7 +301,7 @@ impl BooleanExpression {
     /// If the root of this expression is a `var`, return its name, or `None` otherwise.
     pub fn as_var(&self) -> Option<String> {
         match self.as_native() {
-            RsBooleanExpression::Variable(x) => Some(x.clone()),
+            Variable(x) => Some(x.clone()),
             _ => None,
         }
     }
@@ -309,7 +309,7 @@ impl BooleanExpression {
     /// If the root of this expression is a `not`, return its operand, or `None` otherwise.
     pub fn as_not(&self) -> Option<BooleanExpression> {
         match self.as_native() {
-            RsBooleanExpression::Not(x) => Some(self.mk_child_ref(x)),
+            Not(x) => Some(self.mk_child_ref(x)),
             _ => None,
         }
     }
@@ -371,9 +371,9 @@ impl BooleanExpression {
     /// Otherwise, return `None`.
     pub fn as_literal(&self) -> Option<(String, bool)> {
         match self.as_native() {
-            RsBooleanExpression::Variable(name) => Some((name.clone(), true)),
-            RsBooleanExpression::Not(inner) => match inner.as_ref() {
-                RsBooleanExpression::Variable(name) => Some((name.clone(), false)),
+            Variable(name) => Some((name.clone(), true)),
+            Not(inner) => match inner.as_ref() {
+                Variable(name) => Some((name.clone(), false)),
                 _ => None,
             },
             _ => None,
@@ -414,10 +414,10 @@ impl BooleanExpression {
         fn recursive(e: &RsBooleanExpression, result: &mut HashSet<String>) {
             match e {
                 RsBooleanExpression::Const(_) => (),
-                RsBooleanExpression::Variable(name) => {
+                Variable(name) => {
                     result.insert(name.clone());
                 }
-                RsBooleanExpression::Not(inner) => recursive(inner, result),
+                Not(inner) => recursive(inner, result),
                 And(l, r) | Or(l, r) | Imp(l, r) | Iff(l, r) | Xor(l, r) => {
                     recursive(l, result);
                     recursive(r, result);
@@ -455,12 +455,12 @@ impl BooleanExpression {
         BooleanExpression { root, value }
     }
 
-    pub fn resolve_expression(value: &PyAny) -> PyResult<BooleanExpression> {
+    pub fn resolve_expression(value: &Bound<'_, PyAny>) -> PyResult<BooleanExpression> {
         if let Ok(expression) = value.extract::<BooleanExpression>() {
             return Ok(expression);
         }
-        if let Ok(value) = value.extract::<&str>() {
-            return match RsBooleanExpression::try_from(value) {
+        if let Ok(value) = value.extract::<String>() {
+            return match RsBooleanExpression::try_from(value.as_str()) {
                 Ok(expression) => Ok(BooleanExpression::from_native(expression)),
                 Err(message) => {
                     throw_runtime_error(format!("Invalid expression: \"{}\".", message))
@@ -475,16 +475,16 @@ impl BooleanExpression {
     }
 }
 
-fn eval(e: &RsBooleanExpression, valuation: &PyDict) -> PyResult<bool> {
+fn eval(e: &RsBooleanExpression, valuation: &Bound<'_, PyDict>) -> PyResult<bool> {
     match e {
         RsBooleanExpression::Const(x) => Ok(*x),
-        RsBooleanExpression::Variable(name) => {
+        Variable(name) => {
             let Some(value) = valuation.get_item(name)? else {
                 return throw_runtime_error(format!("Missing value of {}.", name));
             };
-            resolve_boolean(value)
+            resolve_boolean(&value)
         }
-        RsBooleanExpression::Not(inner) => {
+        Not(inner) => {
             let inner = eval(inner, valuation)?;
             Ok(!inner)
         }
