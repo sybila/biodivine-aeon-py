@@ -28,7 +28,6 @@ def test_drop_2():
             dropped = network.drop(to_remove)
             print(dropped)
             assert dropped.variable_count() == len(scc)
-    assert False
 
 
 def test_variable_id():
@@ -80,6 +79,14 @@ def test_regulatory_graph():
         'essential': True,
         'sign': None,
     })
+    with pytest.raises(TypeError):
+        rg1.add_regulation({
+            'source': 'b',
+            'target': 'a',
+            'sign': '-',
+            'essential': False,
+            'extra': 1
+        })
     rg2 = RegulatoryGraph(None, ["a -> b", "b -|? c", "c -? a"])
 
     assert rg1 == rg2
@@ -212,6 +219,14 @@ def test_boolean_network_inheritance():
         'essential': True,
         'sign': None,
     })
+    with pytest.raises(TypeError):
+        bn1.add_regulation({
+            'source': 'b',
+            'target': 'a',
+            'sign': '-',
+            'essential': False,
+            'extra': 1
+        })
     bn2 = BooleanNetwork(None, ["a -> b", "b -|? c", "c -? a"])
 
     assert bn1 == bn2

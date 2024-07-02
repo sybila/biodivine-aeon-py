@@ -701,6 +701,21 @@ impl RegulatoryGraph {
             };
             Ok((source, monotonicity, observable, target))
         } else if let Ok(item) = regulation.downcast::<PyDict>() {
+            for key in item.keys() {
+                let error = match key.extract::<String>() {
+                    Ok(name) => match name.as_str() {
+                        "source" | "target" | "essential" | "observable" | "sign"
+                        | "monotonicity" => continue,
+                        _ => name,
+                    },
+                    Err(_) => key.to_string(),
+                };
+                return throw_type_error(format!(
+                    "Unknown key in the regulation dictionary: {:?}",
+                    error
+                ));
+            }
+
             let Some(source) = item.get_item("source")? else {
                 return throw_type_error("Missing regulation `source` variable.");
             };
