@@ -15,6 +15,9 @@ def test_algorithms():
 
     assert fixed_point_vertices == fixed_points.vertices()
     assert fixed_point_colors == fixed_points.colors()
+    assert fixed_points == FixedPoints.symbolic(graph)
+    assert fixed_point_vertices == FixedPoints.symbolic_vertices(graph)
+    assert fixed_point_colors == FixedPoints.symbolic_colors(graph)
 
     minimal_traps = TrapSpaces.minimal_symbolic(ctx, graph, space_unit)
     essential_traps = TrapSpaces.essential_symbolic(ctx, graph, space_unit)
