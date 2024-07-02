@@ -8,7 +8,7 @@ from functools import reduce
 from typing import Literal
 
 
-def test_drop():
+def test_drop_1():
     network = BooleanNetwork.from_file("./tests/model-1.aeon")
     to_remove = []
     for var in network.variable_names():
@@ -16,6 +16,19 @@ def test_drop():
             to_remove.append(var)
     dropped = network.drop(to_remove)
     assert network.variable_count() == dropped.variable_count() + len(to_remove)
+
+
+def test_drop_2():
+    network = BooleanNetwork.from_file('./tests/model-2.aeon')
+    # Test that we can safely prune the network to its top SCC.
+    for scc in network.strongly_connected_components():
+        print(scc)
+        if network.backward_reachable(list(scc)) == scc:
+            to_remove = [v for v in network.variables() if v not in scc]
+            dropped = network.drop(to_remove)
+            print(dropped)
+            assert dropped.variable_count() == len(scc)
+    assert False
 
 
 def test_variable_id():
@@ -180,7 +193,7 @@ def test_regulatory_graph():
     assert rg1.shortest_cycle('a', parity='+') == rg1.shortest_cycle('a', parity='-')
 
 
-def test_boolean_network_inheritence():
+def test_boolean_network_inheritance():
     """
     This is *almost* the same test as for RegulatoryGraph, but it performs the same operations on a BooleanNetwork
     to check that they still work the same.
@@ -1019,7 +1032,6 @@ def test_symbolic_iterators():
         assert fn_b is not None
         fn_b = i.instantiate(fn_b)
         assert str(fn_b) in {"a", "a & c", "a & !c"}
-
 
     # This is basically a mix of tests for ColorSet and VertexSet
 
