@@ -1007,7 +1007,7 @@ impl Bdd {
     /// At the moment, this operation *cannot* modify the graph structure of the `Bdd`. It can only replace variable
     /// identifiers with new ones. As such, rename operation is only permitted if it does not violate
     /// the current ordering. If this is not satisfied, the method panics.
-    pub fn rename<'a>(&self, py: Python<'a>, replace_with: Vec<(Py<PyAny>, Py<PyAny>)>) -> PyResult<Bdd> {
+    pub fn rename(&self, py: Python, replace_with: Vec<(Py<PyAny>, Py<PyAny>)>) -> PyResult<Bdd> {
         let mut result = self.value.clone();
         for (a, b) in replace_with {
             let a = self.ctx.get().resolve_variable(a.bind(py))?;

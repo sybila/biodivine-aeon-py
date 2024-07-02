@@ -92,7 +92,7 @@ impl SpaceSet {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<Self>, _memo: &PyAny) -> Py<Self> {
+    fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
     }
 
@@ -186,12 +186,16 @@ impl SpaceSet {
     /// will fail with an `IndexError` if a value of a variable outside the `retained` set is
     /// requested.
     #[pyo3(signature = (retained = None))]
-    fn items(&self, retained: Option<&PyList>, py: Python) -> PyResult<_SpaceModelIterator> {
+    fn items(
+        &self,
+        retained: Option<&Bound<'_, PyList>>,
+        py: Python,
+    ) -> PyResult<_SpaceModelIterator> {
         let ctx = self.ctx.borrow(py);
         let retained = if let Some(retained) = retained {
             let mut retained_vars = Vec::new();
             for var in retained {
-                let var = ctx.as_ref().resolve_network_variable(var)?;
+                let var = ctx.as_ref().resolve_network_variable(&var)?;
                 retained_vars.push(ctx.as_native().get_positive_variable(var));
                 retained_vars.push(ctx.as_native().get_negative_variable(var));
             }

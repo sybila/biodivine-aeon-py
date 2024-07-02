@@ -44,7 +44,10 @@ pub struct BddValuation {
 impl BddValuation {
     #[new]
     #[pyo3(signature = (ctx, values = None))]
-    pub fn new(ctx: &Bound<'_, PyAny>, values: Option<&Bound<'_, PyAny>>) -> PyResult<BddValuation> {
+    pub fn new(
+        ctx: &Bound<'_, PyAny>,
+        values: Option<&Bound<'_, PyAny>>,
+    ) -> PyResult<BddValuation> {
         if let Ok(valuation) = ctx.extract::<BddValuation>() {
             if values.is_some() {
                 return throw_type_error("Unexpected second argument.");
@@ -263,7 +266,10 @@ pub struct BddPartialValuation {
 impl BddPartialValuation {
     #[new]
     #[pyo3(signature = (ctx, values = None))]
-    fn new(ctx: &Bound<'_, PyAny>, values: Option<&Bound<'_, PyAny>>) -> PyResult<BddPartialValuation> {
+    fn new(
+        ctx: &Bound<'_, PyAny>,
+        values: Option<&Bound<'_, PyAny>>,
+    ) -> PyResult<BddPartialValuation> {
         if let Ok(valuation) = ctx.extract::<BddPartialValuation>() {
             if values.is_some() {
                 return throw_type_error("Unexpected second argument.");
@@ -362,7 +368,11 @@ impl BddPartialValuation {
         Ok(self.value[var])
     }
 
-    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: Option<&Bound<'_, PyAny>>) -> PyResult<()> {
+    fn __setitem__(
+        &mut self,
+        key: &Bound<'_, PyAny>,
+        value: Option<&Bound<'_, PyAny>>,
+    ) -> PyResult<()> {
         let ctx = self.ctx.get();
         let value = value.map(resolve_boolean).transpose()?;
         let var = ctx.resolve_variable(key)?;

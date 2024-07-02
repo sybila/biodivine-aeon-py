@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use pyo3::{pyclass, pymethods, Py, PyAny, PyResult};
+use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult};
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
@@ -46,7 +46,7 @@ impl VertexModel {
         self.to_values().len()
     }
 
-    pub fn __getitem__(&self, key: &PyAny) -> PyResult<bool> {
+    pub fn __getitem__(&self, key: &Bound<'_, PyAny>) -> PyResult<bool> {
         let ctx = self.ctx.get();
         let variable = ctx.resolve_network_variable(key)?;
         let bdd_variable = ctx.as_native().get_state_variable(variable);
@@ -58,7 +58,7 @@ impl VertexModel {
         })
     }
 
-    pub fn __contains__(&self, key: &PyAny) -> PyResult<bool> {
+    pub fn __contains__(&self, key: &Bound<'_, PyAny>) -> PyResult<bool> {
         let ctx = self.ctx.get();
         let variable = ctx.resolve_network_variable(key)?;
         let bdd_variable = ctx.as_native().get_state_variable(variable);

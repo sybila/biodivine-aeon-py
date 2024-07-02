@@ -40,9 +40,14 @@ impl UpdateFunction {
     /// is "translated" into the given context (IDs are updated based on matching names), or a `BooleanExpression`,
     /// in which case it also translated using variable names.
     #[new]
-    fn new(py: Python, ctx: Py<BooleanNetwork>, value: &Bound<'_, PyAny>) -> PyResult<UpdateFunction> {
+    fn new(
+        py: Python,
+        ctx: Py<BooleanNetwork>,
+        value: &Bound<'_, PyAny>,
+    ) -> PyResult<UpdateFunction> {
         let fun = if let Ok(value) = value.extract::<String>() {
-            FnUpdate::try_from_str(value.as_str(), ctx.borrow(py).as_native()).map_err(runtime_error)?
+            FnUpdate::try_from_str(value.as_str(), ctx.borrow(py).as_native())
+                .map_err(runtime_error)?
         } else if let Ok(value) = value.extract::<UpdateFunction>() {
             if value.ctx.as_ptr() == ctx.as_ptr() {
                 return Ok(value);
@@ -446,7 +451,7 @@ impl UpdateFunction {
     }
 
     /// If this expression is either `var` or `!var`, return the ID of the variable and whether it is positive.
-    /// Otherwise return `None`.
+    /// Otherwise, return `None`.
     pub fn as_literal(&self) -> Option<(VariableId, bool)> {
         match self.as_native() {
             FnUpdate::Var(id) => Some((VariableId::from(*id), true)),
@@ -499,7 +504,11 @@ impl UpdateFunction {
     ///
     ///  > Note that at the moment, there is no substitution method for parameters, since we don't have a concept
     ///    of an "expression with holes" which we could use here.
-    pub fn substitute_all(&self, py: Python, substitution: &Bound<'_, PyDict>) -> PyResult<UpdateFunction> {
+    pub fn substitute_all(
+        &self,
+        py: Python,
+        substitution: &Bound<'_, PyDict>,
+    ) -> PyResult<UpdateFunction> {
         let mut vars = HashMap::new();
         let bn = self.ctx.borrow(py);
         for (k, v) in substitution {

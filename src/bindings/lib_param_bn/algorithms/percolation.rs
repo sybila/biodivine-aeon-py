@@ -29,7 +29,7 @@ impl Percolation {
     pub fn percolate_subspace(
         py: Python,
         graph: &AsynchronousGraph,
-        space: &PyAny,
+        space: &Bound<'_, PyAny>,
     ) -> PyResult<HashMap<VariableIdBinding, bool>> {
         // TODO: Logging?
         let native_graph = graph.as_native();

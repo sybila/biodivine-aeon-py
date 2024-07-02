@@ -112,9 +112,7 @@ impl BooleanExpression {
     /// Return a negation of a `BooleanExpression`.
     #[staticmethod]
     pub fn mk_not(value: &BooleanExpression) -> BooleanExpression {
-        Self::from_native(Not(Box::new(
-            value.as_native().clone(),
-        )))
+        Self::from_native(Not(Box::new(value.as_native().clone())))
     }
 
     /// Return an `and` of two `BooleanExpression` values.
@@ -282,11 +280,7 @@ impl BooleanExpression {
     pub fn is_binary(&self) -> bool {
         matches!(
             self.as_native(),
-            And(_, _)
-                | Or(_, _)
-                | Xor(_, _)
-                | Imp(_, _)
-                | Iff(_, _)
+            And(_, _) | Or(_, _) | Xor(_, _) | Imp(_, _) | Iff(_, _)
         )
     }
 

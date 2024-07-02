@@ -30,9 +30,7 @@ impl BddVariableSetBuilder {
     fn new(variables: Option<Vec<String>>) -> BddVariableSetBuilder {
         let mut inner = biodivine_lib_bdd::BddVariableSetBuilder::new();
         if let Some(variables) = variables {
-            let str_variables = variables.iter()
-                .map(|it| it.as_str())
-                .collect::<Vec<_>>();
+            let str_variables = variables.iter().map(|it| it.as_str()).collect::<Vec<_>>();
             inner.make_variables(str_variables.as_slice());
         }
         BddVariableSetBuilder(inner)
@@ -66,9 +64,7 @@ impl BddVariableSetBuilder {
 
     fn __setstate__(&mut self, state: Vec<String>) {
         self.0 = biodivine_lib_bdd::BddVariableSetBuilder::new();
-        let str_variables = state.iter()
-            .map(|it| it.as_str())
-            .collect::<Vec<_>>();
+        let str_variables = state.iter().map(|it| it.as_str()).collect::<Vec<_>>();
         self.0.make_variables(str_variables.as_slice());
     }
 
@@ -83,9 +79,7 @@ impl BddVariableSetBuilder {
     ///
     /// Panics if some of the variables already exist.
     fn add_all(&mut self, names: Vec<String>) -> Vec<BddVariable> {
-        let str_variables = names.iter()
-            .map(|it| it.as_str())
-            .collect::<Vec<_>>();
+        let str_variables = names.iter().map(|it| it.as_str()).collect::<Vec<_>>();
         self.as_native_mut()
             .make_variables(str_variables.as_slice())
             .into_iter()

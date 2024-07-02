@@ -4,7 +4,7 @@ use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::AsNative;
 use pyo3::types::PyDict;
-use pyo3::{pyclass, pymethods, PyAny, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, PyAny, PyResult, Python};
 
 /// An "algorithm object" that can be used to compute symbolic constraints that correspond
 /// to typical properties of model regulations (i.e. monotonicity and essentiality).
@@ -34,7 +34,7 @@ impl RegulationConstraint {
     pub fn mk_activation(
         context: &SymbolicContext,
         function: &Bdd,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<Bdd> {
         let var = context.resolve_network_variable(variable)?;
         let native =
@@ -63,7 +63,7 @@ impl RegulationConstraint {
     pub fn mk_inhibition(
         context: &SymbolicContext,
         function: &Bdd,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<Bdd> {
         let var = context.resolve_network_variable(variable)?;
         let native =
@@ -93,7 +93,7 @@ impl RegulationConstraint {
     pub fn mk_essential(
         context: &SymbolicContext,
         function: &Bdd,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<Bdd> {
         let var = context.resolve_network_variable(variable)?;
         let native =
@@ -123,10 +123,10 @@ impl RegulationConstraint {
     pub fn infer_sufficient_regulation<'a>(
         py: Python<'a>,
         context: &SymbolicContext,
-        source: &PyAny,
-        target: &PyAny,
+        source: &Bound<'_, PyAny>,
+        target: &Bound<'_, PyAny>,
         function: &Bdd,
-    ) -> PyResult<Option<&'a PyDict>> {
+    ) -> PyResult<Option<Bound<'a, PyDict>>> {
         let source = context.resolve_network_variable(source)?;
         let target = context.resolve_network_variable(target)?;
         let native = biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::infer_sufficient_regulation(

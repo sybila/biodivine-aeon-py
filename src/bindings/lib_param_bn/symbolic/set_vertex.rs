@@ -92,7 +92,7 @@ impl VertexSet {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<Self>, _memo: &PyAny) -> Py<Self> {
+    fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
     }
 
@@ -190,13 +190,13 @@ impl VertexSet {
     /// Consequently, the resulting `VertexModel` instances will fail with an `IndexError` if a value of a variable
     /// outside the `retained` set is requested.
     #[pyo3(signature = (retained = None))]
-    fn items(&self, retained: Option<&PyList>) -> PyResult<_VertexModelIterator> {
+    fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_VertexModelIterator> {
         let ctx = self.ctx.get();
         let retained = if let Some(retained) = retained {
             retained
                 .iter()
                 .map(|it| {
-                    ctx.resolve_network_variable(it)
+                    ctx.resolve_network_variable(&it)
                         .map(|it| ctx.as_native().get_state_variable(it))
                 })
                 .collect::<PyResult<Vec<_>>>()?

@@ -38,7 +38,7 @@ use pyo3::prelude::*;
 /// #### Annotation syntax
 ///
 /// Annotations are comments which start with `#!`. After the `#!` "preamble", each annotation
-/// can contains a "path prefix" with path segments separated using `:` (path segments can be
+/// can contain a "path prefix" with path segments separated using `:` (path segments can be
 /// surrounded by white space that is automatically trimmed). Based on these path
 /// segments, the parser will create an annotation tree. If there are multiple annotations with
 /// the same path, their values are concatenated using newlines.
@@ -66,7 +66,7 @@ use pyo3::prelude::*;
 /// You can use "empty" path (e.g. `#! is_multivalued`), and you can use an empty annotation
 /// value with a non-empty path (e.g. `#! is_multivalued:var_1:`). Though this is not particularly
 /// encouraged: it is better to just have `var_1` as the annotation value if you can do that.
-/// An exception to this may be a case where `is_multivalued:var_1:` has an "optional" value and
+/// An exception to this may be a case where `is_multivalued:var_1:` has an "optional" value, and
 /// you want to express that while the "key" is provided, the "value" is missing. Similarly, for
 /// the sake of completeness, it is technically allowed to use empty path names (e.g. `a::b:value`
 /// translates to `["a", "", "b"] = "value"`), but it is discouraged.
@@ -143,7 +143,7 @@ impl ModelAnnotation {
         self.clone()
     }
 
-    pub fn __deepcopy__(&self, py: Python, _memo: &PyAny) -> PyResult<ModelAnnotation> {
+    pub fn __deepcopy__(&self, py: Python, _memo: &Bound<'_, PyAny>) -> PyResult<ModelAnnotation> {
         let root_copy = self.root.borrow(py).as_native().clone();
         Ok(ModelAnnotation {
             root: Py::new(py, ModelAnnotationRoot::from(root_copy))?,

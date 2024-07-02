@@ -3,7 +3,6 @@ use pyo3::{Bound, PyAny, PyResult};
 
 pub mod algorithms;
 pub mod boolean_network;
-pub mod fixed_points;
 pub mod model_annotation;
 pub mod parameter_id;
 pub mod regulatory_graph;

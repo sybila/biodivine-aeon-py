@@ -27,7 +27,7 @@ pub struct AsynchronousGraph {
 impl NetworkVariableContext for AsynchronousGraph {
     fn resolve_network_variable(
         &self,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<biodivine_lib_param_bn::VariableId> {
         NetworkVariableContext::resolve_network_variable(self.ctx.get(), variable)
     }
@@ -93,7 +93,10 @@ impl AsynchronousGraph {
         self_.clone()
     }
 
-    pub fn __deepcopy__(self_: Py<AsynchronousGraph>, _memo: &PyAny) -> Py<AsynchronousGraph> {
+    pub fn __deepcopy__(
+        self_: Py<AsynchronousGraph>,
+        _memo: &Bound<'_, PyAny>,
+    ) -> Py<AsynchronousGraph> {
         self_.clone()
     }
 
@@ -118,12 +121,15 @@ impl AsynchronousGraph {
     }
 
     /// Return a `VariableId` of the specified network variable, assuming such variable exists.
-    pub fn find_network_variable(&self, variable: &PyAny) -> PyResult<Option<VariableId>> {
+    pub fn find_network_variable(
+        &self,
+        variable: &Bound<'_, PyAny>,
+    ) -> PyResult<Option<VariableId>> {
         self.ctx.get().find_network_variable(variable)
     }
 
     /// The name of a particular network variable.
-    pub fn get_network_variable_name(&self, variable: &PyAny) -> PyResult<String> {
+    pub fn get_network_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         self.ctx.get().get_network_variable_name(variable)
     }
 
@@ -178,9 +184,9 @@ impl AsynchronousGraph {
     /// outputs all functions where given inputs evaluate to the given output.
     pub fn mk_function_row_colors(
         &self,
-        function: &PyAny,
-        row: &PyList,
-        value: &PyAny,
+        function: &Bound<'_, PyAny>,
+        row: &Bound<'_, PyList>,
+        value: &Bound<'_, PyAny>,
     ) -> PyResult<ColorSet> {
         let ctx = self.ctx.get();
         let output = resolve_boolean(value)?;
@@ -199,7 +205,7 @@ impl AsynchronousGraph {
 
         let mut input = Vec::new();
         for it in row {
-            input.push(resolve_boolean(it)?);
+            input.push(resolve_boolean(&it)?);
         }
 
         for (i, var) in table {
@@ -231,7 +237,11 @@ impl AsynchronousGraph {
     /// In both cases, the support set of the function can be of course a subset of the prescribed
     /// variables (e.g. `x_0 | x_3` is allowed for a function with `A=4`, even though `x_1` and
     /// `x_2` are unused).
-    pub fn mk_function_colors(&self, function: &PyAny, value: &PyAny) -> PyResult<ColorSet> {
+    pub fn mk_function_colors(
+        &self,
+        function: &Bound<'_, PyAny>,
+        value: &Bound<'_, PyAny>,
+    ) -> PyResult<ColorSet> {
         let ctx = self.ctx.get();
         let table = match ctx.resolve_function(function)? {
             Left(var) => ctx.as_native().get_implicit_function_table(var).unwrap(),
@@ -350,7 +360,7 @@ impl AsynchronousGraph {
     pub fn transfer_from(
         &self,
         py: Python,
-        set: &PyAny,
+        set: &Bound<'_, PyAny>,
         original_ctx: &AsynchronousGraph,
     ) -> PyResult<PyObject> {
         let set = if let Ok(set) = set.extract::<ColorSet>() {
@@ -377,7 +387,7 @@ impl AsynchronousGraph {
 
     /// Create a symbolic `ColoredVertexSet` consisting of unit colors and vertices with the specified variables
     /// fixed to their respective values.
-    pub fn mk_subspace(&self, subspace: &PyAny) -> PyResult<ColoredVertexSet> {
+    pub fn mk_subspace(&self, subspace: &Bound<'_, PyAny>) -> PyResult<ColoredVertexSet> {
         let valuation = self.resolve_subspace_valuation(subspace)?;
         Ok(ColoredVertexSet::mk_native(
             self.ctx.clone(),
@@ -386,7 +396,7 @@ impl AsynchronousGraph {
     }
 
     /// Create a symbolic `VertexSet` of vertices with the specified variables fixed to their respective values.
-    pub fn mk_subspace_vertices(&self, subspace: &PyAny) -> PyResult<VertexSet> {
+    pub fn mk_subspace_vertices(&self, subspace: &Bound<'_, PyAny>) -> PyResult<VertexSet> {
         let valuation = self.resolve_subspace_valuation(subspace)?;
         Ok(VertexSet::mk_native(
             self.ctx.clone(),
@@ -395,7 +405,7 @@ impl AsynchronousGraph {
     }
 
     /// Compute the `Bdd` representation of the update function that is associated with the given `variable`.
-    pub fn mk_update_function(&self, variable: &PyAny) -> PyResult<Bdd> {
+    pub fn mk_update_function(&self, variable: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let variable = self.ctx.get().resolve_network_variable(variable)?;
         let update = self.as_native().get_symbolic_fn_update(variable);
         Ok(Bdd::new_raw_2(
@@ -436,7 +446,11 @@ impl AsynchronousGraph {
         }
     */
     /// Compute the set of direct successors of the given `set` by updating the specified `var`.
-    pub fn var_post(&self, var: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+    pub fn var_post(
+        &self,
+        var: &Bound<'_, PyAny>,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
         Ok(ColoredVertexSet::mk_native(
             self.ctx.clone(),
@@ -446,7 +460,11 @@ impl AsynchronousGraph {
 
     /// Compute the set of direct successors of the given `set` by updating the specified `var` that are *outside*
     /// of the given `set`.
-    pub fn var_post_out(&self, var: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+    pub fn var_post_out(
+        &self,
+        var: &Bound<'_, PyAny>,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
         Ok(ColoredVertexSet::mk_native(
             self.ctx.clone(),
@@ -458,7 +476,7 @@ impl AsynchronousGraph {
     /// the given `set`.
     pub fn var_post_within(
         &self,
-        var: &PyAny,
+        var: &Bound<'_, PyAny>,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
@@ -469,7 +487,11 @@ impl AsynchronousGraph {
     }
 
     /// Compute the set of direct predecessors of the given `set` by updating the specified `var`.
-    pub fn var_pre(&self, var: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+    pub fn var_pre(
+        &self,
+        var: &Bound<'_, PyAny>,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
         Ok(ColoredVertexSet::mk_native(
             self.ctx.clone(),
@@ -479,7 +501,11 @@ impl AsynchronousGraph {
 
     /// Compute the set of direct predecessors of the given `set` by updating the specified `var` that are *outside*
     /// of the given `set`.
-    pub fn var_pre_out(&self, var: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+    pub fn var_pre_out(
+        &self,
+        var: &Bound<'_, PyAny>,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
         Ok(ColoredVertexSet::mk_native(
             self.ctx.clone(),
@@ -491,7 +517,7 @@ impl AsynchronousGraph {
     /// the given `set`.
     pub fn var_pre_within(
         &self,
-        var: &PyAny,
+        var: &Bound<'_, PyAny>,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
@@ -535,7 +561,11 @@ impl AsynchronousGraph {
     */
 
     /// Compute the subset of the given `set` that has a successor by updating the variable `var`.
-    pub fn var_can_post(&self, var: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+    pub fn var_can_post(
+        &self,
+        var: &Bound<'_, PyAny>,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
         Ok(ColoredVertexSet::mk_native(
             self.ctx.clone(),
@@ -547,7 +577,7 @@ impl AsynchronousGraph {
     /// of the given `set`.
     pub fn var_can_post_out(
         &self,
-        var: &PyAny,
+        var: &Bound<'_, PyAny>,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
@@ -561,7 +591,7 @@ impl AsynchronousGraph {
     /// the given `set`.
     pub fn var_can_post_within(
         &self,
-        var: &PyAny,
+        var: &Bound<'_, PyAny>,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
@@ -573,7 +603,11 @@ impl AsynchronousGraph {
     }
 
     /// Compute the subset of the given `set` that has a predecessor by updating the variable `var`.
-    pub fn var_can_pre(&self, var: &PyAny, set: &ColoredVertexSet) -> PyResult<ColoredVertexSet> {
+    pub fn var_can_pre(
+        &self,
+        var: &Bound<'_, PyAny>,
+        set: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
         Ok(ColoredVertexSet::mk_native(
             self.ctx.clone(),
@@ -585,7 +619,7 @@ impl AsynchronousGraph {
     /// of the given `set`.
     pub fn var_can_pre_out(
         &self,
-        var: &PyAny,
+        var: &Bound<'_, PyAny>,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
@@ -599,7 +633,7 @@ impl AsynchronousGraph {
     /// the given `set`.
     pub fn var_can_pre_within(
         &self,
-        var: &PyAny,
+        var: &Bound<'_, PyAny>,
         set: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let variable = self.ctx.get().resolve_network_variable(var)?;
@@ -630,7 +664,7 @@ impl AsynchronousGraph {
     pub fn inline_variable_symbolic(
         &self,
         py: Python,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<AsynchronousGraph> {
         let variable = self.resolve_network_variable(variable)?;
         let Some(native_reduced) = self.native.inline_symbolic(variable) else {
@@ -654,13 +688,13 @@ impl AsynchronousGraph {
 impl AsynchronousGraph {
     pub fn resolve_subspace_valuation(
         &self,
-        subspace: &PyAny,
+        subspace: &Bound<'_, PyAny>,
     ) -> PyResult<Vec<(biodivine_lib_param_bn::VariableId, bool)>> {
         let mut result = Vec::new();
         if let Ok(dict) = subspace.downcast::<PyDict>() {
             for (k, v) in dict {
-                let k = self.ctx.get().resolve_network_variable(k)?;
-                let v = resolve_boolean(v)?;
+                let k = self.ctx.get().resolve_network_variable(&k)?;
+                let v = resolve_boolean(&v)?;
                 result.push((k, v));
             }
             return Ok(result);

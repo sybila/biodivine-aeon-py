@@ -95,7 +95,7 @@ impl ColorSet {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<ColorSet>, _memo: &PyAny) -> Py<ColorSet> {
+    fn __deepcopy__(self_: Py<ColorSet>, _memo: &Bound<'_, PyAny>) -> Py<ColorSet> {
         self_.clone()
     }
 
@@ -205,14 +205,14 @@ impl ColorSet {
     /// Consequently, the resulting `ColorModel` instances will fail with an `IndexError` if a value of a function
     /// outside the `retained` set is requested.
     #[pyo3(signature = (retained = None))]
-    fn items(&self, retained: Option<&PyList>) -> PyResult<_ColorModelIterator> {
+    fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_ColorModelIterator> {
         let ctx = self.ctx.get();
         let mut retained_explicit = Vec::new();
         let mut retained_implicit = Vec::new();
         let retained = if let Some(retained) = retained {
             let mut result = Vec::new();
             for x in retained {
-                let function = ctx.resolve_function(x)?;
+                let function = ctx.resolve_function(&x)?;
                 let table = match function {
                     Either::Left(x) => {
                         if retained_implicit.contains(&x) {

@@ -32,13 +32,13 @@ impl Attractors {
     pub fn transition_guided_reduction(
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
-        to_reduce: Option<&PyList>,
+        to_reduce: Option<&Bound<'_, PyList>>,
         py: Python,
     ) -> PyResult<ColoredVertexSet> {
         let mut to_reduce_native = Vec::new();
         if let Some(to_reduce) = to_reduce {
             for x in to_reduce {
-                to_reduce_native.push(graph.resolve_network_variable(x)?);
+                to_reduce_native.push(graph.resolve_network_variable(&x)?);
             }
         } else {
             to_reduce_native.extend(graph.as_native().variables());
@@ -110,7 +110,7 @@ impl Attractors {
     pub fn attractors(
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
-        to_reduce: Option<&PyList>,
+        to_reduce: Option<&Bound<'_, PyList>>,
         py: Python,
     ) -> PyResult<Vec<ColoredVertexSet>> {
         let reduced = Self::transition_guided_reduction(graph, restriction, to_reduce, py)?;

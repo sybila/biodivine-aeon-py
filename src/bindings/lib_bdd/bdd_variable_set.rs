@@ -56,10 +56,10 @@ impl BddVariableSet {
             ));
         }
         if let Ok(variables) = variables.extract::<Vec<String>>() {
-            let str_variables = variables.iter()
-                .map(|it| it.as_str())
-                .collect::<Vec<_>>();
-            return Ok(BddVariableSet(biodivine_lib_bdd::BddVariableSet::new(str_variables.as_slice())));
+            let str_variables = variables.iter().map(|it| it.as_str()).collect::<Vec<_>>();
+            return Ok(BddVariableSet(biodivine_lib_bdd::BddVariableSet::new(
+                str_variables.as_slice(),
+            )));
         }
         throw_type_error("Expected `int` or `list[str]`.")
     }
@@ -82,7 +82,7 @@ impl BddVariableSet {
     }
 
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
-        PyTuple::new_bound(py, &[self.variable_names()])
+        PyTuple::new_bound(py, [self.variable_names()])
     }
 
     /// Return the number of variables managed by this `BddVariableSet`.
@@ -154,7 +154,11 @@ impl BddVariableSet {
 
     /// Create a new `Bdd` representing the literal $variable$ or $\neg variable$, depending
     /// on the given `value`.
-    fn mk_literal(self_: PyRef<'_, Self>, variable: &Bound<'_, PyAny>, value: &Bound<'_, PyAny>) -> PyResult<Bdd> {
+    fn mk_literal(
+        self_: PyRef<'_, Self>,
+        variable: &Bound<'_, PyAny>,
+        value: &Bound<'_, PyAny>,
+    ) -> PyResult<Bdd> {
         let value = resolve_boolean(value)?;
         let variable = self_.resolve_variable(variable)?;
         let value = self_.0.mk_literal(variable, value);
@@ -165,7 +169,10 @@ impl BddVariableSet {
     /// (e.g. $x \land y \land \neg z$).
     ///
     /// See also `BoolClauseType`.
-    pub fn mk_conjunctive_clause(self_: PyRef<'_, Self>, clause: &Bound<'_, PyAny>) -> PyResult<Bdd> {
+    pub fn mk_conjunctive_clause(
+        self_: PyRef<'_, Self>,
+        clause: &Bound<'_, PyAny>,
+    ) -> PyResult<Bdd> {
         let value = if let Ok(valuation) = clause.extract::<BddPartialValuation>() {
             // This is useful because there is no need to copy the inner valuation.
             self_.0.mk_conjunctive_clause(valuation.as_native())
@@ -295,7 +302,10 @@ impl BddVariableSet {
 }
 
 impl BddVariableSet {
-    pub fn resolve_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<biodivine_lib_bdd::BddVariable> {
+    pub fn resolve_variable(
+        &self,
+        variable: &Bound<'_, PyAny>,
+    ) -> PyResult<biodivine_lib_bdd::BddVariable> {
         if let Ok(id) = variable.extract::<BddVariable>() {
             return if id.__index__() < self.__len__() {
                 Ok(*id.as_native())

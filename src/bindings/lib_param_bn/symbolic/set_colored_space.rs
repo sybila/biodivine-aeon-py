@@ -100,7 +100,7 @@ impl ColoredSpaceSet {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<Self>, _memo: &PyAny) -> Py<Self> {
+    fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
     }
 
@@ -236,8 +236,8 @@ impl ColoredSpaceSet {
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]
     fn items(
         &self,
-        retained_variables: Option<&PyList>,
-        retained_functions: Option<&PyList>,
+        retained_variables: Option<&Bound<'_, PyList>>,
+        retained_functions: Option<&Bound<'_, PyList>>,
         py: Python,
     ) -> PyResult<_ColorSpaceModelIterator> {
         let ctx = self.ctx.borrow(py);
@@ -248,7 +248,7 @@ impl ColoredSpaceSet {
         let mut retained_functions = if let Some(retained) = retained_functions {
             let mut result = Vec::new();
             for x in retained {
-                let function = ctx_parent.resolve_function(x)?;
+                let function = ctx_parent.resolve_function(&x)?;
                 let table = match function {
                     Either::Left(x) => {
                         if retained_implicit.contains(&x) {
@@ -288,7 +288,7 @@ impl ColoredSpaceSet {
         let mut retained_variables = if let Some(retained) = retained_variables {
             let mut retained_vars = Vec::new();
             for var in retained {
-                let var = ctx.as_ref().resolve_network_variable(var)?;
+                let var = ctx.as_ref().resolve_network_variable(&var)?;
                 retained_vars.push(ctx.as_native().get_positive_variable(var));
                 retained_vars.push(ctx.as_native().get_negative_variable(var));
             }

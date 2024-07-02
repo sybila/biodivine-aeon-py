@@ -10,8 +10,9 @@ use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpress
 use biodivine_lib_bdd::BddPartialValuation;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use either::Either;
+use pyo3::prelude::{PyAnyMethods, PyListMethods};
 use pyo3::types::{PyDict, PyList, PyTuple};
-use pyo3::{pyclass, pymethods, IntoPy, Py, PyAny, PyObject, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, IntoPy, Py, PyAny, PyObject, PyResult, Python};
 use std::sync::Arc;
 use Either::{Left, Right};
 
@@ -70,7 +71,7 @@ impl ColorModel {
         self.retained_implicit.len() + self.retained_explicit.len()
     }
 
-    pub fn __getitem__(&self, key: &PyAny) -> PyResult<BooleanExpression> {
+    pub fn __getitem__(&self, key: &Bound<'_, PyAny>) -> PyResult<BooleanExpression> {
         let ctx = self.ctx.get();
         match ctx.resolve_function(key)? {
             Left(variable) => self.instantiate_expression(Left(variable)),
@@ -78,7 +79,7 @@ impl ColorModel {
         }
     }
 
-    pub fn __contains__(&self, key: &PyAny) -> PyResult<bool> {
+    pub fn __contains__(&self, key: &Bound<'_, PyAny>) -> PyResult<bool> {
         let ctx = self.ctx.get();
         match ctx.resolve_function(key)? {
             Left(variable) => Ok(self.retained_implicit.contains(&variable)),
@@ -90,8 +91,8 @@ impl ColorModel {
     ///
     /// This is the list of all `ParameterId` and `VariableId` objects that admit an associated
     /// uninterpreted function and said function is present in this `ColorModel`.
-    pub fn keys<'a>(&self, py: Python<'a>) -> PyResult<&'a PyList> {
-        let result = PyList::empty(py);
+    pub fn keys<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
+        let result = PyList::empty_bound(py);
         for x in &self.retained_explicit {
             result.append(ParameterId::from(*x).into_py(py))?;
         }
@@ -115,24 +116,24 @@ impl ColorModel {
     }
 
     /// The list of key-value pairs represented in this model.
-    pub fn items<'a>(&self, py: Python<'a>) -> PyResult<&'a PyList> {
-        let result = PyList::empty(py);
+    pub fn items<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
+        let result = PyList::empty_bound(py);
         for x in &self.retained_explicit {
             let k = ParameterId::from(*x).into_py(py);
             let v = self.instantiate_expression(Right(*x))?.into_py(py);
-            result.append(PyTuple::new(py, [k, v]))?;
+            result.append(PyTuple::new_bound(py, [k, v]))?;
         }
         for x in &self.retained_implicit {
             let k = VariableId::from(*x).into_py(py);
             let v = self.instantiate_expression(Left(*x))?.into_py(py);
-            result.append(PyTuple::new(py, [k, v]))?;
+            result.append(PyTuple::new_bound(py, [k, v]))?;
         }
         Ok(result)
     }
 
     /// The same as `VertexModel.items`, but returns a dictionary instead.
-    pub fn to_dict<'a>(&self, py: Python<'a>) -> PyResult<&'a PyDict> {
-        let result = PyDict::new(py);
+    pub fn to_dict<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDict>> {
+        let result = PyDict::new_bound(py);
         for x in &self.retained_explicit {
             let k = ParameterId::from(*x).into_py(py);
             let v = self.instantiate_expression(Right(*x))?.into_py(py);
@@ -197,8 +198,8 @@ impl ColorModel {
     pub fn instantiate(
         &self,
         py: Python,
-        item: &PyAny,
-        args: Option<Vec<&PyAny>>,
+        item: &Bound<'_, PyAny>,
+        args: Option<Bound<'_, PyList>>,
     ) -> PyResult<PyObject> {
         let ctx = self.ctx.get();
         if let Ok(update_function) = item.extract::<UpdateFunction>() {
@@ -255,7 +256,7 @@ impl ColorModel {
             };
             let arguments = args
                 .into_iter()
-                .map(|it| ctx.resolve_function_bdd(it))
+                .map(|it| ctx.resolve_function_bdd(&it))
                 .collect::<PyResult<Vec<_>>>()?;
             let table = match function {
                 Left(var) => ctx.as_native().get_implicit_function_table(var).unwrap(),

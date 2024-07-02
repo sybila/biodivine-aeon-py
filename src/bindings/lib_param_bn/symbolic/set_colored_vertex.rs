@@ -100,7 +100,7 @@ impl ColoredVertexSet {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<Self>, _memo: &PyAny) -> Py<Self> {
+    fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
     }
 
@@ -241,8 +241,8 @@ impl ColoredVertexSet {
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]
     fn items(
         &self,
-        retained_variables: Option<&PyList>,
-        retained_functions: Option<&PyList>,
+        retained_variables: Option<&Bound<'_, PyList>>,
+        retained_functions: Option<&Bound<'_, PyList>>,
     ) -> PyResult<_ColorVertexModelIterator> {
         let ctx = self.ctx.get();
         // First, extract all functions that should be retained (see also ColorSet.items).
@@ -251,7 +251,7 @@ impl ColoredVertexSet {
         let mut retained_functions = if let Some(retained) = retained_functions {
             let mut result = Vec::new();
             for x in retained {
-                let function = ctx.resolve_function(x)?;
+                let function = ctx.resolve_function(&x)?;
                 let table = match function {
                     Either::Left(x) => {
                         if retained_implicit.contains(&x) {
@@ -284,7 +284,7 @@ impl ColoredVertexSet {
             retained
                 .iter()
                 .map(|it| {
-                    ctx.resolve_network_variable(it)
+                    ctx.resolve_network_variable(&it)
                         .map(|it| ctx.as_native().get_state_variable(it))
                 })
                 .collect::<PyResult<Vec<_>>>()?

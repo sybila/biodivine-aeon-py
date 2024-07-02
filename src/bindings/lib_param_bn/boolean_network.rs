@@ -10,7 +10,7 @@ use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -38,7 +38,7 @@ pub struct BooleanNetwork(biodivine_lib_param_bn::BooleanNetwork);
 impl NetworkVariableContext for BooleanNetwork {
     fn resolve_network_variable(
         &self,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<biodivine_lib_param_bn::VariableId> {
         if let Ok(id) = variable.extract::<VariableId>() {
             return if id.__index__() < self.as_native().num_vars() {
@@ -75,10 +75,10 @@ impl BooleanNetwork {
     #[new]
     #[pyo3(signature = (variables = None, regulations = None, parameters = None, functions = None))]
     fn new(
-        variables: Option<&PyAny>,
-        regulations: Option<Vec<&PyAny>>,
+        variables: Option<&Bound<'_, PyAny>>,
+        regulations: Option<&Bound<'_, PyList>>,
         parameters: Option<Vec<(String, u32)>>,
-        functions: Option<&PyAny>,
+        functions: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<(BooleanNetwork, RegulatoryGraph)> {
         let rg = if let Some(x) = variables {
             if let Ok(rg) = x.extract::<RegulatoryGraph>() {
@@ -192,7 +192,11 @@ impl BooleanNetwork {
         self.clone().export_to_python(py)
     }
 
-    pub fn __deepcopy__(&self, py: Python, _memo: &PyAny) -> PyResult<Py<BooleanNetwork>> {
+    pub fn __deepcopy__(
+        &self,
+        py: Python,
+        _memo: &Bound<'_, PyAny>,
+    ) -> PyResult<Py<BooleanNetwork>> {
         self.__copy__(py)
     }
 
@@ -239,7 +243,7 @@ impl BooleanNetwork {
     /// corresponding `VariableId`.
     pub fn set_variable_name(
         mut self_: PyRefMut<'_, Self>,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
         name: &str,
     ) -> PyResult<()> {
         let var = self_.as_ref().resolve_network_variable(variable)?;
@@ -258,7 +262,10 @@ impl BooleanNetwork {
     /// Add a new regulation to the underlying `RegulatoryGraph` of this `BooleanNetwork`, either
     /// using a `NamedRegulation`, `IdRegulation`, or a string representation compatible
     /// with the `.aeon` format.
-    pub fn add_regulation(mut self_: PyRefMut<'_, Self>, regulation: &PyAny) -> PyResult<()> {
+    pub fn add_regulation(
+        mut self_: PyRefMut<'_, Self>,
+        regulation: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
         let (s, m, o, t) = RegulatoryGraph::resolve_regulation(Some(self_.as_ref()), regulation)?;
         let m = m.as_ref().map(|it| match it {
             Positive => Monotonicity::Activation,
@@ -284,9 +291,9 @@ impl BooleanNetwork {
     pub fn remove_regulation<'a>(
         mut self_: PyRefMut<'_, Self>,
         py: Python<'a>,
-        source: &PyAny,
-        target: &PyAny,
-    ) -> PyResult<&'a PyDict> {
+        source: &Bound<'a, PyAny>,
+        target: &Bound<'a, PyAny>,
+    ) -> PyResult<Bound<'a, PyDict>> {
         let source = self_.as_ref().resolve_network_variable(source)?;
         let target = self_.as_ref().resolve_network_variable(target)?;
 
@@ -319,8 +326,8 @@ impl BooleanNetwork {
     pub fn ensure_regulation<'a>(
         mut self_: PyRefMut<'_, Self>,
         py: Python<'a>,
-        regulation: &PyAny,
-    ) -> PyResult<Option<&'a PyDict>> {
+        regulation: &Bound<'a, PyAny>,
+    ) -> PyResult<Option<Bound<'a, PyDict>>> {
         // This is a bit inefficient, but should be good enough for now.
         let (s, m, o, t) = RegulatoryGraph::resolve_regulation(Some(self_.as_ref()), regulation)?;
         let source = self_
@@ -414,7 +421,7 @@ impl BooleanNetwork {
     pub fn drop(
         self_: PyRef<'_, Self>,
         py: Python,
-        variables: &PyAny,
+        variables: &Bound<'_, PyAny>,
     ) -> PyResult<Py<BooleanNetwork>> {
         let removed = self_.as_ref().resolve_variables(variables)?;
 
@@ -508,7 +515,7 @@ impl BooleanNetwork {
     pub fn inline_variable(
         self_: PyRef<'_, Self>,
         py: Python,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
         repair_graph: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
         let variable = self_.as_ref().resolve_network_variable(variable)?;
@@ -632,20 +639,23 @@ impl BooleanNetwork {
     }
 
     /// Return the name of the given explicit parameter.
-    pub fn get_explicit_parameter_name(&self, parameter: &PyAny) -> PyResult<String> {
+    pub fn get_explicit_parameter_name(&self, parameter: &Bound<'_, PyAny>) -> PyResult<String> {
         let parameter = self.resolve_parameter(parameter)?;
         Ok(self.as_native().get_parameter(parameter).get_name().clone())
     }
 
     /// Return the arity of an explicit parameter.
-    pub fn get_explicit_parameter_arity(&self, parameter: &PyAny) -> PyResult<u32> {
+    pub fn get_explicit_parameter_arity(&self, parameter: &Bound<'_, PyAny>) -> PyResult<u32> {
         let parameter = self.resolve_parameter(parameter)?;
         Ok(self.as_native().get_parameter(parameter).get_arity())
     }
 
     /// Return a `ParameterId` identifier of the requested `parameter`, or `None` if the
     /// uninterpreted function does not exist in this `BooleanNetwork`.
-    pub fn find_explicit_parameter(&self, parameter: &PyAny) -> PyResult<Option<ParameterId>> {
+    pub fn find_explicit_parameter(
+        &self,
+        parameter: &Bound<'_, PyAny>,
+    ) -> PyResult<Option<ParameterId>> {
         if let Ok(id) = parameter.extract::<ParameterId>() {
             return if id.__index__() < self.explicit_parameter_count() {
                 Ok(Some(id))
@@ -677,7 +687,7 @@ impl BooleanNetwork {
     pub fn get_update_function(
         self_: Py<BooleanNetwork>,
         py: Python,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<Option<UpdateFunction>> {
         let fun = {
             let self_ref = self_.borrow(py);
@@ -700,17 +710,17 @@ impl BooleanNetwork {
     pub fn set_update_function(
         self_: Py<BooleanNetwork>,
         py: Python,
-        variable: &PyAny,
-        function: &PyAny,
+        variable: &Bound<'_, PyAny>,
+        function: &Bound<'_, PyAny>,
     ) -> PyResult<Option<UpdateFunction>> {
         let old_fun = Self::get_update_function(self_.clone(), py, variable)?;
         let new_fun = if function.is_none() {
             None
         } else if let Ok(fun) = function.extract::<UpdateFunction>() {
             Some(fun.as_native().clone())
-        } else if let Ok(fun) = function.extract::<&str>() {
+        } else if let Ok(fun) = function.extract::<String>() {
             let bn = self_.borrow(py);
-            Some(FnUpdate::try_from_str(fun, bn.as_native()).map_err(runtime_error)?)
+            Some(FnUpdate::try_from_str(fun.as_str(), bn.as_native()).map_err(runtime_error)?)
         } else {
             return throw_type_error("Expected `UpdateFunction` or `str`.");
         };

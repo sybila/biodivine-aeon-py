@@ -53,7 +53,7 @@ pub struct SymbolicContext {
 impl NetworkVariableContext for SymbolicContext {
     fn resolve_network_variable(
         &self,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
     ) -> PyResult<biodivine_lib_param_bn::VariableId> {
         if let Ok(id) = variable.extract::<VariableId>() {
             return if id.__index__() < self.as_native().num_state_variables() {
@@ -73,10 +73,10 @@ impl NetworkVariableContext for SymbolicContext {
                     ))
                 });
         }
-        if let Ok(name) = variable.extract::<&str>() {
+        if let Ok(name) = variable.extract::<String>() {
             return self
                 .as_native()
-                .find_network_variable(name)
+                .find_network_variable(name.as_str())
                 .ok_or_else(|| index_error(format!("Unknown variable name `{}`.", name)));
         }
         throw_type_error("Expected `VariableId`, `BddVariable` or `str`.")
@@ -120,13 +120,13 @@ impl SymbolicContext {
     pub fn new(
         py: Python,
         network: Py<BooleanNetwork>,
-        extra_variables: Option<&PyDict>,
+        extra_variables: Option<&Bound<'_, PyDict>>,
     ) -> PyResult<SymbolicContext> {
         let bn = network.borrow(py);
         let mut extra = HashMap::new();
         if let Some(extra_variables) = extra_variables {
             for (k, v) in extra_variables {
-                let k = bn.as_ref().resolve_network_variable(k)?;
+                let k = bn.as_ref().resolve_network_variable(&k)?;
                 let v = v.extract::<u16>()?;
                 extra.insert(k, v);
             }
@@ -175,7 +175,7 @@ impl SymbolicContext {
         self_.clone()
     }
 
-    fn __deepcopy__(&self, _memo: &PyAny) -> SymbolicContext {
+    fn __deepcopy__(&self, _memo: Bound<'_, PyAny>) -> SymbolicContext {
         self.clone()
     }
 
@@ -217,7 +217,10 @@ impl SymbolicContext {
     /// Compare to methods like `BooleanNetwork.find_variable`, this method can also resolve
     /// a `BddVariable` to the corresponding `VariableId` (assuming said `BddVariable` encodes
     /// a network variable).
-    pub fn find_network_variable(&self, variable: &PyAny) -> PyResult<Option<VariableId>> {
+    pub fn find_network_variable(
+        &self,
+        variable: &Bound<'_, PyAny>,
+    ) -> PyResult<Option<VariableId>> {
         if let Ok(id) = variable.extract::<VariableId>() {
             return if id.__index__() < self.network_variable_count() {
                 Ok(Some(id))
@@ -242,7 +245,10 @@ impl SymbolicContext {
 
     /// The same as `SymbolicContext.find_network_variable`, but returns the `BddVariable`
     /// which encodes the specified network variable.
-    pub fn find_network_bdd_variable(&self, variable: &PyAny) -> PyResult<Option<BddVariable>> {
+    pub fn find_network_bdd_variable(
+        &self,
+        variable: &Bound<'_, PyAny>,
+    ) -> PyResult<Option<BddVariable>> {
         if let Ok(id) = variable.extract::<VariableId>() {
             return if id.__index__() < self.network_variable_count() {
                 Ok(Some(self.as_native().get_state_variable(id.into()).into()))
@@ -267,7 +273,7 @@ impl SymbolicContext {
     }
 
     /// The name of a particular network variable.
-    pub fn get_network_variable_name(&self, variable: &PyAny) -> PyResult<String> {
+    pub fn get_network_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         let variable = self.resolve_network_variable(variable)?;
         Ok(self.as_native().get_network_variable_name(variable))
     }
@@ -405,8 +411,8 @@ impl SymbolicContext {
     }
 
     /// The list of all explicit and implicit uninterpreted functions in this encoding.
-    pub fn functions<'a>(&self, py: Python<'a>) -> PyResult<&'a PyList> {
-        let result = PyList::empty(py);
+    pub fn functions<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
+        let result = PyList::empty_bound(py);
         for x in self.explicit_functions() {
             result.append(x.into_py(py))?;
         }
@@ -419,7 +425,7 @@ impl SymbolicContext {
     /// The list of all symbolic variables which this `SymbolicContext` uses for the encoding of
     /// the uninterpreted functions (both implicit and explicit).
     pub fn functions_bdd_variables_list(&self) -> Vec<BddVariable> {
-        // This list may not sorted in the older library versions.
+        // This list may not be sorted in the older library versions.
         let mut result = self
             .as_native()
             .parameter_variables()
@@ -433,8 +439,8 @@ impl SymbolicContext {
 
     /// A dictionary which maps the `VariableId` and `ParameterId` objects identifying individual
     /// uninterpreted functions to the symbolic variables that are used to encode said function.
-    pub fn functions_bdd_variables<'a>(&self, py: Python<'a>) -> PyResult<&'a PyDict> {
-        let result = PyDict::new(py);
+    pub fn functions_bdd_variables<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDict>> {
+        let result = PyDict::new_bound(py);
         for (k, v) in self.explicit_functions_bdd_variables() {
             result.set_item(k.into_py(py), v.into_py(py))?;
         }
@@ -449,7 +455,11 @@ impl SymbolicContext {
     ///
     /// The function can accept a `BddVariable`. In such case, it will try to identify the
     /// function table in which the variable resides. Note that this is a linear search.
-    pub fn find_function(&self, function: &PyAny, py: Python) -> PyResult<Option<PyObject>> {
+    pub fn find_function(
+        &self,
+        function: &Bound<'_, PyAny>,
+        py: Python,
+    ) -> PyResult<Option<PyObject>> {
         if let Ok(id) = function.extract::<ParameterId>() {
             return if id.__index__() < self.explicit_function_count() {
                 Ok(Some(id.into_py(py)))
@@ -475,9 +485,9 @@ impl SymbolicContext {
             };
         }
 
-        if let Ok(name) = function.extract::<&str>() {
-            let var_id = self.as_native().find_network_variable(name);
-            let par_id = self.as_native().find_network_parameter(name);
+        if let Ok(name) = function.extract::<String>() {
+            let var_id = self.as_native().find_network_variable(name.as_str());
+            let par_id = self.as_native().find_network_parameter(name.as_str());
             return match (var_id, par_id) {
                 (None, None) => Ok(None),
                 (Some(_), Some(_)) => unreachable!(),
@@ -522,7 +532,7 @@ impl SymbolicContext {
     /// Return the name of an uninterpreted function. For explicit functions, the name of the
     /// network parameter is returned. For implicit functions, the name of the corresponding
     /// network variable is returned.
-    pub fn get_function_name(&self, function: &PyAny) -> PyResult<String> {
+    pub fn get_function_name(&self, function: &Bound<'_, PyAny>) -> PyResult<String> {
         match self.resolve_function(function)? {
             Left(var) => Ok(self.as_native().get_network_variable_name(var)),
             Right(par) => Ok(self.as_native().get_network_parameter_name(par)),
@@ -530,7 +540,7 @@ impl SymbolicContext {
     }
 
     /// Return the arity (the number of arguments) of the specified uninterpreted function.
-    pub fn get_function_arity(&self, function: &PyAny) -> PyResult<u16> {
+    pub fn get_function_arity(&self, function: &Bound<'_, PyAny>) -> PyResult<u16> {
         match self.resolve_function(function)? {
             Left(var) => Ok(self.as_native().get_network_implicit_parameter_arity(var)),
             Right(par) => Ok(self.as_native().get_network_parameter_arity(par)),
@@ -541,7 +551,10 @@ impl SymbolicContext {
     /// of tuples, where each tuple represents one input-output pair of the logical table of the
     /// function in question. The input is a list of Boolean values, the output is a symbolic
     /// variable that represents the output of the function for this input vector.
-    pub fn get_function_table(&self, function: &PyAny) -> PyResult<Vec<(Vec<bool>, BddVariable)>> {
+    pub fn get_function_table(
+        &self,
+        function: &Bound<'_, PyAny>,
+    ) -> PyResult<Vec<(Vec<bool>, BddVariable)>> {
         let table = match self.resolve_function(function)? {
             Left(var) => self.as_native().get_implicit_function_table(var).unwrap(),
             Right(par) => self.as_native().get_explicit_function_table(par),
@@ -553,7 +566,7 @@ impl SymbolicContext {
     }
 
     /// Create a new constant (`True`/`False`) `Bdd`.
-    pub fn mk_constant(&self, value: &PyAny) -> PyResult<Bdd> {
+    pub fn mk_constant(&self, value: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let value = resolve_boolean(value)?;
         let rs_bdd = self.as_native().mk_constant(value);
         Ok(Bdd::new_raw_2(self.bdd_vars.clone(), rs_bdd))
@@ -563,7 +576,7 @@ impl SymbolicContext {
     ///
     /// This is equivalent to calling `SymbolicContext.mk_update_function` with
     /// `UpdateFunction.mk_var(variable)` as the argument.
-    pub fn mk_network_variable(&self, variable: &PyAny) -> PyResult<Bdd> {
+    pub fn mk_network_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<Bdd> {
         let variable = self.resolve_network_variable(variable)?;
         let rs_bdd = self.as_native().mk_state_variable_is_true(variable);
         Ok(Bdd::new_raw_2(self.bdd_vars.clone(), rs_bdd))
@@ -576,7 +589,7 @@ impl SymbolicContext {
     #[pyo3(signature = (variable = None, index = None))]
     pub fn mk_extra_bdd_variable(
         &self,
-        variable: Option<&PyAny>,
+        variable: Option<&Bound<'_, PyAny>>,
         index: Option<usize>,
     ) -> PyResult<Bdd> {
         let variable = if let Some(variable) = variable {
@@ -596,10 +609,14 @@ impl SymbolicContext {
     /// The function takes a vector of arguments which must match the arity of the uninterpreted
     /// function. An argument can be either an arbitrary `Bdd` object, or an `UpdateFunction`
     /// from which a `Bdd` is then constructed.
-    pub fn mk_function(&self, function: &PyAny, arguments: Vec<&PyAny>) -> PyResult<Bdd> {
+    pub fn mk_function(
+        &self,
+        function: &Bound<'_, PyAny>,
+        arguments: &Bound<'_, PyList>,
+    ) -> PyResult<Bdd> {
         let arguments = arguments
             .into_iter()
-            .map(|it| self.resolve_function_bdd(it))
+            .map(|it| self.resolve_function_bdd(&it))
             .collect::<PyResult<Vec<_>>>()?;
         let table = match self.resolve_function(function)? {
             Left(var) => self.as_native().get_implicit_function_table(var).unwrap(),
@@ -677,7 +694,10 @@ impl SymbolicContext {
     /// `SymbolicContext.functions_bdd_variables_list`. However, you will no longer
     /// find them in `SymbolicContext.extra_bdd_variables` and
     /// `SymbolicContext.functions_bdd_variables`, since their variable is eliminated.
-    pub fn eliminate_network_variable(&self, variable: &PyAny) -> PyResult<SymbolicContext> {
+    pub fn eliminate_network_variable(
+        &self,
+        variable: &Bound<'_, PyAny>,
+    ) -> PyResult<SymbolicContext> {
         let variable = self.resolve_network_variable(variable)?;
         let eliminated = self.as_native().eliminate_network_variable(variable);
         Ok(SymbolicContext {
@@ -697,7 +717,10 @@ impl SymbolicContext {
             native: ctx,
         })
     }
-    pub fn resolve_function_bdd(&self, function: &PyAny) -> PyResult<biodivine_lib_bdd::Bdd> {
+    pub fn resolve_function_bdd(
+        &self,
+        function: &Bound<'_, PyAny>,
+    ) -> PyResult<biodivine_lib_bdd::Bdd> {
         if let Ok(function) = function.extract::<Bdd>() {
             return Ok(function.as_native().clone());
         }
@@ -709,9 +732,9 @@ impl SymbolicContext {
                 .as_native()
                 .mk_state_variable_is_true(*variable.as_native()));
         }
-        if let Ok(function) = function.extract::<&str>() {
+        if let Ok(function) = function.extract::<String>() {
             let fake_network = self.mk_fake_network();
-            return match FnUpdate::try_from_str(function, &fake_network) {
+            return match FnUpdate::try_from_str(function.as_str(), &fake_network) {
                 Ok(update) => Ok(self.as_native().mk_fn_update_true(&update)),
                 Err(e) => throw_runtime_error(format!("Cannot parse function: {}", e)),
             };
@@ -721,7 +744,7 @@ impl SymbolicContext {
 
     pub fn resolve_function(
         &self,
-        function: &PyAny,
+        function: &Bound<'_, PyAny>,
     ) -> PyResult<Either<biodivine_lib_param_bn::VariableId, biodivine_lib_param_bn::ParameterId>>
     {
         if let Ok(id) = function.extract::<ParameterId>() {
@@ -750,9 +773,9 @@ impl SymbolicContext {
                 throw_index_error(format!("Invalid variable ID `{}`.", id.__index__()))
             };
         }
-        if let Ok(name) = function.extract::<&str>() {
-            let var_id = self.as_native().find_network_variable(name);
-            let par_id = self.as_native().find_network_parameter(name);
+        if let Ok(name) = function.extract::<String>() {
+            let var_id = self.as_native().find_network_variable(name.as_str());
+            let par_id = self.as_native().find_network_parameter(name.as_str());
             return match (var_id, par_id) {
                 (None, None) => throw_index_error(format!(
                     "Name `{}` does not match any variable or parameter.",

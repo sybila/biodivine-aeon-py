@@ -1,8 +1,8 @@
 use crate::throw_type_error;
 use biodivine_lib_param_bn::Sign;
 use pyo3::basic::CompareOp;
+use pyo3::prelude::PyAnyMethods;
 use pyo3::{Bound, IntoPy, Py, PyAny, PyResult, Python};
-use pyo3::prelude::{PyAnyMethods, PyStringMethods};
 
 /// Compare the equality of two objects based on the given `cmp` operator and a "key" returned by the `key` function
 /// for each of the objects.
@@ -32,8 +32,11 @@ pub fn resolve_boolean(value: &Bound<'_, PyAny>) -> PyResult<bool> {
             return Ok(true);
         }
     }
-    let repr = value.str()?.to_str()?;
-    throw_type_error(format!("Expected `True`/`False` or `1`/`0`. Found `{}`.", repr))
+    let repr = value.str()?.str()?;
+    throw_type_error(format!(
+        "Expected `True`/`False` or `1`/`0`. Found `{}`.",
+        repr
+    ))
 }
 
 pub fn resolve_sign(value: &Bound<'_, PyAny>) -> PyResult<Sign> {

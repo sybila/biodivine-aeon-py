@@ -71,7 +71,7 @@ impl SymbolicSpaceContext {
 
     fn __deepcopy__(
         self_: PyRef<SymbolicSpaceContext>,
-        _memo: &PyAny,
+        _memo: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<Py<SymbolicSpaceContext>> {
         let tuple = (self_.clone(), self_.as_ref().clone());
@@ -81,7 +81,7 @@ impl SymbolicSpaceContext {
     /// See `SymbolicContext.eliminate_network_variable`.
     pub fn eliminate_network_variable(
         self_: PyRef<SymbolicSpaceContext>,
-        variable: &PyAny,
+        variable: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<Py<SymbolicSpaceContext>> {
         let inner = self_.as_ref().eliminate_network_variable(variable)?;
@@ -94,7 +94,7 @@ impl SymbolicSpaceContext {
     /// in a particular subspace.
     pub fn get_positive_space_variable(
         self_: PyRef<SymbolicSpaceContext>,
-        network_variable: &PyAny,
+        network_variable: &Bound<'_, PyAny>,
     ) -> PyResult<BddVariable> {
         let var = self_.as_ref().resolve_network_variable(network_variable)?;
         let var = self_.as_native().get_positive_variable(var);
@@ -105,7 +105,7 @@ impl SymbolicSpaceContext {
     /// in a particular subspace.
     pub fn get_negative_space_variable(
         self_: PyRef<SymbolicSpaceContext>,
-        network_variable: &PyAny,
+        network_variable: &Bound<'_, PyAny>,
     ) -> PyResult<BddVariable> {
         let var = self_.as_ref().resolve_network_variable(network_variable)?;
         let var = self_.as_native().get_negative_variable(var);
@@ -199,7 +199,7 @@ impl SymbolicSpaceContext {
     /// as their parent space.
     pub fn mk_sub_spaces(
         self_: Py<SymbolicSpaceContext>,
-        set: &PyAny,
+        set: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<PyObject> {
         let ctx = self_.get();
@@ -239,7 +239,7 @@ impl SymbolicSpaceContext {
     /// as their parent space.
     pub fn mk_super_spaces(
         self_: Py<SymbolicSpaceContext>,
-        set: &PyAny,
+        set: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<PyObject> {
         let ctx = self_.get();
@@ -278,7 +278,7 @@ impl SymbolicSpaceContext {
     /// See also `AsynchronousGraph.mk_subspace`.
     pub fn mk_singleton(
         self_: Py<SymbolicSpaceContext>,
-        space: &PyAny,
+        space: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<SpaceSet> {
         let network_valuation =
@@ -323,7 +323,7 @@ impl SymbolicSpaceContext {
 impl SymbolicSpaceContext {
     pub fn resolve_subspace_valuation(
         self_: Py<SymbolicSpaceContext>,
-        subspace: &PyAny,
+        subspace: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<Vec<(biodivine_lib_param_bn::VariableId, bool)>> {
         let mut result = Vec::new();
@@ -332,8 +332,8 @@ impl SymbolicSpaceContext {
                 if v.is_none() {
                     continue;
                 }
-                let k = self_.borrow(py).as_ref().resolve_network_variable(k)?;
-                let v = resolve_boolean(v)?;
+                let k = self_.borrow(py).as_ref().resolve_network_variable(&k)?;
+                let v = resolve_boolean(&v)?;
                 result.push((k, v));
             }
             return Ok(result);

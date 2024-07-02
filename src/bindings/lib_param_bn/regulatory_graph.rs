@@ -76,8 +76,8 @@ impl RegulatoryGraph {
         // First, try to extract regulation data if it is provided.
         let (regulations, inferred_variables) = if let Some(regulations) = regulations.as_ref() {
             let mut data = Vec::new();
-            for item in regulations {
-                data.push(Self::resolve_regulation::<RegulatoryGraph>(None, item)?);
+            for item in regulations.iter() {
+                data.push(Self::resolve_regulation::<RegulatoryGraph>(None, &item)?);
             }
             let mut variables = HashSet::new();
             for (s, _, _, t) in &data {
@@ -237,7 +237,7 @@ impl RegulatoryGraph {
 
     /// Return the list of all regulations (represented as `IdRegulation` dictionaries) that are currently
     /// managed by this `RegulatoryGraph`.
-    pub fn regulations<'a>(&self, py: Python<'a>) -> PyResult<&Bound<'a, PyList>> {
+    pub fn regulations<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
         let result = PyList::empty_bound(py);
         for reg in self.as_native().regulations() {
             let reg = Self::encode_regulation(py, reg)?;
@@ -261,7 +261,7 @@ impl RegulatoryGraph {
         py: Python<'a>,
         source: &Bound<'_, PyAny>,
         target: &Bound<'_, PyAny>,
-    ) -> PyResult<Option<&'a PyDict>> {
+    ) -> PyResult<Option<Bound<'a, PyDict>>> {
         let source = self.resolve_network_variable(source)?;
         let target = self.resolve_network_variable(target)?;
         if let Some(regulation) = self.as_native().find_regulation(source, target) {
@@ -290,9 +290,9 @@ impl RegulatoryGraph {
     pub fn remove_regulation<'a>(
         &mut self,
         py: Python<'a>,
-        source: &Bound<'_, PyAny>,
-        target: &Bound<'_, PyAny>,
-    ) -> PyResult<&'a PyDict> {
+        source: &Bound<'a, PyAny>,
+        target: &Bound<'a, PyAny>,
+    ) -> PyResult<Bound<'a, PyDict>> {
         let source = self.resolve_network_variable(source)?;
         let target = self.resolve_network_variable(target)?;
         let removed = self
@@ -310,8 +310,8 @@ impl RegulatoryGraph {
     pub fn ensure_regulation<'a>(
         &mut self,
         py: Python<'a>,
-        regulation: &Bound<'_, PyAny>,
-    ) -> PyResult<Option<&'a PyDict>> {
+        regulation: &Bound<'a, PyAny>,
+    ) -> PyResult<Option<Bound<'a, PyDict>>> {
         // This is a bit inefficient, but should be good enough for now.
         let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
         let source = self.as_native().find_variable(s.as_str()).unwrap();
@@ -435,6 +435,7 @@ impl RegulatoryGraph {
     /// The set of all variables that transitively regulate the given variable, or a set of variables.
     ///
     /// If `subgraph` is specified, the search is limited to a subgraph induced by the given collection of variables.
+    #[pyo3(signature = (pivots, subgraph = None))]
     pub fn backward_reachable(
         &self,
         pivots: &Bound<'_, PyAny>,
@@ -453,6 +454,7 @@ impl RegulatoryGraph {
     /// The set of all variables that are transitively regulated by the given variable, or a set of variables.
     ///
     /// If `subgraph` is specified, the search is limited to a subgraph induced by the given collection of variables.
+    #[pyo3(signature = (pivots, subgraph = None))]
     pub fn forward_reachable(
         &self,
         pivots: &Bound<'_, PyAny>,
@@ -647,11 +649,11 @@ impl RegulatoryGraph {
         let mut result = HashSet::new();
         if let Ok(list) = variables.downcast::<PyList>() {
             for item in list {
-                result.insert(self.resolve_network_variable(item)?);
+                result.insert(self.resolve_network_variable(&item)?);
             }
         } else if let Ok(set) = variables.downcast::<PySet>() {
             for item in set {
-                result.insert(self.resolve_network_variable(item)?);
+                result.insert(self.resolve_network_variable(&item)?);
             }
         } else {
             return throw_type_error("Expected `set` or `list`.");

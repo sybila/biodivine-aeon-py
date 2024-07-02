@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use pyo3::{pyclass, pymethods, Py, PyAny, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
@@ -51,7 +51,7 @@ impl SpaceModel {
         self.to_values().len()
     }
 
-    pub fn __getitem__(&self, key: &PyAny, py: Python) -> PyResult<Option<bool>> {
+    pub fn __getitem__(&self, key: &Bound<'_, PyAny>, py: Python) -> PyResult<Option<bool>> {
         let ctx = self.ctx.borrow(py);
         let variable = ctx.as_ref().resolve_network_variable(key)?;
         let p = ctx.as_native().get_positive_variable(variable);
@@ -69,7 +69,7 @@ impl SpaceModel {
         }
     }
 
-    pub fn __contains__(&self, key: &PyAny, py: Python) -> PyResult<bool> {
+    pub fn __contains__(&self, key: &Bound<'_, PyAny>, py: Python) -> PyResult<bool> {
         let ctx = self.ctx.borrow(py);
         let variable = ctx.as_ref().resolve_network_variable(key)?;
         let p = ctx.as_native().get_positive_variable(variable);
