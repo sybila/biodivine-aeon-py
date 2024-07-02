@@ -27,6 +27,8 @@ def test_algorithms():
     assert minimal_traps.is_subset(essential_traps)
     assert maximal_traps.is_subset(essential_traps)
     assert minimal_traps == TrapSpaces.minimize(ctx, essential_traps)
+    assert minimal_traps == TrapSpaces.minimal_symbolic(ctx, graph)
+    assert essential_traps == TrapSpaces.essential_symbolic(ctx, graph)
 
     print(unit)
     assert Attractors.transition_guided_reduction(graph, unit.minus(minimal_trap_states)).is_empty()

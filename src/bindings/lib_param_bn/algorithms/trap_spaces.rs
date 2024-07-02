@@ -16,16 +16,22 @@ impl TrapSpaces {
     /// A trap space is essential if it cannot be further reduced through percolation. In general, every
     /// minimal trap space is always essential.
     #[staticmethod]
+    #[pyo3(signature = (ctx, graph, restriction = None))]
     pub fn essential_symbolic(
         py: Python,
         ctx: Py<SymbolicSpaceContext>,
         graph: &AsynchronousGraph,
-        restriction: &ColoredSpaceSet,
+        restriction: Option<&ColoredSpaceSet>,
     ) -> PyResult<ColoredSpaceSet> {
+        let unit = ctx
+            .get()
+            .as_native()
+            .mk_unit_colored_spaces(graph.as_native());
+        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
         let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_essential_symbolic(
             ctx.get().as_native(),
             graph.as_native(),
-            restriction.as_native(),
+            restriction,
             global_log_level(py)?,
             &|| py.check_signals(),
         )?;
@@ -38,16 +44,22 @@ impl TrapSpaces {
     /// Currently, this method always slower than [Self::essential_symbolic], because it first has to compute
     /// the essential set.
     #[staticmethod]
+    #[pyo3(signature = (ctx, graph, restriction = None))]
     pub fn minimal_symbolic(
         py: Python,
         ctx: Py<SymbolicSpaceContext>,
         graph: &AsynchronousGraph,
-        restriction: &ColoredSpaceSet,
+        restriction: Option<&ColoredSpaceSet>,
     ) -> PyResult<ColoredSpaceSet> {
+        let unit = ctx
+            .get()
+            .as_native()
+            .mk_unit_colored_spaces(graph.as_native());
+        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
         let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
             ctx.get().as_native(),
             graph.as_native(),
-            restriction.as_native(),
+            restriction,
             global_log_level(py)?,
             &|| py.check_signals(),
         )?;
