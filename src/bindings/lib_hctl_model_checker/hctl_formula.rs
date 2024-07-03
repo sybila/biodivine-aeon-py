@@ -138,7 +138,7 @@ fn resolve_hybrid_operator(op: String) -> PyResult<HybridOp> {
 fn resolve_temporal_unary_operator(op: String) -> PyResult<UnaryOp> {
     match op.as_str() {
         "exist_next" => Ok(UnaryOp::Ex),
-        "all_next" => Ok(UnaryOp::Ex),
+        "all_next" => Ok(UnaryOp::Ax),
         "exist_future" => Ok(UnaryOp::Ef),
         "all_future" => Ok(UnaryOp::Af),
         "exist_global" => Ok(UnaryOp::Eg),

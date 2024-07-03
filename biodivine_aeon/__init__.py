@@ -122,12 +122,12 @@ TemporalBinaryOperator = Literal["exist_until", "all_until", "exist_weak_until",
 List of temporal binary operators supported by the HCTL model checker.
 """
 
-TemporalUnaryOperator = Literal["exist_next", "all_next", "exit_future", "all_future", "exist_global", "all_global"]
+TemporalUnaryOperator = Literal["exist_next", "all_next", "exist_future", "all_future", "exist_global", "all_global"]
 """
 List of temporal unary operators supported by the HCTL model checker.
 """
 
-HybridOperator = Literal["exists", "for_all", "bind", "jump"]
+HybridOperator = Literal["exists", "forall", "bind", "jump"]
 """
 List of hybrid quantifiers supported by the HCTL model checker.
 """
