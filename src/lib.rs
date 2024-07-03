@@ -78,6 +78,7 @@ fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     set_log_level(py, module)?;
     bindings::lib_bdd::register(module)?;
     bindings::lib_param_bn::register(module)?;
+    bindings::lib_hctl_model_checker::register(module)?;
     Ok(())
 }
 

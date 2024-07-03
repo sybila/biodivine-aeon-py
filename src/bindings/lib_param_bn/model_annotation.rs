@@ -235,6 +235,8 @@ impl ModelAnnotation {
         root_ref.as_native().get_value(&self_path).cloned()
     }
 
+    // TODO: This is currently causing issues due to a known bug.
+    // Should be fixed soon: https://github.com/PyO3/pyo3/issues/4292
     #[setter]
     pub fn set_value(&self, py: Python, value: Option<String>) {
         let self_path = mk_path(&self.path);

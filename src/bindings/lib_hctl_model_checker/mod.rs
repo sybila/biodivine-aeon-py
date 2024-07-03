@@ -1,47 +1,14 @@
-use crate::bindings::lib_param_bn::{
-    PyBooleanNetwork, PyGraphColoredVertices, PySymbolicAsyncGraph,
-};
-use biodivine_hctl_model_checker::analysis::{analyse_formula, analyse_formulae};
-use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
-use biodivine_hctl_model_checker::model_checking::{
-    model_check_extended_formula, model_check_multiple_extended_formulae,
-    model_check_multiple_trees, model_check_multiple_trees_dirty, model_check_tree,
-    model_check_tree_dirty,
-};
-use biodivine_hctl_model_checker::preprocessing::node::HctlTreeNode;
-use biodivine_hctl_model_checker::preprocessing::parser::parse_and_minimize_hctl_formula;
-use biodivine_hctl_model_checker::result_print::PrintOptions;
+use pyo3::prelude::{PyModule, PyModuleMethods};
+use pyo3::{Bound, PyResult};
 
-use biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext;
-use std::collections::HashMap;
+pub mod hctl_formula;
 
-use crate::{throw_runtime_error, throw_type_error, AsNative};
-
-use macros::Wrapper;
-use pyo3::prelude::*;
-use pyo3::types::PyList;
-use pyo3::PyResult;
-
-mod _impl_hctl_tree_node;
-
-pub(crate) fn register(module: &PyModule) -> PyResult<()> {
-    module.add_class::<PyHctlTreeNode>()?;
-
-    module.add_function(wrap_pyfunction!(get_extended_stg, module)?)?;
-    module.add_function(wrap_pyfunction!(model_check, module)?)?;
-    module.add_function(wrap_pyfunction!(model_check_multiple, module)?)?;
-    module.add_function(wrap_pyfunction!(model_check_extended, module)?)?;
-    module.add_function(wrap_pyfunction!(model_check_multiple_extended, module)?)?;
-    module.add_function(wrap_pyfunction!(mc_analysis, module)?)?;
-    module.add_function(wrap_pyfunction!(mc_analysis_multiple, module)?)?;
+pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    module.add_class::<hctl_formula::HctlFormula>()?;
     Ok(())
 }
 
-/// Structure for a HCTL formula syntax tree.
-#[pyclass(name = "HctlTreeNode")]
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Wrapper)]
-pub struct PyHctlTreeNode(HctlTreeNode);
-
+/*
 #[pyfunction]
 /// Create an extended symbolic transition graph that supports the number of needed HCTL variables.
 pub fn get_extended_stg(
@@ -218,3 +185,6 @@ pub fn mc_analysis_multiple(
         Err(e) => throw_runtime_error(e),
     }
 }
+
+
+ */

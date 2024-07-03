@@ -1,6 +1,6 @@
 # Biodivine `lib-bdd` API coverage
 
-This document should be up-to-date with `lib-bdd` version `0.5.9`.
+This document should be up-to-date with `lib-bdd` version `0.5.13`.
 
 ## `BddVariable` (frozen)
 

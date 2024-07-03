@@ -1,6 +1,6 @@
 # Biodivine `lib-bdd` API coverage
 
-This document should be up-to-date with `lib-bdd` version `0.5.2`.
+This document should be up-to-date with `lib-bdd` version `0.5.10`.
 
 ### `biodivine_std` module
 

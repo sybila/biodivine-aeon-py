@@ -32,6 +32,9 @@ __all__ = [
               'BoolType',
               'SignType',
               'BinaryOperator',
+              'TemporalBinaryOperator',
+              'TemporalUnaryOperator',
+              'HybridOperator',
               'BoolClauseType',
               'BoolExpressionType',
               'Regulation',
@@ -114,6 +117,21 @@ BinaryOperator = Literal["and", "or", "imp", "iff", "xor"]
 Lists the supported Boolean binary operators.
 """
 
+TemporalBinaryOperator = Literal["exist_until", "all_until", "exist_weak_until", "all_weak_until"]
+"""
+List of temporal binary operators supported by the HCTL model checker.
+"""
+
+TemporalUnaryOperator = Literal["exist_next", "all_next", "exit_future", "all_future", "exist_global", "all_global"]
+"""
+List of temporal unary operators supported by the HCTL model checker.
+"""
+
+HybridOperator = Literal["exists", "for_all", "bind", "jump"]
+"""
+List of hybrid quantifiers supported by the HCTL model checker.
+"""
+
 BoolClauseType = Union[BddPartialValuation, BddValuation, Mapping[str, BoolType], Mapping[BddVariable, BoolType]]
 """
 A Boolean clause represents a collection of literals. This can be either done through one of the valuation types, 
@@ -127,6 +145,7 @@ A `BooleanExpression` can be typically also substituted with its "raw" string re
 requires the expression to be repeatedly parsed whenever used and is thus slower and more error prone.
 """
 
+
 # IDT = TypeVar('IDT', covariant=True)
 # class Regulation(TypedDict, Generic[IDT]):
 #     source: IDT
@@ -136,9 +155,9 @@ requires the expression to be repeatedly parsed whenever used and is thus slower
 #     """
 #     A typed dictionary that stores data about a single regulation. Parametrized by an "identifier type" which 
 #     can be either `str` or `VariableId`.
-    
+
 #     Typically both `str` and `VariableId` are accepted as inputs, but only `VariableId` is provided as output.
-    
+
 #     For backwards compatibility purposes, the `sign` key is also equivalent to `monotonicity` and `essential`
 #     is equivalent to `observable`. However, we do not include this in the type hints to discourage the
 #     usage of these deprecated dictionary keys.
@@ -153,6 +172,7 @@ class IdRegulation(TypedDict):
     See `Regulation` type alias.
     """
 
+
 class NamedRegulation(TypedDict):
     source: str
     target: str
@@ -161,6 +181,7 @@ class NamedRegulation(TypedDict):
     """
     See `Regulation` type alias.
     """
+
 
 Regulation = Union[IdRegulation, NamedRegulation]
 """
