@@ -89,23 +89,18 @@ First, the general function definitions plus enum types that are translated to P
         </tr>
         <tr>
             <td><code>UnaryOp::Ax</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>UnaryOp::Ef</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>UnaryOp::Af</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>UnaryOp::Eg</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>UnaryOp::Ag</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>BinaryOp::And</code></td>
@@ -113,19 +108,15 @@ First, the general function definitions plus enum types that are translated to P
         </tr>
         <tr>
             <td><code>BinaryOp::Or</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>BinaryOp::Xor</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>BinaryOp::Imp</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>BinaryOp::Iff</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>BinaryOp::Eu</code></td>
@@ -133,15 +124,12 @@ First, the general function definitions plus enum types that are translated to P
         </tr>
         <tr>
             <td><code>BinaryOp::Au</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>BinaryOp::Ew</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>BinaryOp::Aw</code></td>
-            <td></td>
         </tr>
         <tr>
             <td><code>Atomic::Prop</code></td>
@@ -653,7 +641,7 @@ These are mostly mapped to a singleton `ModelChecking` object. We
 ignore the methods that perform automatic sanitization, because we expect
 the user to know what graph/context they are using. Automatic sanitization
 mostly made sense in the original library where the expectation was that the
-results will be written to some output file.
+results will be written to some output file and the context will be lost.
 
 <table>
     <thead>
