@@ -17,11 +17,17 @@ crate-type = ["cdylib", "rlib"]
 static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
+# TODO: Warning detection is temporarily disabled in CI because of a PyO3 bug that affects ModelAnnotation.
+# The bug is fixed but it is not released yet. Once you update PyO3, please re-enable the warnings check.
 pyo3 = { version = "0.22.0", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
 biodivine-lib-param-bn = { version="0.5.10", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.13"
 biodivine-pbn-control = "0.3.1"
-biodivine-hctl-model-checker = "0.2.2"
+#biodivine-hctl-model-checker = "0.2.2"
+# Currently, we only support HCTL up to version 0.2.2, but it contains some bugs, and so we need to use something
+# more up to date. However, we do not implement or consider any of the update APIs, so once the updated model checker
+# is actually released, make sure to run a proper API diff.
+biodivine-hctl-model-checker = { git = "https://github.com/sybila/biodivine-hctl-model-checker.git", rev = "1e893faaf2573cb1b478d227c915a16e6c8de2db" }
 rand = "0.8.5"
 macros = { path = "macros" }
 zip = "2.1.3"
