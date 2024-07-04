@@ -4,14 +4,18 @@ import pytest
 
 
 def test_hctl_formula():
-    f = HctlFormula("V{a}: (EF a) EU (AF var_1)")
+    f = HctlFormula("V{a}: (EF {a}) EU (AF var_1)")
+
+    assert f.children() == [HctlFormula("(EF {a}) EU (AF var_1)")]
+    assert f.operator() == "forall"
+    assert f.used_extended_properties() == set()
+    assert f.used_state_variables() == { "a" }
 
     with pytest.raises(RuntimeError):
         # Garbage syntax
         HctlFormula("V{x}. foo")
 
-    # TODO: This is not working because the string repr is broken in this version.
-    # assert pickle.loads(pickle.dumps(f)) == f
+    assert pickle.loads(pickle.dumps(f)) == f
 
     # Test builders.
 
@@ -136,3 +140,33 @@ def test_hctl_formula():
 
     ff = HctlFormula("true")
     assert ff.is_const() and ff.as_const()
+
+
+def test_model_checker():
+    network = BooleanNetwork.from_file("./tests/model-2.aeon")
+
+    # There should be two fixed-points.
+    fixed_points = HctlFormula("!{x}: AX {x}")
+    # There should be a complex attractor with these variables set.
+    phenotype = HctlFormula("AG ~n1 & ~n2 & ~n3")
+
+    # We'll use this to test the extended propositions.
+    # In theory, everything should either reach a fixed-point, or the phenotype attractor.
+    basin = HctlFormula("EF (%fix% | %phenotype%)")
+
+    stg = AsynchronousGraph.mk_for_model_checking(network, 1)
+
+    assert fixed_points.is_compatible_with(stg)
+    assert phenotype.is_compatible_with(stg)
+    assert basin.is_compatible_with(stg)
+
+    r = ModelChecking.verify(stg, [fixed_points, phenotype])
+    f = r[0]
+    p = r[1]
+
+    assert f.cardinality() == 2
+    assert p.cardinality() >= 16
+
+    b = ModelChecking.verify(stg, basin, {"fix": f, "phenotype": p})
+
+    assert b == stg.mk_unit_colored_vertices()

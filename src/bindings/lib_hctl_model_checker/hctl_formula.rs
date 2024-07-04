@@ -1,7 +1,11 @@
-use std::hash::{DefaultHasher, Hash, Hasher};
-use std::sync::Arc;
-
-use biodivine_hctl_model_checker::preprocessing::node::{HctlTreeNode, NodeType};
+use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
+use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::pyo3_utils::richcmp_eq_by_key;
+use crate::{throw_runtime_error, throw_type_error, AsNative};
+use biodivine_hctl_model_checker::mc_utils::{
+    check_hctl_var_support, collect_unique_hctl_vars, collect_unique_wild_cards,
+};
+use biodivine_hctl_model_checker::preprocessing::hctl_tree::{HctlTreeNode, NodeType};
 use biodivine_hctl_model_checker::preprocessing::operator_enums::{
     Atomic, BinaryOp, HybridOp, UnaryOp,
 };
@@ -13,10 +17,9 @@ use pyo3::basic::CompareOp;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyTuple};
 use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
-
-use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{throw_runtime_error, throw_type_error, AsNative};
+use std::collections::HashSet;
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::sync::Arc;
 
 /// Represents the syntax tree of a HCTL formula.
 ///
@@ -101,12 +104,12 @@ fn encode_hybrid_operator(op: &HybridOp) -> String {
 fn encode_unary_operator(op: &UnaryOp) -> String {
     match op {
         UnaryOp::Not => "not",
-        UnaryOp::Ex => "exist_next",
-        UnaryOp::Ax => "all_next",
-        UnaryOp::Ef => "exist_future",
-        UnaryOp::Af => "all_future",
-        UnaryOp::Eg => "exist_global",
-        UnaryOp::Ag => "all_global",
+        UnaryOp::EX => "exist_next",
+        UnaryOp::AX => "all_next",
+        UnaryOp::EF => "exist_future",
+        UnaryOp::AF => "all_future",
+        UnaryOp::EG => "exist_global",
+        UnaryOp::AG => "all_global",
     }
     .to_string()
 }
@@ -118,10 +121,10 @@ fn encode_binary_operator(op: &BinaryOp) -> String {
         BinaryOp::Imp => "imp",
         BinaryOp::Iff => "iff",
         BinaryOp::Xor => "xor",
-        BinaryOp::Eu => "exist_until",
-        BinaryOp::Au => "all_until",
-        BinaryOp::Ew => "exist_weak_until",
-        BinaryOp::Aw => "all_weak_until",
+        BinaryOp::EU => "exist_until",
+        BinaryOp::AU => "all_until",
+        BinaryOp::EW => "exist_weak_until",
+        BinaryOp::AW => "all_weak_until",
     }
     .to_string()
 }
@@ -137,22 +140,22 @@ fn resolve_hybrid_operator(op: String) -> PyResult<HybridOp> {
 
 fn resolve_temporal_unary_operator(op: String) -> PyResult<UnaryOp> {
     match op.as_str() {
-        "exist_next" => Ok(UnaryOp::Ex),
-        "all_next" => Ok(UnaryOp::Ax),
-        "exist_future" => Ok(UnaryOp::Ef),
-        "all_future" => Ok(UnaryOp::Af),
-        "exist_global" => Ok(UnaryOp::Eg),
-        "all_global" => Ok(UnaryOp::Ag),
+        "exist_next" => Ok(UnaryOp::EX),
+        "all_next" => Ok(UnaryOp::AX),
+        "exist_future" => Ok(UnaryOp::EF),
+        "all_future" => Ok(UnaryOp::AF),
+        "exist_global" => Ok(UnaryOp::EG),
+        "all_global" => Ok(UnaryOp::AG),
         _ => throw_type_error("Expected one of 'exist_next', 'all_next', 'exist_future', 'all_future', 'exist_global', 'all_global'.")
     }
 }
 
 fn resolve_temporal_binary_operator(op: String) -> PyResult<BinaryOp> {
     match op.as_str() {
-        "exist_until" => Ok(BinaryOp::Eu),
-        "all_until" => Ok(BinaryOp::Au),
-        "exist_weak_until" => Ok(BinaryOp::Ew),
-        "all_weak_until" => Ok(BinaryOp::Aw),
+        "exist_until" => Ok(BinaryOp::EU),
+        "all_until" => Ok(BinaryOp::AU),
+        "exist_weak_until" => Ok(BinaryOp::EW),
+        "all_weak_until" => Ok(BinaryOp::AW),
         _ => throw_type_error(
             "Expected one of 'exist_until', 'all_until', 'exist_weak_until', 'all_weak_until'.",
         ),
@@ -184,7 +187,7 @@ impl HctlFormula {
     /// the mapping between hybrid state variables and their symbolic representation).
     #[new]
     #[pyo3(signature = (value, allow_extended = true, minimize_with = None))]
-    fn new(
+    pub fn new(
         value: &Bound<'_, PyAny>,
         allow_extended: bool,
         minimize_with: Option<&SymbolicContext>,
@@ -234,16 +237,17 @@ impl HctlFormula {
     fn mk_hybrid(op: String, state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
         let op = resolve_hybrid_operator(op)?;
         let formula_native =
-            HctlTreeNode::mk_hybrid_node(inner.as_native().clone(), state_variable, op);
+            HctlTreeNode::mk_hybrid(inner.as_native().clone(), state_variable.as_str(), None, op);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `3{x}` operator.
     #[staticmethod]
     fn mk_exists(state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_hybrid_node(
+        let formula_native = HctlTreeNode::mk_hybrid(
             inner.as_native().clone(),
-            state_variable,
+            state_variable.as_str(),
+            None,
             HybridOp::Exists,
         );
         Ok(Self::from_native(formula_native))
@@ -252,9 +256,10 @@ impl HctlFormula {
     /// Create a new `HctlFormula` that uses the `V{x}` operator.
     #[staticmethod]
     fn mk_forall(state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_hybrid_node(
+        let formula_native = HctlTreeNode::mk_hybrid(
             inner.as_native().clone(),
-            state_variable,
+            state_variable.as_str(),
+            None,
             HybridOp::Forall,
         );
         Ok(Self::from_native(formula_native))
@@ -263,16 +268,24 @@ impl HctlFormula {
     /// Create a new `HctlFormula` that uses the `!{x}` operator.
     #[staticmethod]
     fn mk_bind(state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native =
-            HctlTreeNode::mk_hybrid_node(inner.as_native().clone(), state_variable, HybridOp::Bind);
+        let formula_native = HctlTreeNode::mk_hybrid(
+            inner.as_native().clone(),
+            state_variable.as_str(),
+            None,
+            HybridOp::Bind,
+        );
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `@{x}` operator.
     #[staticmethod]
     fn mk_jump(state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native =
-            HctlTreeNode::mk_hybrid_node(inner.as_native().clone(), state_variable, HybridOp::Jump);
+        let formula_native = HctlTreeNode::mk_hybrid(
+            inner.as_native().clone(),
+            state_variable.as_str(),
+            None,
+            HybridOp::Jump,
+        );
         Ok(Self::from_native(formula_native))
     }
 
@@ -286,10 +299,10 @@ impl HctlFormula {
     fn mk_temporal(op: String, a: HctlFormula, b: Option<HctlFormula>) -> PyResult<HctlFormula> {
         let native = if let Some(b) = b {
             let op = resolve_temporal_binary_operator(op)?;
-            HctlTreeNode::mk_binary_node(a.as_native().clone(), b.as_native().clone(), op)
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), op)
         } else {
             let op = resolve_temporal_unary_operator(op)?;
-            HctlTreeNode::mk_unary_node(a.as_native().clone(), op)
+            HctlTreeNode::mk_unary(a.as_native().clone(), op)
         };
         Ok(Self::from_native(native))
     }
@@ -298,189 +311,162 @@ impl HctlFormula {
     #[staticmethod]
     fn mk_boolean(op: String, a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
         let op = resolve_boolean_binary_operator(op)?;
-        let native = HctlTreeNode::mk_binary_node(a.as_native().clone(), b.as_native().clone(), op);
+        let native = HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), op);
         Ok(Self::from_native(native))
     }
 
     /// Create a new `HctlFormula` that uses the `~` operator.
     #[staticmethod]
     fn mk_not(inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_unary_node(inner.as_native().clone(), UnaryOp::Not);
+        let formula_native = HctlTreeNode::mk_unary(inner.as_native().clone(), UnaryOp::Not);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `&` operator.
     #[staticmethod]
     fn mk_and(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::And,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::And);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `|` operator.
     #[staticmethod]
     fn mk_or(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Or,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::Or);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `=>` operator.
     #[staticmethod]
     fn mk_imp(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Imp,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::Imp);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `<=>` operator.
     #[staticmethod]
     fn mk_iff(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Iff,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::Iff);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `^` operator.
     #[staticmethod]
     fn mk_xor(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Xor,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::Xor);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `EX` operator.
     #[staticmethod]
     fn mk_exist_next(inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_unary_node(inner.as_native().clone(), UnaryOp::Ex);
+        let formula_native = HctlTreeNode::mk_unary(inner.as_native().clone(), UnaryOp::EX);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `AX` operator.
     #[staticmethod]
     fn mk_all_next(inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_unary_node(inner.as_native().clone(), UnaryOp::Ax);
+        let formula_native = HctlTreeNode::mk_unary(inner.as_native().clone(), UnaryOp::AX);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `EF` operator.
     #[staticmethod]
     fn mk_exist_future(inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_unary_node(inner.as_native().clone(), UnaryOp::Ef);
+        let formula_native = HctlTreeNode::mk_unary(inner.as_native().clone(), UnaryOp::EF);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `AF` operator.
     #[staticmethod]
     fn mk_all_future(inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_unary_node(inner.as_native().clone(), UnaryOp::Af);
+        let formula_native = HctlTreeNode::mk_unary(inner.as_native().clone(), UnaryOp::AF);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `EG` operator.
     #[staticmethod]
     fn mk_exist_global(inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_unary_node(inner.as_native().clone(), UnaryOp::Eg);
+        let formula_native = HctlTreeNode::mk_unary(inner.as_native().clone(), UnaryOp::EG);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `AG` operator.
     #[staticmethod]
     fn mk_all_global(inner: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_unary_node(inner.as_native().clone(), UnaryOp::Ag);
+        let formula_native = HctlTreeNode::mk_unary(inner.as_native().clone(), UnaryOp::AG);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `EU` operator.
     #[staticmethod]
     fn mk_exist_until(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Eu,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::EU);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `AU` operator.
     #[staticmethod]
     fn mk_all_until(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Au,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::AU);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `EW` operator.
     #[staticmethod]
     fn mk_exist_weak_until(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Ew,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::EW);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `AW` operator.
     #[staticmethod]
     fn mk_all_weak_until(a: &HctlFormula, b: &HctlFormula) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_binary_node(
-            a.as_native().clone(),
-            b.as_native().clone(),
-            BinaryOp::Aw,
-        );
+        let formula_native =
+            HctlTreeNode::mk_binary(a.as_native().clone(), b.as_native().clone(), BinaryOp::AW);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that represents a quantified state variable.
     #[staticmethod]
     fn mk_state_var(name: String) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_var_node(name);
+        let formula_native = HctlTreeNode::mk_variable(name.as_str());
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that represents a network variable proposition.
     #[staticmethod]
     fn mk_network_var(name: String) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_prop_node(name);
+        let formula_native = HctlTreeNode::mk_proposition(name.as_str());
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that represents a Boolean constant.
     #[staticmethod]
     fn mk_const(value: bool) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_constant_node(value);
+        let formula_native = HctlTreeNode::mk_constant(value);
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that represents an extended proposition.
     #[staticmethod]
     fn mk_extended_prop(name: String) -> PyResult<HctlFormula> {
-        let formula_native = HctlTreeNode::mk_wild_card_node(name);
+        let formula_native = HctlTreeNode::mk_wild_card(name.as_str());
         Ok(Self::from_native(formula_native))
     }
 
     /// Check if this `HctlFormula` represents on of the hybrid operators (see `HybridOperator`).
     fn is_hybrid(&self) -> bool {
-        matches!(self.value.node_type, NodeType::HybridNode(_, _, _))
+        matches!(self.value.node_type, NodeType::Hybrid(_, _, _, _))
     }
 
     /// Check if this `HctlFormula` represents on of the temporal operators (see `TemporalUnaryOperator` and `TemporalBinaryOperator`).
@@ -492,8 +478,8 @@ impl HctlFormula {
     fn is_temporal_unary(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::UnaryNode(
-                UnaryOp::Ex | UnaryOp::Ax | UnaryOp::Ef | UnaryOp::Af | UnaryOp::Eg | UnaryOp::Ag,
+            NodeType::Unary(
+                UnaryOp::EX | UnaryOp::AX | UnaryOp::EF | UnaryOp::AF | UnaryOp::EG | UnaryOp::AG,
                 _
             )
         )
@@ -503,8 +489,8 @@ impl HctlFormula {
     fn is_temporal_binary(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::BinaryNode(
-                BinaryOp::Eu | BinaryOp::Au | BinaryOp::Ew | BinaryOp::Aw,
+            NodeType::Binary(
+                BinaryOp::EU | BinaryOp::AU | BinaryOp::EW | BinaryOp::AW,
                 _,
                 _
             )
@@ -515,7 +501,7 @@ impl HctlFormula {
     fn is_boolean(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::BinaryNode(
+            NodeType::Binary(
                 BinaryOp::And | BinaryOp::Or | BinaryOp::Imp | BinaryOp::Iff | BinaryOp::Xor,
                 _,
                 _
@@ -525,22 +511,19 @@ impl HctlFormula {
 
     /// Check if this `HctlFormula` represents a quantified state proposition.
     fn is_state_var(&self) -> bool {
-        matches!(self.value.node_type, NodeType::TerminalNode(Atomic::Var(_)))
+        matches!(self.value.node_type, NodeType::Terminal(Atomic::Var(_)))
     }
 
     /// Check if this `HctlFormula` represents a network variable proposition.
     fn is_network_var(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::TerminalNode(Atomic::Prop(_))
-        )
+        matches!(self.value.node_type, NodeType::Terminal(Atomic::Prop(_)))
     }
 
     /// Check if this `HctlFormula` represents a constant.
     fn is_const(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::TerminalNode(Atomic::True | Atomic::False)
+            NodeType::Terminal(Atomic::True | Atomic::False)
         )
     }
 
@@ -548,7 +531,7 @@ impl HctlFormula {
     fn is_extended_prop(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::TerminalNode(Atomic::WildCardProp(_))
+            NodeType::Terminal(Atomic::WildCardProp(_))
         )
     }
 
@@ -556,7 +539,7 @@ impl HctlFormula {
     fn is_exists(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::HybridNode(HybridOp::Exists, _, _)
+            NodeType::Hybrid(HybridOp::Exists, _, _, _)
         )
     }
 
@@ -564,7 +547,7 @@ impl HctlFormula {
     fn is_forall(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::HybridNode(HybridOp::Forall, _, _)
+            NodeType::Hybrid(HybridOp::Forall, _, _, _)
         )
     }
 
@@ -572,7 +555,7 @@ impl HctlFormula {
     fn is_bind(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::HybridNode(HybridOp::Bind, _, _)
+            NodeType::Hybrid(HybridOp::Bind, _, _, _)
         )
     }
 
@@ -580,121 +563,94 @@ impl HctlFormula {
     fn is_jump(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::HybridNode(HybridOp::Jump, _, _)
+            NodeType::Hybrid(HybridOp::Jump, _, _, _)
         )
     }
 
     /// Check if this `HctlFormula` represents the `~` operator.
     fn is_not(&self) -> bool {
-        matches!(self.value.node_type, NodeType::UnaryNode(UnaryOp::Not, _))
+        matches!(self.value.node_type, NodeType::Unary(UnaryOp::Not, _))
     }
 
     /// Check if this `HctlFormula` represents the `&` operator.
     fn is_and(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::And, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::And, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `|` operator.
     fn is_or(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Or, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::Or, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `=>` operator.
     fn is_imp(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Imp, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::Imp, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `<=>` operator.
     fn is_iff(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Iff, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::Iff, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `^ (xor)` operator.
     fn is_xor(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Xor, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::Xor, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `EX` operator.
     fn is_exist_next(&self) -> bool {
-        matches!(self.value.node_type, NodeType::UnaryNode(UnaryOp::Ex, _))
+        matches!(self.value.node_type, NodeType::Unary(UnaryOp::EX, _))
     }
 
     /// Check if this `HctlFormula` represents the `AX` operator.
     fn is_all_next(&self) -> bool {
-        matches!(self.value.node_type, NodeType::UnaryNode(UnaryOp::Ax, _))
+        matches!(self.value.node_type, NodeType::Unary(UnaryOp::AX, _))
     }
 
     /// Check if this `HctlFormula` represents the `EF` operator.
     fn is_exist_future(&self) -> bool {
-        matches!(self.value.node_type, NodeType::UnaryNode(UnaryOp::Ef, _))
+        matches!(self.value.node_type, NodeType::Unary(UnaryOp::EF, _))
     }
 
     /// Check if this `HctlFormula` represents the `AF` operator.
     fn is_all_future(&self) -> bool {
-        matches!(self.value.node_type, NodeType::UnaryNode(UnaryOp::Af, _))
+        matches!(self.value.node_type, NodeType::Unary(UnaryOp::AF, _))
     }
 
     /// Check if this `HctlFormula` represents the `EG` operator.
     fn is_exist_global(&self) -> bool {
-        matches!(self.value.node_type, NodeType::UnaryNode(UnaryOp::Eg, _))
+        matches!(self.value.node_type, NodeType::Unary(UnaryOp::EG, _))
     }
 
     /// Check if this `HctlFormula` represents the `AG` operator.
     fn is_all_global(&self) -> bool {
-        matches!(self.value.node_type, NodeType::UnaryNode(UnaryOp::Ag, _))
+        matches!(self.value.node_type, NodeType::Unary(UnaryOp::AG, _))
     }
 
     /// Check if this `HctlFormula` represents the `EU` operator.
     fn is_exist_until(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Eu, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::EU, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `AU` operator.
     fn is_all_until(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Au, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::AU, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `EW` operator.
     fn is_exist_weak_until(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Ew, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::EW, _, _))
     }
 
     /// Check if this `HctlFormula` represents the `AW` operator.
     fn is_all_weak_until(&self) -> bool {
-        matches!(
-            self.value.node_type,
-            NodeType::BinaryNode(BinaryOp::Aw, _, _)
-        )
+        matches!(self.value.node_type, NodeType::Binary(BinaryOp::AW, _, _))
     }
 
     /// Return the operator, variable and argument if this `HctlFormula` represents a hybrid operator.
     fn as_hybrid(&self) -> Option<(String, String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::HybridNode(op, var, inner) => Some((
+            NodeType::Hybrid(op, var, _, inner) => Some((
                 encode_hybrid_operator(op),
                 var.clone(),
                 self.mk_child_ref(inner),
@@ -706,13 +662,13 @@ impl HctlFormula {
     /// Return the operator and argument if this `HctlFormula` represents a unary temporal operator.
     fn as_temporal_unary(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::UnaryNode(op, inner) => match op {
-                UnaryOp::Ex
-                | UnaryOp::Ax
-                | UnaryOp::Ef
-                | UnaryOp::Af
-                | UnaryOp::Eg
-                | UnaryOp::Ag => Some((encode_unary_operator(op), self.mk_child_ref(inner))),
+            NodeType::Unary(op, inner) => match op {
+                UnaryOp::EX
+                | UnaryOp::AX
+                | UnaryOp::EF
+                | UnaryOp::AF
+                | UnaryOp::EG
+                | UnaryOp::AG => Some((encode_unary_operator(op), self.mk_child_ref(inner))),
                 _ => None,
             },
             _ => None,
@@ -722,8 +678,8 @@ impl HctlFormula {
     /// Return the operator and arguments if this `HctlFormula` represents a binary temporal operator.
     fn as_temporal_binary(&self) -> Option<(String, HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(op, a, b) => match op {
-                BinaryOp::Eu | BinaryOp::Au | BinaryOp::Ew | BinaryOp::Aw => Some((
+            NodeType::Binary(op, a, b) => match op {
+                BinaryOp::EU | BinaryOp::AU | BinaryOp::EW | BinaryOp::AW => Some((
                     encode_binary_operator(op),
                     self.mk_child_ref(a),
                     self.mk_child_ref(b),
@@ -737,7 +693,7 @@ impl HctlFormula {
     /// Return the operator and arguments if this `HctlFormula` represents a binary Boolean operator.
     fn as_boolean(&self) -> Option<(String, HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(op, a, b) => match op {
+            NodeType::Binary(op, a, b) => match op {
                 BinaryOp::And | BinaryOp::Or | BinaryOp::Imp | BinaryOp::Iff | BinaryOp::Xor => {
                     Some((
                         encode_binary_operator(op),
@@ -754,7 +710,7 @@ impl HctlFormula {
     /// Return the variable name if this `HctlFormula` represents a state variable proposition.
     fn as_state_var(&self) -> Option<String> {
         match &self.value.node_type {
-            NodeType::TerminalNode(Atomic::Var(name)) => Some(name.clone()),
+            NodeType::Terminal(Atomic::Var(name)) => Some(name.clone()),
             _ => None,
         }
     }
@@ -762,7 +718,7 @@ impl HctlFormula {
     /// Return the variable name if this `HctlFormula` represents a network variable proposition.
     fn as_network_var(&self) -> Option<String> {
         match &self.value.node_type {
-            NodeType::TerminalNode(Atomic::Prop(name)) => Some(name.clone()),
+            NodeType::Terminal(Atomic::Prop(name)) => Some(name.clone()),
             _ => None,
         }
     }
@@ -770,8 +726,8 @@ impl HctlFormula {
     /// Return the Boolean value if this `HctlFormula` represents a constant.
     fn as_const(&self) -> Option<bool> {
         match &self.value.node_type {
-            NodeType::TerminalNode(Atomic::True) => Some(true),
-            NodeType::TerminalNode(Atomic::False) => Some(false),
+            NodeType::Terminal(Atomic::True) => Some(true),
+            NodeType::Terminal(Atomic::False) => Some(false),
             _ => None,
         }
     }
@@ -779,7 +735,7 @@ impl HctlFormula {
     /// Return the property name if this `HctlFormula` represents an extended proposition (`%name%`).
     fn as_extended_prop(&self) -> Option<String> {
         match &self.value.node_type {
-            NodeType::TerminalNode(Atomic::WildCardProp(name)) => Some(name.clone()),
+            NodeType::Terminal(Atomic::WildCardProp(name)) => Some(name.clone()),
             _ => None,
         }
     }
@@ -788,7 +744,7 @@ impl HctlFormula {
     /// the `3{x}` hybrid operator.
     fn as_exists(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::HybridNode(HybridOp::Exists, name, inner) => {
+            NodeType::Hybrid(HybridOp::Exists, name, _, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
@@ -799,7 +755,7 @@ impl HctlFormula {
     /// the `V{x}` hybrid operator.
     fn as_forall(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::HybridNode(HybridOp::Forall, name, inner) => {
+            NodeType::Hybrid(HybridOp::Forall, name, _, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
@@ -810,7 +766,7 @@ impl HctlFormula {
     /// the `!{x}` hybrid operator.
     fn as_bind(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::HybridNode(HybridOp::Bind, name, inner) => {
+            NodeType::Hybrid(HybridOp::Bind, name, _, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
@@ -821,7 +777,7 @@ impl HctlFormula {
     /// the `@{x}` hybrid operator.
     fn as_jump(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::HybridNode(HybridOp::Jump, name, inner) => {
+            NodeType::Hybrid(HybridOp::Jump, name, _, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
@@ -831,7 +787,7 @@ impl HctlFormula {
     /// Return the child formula if this `HctlFormula` represents the `~` operator.
     fn as_not(&self) -> Option<HctlFormula> {
         match &self.value.node_type {
-            NodeType::UnaryNode(UnaryOp::Not, inner) => Some(self.mk_child_ref(inner)),
+            NodeType::Unary(UnaryOp::Not, inner) => Some(self.mk_child_ref(inner)),
             _ => None,
         }
     }
@@ -839,7 +795,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `&` Boolean operator.
     fn as_and(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::And, a, b) => {
+            NodeType::Binary(BinaryOp::And, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -849,7 +805,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `|` Boolean operator.
     fn as_or(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Or, a, b) => {
+            NodeType::Binary(BinaryOp::Or, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -859,7 +815,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `=>` Boolean operator.
     fn as_imp(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Imp, a, b) => {
+            NodeType::Binary(BinaryOp::Imp, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -869,7 +825,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `<=>` Boolean operator.
     fn as_iff(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Iff, a, b) => {
+            NodeType::Binary(BinaryOp::Iff, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -879,7 +835,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `^` Boolean operator.
     fn as_xor(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Xor, a, b) => {
+            NodeType::Binary(BinaryOp::Xor, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -889,7 +845,7 @@ impl HctlFormula {
     /// Return the child formula if this `HctlFormula` represents the `EX` temporal operator.
     fn as_exist_next(&self) -> Option<HctlFormula> {
         match &self.value.node_type {
-            NodeType::UnaryNode(UnaryOp::Ex, inner) => Some(self.mk_child_ref(inner)),
+            NodeType::Unary(UnaryOp::EX, inner) => Some(self.mk_child_ref(inner)),
             _ => None,
         }
     }
@@ -897,7 +853,7 @@ impl HctlFormula {
     /// Return the child formula if this `HctlFormula` represents the `AX` temporal operator.
     fn as_all_next(&self) -> Option<HctlFormula> {
         match &self.value.node_type {
-            NodeType::UnaryNode(UnaryOp::Ax, inner) => Some(self.mk_child_ref(inner)),
+            NodeType::Unary(UnaryOp::AX, inner) => Some(self.mk_child_ref(inner)),
             _ => None,
         }
     }
@@ -905,7 +861,7 @@ impl HctlFormula {
     /// Return the child formula if this `HctlFormula` represents the `EF` temporal operator.
     fn as_exist_future(&self) -> Option<HctlFormula> {
         match &self.value.node_type {
-            NodeType::UnaryNode(UnaryOp::Ef, inner) => Some(self.mk_child_ref(inner)),
+            NodeType::Unary(UnaryOp::EF, inner) => Some(self.mk_child_ref(inner)),
             _ => None,
         }
     }
@@ -913,7 +869,7 @@ impl HctlFormula {
     /// Return the child formula if this `HctlFormula` represents the `AF` temporal operator.
     fn as_all_future(&self) -> Option<HctlFormula> {
         match &self.value.node_type {
-            NodeType::UnaryNode(UnaryOp::Af, inner) => Some(self.mk_child_ref(inner)),
+            NodeType::Unary(UnaryOp::AF, inner) => Some(self.mk_child_ref(inner)),
             _ => None,
         }
     }
@@ -921,7 +877,7 @@ impl HctlFormula {
     /// Return the child formula if this `HctlFormula` represents the `EG` temporal operator.
     fn as_exist_global(&self) -> Option<HctlFormula> {
         match &self.value.node_type {
-            NodeType::UnaryNode(UnaryOp::Eg, inner) => Some(self.mk_child_ref(inner)),
+            NodeType::Unary(UnaryOp::EG, inner) => Some(self.mk_child_ref(inner)),
             _ => None,
         }
     }
@@ -929,7 +885,7 @@ impl HctlFormula {
     /// Return the child formula if this `HctlFormula` represents the `AG` temporal operator.
     fn as_all_global(&self) -> Option<HctlFormula> {
         match &self.value.node_type {
-            NodeType::UnaryNode(UnaryOp::Ag, inner) => Some(self.mk_child_ref(inner)),
+            NodeType::Unary(UnaryOp::AG, inner) => Some(self.mk_child_ref(inner)),
             _ => None,
         }
     }
@@ -937,7 +893,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `EU` temporal operator.
     fn as_exist_until(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Eu, a, b) => {
+            NodeType::Binary(BinaryOp::EU, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -947,7 +903,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `AU` temporal operator.
     fn as_all_until(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Au, a, b) => {
+            NodeType::Binary(BinaryOp::AU, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -957,7 +913,7 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `EW` temporal operator.
     fn as_exist_weak_until(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Ew, a, b) => {
+            NodeType::Binary(BinaryOp::EW, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
@@ -967,10 +923,50 @@ impl HctlFormula {
     /// Return the two child formulas if this `HctlFormula` represents the `AW` temporal operator.
     fn as_all_weak_until(&self) -> Option<(HctlFormula, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::BinaryNode(BinaryOp::Aw, a, b) => {
+            NodeType::Binary(BinaryOp::AW, a, b) => {
                 Some((self.mk_child_ref(a), self.mk_child_ref(b)))
             }
             _ => None,
+        }
+    }
+
+    /// Returns `True` if the provided `AsynchronousGraph` has enough extra symbolic variables
+    /// such that it can be used to model-check this `HctlFormula`.
+    fn is_compatible_with(&self, context: &AsynchronousGraph) -> bool {
+        check_hctl_var_support(context.as_native(), self.as_native().clone())
+    }
+
+    /// Returns the set of HCTL state variables that are used in this formula.
+    pub fn used_state_variables(&self) -> HashSet<String> {
+        collect_unique_hctl_vars(self.as_native().clone())
+    }
+
+    /// Returns the set of extended property names that are used in this formula.
+    pub fn used_extended_properties(&self) -> HashSet<String> {
+        collect_unique_wild_cards(self.as_native().clone()).0
+    }
+
+    /// Return the direct child sub-formulas of this `HctlFormula` (one child for unary and hybrid
+    /// operators, two children for binary operators, no children for atoms).
+    ///
+    /// For binary operators, the left-most child is returned first.
+    pub fn children(&self) -> Vec<HctlFormula> {
+        match &self.value.node_type {
+            NodeType::Terminal(_) => vec![],
+            NodeType::Unary(_, child) => vec![self.mk_child_ref(child)],
+            NodeType::Hybrid(_, _, _, child) => vec![self.mk_child_ref(child)],
+            NodeType::Binary(_, a, b) => vec![self.mk_child_ref(a), self.mk_child_ref(b)],
+        }
+    }
+
+    /// Return the string representation of the operator used by this `HctlFormula`, or `None`
+    /// if this is an atom.
+    pub fn operator(&self) -> Option<String> {
+        match &self.value.node_type {
+            NodeType::Terminal(_) => None,
+            NodeType::Unary(op, _) => Some(encode_unary_operator(op)),
+            NodeType::Hybrid(op, _, _, _) => Some(encode_hybrid_operator(op)),
+            NodeType::Binary(op, _, _) => Some(encode_binary_operator(op)),
         }
     }
 }

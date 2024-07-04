@@ -6,10 +6,12 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSe
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 
+use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::resolve_boolean;
 use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_bdd::BddValuation;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
@@ -82,6 +84,57 @@ impl AsynchronousGraph {
         match native {
             Ok(native) => Ok(AsynchronousGraph { ctx, native }),
             Err(e) => throw_runtime_error(e),
+        }
+    }
+
+    /// Create a new `AsynchronousGraph` whose `SymbolicContext` contains enough additional
+    /// symbolic variables to model-check the `requirement` HCTL formula (or explicit
+    /// quantified variable count).
+    ///
+    /// This uses the "extra" variables supported by the `SymbolicContext` object and hence
+    /// cannot be used with other features that also rely on "extra" variables
+    /// (like `SymbolicSpaceContext`).
+    ///
+    /// Note that the symbolic representation in the resulting `AsynchronousGraph` likely
+    /// won't be compatible with the "default" `AsynchronousGraph` either. However, you can
+    /// translate between these representations using `AsynchronousGraph.transfer_from`.
+    #[staticmethod]
+    pub fn mk_for_model_checking(
+        py: Python,
+        network: &BooleanNetwork,
+        requirement: &Bound<'_, PyAny>,
+    ) -> PyResult<Self> {
+        let var_count = if let Ok(count) = requirement.extract::<usize>() {
+            count
+        } else if let Ok(formula) = requirement.extract::<HctlFormula>() {
+            let vars = formula.used_state_variables();
+            vars.len()
+        } else if let Ok(_formula_str) = requirement.extract::<String>() {
+            // We don't use the string because the constructor already does all the error handling
+            // for the parsing step for us. We just need to check if the argument is a string or not.
+            let formula = HctlFormula::new(requirement, true, None)?;
+            let vars = formula.used_state_variables();
+            vars.len()
+        } else {
+            return throw_type_error("Expected `int`, `str`, or `HctlFormula`.");
+        };
+        let var_count = match u16::try_from(var_count) {
+            Ok(count) => count,
+            Err(_) => return throw_runtime_error("Cannot represent more than 2^16 variables."),
+        };
+
+        match get_extended_symbolic_graph(network.as_native(), var_count) {
+            Ok(graph) => {
+                let py_ctx = Py::new(
+                    py,
+                    SymbolicContext::wrap_native(py, graph.symbolic_context().clone())?,
+                )?;
+                Ok(AsynchronousGraph {
+                    ctx: py_ctx,
+                    native: graph,
+                })
+            }
+            Err(problem) => throw_runtime_error(problem),
         }
     }
 

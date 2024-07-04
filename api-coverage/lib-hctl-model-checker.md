@@ -592,5 +592,128 @@ the current API of `BooleanExpression` and `UpdateFunction`.
             <td></td>
             <td><code>HctlFormula.as_all_weak_until</code></td>
         </tr>
+        <tr><td colspan="2" align="center">Other</td></tr>
+        <tr>
+            <td></td>
+            <td><code>HctlFormula.children</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>HctlFormula.operator</code></td>
+        </tr>
+    </tbody>
+</table>
+
+### `result_print`, `analysis`, `postprocessing` and `evaluation` modules
+
+These modules are not mapped to the Python API. Modules `result_print` and `analysis` are only
+relevant for an "executable" mode where the results are printed directly to standard output.
+
+Module `evaluation` is the internal implementation of the algorithm that is largely too technical to
+use as a high-level API from Python.
+
+Module `postprocessing` is superseded by the `transfer_from` functions that are
+already available on `AsynchronousGraph` objects.
+
+### `mc_utils` module
+
+These functions are mostly added as methods to the more appropriate types, since now we have them in one
+package, and we can do that.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>check_hctl_var_support</code></td>
+            <td><code>HctlFormula.is_compatible_with</code></td>
+        </tr>
+        <tr>
+            <td><code>collect_unique_hctl_vars</code></td>
+            <td><code>HctlFormula.used_state_variables</code></td>
+        </tr>
+        <tr>
+            <td><code>collect_unique_wild_card_props</code></td>
+            <td><code>HctlFormula.used_extended_properties</code></td>
+        </tr>
+        <tr>
+            <td><code>get_extended_symbolic_graph</code></td>
+            <td><code>AsynchronousGraph.mk_for_model_checking</code></td>
+        </tr>  
+    </tbody>
+</table>
+
+### `model_checking` module
+
+These are mostly mapped to a singleton `ModelChecking` object. We
+ignore the methods that perform automatic sanitization, because we expect
+the user to know what graph/context they are using. Automatic sanitization
+mostly made sense in the original library where the expectation was that the
+results will be written to some output file.
+
+<table>
+    <thead>
+        <tr>
+            <th>Rust Member</th>
+            <th>Python Member</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>model_check_extended_formula_dirty</code></td>
+            <td><code>ModelChecking.verify</code></td>
+        </tr>
+        <tr>
+            <td><code>model_check_formula_dirty</code></td>
+            <td><code>ModelChecking.verify</code></td>
+        </tr>
+        <tr>
+            <td><code>model_check_multiple_extended_formulae_dirty</code></td>
+            <td><code>ModelChecking.verify</code></td>
+        </tr>
+        <tr>
+            <td><code>model_check_multiple_formulae_dirty</code></td>
+            <td><code>ModelChecking.verify</code></td>
+        </tr>
+        <tr>
+            <td><code>model_check_extended_formula</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_formula</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_formula_unsafe_ex</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_multiple_extended_formulae</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_multiple_formulae</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_multiple_trees</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_multiple_trees_dirty</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_tree</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>model_check_tree_dirty</code></td>
+            <td></td>
+        </tr>
     </tbody>
 </table>
