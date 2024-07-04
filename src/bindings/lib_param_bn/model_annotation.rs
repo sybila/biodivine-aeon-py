@@ -88,8 +88,8 @@ pub struct ModelAnnotation {
 #[derive(Clone, Wrapper)]
 pub struct ModelAnnotationRoot(biodivine_lib_param_bn::ModelAnnotation);
 
+/// Useful for creating mutable copies of a path.
 fn mk_path(path: &[String]) -> Vec<&str> {
-    // TODO: delete once latest lib-param-bn is released.
     path.iter().map(|it| it.as_str()).collect()
 }
 
@@ -113,7 +113,7 @@ impl ModelAnnotation {
         })
     }
 
-    fn __richcmp__(&self, py: Python, other: &ModelAnnotation, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &ModelAnnotation, op: CompareOp) -> Py<PyAny> {
         // First, check the paths.
         match op {
             CompareOp::Eq => {
@@ -139,7 +139,7 @@ impl ModelAnnotation {
         }
     }
 
-    fn __copy__(&self) -> ModelAnnotation {
+    pub fn __copy__(&self) -> ModelAnnotation {
         self.clone()
     }
 
@@ -151,32 +151,30 @@ impl ModelAnnotation {
         })
     }
 
-    fn __str__(&self, py: Python) -> String {
-        let self_path = mk_path(&self.path);
+    pub fn __str__(&self, py: Python) -> String {
         self.root
             .borrow(py)
             .as_native()
-            .get_child(&self_path)
+            .get_child(&self.path)
             .map(|it| format!("{}", it))
             .unwrap_or_else(String::new)
     }
 
-    fn __repr__(&self, py: Python) -> String {
+    pub fn __repr__(&self, py: Python) -> String {
         let self_str = self.__str__(py);
         format!("ModelAnnotation.from_aeon({:?})", self_str)
     }
 
-    fn __len__(&self, py: Python) -> usize {
-        let self_path = mk_path(&self.path);
+    pub fn __len__(&self, py: Python) -> usize {
         self.root
             .borrow(py)
             .as_native()
-            .get_child(&self_path)
+            .get_child(&self.path)
             .map(|it| it.children().len())
             .unwrap_or(0)
     }
 
-    fn __getitem__(&self, key: &str) -> ModelAnnotation {
+    pub fn __getitem__(&self, key: &str) -> ModelAnnotation {
         let mut path = self.path.clone();
         path.push(key.to_string());
         ModelAnnotation {
@@ -185,11 +183,10 @@ impl ModelAnnotation {
         }
     }
 
-    fn __setitem__(&self, key: &str, value: ModelAnnotation, py: Python) {
+    pub fn __setitem__(&self, key: &str, value: ModelAnnotation, py: Python) {
         // First, find the actual annotation of the given `value`.
-        let value_path = mk_path(&value.path);
         let value_root_ref = value.root.borrow(py);
-        let value_child = value_root_ref.as_native().get_child(&value_path);
+        let value_child = value_root_ref.as_native().get_child(&value.path);
 
         let mut self_path = mk_path(&self.path);
         if let Some(value_child) = value_child {
@@ -209,16 +206,15 @@ impl ModelAnnotation {
         }
     }
 
-    fn __delitem__(&self, key: &str, py: Python) {
-        let self_path = mk_path(&self.path);
+    pub fn __delitem__(&self, key: &str, py: Python) {
         let mut self_root_ref = self.root.borrow_mut(py);
-        let parent = self_root_ref.as_native_mut().get_mut_child(&self_path);
+        let parent = self_root_ref.as_native_mut().get_mut_child(&self.path);
         if let Some(parent) = parent {
             parent.children_mut().remove(key);
         }
     }
 
-    fn __contains__(&self, key: &str, py: Python) -> bool {
+    pub fn __contains__(&self, key: &str, py: Python) -> bool {
         let mut child_path = mk_path(&self.path);
         child_path.push(key);
         self.root
@@ -230,27 +226,25 @@ impl ModelAnnotation {
 
     #[getter]
     pub fn get_value(&self, py: Python) -> Option<String> {
-        let self_path = mk_path(&self.path);
         let root_ref = self.root.borrow_mut(py);
-        root_ref.as_native().get_value(&self_path).cloned()
+        root_ref.as_native().get_value(&self.path).cloned()
     }
 
     // TODO: This is currently causing issues due to a known bug.
     // Should be fixed soon: https://github.com/PyO3/pyo3/issues/4292
     #[setter]
     pub fn set_value(&self, py: Python, value: Option<String>) {
-        let self_path = mk_path(&self.path);
         let mut root_ref = self.root.borrow_mut(py);
         let value_ref = root_ref
             .as_native_mut()
-            .ensure_child(&self_path)
+            .ensure_child(&self.path)
             .value_mut();
         *value_ref = value;
     }
 
     /// Parse an annotation object from the string representing the contents of an `.aeon` file.
     #[staticmethod]
-    pub fn from_aeon(file_contents: &str, py: Python) -> PyResult<ModelAnnotation> {
+    pub fn from_aeon(py: Python, file_contents: &str) -> PyResult<ModelAnnotation> {
         let native = biodivine_lib_param_bn::ModelAnnotation::from_model_string(file_contents);
         let root = Py::new(py, ModelAnnotationRoot::from(native))?;
         Ok(ModelAnnotation {
@@ -267,16 +261,15 @@ impl ModelAnnotation {
         }
 
         match std::fs::read_to_string(path) {
-            Ok(file_contents) => Self::from_aeon(file_contents.as_str(), py),
+            Ok(file_contents) => Self::from_aeon(py, file_contents.as_str()),
             Err(e) => throw_runtime_error(format!("Cannot read file: {}.", e)),
         }
     }
 
     /// Return the list of annotations that are the direct descendants of this annotation.
     pub fn values(&self, py: Python) -> Vec<ModelAnnotation> {
-        let self_path = mk_path(&self.path);
         let root_ref = self.root.borrow(py);
-        let child_ref = root_ref.as_native().get_child(&self_path);
+        let child_ref = root_ref.as_native().get_child(&self.path);
         if let Some(child_ref) = child_ref {
             let mut keys = child_ref.children().keys().collect::<Vec<_>>();
             keys.sort();
@@ -297,9 +290,8 @@ impl ModelAnnotation {
 
     /// Return the sorted list of keys that are stored in this annotation.
     pub fn keys(&self, py: Python) -> Vec<String> {
-        let self_path = mk_path(&self.path);
         let root_ref = self.root.borrow(py);
-        let child_ref = root_ref.as_native().get_child(&self_path);
+        let child_ref = root_ref.as_native().get_child(&self.path);
         if let Some(child_ref) = child_ref {
             let mut keys = child_ref.children().keys().cloned().collect::<Vec<_>>();
             keys.sort();
@@ -312,9 +304,8 @@ impl ModelAnnotation {
     /// Return the list key-value pairs that correspond to the direct descendants
     /// of this annotation.
     pub fn items(&self, py: Python) -> Vec<(String, ModelAnnotation)> {
-        let self_path = mk_path(&self.path);
         let root_ref = self.root.borrow(py);
-        let child_ref = root_ref.as_native().get_child(&self_path);
+        let child_ref = root_ref.as_native().get_child(&self.path);
         if let Some(child_ref) = child_ref {
             let mut keys = child_ref.children().keys().collect::<Vec<_>>();
             keys.sort();

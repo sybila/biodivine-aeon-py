@@ -184,7 +184,7 @@ impl HctlFormula {
     /// If `minimize_with` is specified with a `SymbolicContext`, the created formula is
     /// automatically converted to a canonical format, using standardized variable names and
     /// removing redundancies (for this, a `SymbolicContext` is required in order to check
-    /// the mapping between hybrid state variables and their symbolic representation).
+    /// the mapping between propositions and network variables).
     #[new]
     #[pyo3(signature = (value, allow_extended = true, minimize_with = None))]
     pub fn new(

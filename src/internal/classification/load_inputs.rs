@@ -1,17 +1,18 @@
 //! Loading of various input components of the model, mainly of various properties/assertions.
 
-use biodivine_lib_param_bn::{BooleanNetwork, ModelAnnotation};
-
-use biodivine_lib_bdd::Bdd;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
+
+use biodivine_lib_bdd::Bdd;
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
+use biodivine_lib_param_bn::BooleanNetwork;
 use zip::ZipArchive;
 
+/*
 /// Read the list of assertions from an `.aeon` model annotation object.
 ///
-/// The assertions are expected to appear as `#!dynamic_assertion: FORMULA` model annotations
+/// The assertions are expected to appear as `#!dynamic_assertion: FORMULA` model annotations,
 /// and they are returned in declaration order.
 pub fn read_model_assertions(annotations: &ModelAnnotation) -> Vec<String> {
     let Some(list) = annotations.get_value(&["dynamic_assertion"]) else {
@@ -19,7 +20,9 @@ pub fn read_model_assertions(annotations: &ModelAnnotation) -> Vec<String> {
     };
     list.lines().map(|it| it.to_string()).collect()
 }
+ */
 
+/*
 /// Read the list of named properties from an `.aeon` model annotation object.
 ///
 /// The properties are expected to appear as `#!dynamic_property: NAME: FORMULA` model annotations.
@@ -51,7 +54,9 @@ pub fn read_model_properties(
     properties.sort_by(|(x, _), (y, _)| x.cmp(y));
     Ok(properties)
 }
+ */
 
+/*
 /// Combine all HCTL assertions in the given list into a single conjunction of assertions.
 pub fn build_combined_assertion(assertions: &[String]) -> String {
     if assertions.is_empty() {
@@ -63,6 +68,7 @@ pub fn build_combined_assertion(assertions: &[String]) -> String {
         assertions.join(" & ")
     }
 }
+ */
 
 /// Read the contents of a file from a zip archive into a string.
 fn read_zip_file(reader: &mut ZipArchive<File>, file_name: &str) -> String {

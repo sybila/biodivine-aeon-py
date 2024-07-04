@@ -1,15 +1,14 @@
 //! Finish the classification process and generate the results (report and BDD representation).
 
-use biodivine_lib_param_bn::biodivine_std::traits::Set;
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
 use std::collections::HashMap;
-
 use std::fs::File;
 use std::io::{ErrorKind, Write};
 use std::path::Path;
 
-use zip::write::{FileOptions, ZipWriter};
-
+use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
+use zip::write::{SimpleFileOptions, ZipWriter};
+/*
 /// Transform integer into a corresponding binary number of the given length.
 ///
 /// If the integer "bit width" is larger than the given length, it is truncated. If it is smaller,
@@ -151,7 +150,7 @@ pub fn write_classifier_output(
             // If the BDD is not empty, the results go directly into the zip archive.
             let bdd_file_name = format!("bdd_dump_{}.txt", bool_vec_to_string(&validity));
             zip_writer
-                .start_file(&bdd_file_name, FileOptions::default())
+                .start_file(bdd_file_name.as_str(), SimpleFileOptions::default())
                 .map_err(std::io::Error::from)?;
 
             category_colors.as_bdd().write_as_string(&mut zip_writer)?;
@@ -160,19 +159,20 @@ pub fn write_classifier_output(
 
     // Finally, we can write the report.
     zip_writer
-        .start_file("report.txt", FileOptions::default())
+        .start_file("report.txt", SimpleFileOptions::default())
         .map_err(std::io::Error::from)?;
     zip_writer.write_all(&report)?;
 
     // Include the original model in the result bundle (we need to load it later).
     zip_writer
-        .start_file("model.aeon", FileOptions::default())
+        .start_file("model.aeon", SimpleFileOptions::default())
         .map_err(std::io::Error::from)?;
     write!(zip_writer, "{original_model_str}")?;
 
     zip_writer.finish().map_err(std::io::Error::from)?;
     Ok(())
 }
+ */
 
 /// Create classification archive for an arbitrary "map" of `string -> color set`.
 pub fn build_classification_archive(
@@ -196,7 +196,7 @@ pub fn build_classification_archive(
             // If the BDD is not empty, the results go directly into the zip archive.
             let bdd_file_name = format!("bdd_dump_{}.txt", category_name);
             zip_writer
-                .start_file(&bdd_file_name, FileOptions::default())
+                .start_file(bdd_file_name.as_str(), SimpleFileOptions::default())
                 .map_err(std::io::Error::from)?;
 
             category_colors.as_bdd().write_as_string(&mut zip_writer)?;
@@ -205,7 +205,7 @@ pub fn build_classification_archive(
 
     // Include the original model in the result bundle (we need to load it later).
     zip_writer
-        .start_file("model.aeon", FileOptions::default())
+        .start_file("model.aeon", SimpleFileOptions::default())
         .map_err(std::io::Error::from)?;
     write!(zip_writer, "{original_model_str}")?;
 
@@ -213,6 +213,7 @@ pub fn build_classification_archive(
     Ok(())
 }
 
+/*
 /// Write a short summary regarding the classification computation where the assertions were
 /// not satisfied.
 pub fn write_empty_report(
@@ -225,7 +226,7 @@ pub fn write_empty_report(
 
     // Here, we can write the empty report directly because there is nothing else to compute.
     zip_writer
-        .start_file("report.txt", FileOptions::default())
+        .start_file("report.txt", SimpleFileOptions::default())
         .map_err(std::io::Error::from)?;
 
     writeln!(zip_writer, "### Assertion formulae")?;
@@ -239,7 +240,9 @@ pub fn write_empty_report(
     zip_writer.finish().map_err(std::io::Error::from)?;
     Ok(())
 }
+ */
 
+/*
 #[cfg(test)]
 mod tests {
     use crate::internal::classification::write_output::{bool_vec_to_string, int_to_bool_vec};
@@ -269,3 +272,4 @@ mod tests {
         assert_eq!(bool_vec_to_string(&[true, true, false]), "110".to_string());
     }
 }
+*/

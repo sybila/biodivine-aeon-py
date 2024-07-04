@@ -52,6 +52,12 @@ impl AsNative<GraphColors> for ColorSet {
     }
 }
 
+impl ColorSet {
+    pub fn into_native(self) -> GraphColors {
+        self.native
+    }
+}
+
 #[pymethods]
 impl ColorSet {
     /// Normally, a new `ColorSet` is derived using an `AsynchronousGraph`. However, in some
@@ -109,7 +115,7 @@ impl ColorSet {
         self.items(None)
     }
 
-    fn __ctx__(&self) -> Py<SymbolicContext> {
+    pub fn __ctx__(&self) -> Py<SymbolicContext> {
         self.ctx.clone()
     }
 
@@ -119,39 +125,39 @@ impl ColorSet {
     }
 
     /// Set intersection.
-    fn intersect(&self, other: &ColorSet) -> ColorSet {
+    pub fn intersect(&self, other: &ColorSet) -> ColorSet {
         self.mk_derived(self.as_native().intersect(other.as_native()))
     }
 
     /// Set difference.
-    fn minus(&self, other: &ColorSet) -> ColorSet {
+    pub fn minus(&self, other: &ColorSet) -> ColorSet {
         self.mk_derived(self.as_native().minus(other.as_native()))
     }
 
     /// Set union.
-    fn union(&self, other: &ColorSet) -> ColorSet {
+    pub fn union(&self, other: &ColorSet) -> ColorSet {
         self.mk_derived(self.as_native().union(other.as_native()))
     }
 
     /// True if this set is empty.
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.as_native().is_empty()
     }
 
     /// True if this set is a subset of the other set.
     ///
     /// Should be faster than just calling `set.minus(superset).is_empty()`
-    fn is_subset(&self, other: &ColorSet) -> bool {
+    pub fn is_subset(&self, other: &ColorSet) -> bool {
         self.as_native().is_subset(other.as_native())
     }
 
     /// True if this set is a singleton, i.e. a single function interpretation.
-    fn is_singleton(&self) -> bool {
+    pub fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
 
     /// True if this set is a subspace, i.e. it can be expressed using a single conjunctive clause.
-    fn is_subspace(&self) -> bool {
+    pub fn is_subspace(&self) -> bool {
         self.as_native().is_subspace()
     }
 
