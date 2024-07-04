@@ -86,7 +86,7 @@ def test_regulatory_graph():
             'sign': '-',
             'essential': False,
             'extra': 1
-        })
+        }) # type: ignore
     rg2 = RegulatoryGraph(None, ["a -> b", "b -|? c", "c -? a"])
 
     assert rg1 == rg2
@@ -226,7 +226,7 @@ def test_boolean_network_inheritance():
             'sign': '-',
             'essential': False,
             'extra': 1
-        })
+        }) # type: ignore
     bn2 = BooleanNetwork(None, ["a -> b", "b -|? c", "c -? a"])
 
     assert bn1 == bn2

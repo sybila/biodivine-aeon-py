@@ -195,7 +195,7 @@ jobs:
     env:
       # These are the env variables set by llvm-cov, but modified such that they actually work in GH actions.
       # In particular, we changed the paths from absolute to relative.
-      RUSTFLAGS: '-D warnings -C instrument-coverage --cfg=coverage --cfg=trybuild_no_target'
+      RUSTFLAGS: '-C instrument-coverage --cfg=coverage --cfg=trybuild_no_target'
       LLVM_PROFILE_FILE: './target/biodivine-aeon-py-%p-%4m.profraw'
       CARGO_LLVM_COV: 1
       CARGO_LLVM_COV_SHOW_ENV: 1
