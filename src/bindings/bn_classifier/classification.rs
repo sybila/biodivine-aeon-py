@@ -322,8 +322,14 @@ impl Classification {
     /// Classify the behavior of the given `graph` based on the specified
     /// `HctlFormula` properties.
     ///
-    /// Optionally, you can also give a collection of assertions that restrict the applicable
-    /// graph colors.
+    /// Optionally, you can also give a collection of assertions that restrict
+    /// the applicable graph colors.
+    ///
+    /// Note that this method internally creates a dedicated `AsynchronousGraph` with enough
+    /// symbolic variables to check all the provided properties/assertions. However, the results
+    /// are always transformed back into an encoding that is valid for the `graph` that is given
+    /// as the first argument.
+    ///
     #[staticmethod]
     #[pyo3(signature = (graph, properties, assertions = None, substitution = None))]
     pub fn classify_dynamic_properties(
