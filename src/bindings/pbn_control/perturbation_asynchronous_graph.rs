@@ -1,30 +1,58 @@
-use crate::bindings::lib_bdd::PyBddVariableSet;
-use crate::bindings::lib_param_bn::{
-    PyBooleanNetwork, PyGraphColoredVertices, PyGraphColors, PyGraphVertices, PyParameterId,
-    PySymbolicAsyncGraph, PyVariableId,
-};
 use crate::bindings::pbn_control::{PyAttractorControlMap, PyPhenotypeControlMap, PyPerturbationGraph};
 use crate::{throw_runtime_error, AsNative};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::VariableId;
 use biodivine_pbn_control::perturbation::PerturbationGraph;
 use biodivine_pbn_control::control::PhenotypeOscillationType;
+use macros::Wrapper;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
+use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
+use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 
-impl From<PyPerturbationGraph> for PerturbationGraph {
-    fn from(value: PyPerturbationGraph) -> Self {
+
+/// An extension of `AsynchronousGraph` that admits variable perturbation. Such graph can then
+/// be analyzed to extract control strategies that are sufficient to achieve a particular
+/// outcome (an attractor or a phenotype).
+///
+/// This representation is similar to `SymbolicSpaceContext` in the sense that it introduces
+/// additional variables into the symbolic encoding in order to encode more complex modes of
+/// behavior in a BN. However, in this case, it is also necessary to modify the actual update
+/// functions of the network. Hence, this implementation extends the `AsynchronousGraph` directly.
+///
+/// To represent perturbations, `PerturbedAsynchronousGraph` introduces the following
+/// changes to the network dynamics:
+///     - For each variable (that can be perturbed), we create an explicit Boolean
+///       "perturbation parameter".
+///     - We maintain two version of network dynamics: unperturbed, meaning the additional
+///       parameters have no impact on update functions, and perturbed, where a variable is
+///       allowed to evolve only if it is not perturbed.
+///     - This representation allows us to also encode sets of perturbations, since for a perturbed
+///       variable, we can use the state variable (that would otherwise be unsued) to represent
+///       the value to which the variable is perturbed.
+///
+/// Note that this encoding does not implicitly assume any perturbation temporality (one-step,
+/// permanent, temporary). These aspects are managed by the analysis algorithms.
+///
+#[pyclass(module="biodivine_aeon", extends=AsynchronousGraph)]
+#[derive(Clone, Wrapper)]
+pub struct PerturbedAsynchronousGraph(PerturbationGraph);
+
+
+impl From<PerturbedAsynchronousGraph> for PerturbationGraph {
+    fn from(value: PerturbedAsynchronousGraph) -> Self {
         value.0
     }
 }
 
-impl From<PerturbationGraph> for PyPerturbationGraph {
+impl From<PerturbationGraph> for PerturbedAsynchronousGraph {
     fn from(value: PerturbationGraph) -> Self {
-        PyPerturbationGraph(value)
+        PerturbedAsynchronousGraph(value)
     }
 }
 
-impl AsNative<PerturbationGraph> for PyPerturbationGraph {
+impl AsNative<PerturbationGraph> for PerturbedAsynchronousGraph {
     fn as_native(&self) -> &PerturbationGraph {
         &self.0
     }
@@ -44,10 +72,10 @@ pub fn convert_str_to_oscillation_type(osc: &str) -> PhenotypeOscillationType {
 }
 
 #[pymethods]
-impl PyPerturbationGraph {
+impl PerturbedAsynchronousGraph {
     /// Create a new `PerturbationGraph` based on a `BooleanNetwork`.
     #[new]
-    pub fn new(network: &PyBooleanNetwork) -> Self {
+    pub fn new(network: &BooleanNetwork) -> Self {
         PerturbationGraph::new(network.as_native()).into()
     }
 
@@ -57,9 +85,9 @@ impl PyPerturbationGraph {
     /// The list can specify these variables either using names or `VariableId` objects.
     #[staticmethod]
     pub fn with_restricted_variables(
-        network: PyRef<'_, PyBooleanNetwork>,
+        network: PyRef<'_, BooleanNetwork>,
         perturb: &PyList,
-    ) -> PyResult<PyPerturbationGraph> {
+    ) -> PyResult<PerturbedAsynchronousGraph> {
         let mut perturb_vars = Vec::new();
         for var in perturb.iter() {
             perturb_vars.push(network.as_ref().find_variable(var)?.unwrap().into());
@@ -73,17 +101,17 @@ impl PyPerturbationGraph {
 
     /// Get a `SymbolicAsyncGraph` that represents the original (unperturbed) behaviour
     /// within this graph.
-    pub fn as_original(&self) -> PySymbolicAsyncGraph {
+    pub fn as_original(&self) -> AsynchronousGraph {
         self.as_native().as_original().clone().into()
     }
 
     /// Get a `SymbolicAsyncGraph` that represented the perturbed behaviour within this graph.
-    pub fn as_perturbed(&self) -> PySymbolicAsyncGraph {
+    pub fn as_perturbed(&self) -> AsynchronousGraph {
         self.as_native().as_perturbed().clone().into()
     }
 
     /// Get the underlying `BddVariableSet` that is used to encode the elements of this graph.
-    pub fn bdd_variables(&self) -> PyBddVariableSet {
+    pub fn bdd_variables(&self) -> BddVariableSet {
         self.as_native()
             .as_symbolic_context()
             .bdd_variable_set()

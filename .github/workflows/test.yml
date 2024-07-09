@@ -32,8 +32,8 @@ jobs:
   fmt:
     name: rustfmt
     runs-on: ubuntu-latest
-    #env:
-    #  RUSTFLAGS: "-D warnings"
+    env:
+      RUSTFLAGS: "-D warnings"
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -47,8 +47,8 @@ jobs:
     needs: fmt
     name: check
     runs-on: ubuntu-latest
-    #env:
-    #  RUSTFLAGS: "-D warnings"
+    env:
+      RUSTFLAGS: "-D warnings"
     steps:
       - uses: actions/checkout@v4
       - name: Setup Z3.
@@ -69,8 +69,8 @@ jobs:
     needs: check
     name: clippy
     runs-on: ubuntu-latest
-    #env:
-    #  RUSTFLAGS: "-D warnings"
+    env:
+      RUSTFLAGS: "-D warnings"
     steps:
       - uses: actions/checkout@v4
       - name: Setup Z3.
