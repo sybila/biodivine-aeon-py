@@ -20,7 +20,7 @@ use pyo3::{PyResult, Python};
 /// If reasonable, please also implement `__hash__` and `__richcmp__` to ensure correct type
 /// comparison (alternatively, `__richcmp__` can be substituted for `__lt__`, `__eq__`, etc.).
 ///
-mod bindings;
+pub mod bindings;
 
 /// In this module, we have copied some of the internal AEON algorithms that we cannot include
 /// directly since they are not part of a public crate. Try to keep this module as small as

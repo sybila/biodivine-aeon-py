@@ -19,10 +19,11 @@ use crate::bindings::lib_param_bn::model_annotation::ModelAnnotation;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::internal::classification::load_inputs::load_classification_archive;
 use crate::internal::classification::write_output::build_classification_archive;
-use crate::internal::scc::{Behaviour, Classifier};
+use crate::internal::scc::{Behaviour, Class, Classifier};
 use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
 
 /// An "algorithm object" that groups all methods related to the classification of various
@@ -317,6 +318,42 @@ impl Classification {
                 )
             })
             .collect())
+    }
+
+    /// Classify the colors of an `AsynchronousGraph` according to their affinity to biological
+    /// phenotypes.
+    ///
+    /// Each phenotype is given as an arbitrary `VertexSet`, identified by a `Class` instance.
+    /// Most often, phenotypes are described through sub-spaces (see also
+    /// `AsynchronousGraph.mk_subspace_vertices`). A color satisfies a phenotype if it admits
+    /// an attractor that is fully contained in the given `VertexSet` (i.e. it is not enough
+    /// to have an intersection with the phenotype set).
+    ///
+    /// Note that typically, phenotypes correspond to disjoint sets of vertices. However, this
+    /// is not a rule, and the method can also deal with colors that satisfy multiple phenotypes.
+    /// Such colors are assigned a class that is the sum of all satisfied classes.
+    ///
+    /// Colors that do not match any phenotype are returned with an empty class (i.e. `Class([])`).
+    ///
+    /// Note that you can (optionally) provide your own attractor sets, assuming these are
+    /// already known. However, computing phenotype classification does not actually require
+    /// precise knowledge of attractors, and hence can be often much faster than exact attractor
+    /// computation (especially if the number of attractors is high). However, you can use this
+    /// option to restrict the input space to a subset of attractors.
+    ///
+    /// You can also combine the results of this analysis with other classifications (e.g.
+    /// attractor bifurcations, or HCTL properties) using `Class::classification_ensure` or
+    /// `Class::classification_append`.
+    #[staticmethod]
+    #[pyo3(signature = (graph, phenotypes, attractors = None))]
+    pub fn classify_attractor_phenotypes(
+        py: Python,
+        graph: &AsynchronousGraph,
+        phenotypes: HashMap<Class, VertexSet>,
+        attractors: Option<Vec<ColoredVertexSet>>,
+    ) -> PyResult<HashMap<Class, ColorSet>> {
+        unimplemented!()
+        //TODO: Figure out if we want a subset or an intersection.
     }
 
     /// Classify the behavior of the given `graph` based on the specified

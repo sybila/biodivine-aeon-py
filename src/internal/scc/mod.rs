@@ -7,6 +7,7 @@ mod _impl_behaviour;
 mod _impl_class;
 /// **(internal)** Implementation of `Behaviour` classification in `Classifier`.
 mod _impl_classifier;
+mod _impl_classifier_phenotype;
 pub mod algo_interleaved_transition_guided_reduction;
 pub mod algo_saturated_reachability;
 pub mod algo_xie_beerel;
@@ -24,4 +25,9 @@ pub struct Class(pub Vec<Behaviour>);
 pub struct Classifier {
     classes: Mutex<HashMap<Class, GraphColors>>,
     attractors: Mutex<Vec<(GraphColoredVertices, HashMap<Behaviour, GraphColors>)>>,
+}
+
+pub struct ClassifierPhenotype {
+    classes: HashMap<String, GraphColors>,
+    phenotypes: Vec<(GraphColoredVertices, HashMap<String, GraphColors>)>,
 }
