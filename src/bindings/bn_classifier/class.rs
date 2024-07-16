@@ -132,68 +132,6 @@ impl Class {
         result
     }
 
-    /// Extend an existing `classification` dictionary in such a way that every color
-    /// in the `colors` set appears in a `Class` with the specified `features`.
-    ///
-    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
-    /// `{ `a`: [1,2,3], ['b']: [5,6], ['a','b']: [4] }`.
-    ///
-    /// This does not "increase" the number of times a feature appears in a class, it merely
-    /// creates new classes if the feature is not present.
-    #[staticmethod]
-    pub fn classification_ensure(
-        classification: HashMap<Class, ColorSet>,
-        features: Bound<'_, Class>,
-        colors: ColorSet,
-    ) -> PyResult<HashMap<Class, ColorSet>> {
-        let mut new_classification = HashMap::new();
-        for (cls, set) in &classification {
-            // Save the unaffected colors with the existing class.
-            let rest = set.minus(&colors);
-            if !rest.is_empty() {
-                extend_map(&mut new_classification, cls, rest);
-            }
-            // Create a new class for the intersection.
-            let both = set.intersect(&colors);
-            if !both.is_empty() {
-                let new_cls = cls.ensure(features.as_any())?;
-                extend_map(&mut new_classification, &new_cls, both);
-            }
-        }
-        Ok(new_classification)
-    }
-
-    /// Extend an existing `classification` dictionary in such a way that every color
-    /// in the `colors` set has an additional features according to the specified `Class`.
-    ///
-    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
-    /// `{ `a`: [1,2], ['b']: [5,6], ['a','a']: [3], ['a','b']: [4] }`.
-    ///
-    /// In other words, compared to `Class.classification_ensure`, this does "increase" the number
-    /// of times a feature appears in a class.
-    #[staticmethod]
-    pub fn classification_append(
-        classification: HashMap<Class, ColorSet>,
-        features: Bound<'_, Class>,
-        colors: ColorSet,
-    ) -> PyResult<HashMap<Class, ColorSet>> {
-        let mut new_classification = HashMap::new();
-        for (cls, set) in &classification {
-            // Save the unaffected colors with the existing class.
-            let rest = set.minus(&colors);
-            if !rest.is_empty() {
-                extend_map(&mut new_classification, cls, rest);
-            }
-            // Create a new class for the intersection.
-            let both = set.intersect(&colors);
-            if !both.is_empty() {
-                let new_cls = cls.append(features.as_any())?;
-                extend_map(&mut new_classification, &new_cls, both);
-            }
-        }
-        Ok(new_classification)
-    }
-
     /// Create a `Class` instance that extends this class with the given feature (or features).
     /// If an added feature already exists (at least once), it is not added again.
     pub fn ensure(&self, feature: &Bound<'_, PyAny>) -> PyResult<Class> {
@@ -288,7 +226,7 @@ impl Class {
     }
 }
 
-fn extend_map(m: &mut HashMap<Class, ColorSet>, k: &Class, v: ColorSet) {
+pub fn extend_map(m: &mut HashMap<Class, ColorSet>, k: &Class, v: ColorSet) {
     if let Some(slot) = m.get_mut(k) {
         *slot = slot.union(&v);
     } else {

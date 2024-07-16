@@ -7,13 +7,15 @@ use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{
     GraphColors, SymbolicContext as RsSymbolicContext,
 };
+use biodivine_pbn_control::control::PhenotypeOscillationType;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyList};
 use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
 
-use crate::bindings::bn_classifier::class::Class;
+use crate::bindings::bn_classifier::class::{extend_map, Class};
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::algorithms::attractors::Attractors;
+use crate::bindings::lib_param_bn::algorithms::reachability::Reachability;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::model_annotation::ModelAnnotation;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
@@ -21,9 +23,10 @@ use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::pbn_control::extract_phenotype_type;
 use crate::internal::classification::load_inputs::load_classification_archive;
 use crate::internal::classification::write_output::build_classification_archive;
-use crate::internal::scc::{Behaviour, Class, Classifier};
+use crate::internal::scc::{Behaviour, Classifier};
 use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
 
 /// An "algorithm object" that groups all methods related to the classification of various
@@ -35,6 +38,68 @@ pub struct Classification {
 
 #[pymethods]
 impl Classification {
+    /// Extend an existing `classification` dictionary in such a way that every color
+    /// in the `colors` set appears in a `Class` with the specified `features`.
+    ///
+    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
+    /// `{ `a`: [1,2,3], ['b']: [5,6], ['a','b']: [4] }`.
+    ///
+    /// This does not "increase" the number of times a feature appears in a class, it merely
+    /// creates new classes if the feature is not present.
+    #[staticmethod]
+    pub fn ensure(
+        classification: HashMap<Class, ColorSet>,
+        features: Bound<'_, Class>,
+        colors: ColorSet,
+    ) -> PyResult<HashMap<Class, ColorSet>> {
+        let mut new_classification = HashMap::new();
+        for (cls, set) in &classification {
+            // Save the unaffected colors with the existing class.
+            let rest = set.minus(&colors);
+            if !rest.is_empty() {
+                extend_map(&mut new_classification, cls, rest);
+            }
+            // Create a new class for the intersection.
+            let both = set.intersect(&colors);
+            if !both.is_empty() {
+                let new_cls = cls.ensure(features.as_any())?;
+                extend_map(&mut new_classification, &new_cls, both);
+            }
+        }
+        Ok(new_classification)
+    }
+
+    /// Extend an existing `classification` dictionary in such a way that every color
+    /// in the `colors` set has an additional features according to the specified `Class`.
+    ///
+    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
+    /// `{ `a`: [1,2], ['b']: [5,6], ['a','a']: [3], ['a','b']: [4] }`.
+    ///
+    /// In other words, compared to `Class.classification_ensure`, this does "increase" the number
+    /// of times a feature appears in a class.
+    #[staticmethod]
+    pub fn append(
+        classification: HashMap<Class, ColorSet>,
+        features: Bound<'_, Class>,
+        colors: ColorSet,
+    ) -> PyResult<HashMap<Class, ColorSet>> {
+        let mut new_classification = HashMap::new();
+        for (cls, set) in &classification {
+            // Save the unaffected colors with the existing class.
+            let rest = set.minus(&colors);
+            if !rest.is_empty() {
+                extend_map(&mut new_classification, cls, rest);
+            }
+            // Create a new class for the intersection.
+            let both = set.intersect(&colors);
+            if !both.is_empty() {
+                let new_cls = cls.append(features.as_any())?;
+                extend_map(&mut new_classification, &new_cls, both);
+            }
+        }
+        Ok(new_classification)
+    }
+
     /// Read the list of *dynamic assertions* from `.aeon` model annotations.
     ///
     /// An assertion typically encodes a `HctlFormula` that must be satisfied by all
@@ -281,8 +346,8 @@ impl Classification {
     /// you can provide them through the optional `attractors` argument.
     ///
     /// Note that you can achieve similar results using
-    /// `Classification.classify_long_term_behavior` and `Class.classification_ensure`
-    /// (or `Class.classification_append`). However, this process is not limited to attractors
+    /// `Classification.classify_long_term_behavior` and `Classification.ensure`
+    /// (or `Classification.append`). However, this process is not limited to attractors
     /// and can be potentially combined with other features (like HCTL properties).
     #[staticmethod]
     #[pyo3(signature = (graph, attractors = None))]
@@ -475,7 +540,7 @@ impl Classification {
 
             let cls = Class::new_native(vec![name]);
 
-            classification = Class::classification_append(
+            classification = Classification::append(
                 classification,
                 Py::new(py, cls)?.into_bound(py),
                 ColorSet::mk_native(graph.symbolic_context(), valid_set_sanitized),
