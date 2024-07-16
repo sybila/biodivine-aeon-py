@@ -64,7 +64,7 @@ impl VertexSet {
         }
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         match op {
             CompareOp::Eq => VertexSet::semantic_eq(self, other).into_py(py),
             CompareOp::Ne => VertexSet::semantic_eq(self, other).not().into_py(py),
@@ -72,7 +72,7 @@ impl VertexSet {
         }
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!(
             "VertexSet(cardinality={}, symbolic_size={})",
             self.cardinality(),
@@ -80,7 +80,7 @@ impl VertexSet {
         )
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "VertexSet(cardinality={}, symbolic_size={})",
             self.cardinality(),
@@ -88,25 +88,25 @@ impl VertexSet {
         )
     }
 
-    fn __copy__(self_: Py<Self>) -> Py<Self> {
+    pub fn __copy__(self_: Py<Self>) -> Py<Self> {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
+    pub fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
     }
 
-    fn __hash__(&self) -> u64 {
+    pub fn __hash__(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.as_native().hash(&mut hasher);
         hasher.finish()
     }
 
-    fn __iter__(&self) -> PyResult<_VertexModelIterator> {
+    pub fn __iter__(&self) -> PyResult<_VertexModelIterator> {
         self.items(None)
     }
 
-    fn __ctx__(&self) -> Py<SymbolicContext> {
+    pub fn __ctx__(&self) -> Py<SymbolicContext> {
         self.ctx.clone()
     }
 
@@ -116,56 +116,56 @@ impl VertexSet {
     }
 
     /// Set intersection.
-    fn intersect(&self, other: &Self) -> Self {
+    pub fn intersect(&self, other: &Self) -> Self {
         self.mk_derived(self.as_native().intersect(other.as_native()))
     }
 
     /// Set difference.
-    fn minus(&self, other: &Self) -> Self {
+    pub fn minus(&self, other: &Self) -> Self {
         self.mk_derived(self.as_native().minus(other.as_native()))
     }
 
     /// Set union.
-    fn union(&self, other: &Self) -> Self {
+    pub fn union(&self, other: &Self) -> Self {
         self.mk_derived(self.as_native().union(other.as_native()))
     }
 
     /// True if this set is empty.
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.as_native().is_empty()
     }
 
     /// True if this set is a subset of the other set.
     ///
     /// Should be faster than just calling `set.minus(superset).is_empty()`
-    fn is_subset(&self, other: &Self) -> bool {
+    pub fn is_subset(&self, other: &Self) -> bool {
         self.as_native().is_subset(other.as_native())
     }
 
     /// True if this set is a singleton, i.e. a single vertex.
-    fn is_singleton(&self) -> bool {
+    pub fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
 
     /// True if this set is a subspace, i.e. it can be expressed using a single conjunctive clause.
-    fn is_subspace(&self) -> bool {
+    pub fn is_subspace(&self) -> bool {
         self.as_native().is_subspace()
     }
 
     /// Deterministically pick a subset of this set that contains exactly a single vertex.
     ///
     /// If this set is empty, the result is also empty.
-    fn pick_singleton(&self) -> Self {
+    pub fn pick_singleton(&self) -> Self {
         self.mk_derived(self.as_native().pick_singleton())
     }
 
     /// The number of `Bdd` nodes that are used to represent this set.
-    fn symbolic_size(&self) -> usize {
+    pub fn symbolic_size(&self) -> usize {
         self.as_native().symbolic_size()
     }
 
     /// Obtain the underlying `Bdd` of this `VertexSet`.
-    fn to_bdd(&self, py: Python) -> Bdd {
+    pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
         Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
@@ -174,7 +174,7 @@ impl VertexSet {
     /// Extend this set of vertices with all the colors from the given set.
     ///
     /// This is essentially a cartesian product with the given `ColorSet`.
-    fn extend_with_colors(&self, colors: &ColorSet) -> ColoredVertexSet {
+    pub fn extend_with_colors(&self, colors: &ColorSet) -> ColoredVertexSet {
         let colors = colors.as_native().as_bdd();
         let bdd = self.native.as_bdd().and(colors);
         let ctx = self.ctx.get();
@@ -190,7 +190,7 @@ impl VertexSet {
     /// Consequently, the resulting `VertexModel` instances will fail with an `IndexError` if a value of a variable
     /// outside the `retained` set is requested.
     #[pyo3(signature = (retained = None))]
-    fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_VertexModelIterator> {
+    pub fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_VertexModelIterator> {
         let ctx = self.ctx.get();
         let retained = if let Some(retained) = retained {
             retained

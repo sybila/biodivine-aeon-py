@@ -70,7 +70,7 @@ impl ColoredVertexSet {
         }
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         match op {
             CompareOp::Eq => ColoredVertexSet::semantic_eq(self, other).into_py(py),
             CompareOp::Ne => ColoredVertexSet::semantic_eq(self, other).not().into_py(py),
@@ -78,7 +78,7 @@ impl ColoredVertexSet {
         }
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!(
             "ColoredVertexSet(cardinality={}, symbolic_size={})",
             self.cardinality(),
@@ -86,7 +86,7 @@ impl ColoredVertexSet {
         )
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "ColoredVertexSet(cardinality={}, colors={}, vertices={}, symbolic_size={})",
             self.cardinality(),
@@ -96,104 +96,104 @@ impl ColoredVertexSet {
         )
     }
 
-    fn __copy__(self_: Py<Self>) -> Py<Self> {
+    pub fn __copy__(self_: Py<Self>) -> Py<Self> {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
+    pub fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
     }
 
-    fn __hash__(&self) -> u64 {
+    pub fn __hash__(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.as_native().hash(&mut hasher);
         hasher.finish()
     }
 
-    fn __iter__(&self) -> PyResult<_ColorVertexModelIterator> {
+    pub fn __iter__(&self) -> PyResult<_ColorVertexModelIterator> {
         self.items(None, None)
     }
 
-    fn __ctx__(&self) -> Py<SymbolicContext> {
+    pub fn __ctx__(&self) -> Py<SymbolicContext> {
         self.ctx.clone()
     }
 
     /// Returns the number of vertex-color pairs that are represented in this set.
-    fn cardinality(&self) -> BigInt {
+    pub fn cardinality(&self) -> BigInt {
         self.as_native().exact_cardinality()
     }
 
     /// Set intersection.
-    fn intersect(&self, other: &Self) -> Self {
+    pub fn intersect(&self, other: &Self) -> Self {
         self.mk_derived(self.as_native().intersect(other.as_native()))
     }
 
     /// Set difference.
-    fn minus(&self, other: &Self) -> Self {
+    pub fn minus(&self, other: &Self) -> Self {
         self.mk_derived(self.as_native().minus(other.as_native()))
     }
 
     /// Set union.
-    fn union(&self, other: &Self) -> Self {
+    pub fn union(&self, other: &Self) -> Self {
         self.mk_derived(self.as_native().union(other.as_native()))
     }
 
     /// True if this set is empty.
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.as_native().is_empty()
     }
 
     /// True if this set is a subset of the other set.
     ///
     /// Should be faster than just calling `set.minus(superset).is_empty()`
-    fn is_subset(&self, other: &Self) -> bool {
+    pub fn is_subset(&self, other: &Self) -> bool {
         self.as_native().is_subset(other.as_native())
     }
 
     /// True if this set is a singleton, i.e. a single vertex-color pair.
-    fn is_singleton(&self) -> bool {
+    pub fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
 
     /// True if this set is a subspace, i.e. it can be expressed using a single conjunctive clause.
-    fn is_subspace(&self) -> bool {
+    pub fn is_subspace(&self) -> bool {
         self.as_native().is_subspace()
     }
 
     /// The number of `Bdd` nodes that are used to represent this set.
-    fn symbolic_size(&self) -> usize {
+    pub fn symbolic_size(&self) -> usize {
         self.as_native().symbolic_size()
     }
 
     /// Compute the existential projection of this relation to the color component. I.e. returns a set of colors
     /// such that for each color, there is at least one vertex-color pair in the original set.
-    fn colors(&self) -> ColorSet {
+    pub fn colors(&self) -> ColorSet {
         ColorSet::mk_native(self.ctx.clone(), self.as_native().colors())
     }
 
     /// Compute the existential projection of this relation to the vertex component. I.e. returns a set of vertices
     /// such that for each vertex, there is at least one vertex-color pair in the original set.
-    fn vertices(&self) -> VertexSet {
+    pub fn vertices(&self) -> VertexSet {
         VertexSet::mk_native(self.ctx.clone(), self.as_native().vertices())
     }
 
     /// Retain only those vertex-color pairs for which the color is also contained in the given `colors` set.
-    fn intersect_colors(&self, colors: &ColorSet) -> Self {
+    pub fn intersect_colors(&self, colors: &ColorSet) -> Self {
         self.mk_derived(self.as_native().intersect_colors(colors.as_native()))
     }
 
     /// Retain only those vertex-color pairs for which the vertex is also contained in the given `vertex` set.
-    fn intersect_vertices(&self, vertices: &VertexSet) -> Self {
+    pub fn intersect_vertices(&self, vertices: &VertexSet) -> Self {
         self.mk_derived(self.as_native().intersect_vertices(vertices.as_native()))
     }
 
     /// Remove all vertex-color pairs for which the color is present in the given `colors` set.
-    fn minus_colors(&self, colors: &ColorSet) -> Self {
+    pub fn minus_colors(&self, colors: &ColorSet) -> Self {
         self.mk_derived(self.as_native().minus_colors(colors.as_native()))
     }
 
     /// Remove all vertex-color pairs for which the vertex is present in the given `vertex` set.
-    fn minus_vertices(&self, vertices: &VertexSet) -> Self {
+    pub fn minus_vertices(&self, vertices: &VertexSet) -> Self {
         self.mk_derived(self.as_native().minus_vertices(vertices.as_native()))
     }
 
@@ -201,7 +201,7 @@ impl ColoredVertexSet {
     /// with a single vertex in the result relation.
     ///
     /// I.e. for each `color` that appears in this set, `result.intersect_colors(color)` is a singleton.
-    fn pick_color(&self) -> Self {
+    pub fn pick_color(&self) -> Self {
         self.mk_derived(self.as_native().pick_color())
     }
 
@@ -209,19 +209,19 @@ impl ColoredVertexSet {
     /// with a single color in the result relation.
     ///
     /// I.e. for each `vertex` that appears in this set, `result.intersect_vertices(vertex)` is a singleton.
-    fn pick_vertex(&self) -> Self {
+    pub fn pick_vertex(&self) -> Self {
         self.mk_derived(self.as_native().pick_vertex())
     }
 
     /// Deterministically pick a subset of this set that contains exactly a single vertex-color pair.
     ///
     /// If this set is empty, the result is also empty.
-    fn pick_singleton(&self) -> Self {
+    pub fn pick_singleton(&self) -> Self {
         self.mk_derived(self.as_native().pick_singleton())
     }
 
     /// Obtain the underlying `Bdd` of this `ColoredVertexSet`.
-    fn to_bdd(&self, py: Python) -> Bdd {
+    pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
         Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
@@ -239,7 +239,7 @@ impl ColoredVertexSet {
     /// `set.colors().items()`. Similarly, with `retained_variables = None` and `retained_functions = []`, this is
     /// equivalent to `set.vertices().items()`.
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]
-    fn items(
+    pub fn items(
         &self,
         retained_variables: Option<&Bound<'_, PyList>>,
         retained_functions: Option<&Bound<'_, PyList>>,
