@@ -20,7 +20,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::collections::HashMap;
 
-#[pyclass(module = "biodivine_aeon", frozen)]
+#[pyclass(module = "biodivine_aeon", frozen, subclass)]
 pub struct AsynchronousGraph {
     ctx: Py<SymbolicContext>,
     native: SymbolicAsyncGraph,
@@ -753,5 +753,13 @@ impl AsynchronousGraph {
             return Ok(result);
         }
         throw_type_error("Expected a dictionary of `VariableIdType` keys and `BoolType` values.")
+    }
+
+    pub fn wrap_native(py: Python, stg: SymbolicAsyncGraph) -> PyResult<AsynchronousGraph> {
+        let ctx = Py::new(
+            py,
+            SymbolicContext::wrap_native(py, stg.symbolic_context().clone())?,
+        )?;
+        Ok(AsynchronousGraph { ctx, native: stg })
     }
 }
