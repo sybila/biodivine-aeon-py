@@ -147,6 +147,22 @@ impl ColorModel {
         Ok(result)
     }
 
+    /// The same as `ColorModel.to_dict`, but the keys in the dictionary are names, not IDs.
+    pub fn to_named_dict<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDict>> {
+        let result = PyDict::new_bound(py);
+        for x in &self.retained_explicit {
+            let k = self.ctx.get().as_native().get_network_parameter_name(*x);
+            let v = self.instantiate_expression(Right(*x))?.into_py(py);
+            result.set_item(k, v)?;
+        }
+        for x in &self.retained_implicit {
+            let k = self.ctx.get().as_native().get_network_variable_name(*x);
+            let v = self.instantiate_expression(Left(*x))?.into_py(py);
+            result.set_item(k, v)?;
+        }
+        Ok(result)
+    }
+
     /// Return the underlying `BddPartialValuation` for this symbolic model.
     pub fn to_valuation(&self) -> crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation {
         crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation::new_raw(

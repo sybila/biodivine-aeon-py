@@ -110,6 +110,18 @@ impl SpaceModel {
             .collect()
     }
 
+    /// The same as `SpaceModel.to_dict`, but the keys in the dictionary are names, not IDs.
+    pub fn to_named_dict(&self) -> HashMap<String, Option<bool>> {
+        let ctx = self.ctx.get().as_native().inner_context();
+        self.to_values()
+            .into_iter()
+            .map(|(a, b)| {
+                let name = ctx.get_network_variable_name(a);
+                (name, b)
+            })
+            .collect()
+    }
+
     /// Return the underlying `BddPartialValuation` for this symbolic model.
     pub fn to_valuation(&self, py: Python) -> BddPartialValuation {
         BddPartialValuation::new_raw(

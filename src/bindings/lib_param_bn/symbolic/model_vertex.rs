@@ -109,6 +109,19 @@ impl VertexModel {
             .collect()
     }
 
+    /// The same as `VertexModel.to_dict`, but the keys in the dictionary are names, not IDs.
+    pub fn to_named_dict(&self) -> HashMap<String, bool> {
+        let ctx = self.ctx.get().as_native();
+        self.to_values()
+            .into_iter()
+            .map(|(k, v)| {
+                let var = ctx.find_state_variable(k).unwrap();
+                let name = ctx.get_network_variable_name(var);
+                (name, v)
+            })
+            .collect()
+    }
+
     /// Return the underlying `BddPartialValuation` for this symbolic model.
     pub fn to_valuation(&self) -> BddPartialValuation {
         BddPartialValuation::new_raw(self.ctx.get().bdd_variable_set(), self.native.clone())
