@@ -2112,6 +2112,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         </tr>
         <tr>
             <td></td>
+            <td><code>VertexModel.to_named_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>VertexModel.to_valuation</code></td>
         </tr>
         <tr>
@@ -2187,6 +2191,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         <tr>
             <td></td>
             <td><code>ColorModel.to_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.to_named_dict</code></td>
         </tr>
         <tr>
             <td></td>
@@ -2269,6 +2277,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
         <tr>
             <td></td>
             <td><code>SpaceModel.to_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>ColorModel.to_named_dict</code></td>
         </tr>
         <tr>
             <td></td>
