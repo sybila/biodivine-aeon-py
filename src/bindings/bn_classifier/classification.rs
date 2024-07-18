@@ -390,35 +390,117 @@ impl Classification {
     ///
     /// Each phenotype is given as an arbitrary `VertexSet`, identified by a `Class` instance.
     /// Most often, phenotypes are described through sub-spaces (see also
-    /// `AsynchronousGraph.mk_subspace_vertices`). A color satisfies a phenotype if it admits
-    /// an attractor that is fully contained in the given `VertexSet` (i.e. it is not enough
-    /// to have an intersection with the phenotype set).
+    /// `AsynchronousGraph.mk_subspace_vertices`). Each phenotype either holds or does not hold
+    /// in each network attractor. The conditions for this depend on the `PhenotypeOscillation`
+    /// type, that can be optionally given as a second dictionary.
     ///
-    /// Note that typically, phenotypes correspond to disjoint sets of vertices. However, this
-    /// is not a rule, and the method can also deal with colors that satisfy multiple phenotypes.
-    /// Such colors are assigned a class that is the sum of all satisfied classes.
+    ///  - [default] `forbidden`: Phenotype is satisfied if all attractor vertices belong to the
+    ///    given phenotype `VertexSet` (oscillation is forbidden).
+    ///  - `required`: Phenotype is satisfied if the attractor intersects the phenotype set,
+    ///    but is not a proper subset (oscillation always occurs).
+    ///  - `allowed`: Phenotype is satisfied if *some* attractor state belongs to the given
+    ///    phenotype set (i.e. the attractor can be a subset of the phenotype, or just have
+    ///    a non-empty intersection).
     ///
-    /// Colors that do not match any phenotype are returned with an empty class (i.e. `Class([])`).
+    /// A network color `c` then satisfies a phenotype if there *exists* an attractor in `c`
+    /// for which the phenotype holds. Colors that do not match any phenotype are returned with
+    /// an empty class (i.e. `Class([])`).
     ///
-    /// Note that you can (optionally) provide your own attractor sets, assuming these are
-    /// already known. However, computing phenotype classification does not actually require
-    /// precise knowledge of attractors, and hence can be often much faster than exact attractor
-    /// computation (especially if the number of attractors is high). However, you can use this
-    /// option to restrict the input space to a subset of attractors.
+    /// Typically, phenotypes correspond to disjoint sets of vertices. However, this
+    /// is not a rule. Furthermore, the method can also deal with colors that satisfy multiple
+    /// phenotypes. Such colors are assigned a class that is the sum of all satisfied phenotype
+    /// classes.
+    ///
+    /// Note that you can (optionally) provide your own attractor states (or any other relevant
+    /// set of states) as the `initial_trap` argument (the method assumes this is a trap set).
+    /// However, computing phenotype classification does not require precise knowledge of
+    /// attractors. Thus, it can be often much faster than exact attractor computation (especially
+    /// if the number of attractors is high). However, you can use this option to restrict the
+    /// input space if you want to explicitly ignore certain attractors.
     ///
     /// You can also combine the results of this analysis with other classifications (e.g.
-    /// attractor bifurcations, or HCTL properties) using `Class::classification_ensure` or
-    /// `Class::classification_append`.
+    /// attractor bifurcations, or HCTL properties) using `Classification.ensure` or
+    /// `Classification.append`.
     #[staticmethod]
-    #[pyo3(signature = (graph, phenotypes, attractors = None))]
+    #[pyo3(signature = (graph, phenotypes, phenotype_types = None, initial_trap = None))]
     pub fn classify_attractor_phenotypes(
         py: Python,
         graph: &AsynchronousGraph,
         phenotypes: HashMap<Class, VertexSet>,
-        attractors: Option<Vec<ColoredVertexSet>>,
+        phenotype_types: Option<HashMap<Class, String>>,
+        initial_trap: Option<ColoredVertexSet>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
-        unimplemented!()
-        //TODO: Figure out if we want a subset or an intersection.
+        let mut map = HashMap::new();
+        map.insert(Class::new_native(Vec::new()), graph.mk_unit_colors());
+
+        let unit = graph.mk_unit_colored_vertices();
+        let initial_trap = initial_trap.unwrap_or_else(|| graph.mk_unit_colored_vertices());
+
+        for (cls, phenotype) in phenotypes {
+            let p_type = phenotype_types
+                .as_ref()
+                .and_then(|it| it.get(&cls))
+                .map(|it| extract_phenotype_type(it.as_str()))
+                .transpose()?
+                .unwrap_or(PhenotypeOscillationType::Forbidden);
+
+            let phenotype = initial_trap.intersect_vertices(&phenotype);
+
+            let phenotype_colors = match p_type {
+                PhenotypeOscillationType::Forbidden => {
+                    // Oscillation is forbidden. Any attractor that contains a non-phenotype state
+                    // should be disregarded.
+
+                    // Identify all states that can reach something that is not `phenotype`,
+                    // remove them, and take all colors that still appear in the set (there
+                    // exists at least one attractor that is fully contained in the phenotype).
+                    let not_phenotype = unit.minus(&phenotype);
+                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let always_phenotype = phenotype.minus(&not_phenotype);
+                    always_phenotype.colors()
+                }
+                PhenotypeOscillationType::Required => {
+                    // Oscillation is required. Select all attractors that intersect the phenotype
+                    // set, but are not fully contained in it.
+
+                    // This one is a bit more tricky. The idea is that if we remove every attractor
+                    // that is fully contained in the `phenotype` set as well as every attractor
+                    // that is fully outside, we get a trap set with all attractors that intersect
+                    // the `phenotype` set but are not contained in it.
+                    let not_phenotype = unit.minus(&phenotype);
+                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let always_phenotype = phenotype.minus(&not_phenotype);
+                    let is_phenotype = unit.intersect(&phenotype);
+                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let never_phenotype = unit.minus(&is_phenotype);
+                    let can_be_never_or_always = always_phenotype.union(&never_phenotype);
+                    let can_be_never_or_always =
+                        Reachability::reach_bwd(py, graph, &can_be_never_or_always)?;
+                    let always_mixed = unit.minus(&can_be_never_or_always);
+                    always_mixed.colors()
+                }
+                PhenotypeOscillationType::Allowed => {
+                    // Oscillation is allowed. Any attractor that is not fully *outside* the
+                    // phenotype set is valid here.
+
+                    // This is basically negating the phenotype set, and then finding all attractors
+                    // that fully reside in the negated set (forbidden oscillation) and
+                    // disregarding them.
+                    let is_phenotype = unit.intersect(&phenotype);
+                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let never_phenotype = unit.minus(&is_phenotype);
+                    let can_reach_never_phenotype =
+                        Reachability::reach_bwd(py, graph, &never_phenotype)?;
+                    let allowed_phenotype = unit.minus(&can_reach_never_phenotype);
+                    allowed_phenotype.colors()
+                }
+            };
+
+            let py_cls = Py::new(py, cls)?;
+            map = Classification::append(map, py_cls.into_bound(py), phenotype_colors)?
+        }
+
+        Ok(map)
     }
 
     /// Classify the behavior of the given `graph` based on the specified

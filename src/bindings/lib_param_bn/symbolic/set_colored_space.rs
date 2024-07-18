@@ -358,13 +358,25 @@ impl _ColorSpaceModelIterator {
     fn __next__(&mut self, py: Python) -> PyResult<Option<(ColorModel, SpaceModel)>> {
         if let Some(it) = self.native.next() {
             let parent = self.ctx.extract::<Py<SymbolicContext>>(py)?;
+            // Here, we have to create two copies of the partial valuation that don't have
+            // any "invalid" variables, otherwise those could propagate further by instantiating
+            // a symbolic set from the model object.
+            let mut color_val = it.clone();
+            let mut space_val = it.clone();
+            let native_ctx = self.ctx.get().as_native();
+            for s_var in native_ctx.inner_context().all_extra_state_variables() {
+                color_val.unset_value(*s_var);
+            }
+            for p_var in native_ctx.inner_context().parameter_variables() {
+                space_val.unset_value(*p_var);
+            }
             let color = ColorModel::new_native(
                 parent,
-                it.clone(),
+                color_val,
                 self.retained_implicit.clone(),
                 self.retained_explicit.clone(),
             );
-            let vertex = SpaceModel::new_native(self.ctx.clone(), it);
+            let vertex = SpaceModel::new_native(self.ctx.clone(), space_val);
             Ok(Some((color, vertex)))
         } else {
             Ok(None)

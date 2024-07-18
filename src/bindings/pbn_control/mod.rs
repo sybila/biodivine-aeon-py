@@ -7,6 +7,7 @@ mod model_perturbation;
 mod set_colored_perturbation;
 mod set_perturbation;
 
+use crate::bindings::pbn_control::control::Control;
 use crate::bindings::pbn_control::set_colored_perturbation::_ColorPerturbationModelIterator;
 use crate::bindings::pbn_control::set_perturbation::_PerturbationModelIterator;
 use crate::throw_type_error;
@@ -14,7 +15,6 @@ pub use asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 pub use model_perturbation::PerturbationModel;
 pub use set_colored_perturbation::ColoredPerturbationSet;
 pub use set_perturbation::PerturbationSet;
-use crate::bindings::pbn_control::control::Control;
 
 pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<AsynchronousPerturbationGraph>()?;

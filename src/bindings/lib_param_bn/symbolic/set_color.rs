@@ -22,6 +22,7 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSe
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationSet};
 use crate::AsNative;
 
 /// A symbolic representation of a set of "colours", i.e. interpretations of explicit and
@@ -73,7 +74,7 @@ impl ColorSet {
         }
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         match op {
             CompareOp::Eq => ColorSet::semantic_eq(self, other).into_py(py),
             CompareOp::Ne => ColorSet::semantic_eq(self, other).not().into_py(py),
@@ -81,7 +82,7 @@ impl ColorSet {
         }
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!(
             "ColorSet(cardinality={}, symbolic_size={})",
             self.cardinality(),
@@ -89,7 +90,7 @@ impl ColorSet {
         )
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "ColorSet(cardinality={}, symbolic_size={})",
             self.cardinality(),
@@ -97,21 +98,21 @@ impl ColorSet {
         )
     }
 
-    fn __copy__(self_: Py<ColorSet>) -> Py<ColorSet> {
+    pub fn __copy__(self_: Py<ColorSet>) -> Py<ColorSet> {
         self_.clone()
     }
 
-    fn __deepcopy__(self_: Py<ColorSet>, _memo: &Bound<'_, PyAny>) -> Py<ColorSet> {
+    pub fn __deepcopy__(self_: Py<ColorSet>, _memo: &Bound<'_, PyAny>) -> Py<ColorSet> {
         self_.clone()
     }
 
-    fn __hash__(&self) -> u64 {
+    pub fn __hash__(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.as_native().hash(&mut hasher);
         hasher.finish()
     }
 
-    fn __iter__(&self) -> PyResult<_ColorModelIterator> {
+    pub fn __iter__(&self) -> PyResult<_ColorModelIterator> {
         self.items(None)
     }
 
@@ -165,17 +166,17 @@ impl ColorSet {
     /// interpretation.
     ///
     /// If this set is empty, the result is also empty.
-    fn pick_singleton(&self) -> ColorSet {
+    pub fn pick_singleton(&self) -> ColorSet {
         self.mk_derived(self.as_native().pick_singleton())
     }
 
     /// The number of `Bdd` nodes that are used to represent this set.
-    fn symbolic_size(&self) -> usize {
+    pub fn symbolic_size(&self) -> usize {
         self.as_native().symbolic_size()
     }
 
     /// Obtain the underlying `Bdd` of this `ColorSet`.
-    fn to_bdd(&self, py: Python) -> Bdd {
+    pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
         Bdd::new_raw_2(ctx.bdd_variable_set(), rs_bdd)
@@ -184,7 +185,7 @@ impl ColorSet {
     /// Extend this set of colors with all the vertices from the given set.
     ///
     /// This is essentially a cartesian product with the given `VertexSet`.
-    fn extend_with_vertices(&self, vertices: &VertexSet) -> ColoredVertexSet {
+    pub fn extend_with_vertices(&self, vertices: &VertexSet) -> ColoredVertexSet {
         let vertices = vertices.as_native().as_bdd();
         let bdd = self.native.as_bdd().and(vertices);
         let ctx = self.ctx.get();
@@ -195,12 +196,30 @@ impl ColorSet {
     /// Extend this set of colors with all the spaces from the given set.
     ///
     /// This is essentially a cartesian product with the given `SpaceSet`.
-    fn extend_with_spaces(&self, spaces: &SpaceSet) -> ColoredSpaceSet {
+    pub fn extend_with_spaces(&self, spaces: &SpaceSet) -> ColoredSpaceSet {
         let space_bdd = spaces.as_native().as_bdd();
         let bdd = self.native.as_bdd().and(space_bdd);
         let ctx = spaces.__ctx__();
         let native_set = NetworkColoredSpaces::new(bdd, ctx.get().as_native());
         ColoredSpaceSet::wrap_native(ctx, native_set)
+    }
+
+    pub fn extend_with_perturbations(
+        &self,
+        perturbations: &PerturbationSet,
+    ) -> ColoredPerturbationSet {
+        let graph_ctx = perturbations.__ctx__();
+        let perturbation_vars = graph_ctx
+            .get()
+            .as_native()
+            .get_perturbation_bdd_mapping(graph_ctx.get().as_native().perturbable_variables())
+            .into_values()
+            .collect::<Vec<_>>();
+        let colors = self.native.as_bdd().exists(&perturbation_vars);
+        let bdd = perturbations.as_native().as_bdd().and(&colors);
+        let ctx = self.ctx.get();
+        let native_set = GraphColoredVertices::new(bdd, ctx.as_native());
+        ColoredPerturbationSet::mk_native(graph_ctx, native_set)
     }
 
     /// Returns an iterator over all interpretations in this `ColorSet` with an optional projection to a subset
@@ -211,7 +230,7 @@ impl ColorSet {
     /// Consequently, the resulting `ColorModel` instances will fail with an `IndexError` if a value of a function
     /// outside the `retained` set is requested.
     #[pyo3(signature = (retained = None))]
-    fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_ColorModelIterator> {
+    pub fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_ColorModelIterator> {
         let ctx = self.ctx.get();
         let mut retained_explicit = Vec::new();
         let mut retained_implicit = Vec::new();

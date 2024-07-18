@@ -86,7 +86,7 @@ def test_regulatory_graph():
             'sign': '-',
             'essential': False,
             'extra': 1
-        }) # type: ignore
+        })  # type: ignore
     rg2 = RegulatoryGraph(None, ["a -> b", "b -|? c", "c -? a"])
 
     assert rg1 == rg2
@@ -226,7 +226,7 @@ def test_boolean_network_inheritance():
             'sign': '-',
             'essential': False,
             'extra': 1
-        }) # type: ignore
+        })  # type: ignore
     bn2 = BooleanNetwork(None, ["a -> b", "b -|? c", "c -? a"])
 
     assert bn1 == bn2
@@ -1153,3 +1153,17 @@ def test_symbolic_iterators():
         assert fn_b is not None
         fn_b = i.instantiate(fn_b)
         assert str(fn_b) in {"a", "a & c", "a & !c"}
+
+    # Combining models: (uncovered as a real bug)
+
+    it = graph.mk_unit_colored_vertices().__iter__()
+    (m1, _) = it.__next__()
+    (_, m2) = it.__next__()
+    combined = m1.to_symbolic().extend_with_vertices(m2.to_symbolic())
+    assert not combined.is_empty() and combined.is_singleton()
+
+    it = unit_colored_spaces.__iter__()
+    (m1, _) = it.__next__()
+    (_, m2) = it.__next__()
+    combined = m1.to_symbolic().extend_with_spaces(m2.to_symbolic())
+    assert not combined.is_empty() and combined.is_singleton()

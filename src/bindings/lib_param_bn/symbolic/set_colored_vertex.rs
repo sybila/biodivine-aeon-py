@@ -344,13 +344,25 @@ impl _ColorVertexModelIterator {
 
     fn __next__(&mut self) -> Option<(ColorModel, VertexModel)> {
         self.native.next().map(|it| {
+            // Here, we have to create two copies of the partial valuation that don't have
+            // any "invalid" variables, otherwise those could propagate further by instantiating
+            // a symbolic set from the model object.
+            let mut color_val = it.clone();
+            let mut state_val = it.clone();
+            let native_ctx = self.ctx.get().as_native();
+            for s_var in native_ctx.state_variables() {
+                color_val.unset_value(*s_var);
+            }
+            for p_var in native_ctx.parameter_variables() {
+                state_val.unset_value(*p_var);
+            }
             let color = ColorModel::new_native(
                 self.ctx.clone(),
-                it.clone(),
+                color_val,
                 self.retained_implicit.clone(),
                 self.retained_explicit.clone(),
             );
-            let vertex = VertexModel::new_native(self.ctx.clone(), it);
+            let vertex = VertexModel::new_native(self.ctx.clone(), state_val);
             (color, vertex)
         })
     }
