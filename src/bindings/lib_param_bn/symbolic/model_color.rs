@@ -66,6 +66,10 @@ impl ColorModel {
         Ok(format!("ColorModel({{{}}})", items.join(", ")))
     }
 
+    pub fn __repr__(&self) -> PyResult<String> {
+        self.__str__()
+    }
+
     /// The number of actual uninterpreted functions in this `ColorModel`.
     pub fn __len__(&self) -> usize {
         self.retained_implicit.len() + self.retained_explicit.len()

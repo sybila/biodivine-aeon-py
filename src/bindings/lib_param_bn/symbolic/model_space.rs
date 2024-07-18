@@ -46,6 +46,10 @@ impl SpaceModel {
         format!("SpaceModel({{{}}})", items.join(", "))
     }
 
+    pub fn __repr__(&self) -> String {
+        self.__str__()
+    }
+
     /// The number of actual values in this `VertexModel` (i.e. retained network variables).
     pub fn __len__(&self) -> usize {
         self.to_values().len()
