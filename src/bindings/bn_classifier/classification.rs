@@ -422,12 +422,12 @@ impl Classification {
     /// attractor bifurcations, or HCTL properties) using `Classification.ensure` or
     /// `Classification.append`.
     #[staticmethod]
-    #[pyo3(signature = (graph, phenotypes, phenotype_types = None, initial_trap = None))]
+    #[pyo3(signature = (graph, phenotypes, oscillation_types = None, initial_trap = None))]
     pub fn classify_attractor_phenotypes(
         py: Python,
         graph: &AsynchronousGraph,
         phenotypes: HashMap<Class, VertexSet>,
-        phenotype_types: Option<HashMap<Class, String>>,
+        oscillation_types: Option<HashMap<Class, String>>,
         initial_trap: Option<ColoredVertexSet>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let mut map = HashMap::new();
@@ -437,7 +437,7 @@ impl Classification {
         let initial_trap = initial_trap.unwrap_or_else(|| graph.mk_unit_colored_vertices());
 
         for (cls, phenotype) in phenotypes {
-            let p_type = phenotype_types
+            let p_type = oscillation_types
                 .as_ref()
                 .and_then(|it| it.get(&cls))
                 .map(|it| extract_phenotype_type(it.as_str()))

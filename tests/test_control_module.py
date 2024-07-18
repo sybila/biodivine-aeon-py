@@ -10,19 +10,19 @@ def test_witness():
     pstg = AsynchronousPerturbationGraph(bn)
 
     attractors = Attractors.attractors(pstg)
-    attractors = [a.vertices() for a in attractors]
+    attractor_states = [a.vertices() for a in attractors]
 
     erythrocyte = pstg.mk_subspace_vertices({"EKLF": True})
-    erythrocyte_att = [a for a in attractors if not a.intersect(erythrocyte).is_empty()][0]
+    erythrocyte_att = [a for a in attractor_states if not a.intersect(erythrocyte).is_empty()][0]
 
     megakaryocyte = pstg.mk_subspace_vertices({"Fli1": True})
-    megakaryocyte_att = [a for a in attractors if not a.intersect(megakaryocyte).is_empty()][0]
+    megakaryocyte_att = [a for a in attractor_states if not a.intersect(megakaryocyte).is_empty()][0]
 
     # monocyte = pstg.mk_subspace_vertices({"cJun": True})
-    # monocyte_att = [a for a in attractors if not a.intersect(monocyte).is_empty()][0]
+    # monocyte_att = [a for a in attractor_states if not a.intersect(monocyte).is_empty()][0]
 
     # granulocyte = pstg.mk_subspace_vertices({"Gfi1": True})
-    # granulocyte_att = [a for a in attractors if not a.intersect(granulocyte).is_empty()][0]
+    # granulocyte_att = [a for a in attractor_states if not a.intersect(granulocyte).is_empty()][0]
 
     sym_results = Control.attractor_one_step(pstg, erythrocyte_att, megakaryocyte_att)
 

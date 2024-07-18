@@ -136,7 +136,8 @@ List of hybrid quantifiers supported by the HCTL model checker.
 PhenotypeOscillation = Literal["required", "allowed", "forbidden"]
 """
 The possible modes of oscillation in a phenotype set:
- - `required`: To satisfy the phenotype, an attractor must visit the phenotype set intermittently (i.e. it cannot be proper subset).
+ - `required`: To satisfy the phenotype, an attractor must visit the phenotype set intermittently
+ (i.e. it cannot be proper subset).
  - `forbidden`: To satisfy the phenotype, an attractor must fully reside in the phenotype set.
  - `allowed`: To satisfy the phenotype, an attractor must intersect the phenotype set, but it does not matter whether
  it is fully contained in it or simply visits it intermittently.

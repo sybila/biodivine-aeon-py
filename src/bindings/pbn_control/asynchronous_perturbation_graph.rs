@@ -17,12 +17,13 @@ use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::pbn_control::control::sanitize_control_map;
 use crate::bindings::pbn_control::set_colored_perturbation::ColoredPerturbationSet;
 use crate::bindings::pbn_control::PerturbationSet;
 use crate::pyo3_utils::resolve_boolean;
 use crate::{throw_runtime_error, AsNative};
 
-/// An extension of `AsynchronousGraph` that admits variable various perturbation through
+/// An extension of `AsynchronousGraph` that admits various variable perturbations through
 /// additional colors/parameters. Such graph can then be analyzed to extract control strategies
 /// (perturbations) that are sufficient to achieve a particular outcome (an attractor or
 /// a phenotype).
@@ -32,18 +33,19 @@ use crate::{throw_runtime_error, AsNative};
 /// behavior in a BN. However, in this case, it is also necessary to modify the actual update
 /// functions of the network. Hence, this implementation extends the `AsynchronousGraph` directly.
 ///
-/// To represent perturbations, `PerturbedAsynchronousGraph` introduces the following
+/// To represent perturbations, `AsynchronousPerturbedGraph` introduces the following
 /// changes to the network dynamics:
-///     - For each variable (that can be perturbed), we create an explicit Boolean
-///       "perturbation parameter".
-///     - Implicit parameters are given explicit names, since we may need to augment the update
-///       functions of these variables with perturbation parameters.
-///     - We maintain two versions of network dynamics: *original* (unperturbed), meaning the additional
-///       parameters have no impact on the update functions, and *perturbed*, where a variable is
-///       allowed to evolve only if it is not perturbed.
-///     - This representation allows us to also encode sets of perturbations, since for a perturbed
-///       variable, we can use the state variable (that would otherwise be unused) to represent
-///       the value to which the variable is perturbed.
+///
+///  - For each variable (that can be perturbed), we create an explicit Boolean
+///  "perturbation parameter".
+///  - Implicit parameters are given explicit names, since we may need to augment the update
+///  functions of these variables with perturbation parameters.
+///  - We maintain two versions of network dynamics: *original* (unperturbed), meaning the additional
+///  parameters have no impact on the update functions, and *perturbed*, where a variable is
+///  allowed to evolve only if it is not perturbed.
+///  - This representation allows us to also encode sets of perturbations, since for a perturbed
+///  variable, we can use the state variable (that would otherwise be unused) to represent
+///  the value to which the variable is perturbed.
 ///
 /// Note that this encoding does not implicitly assume any perturbation temporality (one-step,
 /// permanent, temporary). These aspects are managed by the analysis algorithms.
@@ -52,7 +54,7 @@ use crate::{throw_runtime_error, AsNative};
 /// and the newly introduced parameters are set to `False`, i.e. unperturbed. The perturbation
 /// parameters always appear in the symbolic encoding, they are just not considered in the update
 /// functions. To access the "perturbed" dynamics,
-/// see `PerturbationAsynchronousGraph.to_perturbed`.*
+/// see `AsynchronousPerturbationGraph.to_perturbed`.*
 ///
 #[pyclass(module="biodivine_aeon", extends=AsynchronousGraph, frozen)]
 #[derive(Clone, Wrapper)]
@@ -101,22 +103,32 @@ impl AsynchronousPerturbationGraph {
         format!("AsynchronousPerturbationGraph({})", ctx.get().__str__())
     }
 
+    /// Reconstruct the `BooleanNetwork` that represents the *unperturbed* dynamics of this graph.
+    /// The network does not contain any perturbation parameters.
+    ///
+    /// (see also `AsynchronousGraph.reconstruct_network`).
     pub fn reconstruct_network(_self: Bound<'_, Self>, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let result = _self.borrow().as_ref().reconstruct_network(py)?;
         let result_ref = result.borrow(py);
         result_ref.prune_unused_parameters(py)
     }
 
+    /// Return a "unit" (i.e. full) `ColoredVertexSet`, with the perturbation
+    /// parameters all fixed to `False`.
     pub fn mk_unit_colored_vertices(_self: Bound<'_, Self>) -> ColoredVertexSet {
         let unit = _self.borrow().as_ref().mk_unit_colored_vertices();
         Self::mk_unperturbable_colored_vertex_set(&_self, unit.as_native())
     }
 
+    /// Return a "unit" (i.e. full) `ColorSet`, with the perturbation
+    /// parameters all fixed to `False`.
     pub fn mk_unit_colors(_self: Bound<'_, Self>) -> ColorSet {
         let unit = _self.borrow().as_ref().mk_unit_colors();
         Self::mk_unperturbable_color_set(&_self, unit.as_native())
     }
 
+    /// A version of `AsynchronousGraph.mk_function_row_colors` that also fixes the perturbation
+    /// parameters for `False`.
     pub fn mk_function_row_colors(
         _self: Bound<'_, Self>,
         function: &Bound<'_, PyAny>,
@@ -130,6 +142,8 @@ impl AsynchronousPerturbationGraph {
         Ok(Self::mk_unperturbable_color_set(&_self, result.as_native()))
     }
 
+    /// A version of `AsynchronousGraph.mk_function_colors` that also fixes the perturbation
+    /// parameters for `False`.
     pub fn mk_function_colors(
         _self: Bound<'_, Self>,
         function: &Bound<'_, PyAny>,
@@ -142,6 +156,8 @@ impl AsynchronousPerturbationGraph {
         Ok(Self::mk_unperturbable_color_set(&_self, result.as_native()))
     }
 
+    /// A version of `AsynchronousGraph.mk_subspace` that also fixes the perturbation
+    /// parameters for `False`.
     pub fn mk_subspace(
         _self: Bound<'_, Self>,
         subspace: &Bound<'_, PyAny>,
@@ -158,7 +174,8 @@ impl AsynchronousPerturbationGraph {
     */
 
     /// A copy of the *base* `BooleanNetwork` that was used to create this graph,
-    /// without additional perturbation parameters.
+    /// without additional perturbation parameters or any modification (e.g. still with all
+    /// implicit parameters).
     pub fn base_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
         // a network object.
@@ -199,7 +216,9 @@ impl AsynchronousPerturbationGraph {
     /// perturbations, but does not actually use them in any meaningful way.
     ///
     /// This is effectively the "parent" implementation of this instance, so you can already
-    /// access these methods directly by calling them on this graph.
+    /// access these methods directly by calling them on this graph. Just keep in mind that
+    /// methods that return color sets do not fix the perturbation parameters to `False` in
+    /// the "parent" implementation.
     ///
     /// See also `AsynchronousPerturbationGraph.to_perturbed()`.
     pub fn to_original(&self, py: Python) -> PyResult<AsynchronousGraph> {
@@ -211,7 +230,7 @@ impl AsynchronousPerturbationGraph {
     /// perturbations, and they do affect the state-transitions: In colors where a variable
     /// is perturbed, it cannot be updated.
     ///
-    /// See also `AsynchronousPerturbationGraph.to_unperturbed()`.
+    /// See also `AsynchronousPerturbationGraph.to_original()`.
     pub fn to_perturbed(&self, py: Python) -> PyResult<AsynchronousGraph> {
         AsynchronousGraph::wrap_native(py, self.as_native().as_perturbed().clone())
     }
@@ -295,7 +314,10 @@ impl AsynchronousPerturbationGraph {
             .borrow()
             .as_native()
             .post_perturbation(&source, target.as_native());
-        Ok(ColoredPerturbationSet::mk_native(_self.unbind(), result))
+        Ok(sanitize_control_map(
+            _self.unbind(),
+            result.as_bdd().clone(),
+        ))
     }
 
     /// Return the set of all perturbations that are valid in this graph.

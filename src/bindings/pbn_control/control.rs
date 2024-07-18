@@ -125,7 +125,7 @@ impl Control {
     /// specified target `phenotype` from any initial state, assuming the perturbation
     /// is applied indefinitely.
     ///
-    /// Optionally, you can provide an `oscillation_type` that specifies whether the attractors
+    /// Optionally, you can provide an `PhenotypeOscillation` type that specifies whether the attractors
     /// must fully reside in the `phenotype` set (`forbidden`), can only intersect the
     /// phenotype set but still be proper subsets (`allowed`), or must intersect the phenotype
     /// while not being subsets (`required`). Default behavior is `forbidden`,
@@ -202,7 +202,7 @@ fn extract_state(
 /// Tries to "normalize" a control map into a state in which it can be safely handled by
 /// `ColoredPerturbationSet`. In particular, this means that any state variable must be
 /// unconstrained in cases where it is unperturbed.
-fn sanitize_control_map(
+pub fn sanitize_control_map(
     graph: Py<AsynchronousPerturbationGraph>,
     mut bdd: biodivine_lib_bdd::Bdd,
 ) -> ColoredPerturbationSet {
