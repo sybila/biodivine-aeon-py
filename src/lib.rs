@@ -1,6 +1,5 @@
 use pyo3::exceptions::{PyIndexError, PyInterruptedError, PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
 use pyo3::{PyResult, Python};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
@@ -30,7 +29,9 @@ pub mod bindings;
 mod internal;
 mod pyo3_utils;
 
-fn set_log_level(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
+fn set_log_level(_py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
+    /* Disable default logging. Turns out this is not so useful after all.
+
     // This should be an error when running as a script or a normal shell, but returns a name in notebooks.
     // https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
     let is_notebook = py.eval_bound("get_ipython().__class__.__name__", None, None);
@@ -52,6 +53,7 @@ fn set_log_level(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
         println!("Detected interactive mode. Log level set to `LOG_ESSENTIAL`.");
         return module.setattr("LOG_LEVEL", 1);
     }
+    */
     module.setattr("LOG_LEVEL", 0)
 }
 
