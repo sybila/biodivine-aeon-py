@@ -33,7 +33,7 @@ use crate::{throw_runtime_error, AsNative};
 /// introduces some issues in terms of cardinality computation and iterators, since we now have
 /// to account for the fact that if a variable is unperturbed, it actually generates two
 /// perturbation instances (one with state variable `true`, one with `false`). We generally
-/// address this by fixing the state variable to `false` in such instances.
+/// address this by manually fixing the state variable to `false` within these operations.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct PerturbationSet {

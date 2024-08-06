@@ -367,6 +367,61 @@ impl AsynchronousPerturbationGraph {
         _self.borrow(py).as_ref().mk_unit_colored_vertices()
     }
 
+    /// Create a singleton `PerturbationSet` based on the given values of perturbable variables.
+    ///
+    /// The difference between this method and `AsynchronousPerturbationGraph.mk_perturbations`
+    /// is in how missing values are treated: In `mk_perturbations`, a variable with an unspecified
+    /// value is treated as unconstrained: i.e. it can be unperturbed, or perturbed to
+    /// `False`/`True`. Meanwhile, `mk_perturbation` treats any unspecified value as unperturbed,
+    /// since the result must always represent a single perturbation.
+    pub fn mk_perturbation(
+        _self: Py<Self>,
+        py: Python,
+        perturbation: &Bound<'_, PyDict>,
+    ) -> PyResult<PerturbationSet> {
+        let self_borrow = _self.borrow(py);
+        let parent = self_borrow.as_ref();
+        let mut partial_valuation = biodivine_lib_bdd::BddPartialValuation::empty();
+        let perturbable = _self.get().as_native().perturbable_variables();
+        let map = _self
+            .get()
+            .as_native()
+            .get_perturbation_bdd_mapping(perturbable);
+        // Init the partial valuation such that everything is unperturbed initially.
+        for bdd_var in map.values() {
+            partial_valuation.set_value(*bdd_var, false);
+        }
+
+        // Read data from the dictionary.
+        for (k, v) in perturbation {
+            let k_var = parent.resolve_network_variable(&k)?;
+            let s_var = parent
+                .as_native()
+                .symbolic_context()
+                .get_state_variable(k_var);
+            let Some(p_var) = map.get(&k_var).cloned() else {
+                return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
+            };
+
+            let val = v.extract::<Option<bool>>()?;
+            match val {
+                None => partial_valuation.set_value(p_var, false),
+                Some(val) => {
+                    partial_valuation.set_value(p_var, true);
+                    partial_valuation.set_value(s_var, val);
+                }
+            }
+        }
+
+        let bdd = parent
+            .as_native()
+            .symbolic_context()
+            .bdd_variable_set()
+            .mk_conjunctive_clause(&partial_valuation);
+        let set = GraphColoredVertices::new(bdd, parent.as_native().symbolic_context());
+        Ok(PerturbationSet::mk_native(_self.clone(), set))
+    }
+
     /// Create a set of perturbations that match the given dictionary of values.
     ///
     /// The dictionary should contain `True`/`False` for a perturbed variable and `None` for

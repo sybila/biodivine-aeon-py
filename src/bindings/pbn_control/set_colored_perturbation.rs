@@ -262,10 +262,57 @@ impl ColoredPerturbationSet {
         self.mk_derived(self.as_native().minus(perturbations.as_native()))
     }
 
+    /// Return the subset of this relation that has all the perturbations fixed according to the
+    /// provided values.
+    ///
+    /// To specify that a variable should be unperturbed, use `"var": None`. Any variable that
+    /// should remain unrestricted should be completely omitted from the `perturbations`
+    /// dictionary. This is similar to `AsynchronousPerturbationGraph.mk_perturbations`.
+    fn select_perturbations(
+        &self,
+        py: Python,
+        perturbations: &Bound<'_, PyDict>,
+    ) -> PyResult<ColoredPerturbationSet> {
+        let borrowed = self.ctx.borrow(py);
+        let parent = borrowed.as_ref();
+        let native_graph = self.ctx.get().as_native();
+        let mapping =
+            native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
+        let mut selection = biodivine_lib_bdd::BddPartialValuation::empty();
+
+        // Go through the given perturbation and mark everything that should be perturbed.
+        for (k, v) in perturbations {
+            let k_var = parent.resolve_network_variable(&k)?;
+            let s_var = parent
+                .as_native()
+                .symbolic_context()
+                .get_state_variable(k_var);
+            let Some(p_var) = mapping.get(&k_var).cloned() else {
+                return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
+            };
+
+            match v.extract::<Option<bool>>()? {
+                Some(val) => {
+                    selection.set_value(p_var, true);
+                    selection.set_value(s_var, val);
+                }
+                None => {
+                    selection.set_value(p_var, false);
+                }
+            }
+        }
+
+        let bdd = self.as_native().as_bdd().select(&selection.to_values());
+        let native = GraphColoredVertices::new(bdd, native_graph.as_symbolic_context());
+
+        Ok(ColoredPerturbationSet::mk_native(self.ctx.clone(), native))
+    }
+
     /// Return the set of colors for which the given perturbation exists in this set.
     ///
     /// *Note that here, we assume that the dictionary represents a single perturbation. Therefore,
-    /// any missing perturbable variables are treated as unperturbed.*
+    /// any missing perturbable variables are treated as unperturbed.* This is the same behavior
+    /// as in `AsynchronousPerturbationGraph.mk_perturbation`.
     ///
     fn select_perturbation(
         &self,
@@ -332,19 +379,36 @@ impl ColoredPerturbationSet {
         AsynchronousPerturbationGraph::colored_robustness(self.ctx.bind(py).clone(), &colors)
     }
 
+    /// Only retain those perturbations that have the given `size`. If `up_to` is set to `True`,
+    /// then retain perturbations that have smaller or equal size.
+    ///
+    /// This is similar to `AsynchronousPerturbationGraph.mk_perturbations_with_size`.
+    fn select_by_size(&self, py: Python, size: usize, up_to: bool) -> ColoredPerturbationSet {
+        let sized = AsynchronousPerturbationGraph::mk_perturbations_with_size(
+            self.ctx.clone(),
+            py,
+            size,
+            up_to,
+        );
+        self.intersect_perturbations(&sized)
+    }
+
     /// Select all perturbations from this relation whose robustness is at least the given
     /// `threshold`.
     ///
-    /// The perturbations are returned from smallest to largest. Optionally, you can use
-    /// `size_limit` to restrict the maximal perturbation size that will be considered, and
-    /// `result_limit` to restrict the maximal number of returned perturbations.
+    /// Since this operation cannot be completed symbolically, the result is a list of explicit
+    /// `PerturbationModel` instances, together with their robustness and their `ColorSet`.
+    /// The perturbations are returned from smallest to largest (in terms of the number of
+    /// perturbed variables, not robustness). Optionally, you can use `result_limit` to restrict
+    /// the maximal number of returned perturbations.
     ///
-    #[pyo3(signature = (threshold, size_limit = None, result_limit = None))]
+    /// You can also use `ColoredPerturbationSet.select_by_size` to first only select perturbations
+    /// of a specific size and only then enumerate their robustness.
+    #[pyo3(signature = (threshold, result_limit = None))]
     fn select_by_robustness(
         &self,
         py: Python,
         threshold: f64,
-        size_limit: Option<usize>,
         result_limit: Option<usize>,
     ) -> PyResult<Vec<(PerturbationModel, f64, ColorSet)>> {
         if threshold <= 0.0 || threshold > 1.0 {
@@ -353,8 +417,7 @@ impl ColoredPerturbationSet {
 
         let mut results = Vec::new();
 
-        let size_limit =
-            size_limit.unwrap_or_else(|| self.ctx.get().as_native().perturbable_variables().len());
+        let size_limit = self.ctx.get().as_native().perturbable_variables().len();
         let perturbations = self.perturbations();
         for size in 0..=size_limit {
             let size_perturbations = AsynchronousPerturbationGraph::mk_perturbations_with_size(

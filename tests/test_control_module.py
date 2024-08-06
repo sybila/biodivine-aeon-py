@@ -31,7 +31,7 @@ def test_witness():
     assert sym_results.select_perturbation({"EKLF": False, "Fli1": True}).is_singleton()
 
     # There should be exactly one perturbation of size 2 that works.
-    good = sym_results.select_by_robustness(0.99, size_limit=2, result_limit=10)
+    good = sym_results.select_by_size(size=2, up_to=True).select_by_robustness(0.99, result_limit=10)
     assert len(good) == 1
     assert good[0][0]["EKLF"] is False
     assert good[0][0]["Fli1"] is True
@@ -43,7 +43,7 @@ def test_witness():
                                                    size_limit=10)
 
     # Similarly, only one perturbation of size 2 actually works for phenotype control
-    good = phen_sym_results.select_by_robustness(threshold=0.99, size_limit=2, result_limit=10)
+    good = phen_sym_results.select_by_size(size=2, up_to=True).select_by_robustness(threshold=0.99, result_limit=10)
     assert len(good) == 1
     assert good[0][0].perturbation_size() == 2
     assert good[0][0]["Fli1"] is True
@@ -209,6 +209,7 @@ def test_symbolic_representation():
     assert empty_pert.is_subset(unit_pert)
 
     single = graph.mk_perturbations({"a": True, "c": None})
+    assert graph.mk_perturbation({"a": True}) == single
     assert not unit_pert.is_singleton()
     assert single.is_singleton()
     assert single.cardinality() == 1
@@ -244,7 +245,7 @@ def test_symbolic_representation():
     assert unit_set.minus_perturbations(unit_pert.pick_singleton()).cardinality() == 9 * 8
 
     p_singleton = unit_pert.pick_singleton()
-    assert graph.mk_perturbations({"a": None, "c": None}) == p_singleton
+    assert graph.mk_perturbation({}) == p_singleton
     assert unit_set.select_perturbation({"a": None, "c": None}).cardinality() == 9
     assert unit_set.minus_perturbations(p_singleton).select_perturbation({"a": None, "c": None}).is_empty()
 
@@ -252,17 +253,23 @@ def test_symbolic_representation():
     some_colors = graph.mk_function_colors("f", "true")
     some_set = unit_set.minus(p_singleton.extend_with_colors(some_colors))
 
+    assert some_set.select_perturbations({}) == some_set
+    assert some_set.select_perturbations({"a": True}).cardinality() == 3 * 9
+    assert some_set.select_perturbations({"a": None}).cardinality() == 2 * 9 + 6
+
     # Test that robustness is computed correctly for this set.
     assert some_set.select_perturbation({"a": True, "c": False}).cardinality() == 9
-    assert some_set.select_perturbation({"a": None, "c": None}).cardinality() == 6
+    assert some_set.select_perturbation({}).cardinality() == 6
 
     assert some_set.perturbation_robustness({"a": True, "c": False}) == 1.0
     assert some_set.perturbation_robustness({"a": None, "c": None}) == 0.666666  # 6 / 9 rounded to 6 places.
 
+    some_set_zero = some_set.select_by_size(0, up_to=True)
+    some_set_one = some_set.select_by_size(1, up_to=True)
     assert len(some_set.select_by_robustness(0.99)) == unit_pert.cardinality() - 1
-    assert len(some_set.select_by_robustness(0.99, size_limit=0)) == 0
-    assert len(some_set.select_by_robustness(0.50, size_limit=0)) == 1
-    assert len(some_set.select_by_robustness(0.99, size_limit=1)) == 4
-    assert len(some_set.select_by_robustness(0.50, size_limit=1)) == 5
-    assert some_set.select_by_robustness(0.99, size_limit=1, result_limit=1)[0][0].perturbation_size() == 1
-    assert some_set.select_by_robustness(0.50, size_limit=1, result_limit=1)[0][0].perturbation_size() == 0
+    assert len(some_set_zero.select_by_robustness(0.99)) == 0
+    assert len(some_set_zero.select_by_robustness(0.50)) == 1
+    assert len(some_set_one.select_by_robustness(0.99)) == 4
+    assert len(some_set_one.select_by_robustness(0.50)) == 5
+    assert some_set_one.select_by_robustness(0.99, result_limit=1)[0][0].perturbation_size() == 1
+    assert some_set_one.select_by_robustness(0.50, result_limit=1)[0][0].perturbation_size() == 0
