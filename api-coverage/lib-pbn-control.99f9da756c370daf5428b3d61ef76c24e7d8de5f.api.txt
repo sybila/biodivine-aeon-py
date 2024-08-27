@@ -1,0 +1,249 @@
+pub mod biodivine_pbn_control
+pub mod biodivine_pbn_control::aeon
+pub mod biodivine_pbn_control::aeon::attractors
+pub fn biodivine_pbn_control::aeon::attractors::compute(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, verbose: bool) -> alloc::vec::Vec<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+pub mod biodivine_pbn_control::aeon::config
+pub mod biodivine_pbn_control::aeon::phentoype
+pub fn biodivine_pbn_control::aeon::phentoype::build_phenotype(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, phenotype: std::collections::hash::map::HashMap<&str, bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphVertices
+pub fn biodivine_pbn_control::aeon::phentoype::resolve_var_id(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, var: &str) -> core::option::Option<biodivine_lib_param_bn::VariableId>
+pub mod biodivine_pbn_control::aeon::reachability
+pub fn biodivine_pbn_control::aeon::reachability::backward(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, verbose: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::aeon::reachability::backward_closed_subset(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::aeon::reachability::backward_within(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, bounds: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, verbose: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::aeon::reachability::forward(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, verbose: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::aeon::reachability::forward_closed(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, verbose: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::aeon::reachability::forward_closed_subset(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::aeon::reachability::forward_closed_within(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, bounds: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, verbose: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::aeon::reachability::forward_within(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, initial: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, bounds: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, verbose: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub mod biodivine_pbn_control::control
+pub mod biodivine_pbn_control::control::_impl_attractor_control_map
+pub mod biodivine_pbn_control::control::_impl_one_step_control
+pub mod biodivine_pbn_control::control::_impl_permanent_control
+pub mod biodivine_pbn_control::control::_impl_phenotype_control_map
+pub mod biodivine_pbn_control::control::_impl_phenotype_permanent_control
+pub mod biodivine_pbn_control::control::_impl_temporary_control
+pub mod biodivine_pbn_control::control::_symbolic_utils
+pub fn biodivine_pbn_control::control::_symbolic_utils::mk_bdd_of_bound(ctx: &biodivine_lib_bdd::BddVariableSet, variables: &[biodivine_lib_bdd::BddVariable], bound: usize) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_pbn_control::control::_symbolic_utils::mk_bdd_up_to_bound(ctx: &biodivine_lib_bdd::BddVariableSet, variables: &[biodivine_lib_bdd::BddVariable], bound: usize) -> biodivine_lib_bdd::Bdd
+pub enum biodivine_pbn_control::control::PhenotypeOscillationType
+pub biodivine_pbn_control::control::PhenotypeOscillationType::Allowed
+pub biodivine_pbn_control::control::PhenotypeOscillationType::Forbidden
+pub biodivine_pbn_control::control::PhenotypeOscillationType::Required
+impl core::clone::Clone for biodivine_pbn_control::control::PhenotypeOscillationType
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::clone(&self) -> biodivine_pbn_control::control::PhenotypeOscillationType
+impl core::marker::Freeze for biodivine_pbn_control::control::PhenotypeOscillationType
+impl core::marker::Send for biodivine_pbn_control::control::PhenotypeOscillationType
+impl core::marker::Sync for biodivine_pbn_control::control::PhenotypeOscillationType
+impl core::marker::Unpin for biodivine_pbn_control::control::PhenotypeOscillationType
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_pbn_control::control::PhenotypeOscillationType
+impl core::panic::unwind_safe::UnwindSafe for biodivine_pbn_control::control::PhenotypeOscillationType
+impl<T, U> core::convert::Into<U> for biodivine_pbn_control::control::PhenotypeOscillationType where U: core::convert::From<T>
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_pbn_control::control::PhenotypeOscillationType where U: core::convert::Into<T>
+pub type biodivine_pbn_control::control::PhenotypeOscillationType::Error = core::convert::Infallible
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_pbn_control::control::PhenotypeOscillationType where U: core::convert::TryFrom<T>
+pub type biodivine_pbn_control::control::PhenotypeOscillationType::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_pbn_control::control::PhenotypeOscillationType where T: core::clone::Clone
+pub type biodivine_pbn_control::control::PhenotypeOscillationType::Owned = T
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::clone_into(&self, target: &mut T)
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_pbn_control::control::PhenotypeOscillationType where T: 'static + core::marker::Sized
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_pbn_control::control::PhenotypeOscillationType where T: core::marker::Sized
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_pbn_control::control::PhenotypeOscillationType where T: core::marker::Sized
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_pbn_control::control::PhenotypeOscillationType where T: core::clone::Clone
+pub unsafe fn biodivine_pbn_control::control::PhenotypeOscillationType::clone_to_uninit(&self, dst: *mut T)
+impl<T> core::convert::From<T> for biodivine_pbn_control::control::PhenotypeOscillationType
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_pbn_control::control::PhenotypeOscillationType where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_pbn_control::control::PhenotypeOscillationType::vzip(self) -> V
+pub struct biodivine_pbn_control::control::AttractorControlMap
+impl biodivine_pbn_control::control::AttractorControlMap
+pub fn biodivine_pbn_control::control::AttractorControlMap::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_pbn_control::control::AttractorControlMap::as_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::control::AttractorControlMap::controllable_colors_cardinality(&self) -> f64
+pub fn biodivine_pbn_control::control::AttractorControlMap::exclude_perturbation(&mut self, variable: biodivine_lib_param_bn::VariableId, value: core::option::Option<&bool>)
+pub fn biodivine_pbn_control::control::AttractorControlMap::jump_vertices(&self) -> f64
+pub fn biodivine_pbn_control::control::AttractorControlMap::require_perturbation(&mut self, variable: biodivine_lib_param_bn::VariableId, value: core::option::Option<&bool>)
+impl biodivine_pbn_control::control::ControlMap for biodivine_pbn_control::control::AttractorControlMap
+pub fn biodivine_pbn_control::control::AttractorControlMap::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_pbn_control::control::AttractorControlMap::as_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::control::AttractorControlMap::new(context: biodivine_pbn_control::perturbation::PerturbationGraph, perturbation_set: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+pub fn biodivine_pbn_control::control::AttractorControlMap::perturbation_working_colors(&self, perturbation: &std::collections::hash::map::HashMap<alloc::string::String, bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::control::AttractorControlMap::working_perturbations(&self, min_robustness: f64, _verbose: bool, return_all: bool) -> alloc::vec::Vec<(std::collections::hash::map::HashMap<alloc::string::String, bool>, biodivine_lib_param_bn::symbolic_async_graph::GraphColors)>
+impl core::clone::Clone for biodivine_pbn_control::control::AttractorControlMap
+pub fn biodivine_pbn_control::control::AttractorControlMap::clone(&self) -> biodivine_pbn_control::control::AttractorControlMap
+impl core::marker::Freeze for biodivine_pbn_control::control::AttractorControlMap
+impl core::marker::Send for biodivine_pbn_control::control::AttractorControlMap
+impl core::marker::Sync for biodivine_pbn_control::control::AttractorControlMap
+impl core::marker::Unpin for biodivine_pbn_control::control::AttractorControlMap
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_pbn_control::control::AttractorControlMap
+impl core::panic::unwind_safe::UnwindSafe for biodivine_pbn_control::control::AttractorControlMap
+impl<T, U> core::convert::Into<U> for biodivine_pbn_control::control::AttractorControlMap where U: core::convert::From<T>
+pub fn biodivine_pbn_control::control::AttractorControlMap::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_pbn_control::control::AttractorControlMap where U: core::convert::Into<T>
+pub type biodivine_pbn_control::control::AttractorControlMap::Error = core::convert::Infallible
+pub fn biodivine_pbn_control::control::AttractorControlMap::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_pbn_control::control::AttractorControlMap where U: core::convert::TryFrom<T>
+pub type biodivine_pbn_control::control::AttractorControlMap::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_pbn_control::control::AttractorControlMap::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_pbn_control::control::AttractorControlMap where T: core::clone::Clone
+pub type biodivine_pbn_control::control::AttractorControlMap::Owned = T
+pub fn biodivine_pbn_control::control::AttractorControlMap::clone_into(&self, target: &mut T)
+pub fn biodivine_pbn_control::control::AttractorControlMap::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_pbn_control::control::AttractorControlMap where T: 'static + core::marker::Sized
+pub fn biodivine_pbn_control::control::AttractorControlMap::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_pbn_control::control::AttractorControlMap where T: core::marker::Sized
+pub fn biodivine_pbn_control::control::AttractorControlMap::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_pbn_control::control::AttractorControlMap where T: core::marker::Sized
+pub fn biodivine_pbn_control::control::AttractorControlMap::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_pbn_control::control::AttractorControlMap where T: core::clone::Clone
+pub unsafe fn biodivine_pbn_control::control::AttractorControlMap::clone_to_uninit(&self, dst: *mut T)
+impl<T> core::convert::From<T> for biodivine_pbn_control::control::AttractorControlMap
+pub fn biodivine_pbn_control::control::AttractorControlMap::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_pbn_control::control::AttractorControlMap where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_pbn_control::control::AttractorControlMap::vzip(self) -> V
+pub struct biodivine_pbn_control::control::PhenotypeControlMap
+impl biodivine_pbn_control::control::ControlMap for biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::as_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::new(context: biodivine_pbn_control::perturbation::PerturbationGraph, perturbation_set: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::perturbation_working_colors(&self, perturbation: &std::collections::hash::map::HashMap<alloc::string::String, bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::working_perturbations(&self, min_robustness: f64, verbose: bool, _return_only_smallest: bool) -> alloc::vec::Vec<(std::collections::hash::map::HashMap<alloc::string::String, bool>, biodivine_lib_param_bn::symbolic_async_graph::GraphColors)>
+impl core::clone::Clone for biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::clone(&self) -> biodivine_pbn_control::control::PhenotypeControlMap
+impl core::marker::Freeze for biodivine_pbn_control::control::PhenotypeControlMap
+impl core::marker::Send for biodivine_pbn_control::control::PhenotypeControlMap
+impl core::marker::Sync for biodivine_pbn_control::control::PhenotypeControlMap
+impl core::marker::Unpin for biodivine_pbn_control::control::PhenotypeControlMap
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_pbn_control::control::PhenotypeControlMap
+impl core::panic::unwind_safe::UnwindSafe for biodivine_pbn_control::control::PhenotypeControlMap
+impl<T, U> core::convert::Into<U> for biodivine_pbn_control::control::PhenotypeControlMap where U: core::convert::From<T>
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_pbn_control::control::PhenotypeControlMap where U: core::convert::Into<T>
+pub type biodivine_pbn_control::control::PhenotypeControlMap::Error = core::convert::Infallible
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_pbn_control::control::PhenotypeControlMap where U: core::convert::TryFrom<T>
+pub type biodivine_pbn_control::control::PhenotypeControlMap::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_pbn_control::control::PhenotypeControlMap where T: core::clone::Clone
+pub type biodivine_pbn_control::control::PhenotypeControlMap::Owned = T
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::clone_into(&self, target: &mut T)
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_pbn_control::control::PhenotypeControlMap where T: 'static + core::marker::Sized
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_pbn_control::control::PhenotypeControlMap where T: core::marker::Sized
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_pbn_control::control::PhenotypeControlMap where T: core::marker::Sized
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_pbn_control::control::PhenotypeControlMap where T: core::clone::Clone
+pub unsafe fn biodivine_pbn_control::control::PhenotypeControlMap::clone_to_uninit(&self, dst: *mut T)
+impl<T> core::convert::From<T> for biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_pbn_control::control::PhenotypeControlMap where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::vzip(self) -> V
+pub trait biodivine_pbn_control::control::ControlMap
+pub fn biodivine_pbn_control::control::ControlMap::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_pbn_control::control::ControlMap::as_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::control::ControlMap::new(context: biodivine_pbn_control::perturbation::PerturbationGraph, perturbation_set: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+pub fn biodivine_pbn_control::control::ControlMap::perturbation_working_colors(&self, perturbation: &std::collections::hash::map::HashMap<alloc::string::String, bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::control::ControlMap::working_perturbations(&self, min_robustness: f64, verbose: bool, return_all: bool) -> alloc::vec::Vec<(std::collections::hash::map::HashMap<alloc::string::String, bool>, biodivine_lib_param_bn::symbolic_async_graph::GraphColors)>
+impl biodivine_pbn_control::control::ControlMap for biodivine_pbn_control::control::AttractorControlMap
+pub fn biodivine_pbn_control::control::AttractorControlMap::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_pbn_control::control::AttractorControlMap::as_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::control::AttractorControlMap::new(context: biodivine_pbn_control::perturbation::PerturbationGraph, perturbation_set: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+pub fn biodivine_pbn_control::control::AttractorControlMap::perturbation_working_colors(&self, perturbation: &std::collections::hash::map::HashMap<alloc::string::String, bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::control::AttractorControlMap::working_perturbations(&self, min_robustness: f64, _verbose: bool, return_all: bool) -> alloc::vec::Vec<(std::collections::hash::map::HashMap<alloc::string::String, bool>, biodivine_lib_param_bn::symbolic_async_graph::GraphColors)>
+impl biodivine_pbn_control::control::ControlMap for biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::as_bdd(&self) -> &biodivine_lib_bdd::Bdd
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::as_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::new(context: biodivine_pbn_control::perturbation::PerturbationGraph, perturbation_set: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::perturbation_working_colors(&self, perturbation: &std::collections::hash::map::HashMap<alloc::string::String, bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::control::PhenotypeControlMap::working_perturbations(&self, min_robustness: f64, verbose: bool, _return_only_smallest: bool) -> alloc::vec::Vec<(std::collections::hash::map::HashMap<alloc::string::String, bool>, biodivine_lib_param_bn::symbolic_async_graph::GraphColors)>
+pub mod biodivine_pbn_control::experiment_utils
+pub fn biodivine_pbn_control::experiment_utils::get_all_params_with_attractor(graph: &biodivine_pbn_control::perturbation::PerturbationGraph, state: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::experiment_utils::parse_experiment(file: &str) -> (biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, biodivine_lib_param_bn::BooleanNetwork)
+pub fn biodivine_pbn_control::experiment_utils::run_control_experiment<F>(source: biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, target: biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, model: biodivine_lib_param_bn::BooleanNetwork, control_function: F, control_type: &str) where F: core::ops::function::Fn(&biodivine_pbn_control::perturbation::PerturbationGraph, &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, &biodivine_lib_param_bn::symbolic_async_graph::GraphColors, bool) -> biodivine_pbn_control::control::AttractorControlMap
+pub fn biodivine_pbn_control::experiment_utils::string_to_state(string_vector: &str) -> biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector
+pub mod biodivine_pbn_control::perturbation
+pub struct biodivine_pbn_control::perturbation::PerturbationGraph
+impl biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::as_non_perturbable(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::as_original(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::as_perturbed(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::as_symbolic_context(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::build_colors_with_values(&self, bn: &biodivine_lib_param_bn::BooleanNetwork, values: std::collections::hash::map::HashMap<alloc::string::String, bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::create_perturbation_colors(&self, perturbation_size: usize, verbose: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::empty_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::empty_colors(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::fix_perturbation(&self, variable: biodivine_lib_param_bn::VariableId, value: core::option::Option<&bool>) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::fix_variable(&self, variable: biodivine_lib_param_bn::VariableId, value: bool) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::get_perturbation_parameter(&self, variable: biodivine_lib_param_bn::VariableId) -> core::option::Option<biodivine_lib_param_bn::ParameterId>
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::mk_empty_colored_vertices(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::mk_empty_colors(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::mk_unit_colored_vertices(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::mk_unit_colors(&self) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::new(network: &biodivine_lib_param_bn::BooleanNetwork) -> biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::not_perturbed(&self, variable: biodivine_lib_param_bn::VariableId) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::num_perturbation_parameters(&self) -> usize
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::perturbable_variables(&self) -> &alloc::vec::Vec<biodivine_lib_param_bn::VariableId>
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::post_perturbation(&self, source: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, target: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::strong_basin(&self, target: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::unit_colored_vertices(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::unit_colors(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::GraphColors
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::variables(&self) -> biodivine_lib_param_bn::VariableIdIterator
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::vertex(&self, state: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector) -> biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::with_restricted_variables(network: &biodivine_lib_param_bn::BooleanNetwork, perturb: alloc::vec::Vec<biodivine_lib_param_bn::VariableId>) -> biodivine_pbn_control::perturbation::PerturbationGraph
+impl biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::ceiled_phenotype_permanent_control(&self, phenotype: biodivine_lib_param_bn::symbolic_async_graph::GraphVertices, size_bound: usize, allow_oscillation: biodivine_pbn_control::control::PhenotypeOscillationType, stop_early: bool, verbose: bool) -> biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::get_perturbation_bdd_mapping(&self, perturbation_variables: &alloc::vec::Vec<biodivine_lib_param_bn::VariableId>) -> std::collections::hash::map::HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::get_perturbation_bdd_vars(perturbation_bbd_vars_mapping: &std::collections::hash::map::HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>) -> alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::phenotype_permanent_control(&self, phenotype: biodivine_lib_param_bn::symbolic_async_graph::GraphVertices, oscillation: biodivine_pbn_control::control::PhenotypeOscillationType, verbose: bool) -> biodivine_pbn_control::control::PhenotypeControlMap
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::phenotype_permanent_control_of_specific_size(&self, phenotype: biodivine_lib_param_bn::symbolic_async_graph::GraphVertices, perturbation_size: usize, allow_oscillation: biodivine_pbn_control::control::PhenotypeOscillationType, verbose: bool) -> biodivine_pbn_control::control::PhenotypeControlMap
+impl biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::one_step_control(&self, source: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, target: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, compute_params: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors, verbose: bool) -> biodivine_pbn_control::control::AttractorControlMap
+impl biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::permanent_control(&self, source: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, target: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, compute_params: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors, verbose: bool) -> biodivine_pbn_control::control::AttractorControlMap
+impl biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::temporary_control(&self, source: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, target: &biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector, compute_params: &biodivine_lib_param_bn::symbolic_async_graph::GraphColors, verbose: bool) -> biodivine_pbn_control::control::AttractorControlMap
+impl core::clone::Clone for biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::clone(&self) -> biodivine_pbn_control::perturbation::PerturbationGraph
+impl core::marker::Freeze for biodivine_pbn_control::perturbation::PerturbationGraph
+impl core::marker::Send for biodivine_pbn_control::perturbation::PerturbationGraph
+impl core::marker::Sync for biodivine_pbn_control::perturbation::PerturbationGraph
+impl core::marker::Unpin for biodivine_pbn_control::perturbation::PerturbationGraph
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_pbn_control::perturbation::PerturbationGraph
+impl core::panic::unwind_safe::UnwindSafe for biodivine_pbn_control::perturbation::PerturbationGraph
+impl<T, U> core::convert::Into<U> for biodivine_pbn_control::perturbation::PerturbationGraph where U: core::convert::From<T>
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_pbn_control::perturbation::PerturbationGraph where U: core::convert::Into<T>
+pub type biodivine_pbn_control::perturbation::PerturbationGraph::Error = core::convert::Infallible
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_pbn_control::perturbation::PerturbationGraph where U: core::convert::TryFrom<T>
+pub type biodivine_pbn_control::perturbation::PerturbationGraph::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_pbn_control::perturbation::PerturbationGraph where T: core::clone::Clone
+pub type biodivine_pbn_control::perturbation::PerturbationGraph::Owned = T
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::clone_into(&self, target: &mut T)
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_pbn_control::perturbation::PerturbationGraph where T: 'static + core::marker::Sized
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_pbn_control::perturbation::PerturbationGraph where T: core::marker::Sized
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_pbn_control::perturbation::PerturbationGraph where T: core::marker::Sized
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_pbn_control::perturbation::PerturbationGraph where T: core::clone::Clone
+pub unsafe fn biodivine_pbn_control::perturbation::PerturbationGraph::clone_to_uninit(&self, dst: *mut T)
+impl<T> core::convert::From<T> for biodivine_pbn_control::perturbation::PerturbationGraph
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_pbn_control::perturbation::PerturbationGraph where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_pbn_control::perturbation::PerturbationGraph::vzip(self) -> V
+pub mod biodivine_pbn_control::tests
+pub mod biodivine_pbn_control::tests::reduced_mapk_test
+pub mod biodivine_pbn_control::tests::uncertain_mapk_dusp1_test
+pub mod biodivine_pbn_control::tests::uncertain_mapk_frs2_test
+pub mod biodivine_pbn_control::tests::uncertain_mapk_mek1_2_test
