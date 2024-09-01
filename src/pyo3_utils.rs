@@ -31,7 +31,7 @@ pub fn richcmp_eq_by_key<T: Sized, R: Eq>(
 pub struct BoolLikeValue(bool);
 
 impl BoolLikeValue {
-    pub fn bool(&self) -> bool {
+    pub fn bool(self) -> bool {
         self.0
     }
 }
@@ -73,6 +73,16 @@ impl From<BoolLikeValue> for bool {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SignValue(Sign);
+
+impl SignValue {
+    pub fn sign(self) -> Sign {
+        Sign::from(self)
+    }
+
+    pub fn monotonicity(self) -> Monotonicity {
+        Monotonicity::from(self)
+    }
+}
 
 impl<'py> FromPyObject<'py> for SignValue {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
@@ -136,23 +146,4 @@ impl From<Monotonicity> for SignValue {
             Monotonicity::Inhibition => SignValue(Sign::Negative),
         }
     }
-}
-
-pub fn resolve_sign(value: &Bound<'_, PyAny>) -> PyResult<Sign> {
-    if let Ok(value) = value.extract::<bool>() {
-        return if value {
-            Ok(Sign::Positive)
-        } else {
-            Ok(Sign::Negative)
-        };
-    }
-    if let Ok(value) = value.extract::<String>() {
-        // Activation and inhibition are included for backwards compatibility.
-        return match value.as_str() {
-            "positive" | "+" | "activation" => Ok(Sign::Positive),
-            "negative" | "-" | "inhibition" => Ok(Sign::Negative),
-            _ => throw_type_error("Expected one of `positive`/`negative`/`+`/`-`."),
-        };
-    }
-    throw_type_error("Expected `positive`/`negative`/`+`/`-` or `bool`.")
 }

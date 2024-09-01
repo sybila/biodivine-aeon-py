@@ -1,6 +1,6 @@
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{resolve_sign, richcmp_eq_by_key, BoolLikeValue};
+use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue, SignValue};
 use crate::{
     global_log_level, runtime_error, throw_index_error, throw_runtime_error, throw_type_error,
     AsNative,
@@ -486,16 +486,15 @@ impl RegulatoryGraph {
     pub fn feedback_vertex_set(
         &self,
         py: Python,
-        parity: Option<&Bound<'_, PyAny>>,
+        parity: Option<SignValue>,
         subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<HashSet<VariableId>> {
         let sd_graph = SdGraph::from(self.as_native());
         let restriction = self.resolve_subgraph(subgraph)?;
         let fvs = if let Some(parity) = parity {
-            let parity = resolve_sign(parity)?;
             sd_graph._restricted_parity_feedback_vertex_set(
                 &restriction,
-                parity,
+                parity.sign(),
                 global_log_level(py)?,
                 &|| py.check_signals(),
             )?
@@ -525,16 +524,15 @@ impl RegulatoryGraph {
     pub fn independent_cycles(
         &self,
         py: Python,
-        parity: Option<&Bound<'_, PyAny>>,
+        parity: Option<SignValue>,
         subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Vec<Vec<VariableId>>> {
         let sd_graph = SdGraph::from(self.as_native());
         let restriction = self.resolve_subgraph(subgraph)?;
         let cycles = if let Some(parity) = parity {
-            let parity = resolve_sign(parity)?;
             sd_graph._restricted_independent_parity_cycles(
                 &restriction,
-                parity,
+                parity.sign(),
                 global_log_level(py)?,
                 &|| py.check_signals(),
             )?
@@ -614,7 +612,7 @@ impl RegulatoryGraph {
     pub fn shortest_cycle(
         &self,
         pivot: &Bound<'_, PyAny>,
-        parity: Option<&Bound<'_, PyAny>>,
+        parity: Option<SignValue>,
         subgraph: Option<&Bound<'_, PyAny>>,
         length: Option<usize>,
     ) -> PyResult<Option<Vec<VariableId>>> {
@@ -624,8 +622,7 @@ impl RegulatoryGraph {
         let sd_graph = SdGraph::from(self.as_native());
 
         let cycle = if let Some(parity) = parity {
-            let parity = resolve_sign(parity)?;
-            sd_graph.shortest_parity_cycle(&subgraph, pivot, parity, length)
+            sd_graph.shortest_parity_cycle(&subgraph, pivot, parity.sign(), length)
         } else {
             sd_graph.shortest_cycle(&subgraph, pivot, length)
         };
@@ -751,7 +748,7 @@ impl RegulatoryGraph {
                 .get_item("sign")?
                 .or(item.get_item("monotonicity")?) // backwards compatibility
                 .and_then(|it| if it.is_none() { None } else { Some(it) })
-                .map(|it| resolve_sign(&it))
+                .map(|it| it.extract::<SignValue>().map(Sign::from))
                 .transpose()?;
 
             Ok((source, monotonicity, observable, target))
