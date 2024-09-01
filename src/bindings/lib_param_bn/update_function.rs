@@ -3,7 +3,7 @@ use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
+use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
 use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsExpression;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
@@ -124,9 +124,8 @@ impl UpdateFunction {
 
     /// Return an `UpdateFunction` for a constant value.
     #[staticmethod]
-    pub fn mk_const(ctx: Py<BooleanNetwork>, value: &Bound<'_, PyAny>) -> PyResult<UpdateFunction> {
-        let value = resolve_boolean(value)?;
-        let fun = if value {
+    pub fn mk_const(ctx: Py<BooleanNetwork>, value: BoolLikeValue) -> PyResult<UpdateFunction> {
+        let fun = if value.bool() {
             FnUpdate::mk_true()
         } else {
             FnUpdate::mk_false()

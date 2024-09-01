@@ -9,7 +9,7 @@ use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::resolve_boolean;
+use crate::pyo3_utils::BoolLikeValue;
 use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
@@ -239,10 +239,10 @@ impl AsynchronousGraph {
         &self,
         function: &Bound<'_, PyAny>,
         row: &Bound<'_, PyList>,
-        value: &Bound<'_, PyAny>,
+        value: BoolLikeValue,
     ) -> PyResult<ColorSet> {
         let ctx = self.ctx.get();
-        let output = resolve_boolean(value)?;
+        let output = value.bool();
         let table = match ctx.resolve_function(function)? {
             Left(var) => ctx.as_native().get_implicit_function_table(var).unwrap(),
             Right(par) => ctx.as_native().get_explicit_function_table(par),
@@ -258,7 +258,7 @@ impl AsynchronousGraph {
 
         let mut input = Vec::new();
         for it in row {
-            input.push(resolve_boolean(&it)?);
+            input.push(it.extract::<BoolLikeValue>()?.bool());
         }
 
         for (i, var) in table {
@@ -747,8 +747,8 @@ impl AsynchronousGraph {
         if let Ok(dict) = subspace.downcast::<PyDict>() {
             for (k, v) in dict {
                 let k = self.ctx.get().resolve_network_variable(&k)?;
-                let v = resolve_boolean(&v)?;
-                result.push((k, v));
+                let v = v.extract::<BoolLikeValue>()?;
+                result.push((k, v.bool()));
             }
             return Ok(result);
         }

@@ -1,6 +1,6 @@
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
+use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -87,10 +87,9 @@ impl BddValuation {
                                     list.len()
                                 ));
                             }
-                            let value = list
-                                .iter()
-                                .map(|it| resolve_boolean(&it))
-                                .collect::<PyResult<Vec<bool>>>()?;
+                            let value = list.extract::<Vec<BoolLikeValue>>()?;
+                            let value =
+                                value.into_iter().map(|it| it.into()).collect::<Vec<bool>>();
                             let value = biodivine_lib_bdd::BddValuation::new(value);
                             Ok(BddValuation { ctx, value })
                         } else {
@@ -112,6 +111,14 @@ impl BddValuation {
         hasher.finish()
     }
 
+    /// Convert the [BddValuation] to a string of `int` values (information about the
+    /// valuation context is not printed).
+    ///
+    /// ```python
+    /// ctx = BddVariableSet(["a", "b", "c"])
+    /// val = BddValuation(ctx, [0, 1, 0])
+    /// assert str(val) == "[0,1,0]"
+    /// ```
     fn __str__(&self) -> String {
         self.value.to_string()
     }
@@ -140,11 +147,10 @@ impl BddValuation {
         Ok(self.value[var])
     }
 
-    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: &Bound<'_, PyAny>) -> PyResult<()> {
+    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: BoolLikeValue) -> PyResult<()> {
         let ctx = self.ctx.get();
-        let value = resolve_boolean(value)?;
         let var = ctx.resolve_variable(key)?;
-        self.value[var] = value;
+        self.value[var] = bool::from(value);
         Ok(())
     }
 
@@ -300,9 +306,9 @@ impl BddPartialValuation {
                             .iter()
                             .map(|(a, b)| {
                                 let a = ctx.get().resolve_variable(&a);
-                                let b = resolve_boolean(&b);
+                                let b = b.extract::<BoolLikeValue>();
                                 match (a, b) {
-                                    (Ok(a), Ok(b)) => Ok((a, b)),
+                                    (Ok(a), Ok(b)) => Ok((a, b.bool())),
                                     (Err(e), _) | (_, Err(e)) => Err(e),
                                 }
                             })
@@ -371,10 +377,10 @@ impl BddPartialValuation {
     fn __setitem__(
         &mut self,
         key: &Bound<'_, PyAny>,
-        value: Option<&Bound<'_, PyAny>>,
+        value: Option<BoolLikeValue>,
     ) -> PyResult<()> {
         let ctx = self.ctx.get();
-        let value = value.map(resolve_boolean).transpose()?;
+        let value = value.map(|it| it.bool());
         let var = ctx.resolve_variable(key)?;
         self.value[var] = value;
         Ok(())

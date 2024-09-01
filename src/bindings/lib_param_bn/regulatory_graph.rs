@@ -1,6 +1,6 @@
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{resolve_boolean, resolve_sign, richcmp_eq_by_key};
+use crate::pyo3_utils::{resolve_sign, richcmp_eq_by_key, BoolLikeValue};
 use crate::{
     global_log_level, runtime_error, throw_index_error, throw_runtime_error, throw_type_error,
     AsNative,
@@ -745,7 +745,7 @@ impl RegulatoryGraph {
             let observable = item
                 .get_item("essential")?
                 .or(item.get_item("observable")?) // backwards compatibility
-                .map(|it| resolve_boolean(&it))
+                .map(|it| it.extract::<BoolLikeValue>().map(bool::from))
                 .unwrap_or(Ok(true))?;
             let monotonicity = item
                 .get_item("sign")?

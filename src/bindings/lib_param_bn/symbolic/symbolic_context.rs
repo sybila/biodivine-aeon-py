@@ -6,7 +6,7 @@ use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
+use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
 use crate::{index_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
 use biodivine_lib_param_bn::FnUpdate;
 use either::{Either, Left, Right};
@@ -566,9 +566,8 @@ impl SymbolicContext {
     }
 
     /// Create a new constant (`True`/`False`) `Bdd`.
-    pub fn mk_constant(&self, value: &Bound<'_, PyAny>) -> PyResult<Bdd> {
-        let value = resolve_boolean(value)?;
-        let rs_bdd = self.as_native().mk_constant(value);
+    pub fn mk_constant(&self, value: BoolLikeValue) -> PyResult<Bdd> {
+        let rs_bdd = self.as_native().mk_constant(value.bool());
         Ok(Bdd::new_raw_2(self.bdd_vars.clone(), rs_bdd))
     }
 
