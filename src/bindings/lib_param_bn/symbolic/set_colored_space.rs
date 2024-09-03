@@ -382,4 +382,8 @@ impl _ColorSpaceModelIterator {
             Ok(None)
         }
     }
+
+    pub fn next(&mut self, py: Python) -> PyResult<Option<(ColorModel, SpaceModel)>> {
+        self.__next__(py)
+    }
 }

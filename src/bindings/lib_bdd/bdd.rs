@@ -1088,6 +1088,10 @@ impl _BddValuationIterator {
             BddValuation::new_raw(ctx, it)
         })
     }
+
+    pub fn next(slf: PyRefMut<'_, Self>) -> Option<BddValuation> {
+        _BddValuationIterator::__next__(slf)
+    }
 }
 
 #[pymethods]
@@ -1121,5 +1125,9 @@ impl _BddClauseIterator {
             let ctx = slf.0.get().__ctx__();
             BddPartialValuation::new_raw(ctx, it)
         })
+    }
+
+    pub fn next(slf: PyRefMut<'_, Self>) -> Option<BddPartialValuation> {
+        Self::__next__(slf)
     }
 }

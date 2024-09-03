@@ -366,4 +366,8 @@ impl _ColorVertexModelIterator {
             (color, vertex)
         })
     }
+
+    pub fn next(&mut self) -> Option<(ColorModel, VertexModel)> {
+        self.__next__()
+    }
 }

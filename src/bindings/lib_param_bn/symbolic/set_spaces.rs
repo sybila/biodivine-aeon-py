@@ -252,4 +252,8 @@ impl _SpaceModelIterator {
             .next()
             .map(|it| SpaceModel::new_native(self.ctx.clone(), it))
     }
+
+    pub fn next(&mut self) -> Option<SpaceModel> {
+        self.__next__()
+    }
 }

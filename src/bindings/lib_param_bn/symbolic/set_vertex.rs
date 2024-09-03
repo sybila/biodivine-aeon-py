@@ -251,4 +251,8 @@ impl _VertexModelIterator {
             .next()
             .map(|it| VertexModel::new_native(self.ctx.clone(), it))
     }
+
+    pub fn next(&mut self) -> Option<VertexModel> {
+        self.__next__()
+    }
 }

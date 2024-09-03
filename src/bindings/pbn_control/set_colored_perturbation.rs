@@ -704,4 +704,8 @@ impl _ColorPerturbationModelIterator {
             (color, vertex)
         })
     }
+
+    pub fn next(&mut self) -> Option<(ColorModel, PerturbationModel)> {
+        self.__next__()
+    }
 }

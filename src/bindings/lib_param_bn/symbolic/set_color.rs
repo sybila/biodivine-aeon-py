@@ -314,4 +314,8 @@ impl _ColorModelIterator {
             )
         })
     }
+
+    pub fn next(&mut self) -> Option<ColorModel> {
+        self.__next__()
+    }
 }
