@@ -315,6 +315,7 @@ impl _ColorModelIterator {
         })
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Option<ColorModel> {
         self.__next__()
     }

@@ -253,6 +253,7 @@ impl _SpaceModelIterator {
             .map(|it| SpaceModel::new_native(self.ctx.clone(), it))
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Option<SpaceModel> {
         self.__next__()
     }

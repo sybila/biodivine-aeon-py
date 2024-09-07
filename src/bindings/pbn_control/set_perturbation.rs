@@ -353,6 +353,7 @@ impl _PerturbationModelIterator {
         })
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Option<PerturbationModel> {
         self.__next__()
     }
