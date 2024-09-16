@@ -70,13 +70,7 @@ measurable impact in shorter computations. For longer computations, the overhead
  - `LOG_VERBOSE`: Prints all progress messages. This setting is useful for in-depth comparisons between algorithms, 
  but can be overwhelming under normal circumstances.
    
-When `biodivine_aeon` is first loaded, the module determines if it is running in a normal Python script, or
-in an interactive environment (interpreter shell, jupyter notebook, etc.). If an interactive environment is detected,
-the `LOG_LEVEL` is automatically set to `LOG_ESSENTIAL`. **In other words, normal Python scripts do not print anything, 
-while interactive environments should print some progress messages for non-trivial operations by default.** 
-
-(Unfortunately, logging to other types of output is currently not supported. But if you need this feature, make
-sure to get in touch.) 
+The default value is `LOG_NOTHING`. 
 """
 
 BddVariableType = Union[BddVariable, str]
