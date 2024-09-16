@@ -1,7 +1,7 @@
 # Biodivine/AEON.py
 
  > AEON.py now finally has API documentation! You can learn more about the individual methods and classes 
- > [here](https://biodivine.fi.muni.cz/docs/aeon-py/latest/biodivine_aeon.html#BooleanNetwork). 
+ > [here](https://biodivine.fi.muni.cz/docs/aeon-py/latest/). 
 
 AEON.py provides Python bindings for the internal and experimental functionality of the tool
 [AEON](https://biodivine.fi.muni.cz/aeon/). You can use it to perform analysis of 
