@@ -1,0 +1,60 @@
+# This runs on every commit that is not on a dev-* branch. It should be reasonably fast,
+# as it links to Z3 dynamically.
+name: pdoc
+on:
+  push:
+    branches-ignore:
+      - 'dev-*'
+  pull_request:
+    branches:
+      - '*'
+env:
+  # A fixed version used for testing, so that the builds don't
+  # spontaneously break after a few years.
+  # Make sure to update this from time to time.
+  RUST_VERSION: "1.79.0"
+  # This is the version currently used by `z3-sys`.
+  # If this ever changes, you might also need to increase
+  # the minimum macOS version below.
+  Z3_VERSION: "4.8.12"
+  MACOS_TARGET: "11.0"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+
+  pdoc:
+    name: pdoc documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v4
+      - name: Setup Z3.
+        id: z3
+        uses: daemontus/setup-z3@v1.3.1
+        with:
+          version: ${{ env.Z3_VERSION }}
+          add_to_library_path: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Python.
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      # We install pdoc from our custom fork that supports overloads (albeit in a bit of an out-of-spec way).
+      - name: Install and run pdoc.
+        run: |
+          python3 -m venv venv
+          source ./venv/bin/activate
+          ./venv/bin/pip3 install -r dev-requirements.txt          
+          ./venv/bin/pip3 install git+https://github.com/daemontus/pdoc.git@aeon
+          maturin develop
+          pdoc --math -o ./docs biodivine_aeon
+      - name: Store the generated docs with the workflow run
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: ./docs

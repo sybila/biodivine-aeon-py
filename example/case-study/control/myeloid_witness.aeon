@@ -1,0 +1,51 @@
+$CEBPa:(CEBPa & (!GATA1 | (!FOG1 | !SCL)))
+CEBPa -> CEBPa
+GATA1 -| CEBPa
+FOG1 -| CEBPa
+SCL -| CEBPa
+
+$cJun:(PU1 & !Gfi1)
+PU1 -> cJun
+Gfi1 -| cJun
+
+$EgrNab:((PU1 & cJun) & !Gfi1)
+Gfi1 -| EgrNab
+cJun -> EgrNab
+PU1 -> EgrNab
+
+$EKLF:(GATA1 & !Fli1)
+GATA1 -> EKLF
+Fli1 -| EKLF
+
+$Fli1:(GATA1 & !EKLF)
+EKLF -| Fli1
+GATA1 -> Fli1
+
+$FOG1:(GATA1)
+GATA1 -> FOG1
+
+$GATA1:(((GATA1 | GATA2) | Fli1) & !PU1)
+GATA1 -> GATA1
+GATA2 -> GATA1
+PU1 -| GATA1
+Fli1 -> GATA1
+
+$GATA2:(GATA2 & (!GATA1 | !FOG1) & !PU1)
+FOG1 -| GATA2
+GATA1 -| GATA2
+PU1 -| GATA2
+GATA2 -> GATA2
+
+$Gfi1:(CEBPa & !EgrNab)
+CEBPa -> Gfi1
+EgrNab -| Gfi1
+
+$PU1:((CEBPa | PU1) & (!GATA1 | !GATA2))
+CEBPa -> PU1
+PU1 -> PU1
+GATA2 -| PU1
+GATA1 -| PU1
+
+$SCL:(GATA1 & !PU1)
+GATA1 -> SCL
+PU1 -| SCL

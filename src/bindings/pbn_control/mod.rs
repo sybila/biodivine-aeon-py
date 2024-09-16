@@ -1,24 +1,39 @@
-use biodivine_pbn_control::control::ControlMap;
-use biodivine_pbn_control::perturbation::PerturbationGraph;
+use biodivine_pbn_control::control::PhenotypeOscillationType;
 use pyo3::prelude::*;
 
-mod _impl_control_map;
-mod _impl_perturbation_graph;
+mod asynchronous_perturbation_graph;
+mod control;
+mod model_perturbation;
+mod set_colored_perturbation;
+mod set_perturbation;
 
-pub(crate) fn register(module: &PyModule) -> PyResult<()> {
-    module.add_class::<PyControlMap>()?;
-    module.add_class::<PyPerturbationGraph>()?;
+use crate::bindings::pbn_control::control::Control;
+use crate::bindings::pbn_control::set_colored_perturbation::_ColorPerturbationModelIterator;
+use crate::bindings::pbn_control::set_perturbation::_PerturbationModelIterator;
+use crate::throw_type_error;
+pub use asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
+pub use model_perturbation::PerturbationModel;
+pub use set_colored_perturbation::ColoredPerturbationSet;
+pub use set_perturbation::PerturbationSet;
+
+pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    module.add_class::<AsynchronousPerturbationGraph>()?;
+    module.add_class::<PerturbationModel>()?;
+    module.add_class::<PerturbationSet>()?;
+    module.add_class::<ColoredPerturbationSet>()?;
+    module.add_class::<_PerturbationModelIterator>()?;
+    module.add_class::<_ColorPerturbationModelIterator>()?;
+    module.add_class::<Control>()?;
     Ok(())
 }
 
-/// A symbolic representation of possible perturbation strategies associated with
-/// Boolean network parameter valuations.
-#[pyclass(name = "ControlMap")]
-#[derive(Clone)]
-pub struct PyControlMap(ControlMap);
-
-/// A symbolically represented state-transition graph that supports perturbations in all
-/// admissible BN variables.
-#[pyclass(name = "PerturbationGraph")]
-#[derive(Clone)]
-pub struct PyPerturbationGraph(PerturbationGraph);
+pub fn extract_phenotype_type(osc: &str) -> PyResult<PhenotypeOscillationType> {
+    match osc {
+        "forbidden" | "Forbidden" => Ok(PhenotypeOscillationType::Forbidden),
+        "allowed" | "Allowed" => Ok(PhenotypeOscillationType::Allowed),
+        "required" | "Required" => Ok(PhenotypeOscillationType::Required),
+        _ => throw_type_error(
+            "Invalid oscillation type. Expected one of ['forbidden', 'allowed', 'required'].",
+        ),
+    }
+}

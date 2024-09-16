@@ -129,13 +129,13 @@ impl Classifier {
         if !not_sink_params.is_empty() {
             let mut disorder = graph.mk_empty_colors();
             for variable in graph.variables() {
-                let found_first_successor = &graph.var_can_post(variable, &without_sinks);
+                let found_first_successor = &graph.var_can_post_within(variable, &without_sinks);
                 for next_variable in graph.variables() {
                     if next_variable == variable {
                         continue;
                     }
                     let found_second_successor =
-                        &graph.var_can_post(next_variable, found_first_successor);
+                        &graph.var_can_post_within(next_variable, found_first_successor);
                     disorder = disorder.union(&found_second_successor.colors());
                 }
             }

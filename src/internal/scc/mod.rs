@@ -19,7 +19,7 @@ pub enum Behaviour {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct Class(Vec<Behaviour>);
+pub struct Class(pub Vec<Behaviour>);
 
 pub struct Classifier {
     classes: Mutex<HashMap<Class, GraphColors>>,

@@ -1,10 +1,13 @@
+use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
+use biodivine_lib_param_bn::VariableId;
+use pyo3::PyResult;
+
 use crate::internal::scc::algo_interleaved_transition_guided_reduction::{
     ExtendedComponentProcess, FwdProcess, Process, ReachableProcess, Scheduler,
 };
 use crate::internal::scc::algo_saturated_reachability::reach_bwd;
-use biodivine_lib_param_bn::biodivine_std::traits::Set;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
-use biodivine_lib_param_bn::VariableId;
+use crate::{log_essential, should_log};
 
 impl ReachableProcess {
     pub fn new(
@@ -21,22 +24,44 @@ impl ReachableProcess {
 }
 
 impl Process for ReachableProcess {
-    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> bool {
-        if self.fwd.step(scheduler, graph) {
+    fn step(&mut self, scheduler: &mut Scheduler, graph: &SymbolicAsyncGraph) -> PyResult<bool> {
+        if self.fwd.step(scheduler, graph)? {
             let fwd_set = self.fwd.get_reachable_set();
 
             // If fwd set is not the whole universe, it probably has a basin.
             if fwd_set != scheduler.get_universe() {
+                if log_essential(scheduler.log_level, fwd_set.symbolic_size()) {
+                    println!(
+                        " > Completed forward-reachability for {} transitions. Start pruning the basin...",
+                        self.variable
+                    );
+                }
+
                 let basin_only = reach_bwd(
                     graph,
                     fwd_set,
                     scheduler.get_universe(),
                     scheduler.get_active_variables(),
-                )
+                    scheduler.log_level,
+                )?
                 .minus(fwd_set);
+
+                if should_log(scheduler.log_level) {
+                    println!(
+                        " > Discarded {} instances using the {} transition basin.",
+                        basin_only.approx_cardinality(),
+                        self.variable
+                    );
+                }
+
                 if !basin_only.is_empty() {
                     scheduler.discard_vertices(&basin_only);
                 }
+            } else if log_essential(scheduler.log_level, fwd_set.symbolic_size()) {
+                println!(
+                    " > Completed forward-reachability for {} transitions. Basin is empty.",
+                    self.variable
+                );
             }
 
             scheduler.spawn(ExtendedComponentProcess::new(
@@ -45,9 +70,9 @@ impl Process for ReachableProcess {
                 scheduler.get_universe().clone(),
                 graph,
             ));
-            true
+            Ok(true)
         } else {
-            false
+            Ok(false)
         }
     }
 

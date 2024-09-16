@@ -10,7 +10,6 @@ use biodivine_hctl_model_checker::model_checking::{
     model_check_multiple_trees_dirty, model_check_tree_dirty,
 };
 use biodivine_hctl_model_checker::postprocessing::sanitizing::sanitize_colors;
-use biodivine_hctl_model_checker::preprocessing::node::HctlTreeNode;
 use biodivine_hctl_model_checker::preprocessing::parser::parse_and_minimize_hctl_formula;
 
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
@@ -19,6 +18,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::{
 };
 use biodivine_lib_param_bn::{BooleanNetwork, ModelAnnotation};
 
+use biodivine_hctl_model_checker::preprocessing::hctl_tree::HctlTreeNode;
 use std::cmp::max;
 
 /// Return the set of colors for which ALL system states are contained in the given color-vertex
@@ -26,7 +26,7 @@ use std::cmp::max;
 /// the property holds universally in every state).
 ///
 /// Formally, this is a universal projection on the colors of the given `colored_vertices`.
-fn get_universal_colors(
+pub fn get_universal_colors(
     stg: &SymbolicAsyncGraph,
     colored_vertices: &GraphColoredVertices,
 ) -> GraphColors {

@@ -1,20 +1,28 @@
+# This workflow only runs for tags. It takes a lot of time to complete because
+# it has to bundle Z3 statically into the final binary.
+# Specifically, we:
+#  - Build the library using static Z3 on linux/windows/macOS and upload the result to GitHub storage.
+#  - Create a release package from the uploaded wheel files and push it to PyPI.
+#  - Do the same thing for conda, but also for different versions of Python.
 name: build
 on:
   push:
-  pull_request:
+    tags:
+      - '*'
 env:
   # A fixed version used for testing, so that the builds don't
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
-  RUST_VERSION: "1.72.0"
+  RUST_VERSION: "1.79.0"
   # This is the version currently used by `z3-sys`.
   # If this ever changes, you might also need to increase
   # the minimum macOS version below.
   Z3_VERSION: "4.8.12"
   MACOS_TARGET: "11.0"
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
+
 jobs:
-  linux:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout.
@@ -33,28 +41,19 @@ jobs:
           name: wheels
           path: target/dist
 
-  macos:
+  build-macos:
     runs-on: macos-latest
     steps:
       - name: Checkout.
         uses: actions/checkout@v4
-      - name: Setup Z3.
-        id: z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ env.Z3_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Python.
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-      - name: Setup Rust toolchain.
-        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}
-      # Explicitly add z3 to include path (probably some bug in either 
-      # `setup-z3` or `z3-sys` crate, because this should not be necessary).
-      - run: echo "CPATH=$Z3_ROOT/include" >> $GITHUB_ENV      
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
       # The considered version of z3 needs at least this version of macOS.
       - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
       - run: echo "CMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
@@ -69,18 +68,19 @@ jobs:
           name: wheels
           path: target/dist
 
-  windows:
+  build-windows:
     runs-on: windows-latest
     steps:
       - name: Checkout.
         uses: actions/checkout@v4
       - name: Setup Python.
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-      - name: Setup Rust toolchain.
-        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ env.RUST_VERSION }}            
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
       # Surprisingly, windows is the easiest. Just build the thing.
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
@@ -96,8 +96,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ macos, windows, linux ]
+    needs: [ build-macos, build-windows, build-linux ]
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -112,13 +111,12 @@ jobs:
 
   conda_deployment_with_new_tag:
     name: Conda deployment (${{ matrix.os }})
-    if: "startsWith(github.ref, 'refs/tags/')"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # For now, windows builds are broken...
         os: [macos-latest, ubuntu-latest]
-        python: ["3.9", "3.10", "3.11"]
+        python: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4

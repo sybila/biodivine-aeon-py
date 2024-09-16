@@ -1,103 +1,53 @@
-use biodivine_lib_bdd::Bdd;
-use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
-    MixedProjection, MixedProjectionIterator,
-};
-use biodivine_lib_param_bn::symbolic_async_graph::{
-    GraphColoredVertices, GraphColors, GraphVertexIterator, GraphVertices, SymbolicAsyncGraph,
-    SymbolicContext,
-};
-use biodivine_lib_param_bn::{
-    BooleanNetwork, FnUpdate, ModelAnnotation, ParameterId, RegulatoryGraph, VariableId,
-};
-use macros::Wrapper;
-use pyo3::prelude::*;
+use pyo3::prelude::{PyModule, PyModuleMethods};
+use pyo3::{Bound, PyAny, PyResult};
 
-mod _impl_boolean_network;
-mod _impl_fixed_points;
-mod _impl_fn_update;
-mod _impl_graph_colored_vertices;
-mod _impl_graph_colors;
-mod _impl_graph_vertices;
-mod _impl_model_annotation;
-mod _impl_parameter_id;
-mod _impl_regulatory_graph;
-mod _impl_symbolic_async_graph;
-mod _impl_symbolic_context;
-mod _impl_symbolic_projection;
-mod _impl_variable_id;
+pub mod algorithms;
+pub mod boolean_network;
+pub mod model_annotation;
+pub mod parameter_id;
+pub mod regulatory_graph;
+pub mod symbolic;
+pub mod update_function;
+pub mod variable_id;
 
-pub(crate) fn register(module: &PyModule) -> PyResult<()> {
-    module.add_class::<PyVariableId>()?;
-    module.add_class::<PyParameterId>()?;
-    module.add_class::<PyRegulatoryGraph>()?;
-    module.add_class::<PyBooleanNetwork>()?;
-    module.add_class::<PyGraphColors>()?;
-    module.add_class::<PyGraphVertices>()?;
-    module.add_class::<PyGraphColoredVertices>()?;
-    module.add_class::<PySymbolicAsyncGraph>()?;
-    module.add_class::<PyModelAnnotation>()?;
-    module.add_class::<PyGraphVertexIterator>()?;
-    module.add_class::<PySymbolicContext>()?;
-    module.add_class::<PyFnUpdate>()?;
-    module.add_class::<PyFixedPoints>()?;
-    module.add_class::<PySymbolicProjection>()?;
+pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    module.add_class::<variable_id::VariableId>()?;
+    module.add_class::<parameter_id::ParameterId>()?;
+    module.add_class::<regulatory_graph::RegulatoryGraph>()?;
+    module.add_class::<boolean_network::BooleanNetwork>()?;
+    module.add_class::<update_function::UpdateFunction>()?;
+    module.add_class::<model_annotation::ModelAnnotationRoot>()?;
+    module.add_class::<model_annotation::ModelAnnotation>()?;
+    module.add_class::<symbolic::symbolic_context::SymbolicContext>()?;
+    module.add_class::<symbolic::symbolic_space_context::SymbolicSpaceContext>()?;
+    module.add_class::<symbolic::set_vertex::VertexSet>()?;
+    module.add_class::<symbolic::set_vertex::_VertexModelIterator>()?;
+    module.add_class::<symbolic::model_vertex::VertexModel>()?;
+    module.add_class::<symbolic::set_color::ColorSet>()?;
+    module.add_class::<symbolic::set_color::_ColorModelIterator>()?;
+    module.add_class::<symbolic::model_color::ColorModel>()?;
+    module.add_class::<symbolic::set_spaces::SpaceSet>()?;
+    module.add_class::<symbolic::set_spaces::_SpaceModelIterator>()?;
+    module.add_class::<symbolic::model_space::SpaceModel>()?;
+    module.add_class::<symbolic::set_colored_vertex::ColoredVertexSet>()?;
+    module.add_class::<symbolic::set_colored_vertex::_ColorVertexModelIterator>()?;
+    module.add_class::<symbolic::set_colored_space::ColoredSpaceSet>()?;
+    module.add_class::<symbolic::set_colored_space::_ColorSpaceModelIterator>()?;
+    module.add_class::<symbolic::asynchronous_graph::AsynchronousGraph>()?;
+    module.add_class::<algorithms::trap_spaces::TrapSpaces>()?;
+    module.add_class::<algorithms::fixed_points::FixedPoints>()?;
+    module.add_class::<algorithms::attractors::Attractors>()?;
+    module.add_class::<algorithms::percolation::Percolation>()?;
+    module.add_class::<algorithms::reachability::Reachability>()?;
+    module.add_class::<algorithms::regulation_constraint::RegulationConstraint>()?;
     Ok(())
 }
 
-#[pyclass(name = "VariableId")]
-#[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, Wrapper)]
-pub struct PyVariableId(VariableId);
-
-#[pyclass(name = "ParameterId")]
-#[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, Wrapper)]
-pub struct PyParameterId(ParameterId);
-
-#[pyclass(name = "RegulatoryGraph", module = "biodivine_aeon", subclass)]
-#[derive(Clone, Wrapper)]
-pub struct PyRegulatoryGraph(RegulatoryGraph);
-
-#[pyclass(name = "BooleanNetwork", module="biodivine_aeon", extends=PyRegulatoryGraph)]
-#[derive(Clone, Wrapper)]
-pub struct PyBooleanNetwork(BooleanNetwork);
-
-#[pyclass(name = "ColorSet")]
-#[derive(Clone, Wrapper)]
-pub struct PyGraphColors(GraphColors);
-
-#[pyclass(name = "VertexSet")]
-#[derive(Clone, Wrapper)]
-pub struct PyGraphVertices(GraphVertices);
-
-#[pyclass(name = "ColoredVertexSet")]
-#[derive(Clone, Wrapper)]
-pub struct PyGraphColoredVertices(GraphColoredVertices);
-
-#[pyclass(name = "SymbolicAsyncGraph")]
-#[derive(Clone, Wrapper)]
-pub struct PySymbolicAsyncGraph(SymbolicAsyncGraph);
-
-#[pyclass(name = "ModelAnnotation")]
-#[derive(Clone, Wrapper)]
-pub struct PyModelAnnotation(ModelAnnotation);
-
-#[pyclass(name = "FixedPoints")]
-pub struct PyFixedPoints();
-
-#[pyclass(name = "GraphVertexIterator")]
-pub struct PyGraphVertexIterator(GraphVertexIterator);
-
-#[pyclass(name = "SymbolicContext")]
-#[derive(Clone, Wrapper)]
-pub struct PySymbolicContext(SymbolicContext);
-
-#[pyclass(name = "UpdateFunction")]
-#[derive(Clone, Wrapper, Eq, PartialEq, Hash)]
-pub struct PyFnUpdate(FnUpdate);
-
-#[pyclass(name = "SymbolicProjection")]
-pub struct PySymbolicProjection(
-    Box<SymbolicAsyncGraph>,
-    Box<Bdd>,
-    Box<MixedProjection<'static>>,
-    MixedProjectionIterator<'static, 'static>,
-);
+/// A trait implemented by types that can resolve a `VariableId` based on its name.
+pub trait NetworkVariableContext {
+    fn resolve_network_variable(
+        &self,
+        variable: &Bound<'_, PyAny>,
+    ) -> PyResult<biodivine_lib_param_bn::VariableId>;
+    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String;
+}

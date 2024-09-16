@@ -1,6 +1,9 @@
+use crate::bindings::global_interrupt;
+use crate::log_essential;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
+use pyo3::PyResult;
 
 /// Performs one reachability step using the saturation scheme.
 ///
@@ -14,24 +17,26 @@ pub fn reachability_step<F>(
     universe: &GraphColoredVertices,
     variables: &[VariableId],
     step: F,
-) -> bool
+) -> PyResult<bool>
 where
     F: Fn(VariableId, &GraphColoredVertices) -> GraphColoredVertices,
 {
     if variables.is_empty() {
-        return true;
+        return Ok(true);
     }
     for var in variables.iter().rev() {
+        global_interrupt()?;
         let stepped = step(*var, set).minus(set).intersect(universe);
 
         if !stepped.is_empty() {
             *set = set.union(&stepped);
-            return false;
+            return Ok(false);
         }
     }
-    true
-}
 
+    Ok(true)
+}
+/*
 /// Fully compute reachable states from `initial` inside `universe` using transitions under
 /// `variables`.
 ///
@@ -50,7 +55,7 @@ pub fn reach_fwd(
         }
     }
     set
-}
+}*/
 
 /// Fully compute back-reachable states from `initial` inside `universe` using transitions under
 /// `variables`.
@@ -62,12 +67,25 @@ pub fn reach_bwd(
     initial: &GraphColoredVertices,
     universe: &GraphColoredVertices,
     variables: &[VariableId],
-) -> GraphColoredVertices {
+    log_level: usize,
+) -> PyResult<GraphColoredVertices> {
     let mut set = initial.clone();
     loop {
-        if reachability_step(&mut set, universe, variables, |v, s| graph.var_pre(v, s)) {
+        if reachability_step(&mut set, universe, variables, |v, s| graph.var_pre(v, s))? {
             break;
         }
+
+        let problem_size = set.symbolic_size();
+        if log_essential(log_level, problem_size) {
+            let current = set.approx_cardinality();
+            let max = universe.approx_cardinality();
+            println!(
+                " >> [BWD process] Reachability progress: {}[nodes:{}] candidates ({:.2} log-%).",
+                current,
+                problem_size,
+                (current.log2() / max.log2()) * 100.0
+            );
+        }
     }
-    set
+    Ok(set)
 }

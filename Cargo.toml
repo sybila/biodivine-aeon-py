@@ -1,6 +1,6 @@
 [package]
 name = "biodivine-aeon-py"
-version = "0.3.0"
+version = "1.0.0-alpha10"
 edition = "2021"
 
 [lib]
@@ -8,6 +8,7 @@ name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
 [features]
+# default = ['static-z3']
 # For releases, we want to include Z3 statically, so that users
 # don't have to install it (or break compatibility with new versions).
 # So for CI builds, this feature is enabled, but for local builds,
@@ -16,14 +17,23 @@ crate-type = ["cdylib", "rlib"]
 static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
-pyo3 = { version = "0.20.0", features = ["abi3-py37", "extension-module"] }
-biodivine-lib-param-bn = { version="0.5.2", features=["solver-z3"] }
-biodivine-lib-bdd = "0.5.7"
-biodivine-pbn-control = "0.3.1"
-biodivine-hctl-model-checker = "0.2.2"
+pyo3 = { version = "0.22.2", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
+biodivine-lib-param-bn = { version="0.5.11", features=["solver-z3"] }
+biodivine-lib-bdd = "0.5.13"
+#biodivine-pbn-control = "0.3.1"
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "99f9da756c370daf5428b3d61ef76c24e7d8de5f" }
+#biodivine-hctl-model-checker = "0.2.2"
+# Currently, we only support HCTL up to version 0.2.2, but it contains some bugs, and so we need to use something
+# more up to date. However, we do not implement or consider any of the update APIs, so once the updated model checker
+# is actually released, make sure to run a proper API diff.
+biodivine-hctl-model-checker = { git = "https://github.com/sybila/biodivine-hctl-model-checker.git", rev = "1e893faaf2573cb1b478d227c915a16e6c8de2db" }
 rand = "0.8.5"
 macros = { path = "macros" }
-zip = "0.6.6"
+zip = "2.1.3"
+num-bigint = "0.4.6"
+num-traits = "0.2.19"
+either = "1.13.0"
+itertools = "0.13.0"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
@@ -31,4 +41,4 @@ z3="^0.12.1"
 z3-sys = "^0.8.1"
 
 [build-dependencies]
-pyo3-build-config = "0.20.0"
+pyo3-build-config = "0.22.1"

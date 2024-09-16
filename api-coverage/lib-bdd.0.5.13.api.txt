@@ -1,0 +1,779 @@
+pub mod biodivine_lib_bdd
+pub mod biodivine_lib_bdd::boolean_expression
+pub enum biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::And(alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>, alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Cond(alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>, alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>, alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Const(bool)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Iff(alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>, alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Imp(alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>, alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Not(alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Or(alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>, alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Variable(alloc::string::String)
+pub biodivine_lib_bdd::boolean_expression::BooleanExpression::Xor(alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>, alloc::boxed::Box<biodivine_lib_bdd::boolean_expression::BooleanExpression>)
+impl core::clone::Clone for biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::clone(&self) -> biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::cmp::Eq for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::cmp::PartialEq for biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::eq(&self, other: &biodivine_lib_bdd::boolean_expression::BooleanExpression) -> bool
+impl core::convert::TryFrom<&str> for biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub type biodivine_lib_bdd::boolean_expression::BooleanExpression::Error = alloc::string::String
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::try_from(value: &str) -> core::result::Result<Self, Self::Error>
+impl core::fmt::Debug for biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
+impl core::marker::StructuralPartialEq for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::marker::Freeze for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::marker::Send for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::marker::Sync for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::marker::Unpin for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::boolean_expression::BooleanExpression
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::boolean_expression::BooleanExpression where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::boolean_expression::BooleanExpression where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::boolean_expression::BooleanExpression::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::boolean_expression::BooleanExpression where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::boolean_expression::BooleanExpression::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::boolean_expression::BooleanExpression where T: core::clone::Clone
+pub type biodivine_lib_bdd::boolean_expression::BooleanExpression::Owned = T
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::to_owned(&self) -> T
+impl<T> alloc::string::ToString for biodivine_lib_bdd::boolean_expression::BooleanExpression where T: core::fmt::Display + core::marker::Sized
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for biodivine_lib_bdd::boolean_expression::BooleanExpression where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::boolean_expression::BooleanExpression where T: core::marker::Sized
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::boolean_expression::BooleanExpression where T: core::marker::Sized
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::boolean_expression::BooleanExpression where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::boolean_expression::BooleanExpression::vzip(self) -> V
+pub mod biodivine_lib_bdd::op_function
+pub fn biodivine_lib_bdd::op_function::and(l: core::option::Option<bool>, r: core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::op_function::and_not(l: core::option::Option<bool>, r: core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::op_function::iff(l: core::option::Option<bool>, r: core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::op_function::imp(l: core::option::Option<bool>, r: core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::op_function::or(l: core::option::Option<bool>, r: core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::op_function::xor(l: core::option::Option<bool>, r: core::option::Option<bool>) -> core::option::Option<bool>
+pub mod biodivine_lib_bdd::tutorial
+pub mod biodivine_lib_bdd::tutorial::p01_bdd_intro
+pub mod biodivine_lib_bdd::tutorial::p02_bdd_variable_set
+pub mod biodivine_lib_bdd::tutorial::p03_bdd_manipulation
+pub mod biodivine_lib_bdd::tutorial::p04_bdd_serialisation
+pub mod biodivine_lib_bdd::tutorial::p05_bdd_valuations
+pub mod biodivine_lib_bdd::tutorial::p06_bdd_advanced_operations
+pub macro biodivine_lib_bdd::bdd!
+pub struct biodivine_lib_bdd::Bdd(_)
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::_to_optimized_dnf<E, I: core::ops::function::Fn() -> core::result::Result<(), E>>(&self, interrupt: &I) -> core::result::Result<alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>, E>
+pub fn biodivine_lib_bdd::Bdd::to_dnf(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::to_optimized_dnf(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::and(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::and_not(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::binary_op<T>(left: &biodivine_lib_bdd::Bdd, right: &biodivine_lib_bdd::Bdd, op_function: T) -> biodivine_lib_bdd::Bdd where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::binary_op_with_limit<T>(limit: usize, left: &biodivine_lib_bdd::Bdd, right: &biodivine_lib_bdd::Bdd, op_function: T) -> core::option::Option<biodivine_lib_bdd::Bdd> where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::check_binary_op<T>(limit: usize, left: &biodivine_lib_bdd::Bdd, right: &biodivine_lib_bdd::Bdd, op_function: T) -> core::option::Option<(bool, usize)> where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::check_fused_binary_flip_op<T>(limit: usize, left: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), right: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), flip_output: core::option::Option<biodivine_lib_bdd::BddVariable>, op_function: T) -> core::option::Option<(bool, usize)> where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::fused_binary_flip_op<T>(left: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), right: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), flip_output: core::option::Option<biodivine_lib_bdd::BddVariable>, op_function: T) -> biodivine_lib_bdd::Bdd where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::fused_binary_flip_op_with_limit<T>(limit: usize, left: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), right: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), flip_output: core::option::Option<biodivine_lib_bdd::BddVariable>, op_function: T) -> core::option::Option<biodivine_lib_bdd::Bdd> where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::if_then_else(a: &biodivine_lib_bdd::Bdd, b: &biodivine_lib_bdd::Bdd, c: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::iff(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::imp(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::not(&self) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::or(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::xor(&self, right: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::binary_op_nested<F1, F2, Trigger>(left: &biodivine_lib_bdd::Bdd, right: &biodivine_lib_bdd::Bdd, trigger: Trigger, outer_op: F1, inner_op: F2) -> biodivine_lib_bdd::Bdd where F1: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>, F2: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>, Trigger: core::ops::function::Fn(biodivine_lib_bdd::BddVariable) -> bool
+pub fn biodivine_lib_bdd::Bdd::binary_op_with_exists<F>(left: &biodivine_lib_bdd::Bdd, right: &biodivine_lib_bdd::Bdd, op: F, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd where F: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::binary_op_with_for_all<F>(left: &biodivine_lib_bdd::Bdd, right: &biodivine_lib_bdd::Bdd, op: F, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd where F: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::cardinality(&self) -> f64
+pub fn biodivine_lib_bdd::Bdd::exact_cardinality(&self) -> num_bigint::bigint::BigInt
+pub fn biodivine_lib_bdd::Bdd::exact_clause_cardinality(&self) -> num_bigint::bigint::BigInt
+pub fn biodivine_lib_bdd::Bdd::from_nodes(data: &[biodivine_lib_bdd::BddNode]) -> core::result::Result<biodivine_lib_bdd::Bdd, alloc::string::String>
+pub fn biodivine_lib_bdd::Bdd::high_link_of(&self, node: biodivine_lib_bdd::BddPointer) -> biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::Bdd::is_clause(&self) -> bool
+pub fn biodivine_lib_bdd::Bdd::is_false(&self) -> bool
+pub fn biodivine_lib_bdd::Bdd::is_true(&self) -> bool
+pub fn biodivine_lib_bdd::Bdd::is_valuation(&self) -> bool
+pub fn biodivine_lib_bdd::Bdd::low_link_of(&self, node: biodivine_lib_bdd::BddPointer) -> biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::Bdd::num_vars(&self) -> u16
+pub unsafe fn biodivine_lib_bdd::Bdd::rename_variable(&mut self, old_id: biodivine_lib_bdd::BddVariable, new_id: biodivine_lib_bdd::BddVariable)
+pub fn biodivine_lib_bdd::Bdd::root_pointer(&self) -> biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::Bdd::sat_witness(&self) -> core::option::Option<biodivine_lib_bdd::BddValuation>
+pub unsafe fn biodivine_lib_bdd::Bdd::set_num_vars(&mut self, new_value: u16)
+pub fn biodivine_lib_bdd::Bdd::size(&self) -> usize
+pub fn biodivine_lib_bdd::Bdd::size_per_variable(&self) -> std::collections::hash::map::HashMap<biodivine_lib_bdd::BddVariable, usize>
+pub fn biodivine_lib_bdd::Bdd::substitute(&self, var: biodivine_lib_bdd::BddVariable, function: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::support_set(&self) -> std::collections::hash::set::HashSet<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_bdd::Bdd::to_boolean_expression(&self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::boolean_expression::BooleanExpression
+pub fn biodivine_lib_bdd::Bdd::to_nodes(self) -> alloc::vec::Vec<biodivine_lib_bdd::BddNode>
+pub fn biodivine_lib_bdd::Bdd::var_of(&self, node: biodivine_lib_bdd::BddPointer) -> biodivine_lib_bdd::BddVariable
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::eval_in(&self, valuation: &biodivine_lib_bdd::BddValuation) -> bool
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::exists(&self, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::for_all(&self, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::pick(&self, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::pick_random<R: rand::rng::Rng>(&self, variables: &[biodivine_lib_bdd::BddVariable], rng: &mut R) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::project(&self, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::restrict(&self, variables: &[(biodivine_lib_bdd::BddVariable, bool)]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::select(&self, variables: &[(biodivine_lib_bdd::BddVariable, bool)]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::var_exists(&self, variable: biodivine_lib_bdd::BddVariable) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::var_for_all(&self, variable: biodivine_lib_bdd::BddVariable) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::var_pick(&self, variable: biodivine_lib_bdd::BddVariable) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::var_pick_random<R: rand::rng::Rng>(&self, variable: biodivine_lib_bdd::BddVariable, rng: &mut R) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::var_project(&self, variable: biodivine_lib_bdd::BddVariable) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::var_restrict(&self, variable: biodivine_lib_bdd::BddVariable, value: bool) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::var_select(&self, variable: biodivine_lib_bdd::BddVariable, value: bool) -> biodivine_lib_bdd::Bdd
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::first_clause(&self) -> core::option::Option<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::first_valuation(&self) -> core::option::Option<biodivine_lib_bdd::BddValuation>
+pub fn biodivine_lib_bdd::Bdd::last_clause(&self) -> core::option::Option<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::last_valuation(&self) -> core::option::Option<biodivine_lib_bdd::BddValuation>
+pub fn biodivine_lib_bdd::Bdd::most_fixed_clause(&self) -> core::option::Option<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::most_free_clause(&self) -> core::option::Option<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::most_negative_valuation(&self) -> core::option::Option<biodivine_lib_bdd::BddValuation>
+pub fn biodivine_lib_bdd::Bdd::most_positive_valuation(&self) -> core::option::Option<biodivine_lib_bdd::BddValuation>
+pub fn biodivine_lib_bdd::Bdd::necessary_clause(&self) -> core::option::Option<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::random_clause<R: rand::rng::Rng>(&self, rng: &mut R) -> core::option::Option<biodivine_lib_bdd::BddPartialValuation>
+pub fn biodivine_lib_bdd::Bdd::random_valuation<R: rand::rng::Rng>(&self, rng: &mut R) -> core::option::Option<biodivine_lib_bdd::BddValuation>
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::from_bytes(data: &mut &[u8]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::from_string(bdd: &str) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::read_as_bytes(input: &mut dyn std::io::Read) -> core::result::Result<biodivine_lib_bdd::Bdd, std::io::error::Error>
+pub fn biodivine_lib_bdd::Bdd::read_as_string(input: &mut dyn std::io::Read) -> core::result::Result<biodivine_lib_bdd::Bdd, alloc::string::String>
+pub fn biodivine_lib_bdd::Bdd::to_bytes(&self) -> alloc::vec::Vec<u8>
+pub fn biodivine_lib_bdd::Bdd::write_as_bytes(&self, output: &mut dyn std::io::Write) -> core::result::Result<(), std::io::error::Error>
+pub fn biodivine_lib_bdd::Bdd::write_as_string(&self, output: &mut dyn std::io::Write) -> core::result::Result<(), std::io::error::Error>
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::fused_ternary_flip_op<T>(a: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), b: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), c: (&biodivine_lib_bdd::Bdd, core::option::Option<biodivine_lib_bdd::BddVariable>), flip_output: core::option::Option<biodivine_lib_bdd::BddVariable>, op_function: T) -> biodivine_lib_bdd::Bdd where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::Bdd::ternary_op<T>(a: &biodivine_lib_bdd::Bdd, b: &biodivine_lib_bdd::Bdd, c: &biodivine_lib_bdd::Bdd, op_function: T) -> biodivine_lib_bdd::Bdd where T: core::ops::function::Fn(core::option::Option<bool>, core::option::Option<bool>, core::option::Option<bool>) -> core::option::Option<bool>
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::sat_clauses(&self) -> biodivine_lib_bdd::BddPathIterator<'_>
+pub fn biodivine_lib_bdd::Bdd::sat_valuations(&self) -> biodivine_lib_bdd::BddSatisfyingValuations<'_>
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::to_cnf(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddPartialValuation>
+impl biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::to_dot_string(&self, variables: &biodivine_lib_bdd::BddVariableSet, zero_pruned: bool) -> alloc::string::String
+pub fn biodivine_lib_bdd::Bdd::write_as_dot_string(&self, output: &mut dyn std::io::Write, variables: &biodivine_lib_bdd::BddVariableSet, zero_pruned: bool) -> core::result::Result<(), std::io::error::Error>
+impl biodivine_lib_bdd::IntoBdd for &biodivine_lib_bdd::Bdd
+pub fn &biodivine_lib_bdd::Bdd::into_bdd(self, _variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
+impl biodivine_lib_bdd::IntoBdd for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::into_bdd(self, _variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
+impl core::clone::Clone for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::clone(&self) -> biodivine_lib_bdd::Bdd
+impl core::cmp::Eq for biodivine_lib_bdd::Bdd
+impl core::cmp::PartialEq for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::eq(&self, other: &biodivine_lib_bdd::Bdd) -> bool
+impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::from(valuation: biodivine_lib_bdd::BddValuation) -> Self
+impl core::fmt::Debug for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
+impl core::hash::Hash for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::StructuralPartialEq for biodivine_lib_bdd::Bdd
+impl core::marker::Freeze for biodivine_lib_bdd::Bdd
+impl core::marker::Send for biodivine_lib_bdd::Bdd
+impl core::marker::Sync for biodivine_lib_bdd::Bdd
+impl core::marker::Unpin for biodivine_lib_bdd::Bdd
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::Bdd
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::Bdd
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::Bdd where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::Bdd::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::Bdd where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::Bdd::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::Bdd::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::Bdd where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::Bdd::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::Bdd::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::Bdd where T: core::clone::Clone
+pub type biodivine_lib_bdd::Bdd::Owned = T
+pub fn biodivine_lib_bdd::Bdd::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::Bdd::to_owned(&self) -> T
+impl<T> alloc::string::ToString for biodivine_lib_bdd::Bdd where T: core::fmt::Display + core::marker::Sized
+pub fn biodivine_lib_bdd::Bdd::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for biodivine_lib_bdd::Bdd where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::Bdd::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::Bdd where T: core::marker::Sized
+pub fn biodivine_lib_bdd::Bdd::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::Bdd where T: core::marker::Sized
+pub fn biodivine_lib_bdd::Bdd::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::Bdd where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::Bdd::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddNode
+pub biodivine_lib_bdd::BddNode::high_link: biodivine_lib_bdd::BddPointer
+pub biodivine_lib_bdd::BddNode::low_link: biodivine_lib_bdd::BddPointer
+pub biodivine_lib_bdd::BddNode::var: biodivine_lib_bdd::BddVariable
+impl biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::is_one(&self) -> bool
+pub fn biodivine_lib_bdd::BddNode::is_terminal(&self) -> bool
+pub fn biodivine_lib_bdd::BddNode::is_zero(&self) -> bool
+impl biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::mk_node(var: biodivine_lib_bdd::BddVariable, low_link: biodivine_lib_bdd::BddPointer, high_link: biodivine_lib_bdd::BddPointer) -> biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::mk_one(num_vars: u16) -> biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::mk_zero(num_vars: u16) -> biodivine_lib_bdd::BddNode
+impl core::clone::Clone for biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::clone(&self) -> biodivine_lib_bdd::BddNode
+impl core::cmp::Eq for biodivine_lib_bdd::BddNode
+impl core::cmp::PartialEq for biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::eq(&self, other: &biodivine_lib_bdd::BddNode) -> bool
+impl core::fmt::Debug for biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for biodivine_lib_bdd::BddNode
+impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddNode
+impl core::marker::Freeze for biodivine_lib_bdd::BddNode
+impl core::marker::Send for biodivine_lib_bdd::BddNode
+impl core::marker::Sync for biodivine_lib_bdd::BddNode
+impl core::marker::Unpin for biodivine_lib_bdd::BddNode
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddNode
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddNode
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddNode where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddNode::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddNode where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddNode::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddNode::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddNode where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddNode::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddNode::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddNode where T: core::clone::Clone
+pub type biodivine_lib_bdd::BddNode::Owned = T
+pub fn biodivine_lib_bdd::BddNode::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::BddNode::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_bdd::BddNode where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddNode::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddNode where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddNode::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddNode where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddNode::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddNode
+pub fn biodivine_lib_bdd::BddNode::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddNode where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddNode::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddPartialValuation(_)
+impl biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::cardinality(&self) -> u16
+pub fn biodivine_lib_bdd::BddPartialValuation::empty() -> biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::extends(&self, valuation: &biodivine_lib_bdd::BddPartialValuation) -> bool
+pub fn biodivine_lib_bdd::BddPartialValuation::from_values(values: &[(biodivine_lib_bdd::BddVariable, bool)]) -> biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::get_value(&self, id: biodivine_lib_bdd::BddVariable) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::BddPartialValuation::has_value(&self, id: biodivine_lib_bdd::BddVariable) -> bool
+pub fn biodivine_lib_bdd::BddPartialValuation::is_empty(&self) -> bool
+pub fn biodivine_lib_bdd::BddPartialValuation::last_fixed_variable(&self) -> core::option::Option<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_bdd::BddPartialValuation::set_value(&mut self, id: biodivine_lib_bdd::BddVariable, value: bool)
+pub fn biodivine_lib_bdd::BddPartialValuation::to_values(&self) -> alloc::vec::Vec<(biodivine_lib_bdd::BddVariable, bool)>
+pub fn biodivine_lib_bdd::BddPartialValuation::unset_value(&mut self, id: biodivine_lib_bdd::BddVariable)
+impl core::clone::Clone for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::clone(&self) -> biodivine_lib_bdd::BddPartialValuation
+impl core::cmp::Eq for biodivine_lib_bdd::BddPartialValuation
+impl core::cmp::PartialEq for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::eq(&self, other: &Self) -> bool
+impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::from(value: biodivine_lib_bdd::BddValuation) -> Self
+impl core::convert::TryFrom<biodivine_lib_bdd::BddPartialValuation> for biodivine_lib_bdd::BddValuation
+pub type biodivine_lib_bdd::BddValuation::Error = ()
+pub fn biodivine_lib_bdd::BddValuation::try_from(value: biodivine_lib_bdd::BddPartialValuation) -> core::result::Result<Self, Self::Error>
+impl core::default::Default for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::default() -> Self
+impl core::fmt::Debug for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::hash<H: core::hash::Hasher>(&self, state: &mut H)
+impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddPartialValuation
+pub type biodivine_lib_bdd::BddPartialValuation::Output = core::option::Option<bool>
+pub fn biodivine_lib_bdd::BddPartialValuation::index(&self, index: biodivine_lib_bdd::BddVariable) -> &Self::Output
+impl core::ops::index::IndexMut<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::index_mut(&mut self, index: biodivine_lib_bdd::BddVariable) -> &mut Self::Output
+impl core::marker::Freeze for biodivine_lib_bdd::BddPartialValuation
+impl core::marker::Send for biodivine_lib_bdd::BddPartialValuation
+impl core::marker::Sync for biodivine_lib_bdd::BddPartialValuation
+impl core::marker::Unpin for biodivine_lib_bdd::BddPartialValuation
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddPartialValuation
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddPartialValuation
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddPartialValuation where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddPartialValuation::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddPartialValuation where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddPartialValuation::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddPartialValuation::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddPartialValuation where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddPartialValuation::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddPartialValuation::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddPartialValuation where T: core::clone::Clone
+pub type biodivine_lib_bdd::BddPartialValuation::Owned = T
+pub fn biodivine_lib_bdd::BddPartialValuation::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::BddPartialValuation::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_bdd::BddPartialValuation where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddPartialValuation::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddPartialValuation where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddPartialValuation::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddPartialValuation where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddPartialValuation::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddPartialValuation where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddPartialValuation::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddPathIterator<'a>
+impl biodivine_lib_bdd::BddPathIterator<'_>
+pub fn biodivine_lib_bdd::BddPathIterator<'_>::new(bdd: &biodivine_lib_bdd::Bdd) -> biodivine_lib_bdd::BddPathIterator<'_>
+impl core::iter::traits::iterator::Iterator for biodivine_lib_bdd::BddPathIterator<'_>
+pub type biodivine_lib_bdd::BddPathIterator<'_>::Item = biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPathIterator<'_>::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a> core::marker::Freeze for biodivine_lib_bdd::BddPathIterator<'a>
+impl<'a> core::marker::Send for biodivine_lib_bdd::BddPathIterator<'a>
+impl<'a> core::marker::Sync for biodivine_lib_bdd::BddPathIterator<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_bdd::BddPathIterator<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddPathIterator<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddPathIterator<'a>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_bdd::BddPathIterator<'a> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_bdd::BddPathIterator<'a>::IntoIter = I
+pub type biodivine_lib_bdd::BddPathIterator<'a>::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_bdd::BddPathIterator<'a> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddPathIterator<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddPathIterator<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddPathIterator<'a>::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddPathIterator<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddPathIterator<'a>::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_bdd::BddPathIterator<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddPathIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddPathIterator<'a> where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddPathIterator<'a>
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddPathIterator<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddPathIterator<'a>::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddPointer(_)
+impl biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::as_bool(&self) -> core::option::Option<bool>
+pub fn biodivine_lib_bdd::BddPointer::flip_if_terminal(&mut self)
+pub fn biodivine_lib_bdd::BddPointer::from_bool(value: bool) -> biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::from_index(index: usize) -> biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::from_le_bytes(bytes: [u8; 4]) -> biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::is_one(&self) -> bool
+pub fn biodivine_lib_bdd::BddPointer::is_terminal(&self) -> bool
+pub fn biodivine_lib_bdd::BddPointer::is_zero(&self) -> bool
+pub fn biodivine_lib_bdd::BddPointer::one() -> biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::to_index(self) -> usize
+pub fn biodivine_lib_bdd::BddPointer::to_le_bytes(self) -> [u8; 4]
+pub fn biodivine_lib_bdd::BddPointer::zero() -> biodivine_lib_bdd::BddPointer
+impl core::clone::Clone for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::clone(&self) -> biodivine_lib_bdd::BddPointer
+impl core::cmp::Eq for biodivine_lib_bdd::BddPointer
+impl core::cmp::Ord for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::cmp(&self, other: &biodivine_lib_bdd::BddPointer) -> core::cmp::Ordering
+impl core::cmp::PartialEq for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::eq(&self, other: &biodivine_lib_bdd::BddPointer) -> bool
+impl core::cmp::PartialOrd for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::partial_cmp(&self, other: &biodivine_lib_bdd::BddPointer) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
+impl core::hash::Hash for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for biodivine_lib_bdd::BddPointer
+impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddPointer
+impl core::marker::Freeze for biodivine_lib_bdd::BddPointer
+impl core::marker::Send for biodivine_lib_bdd::BddPointer
+impl core::marker::Sync for biodivine_lib_bdd::BddPointer
+impl core::marker::Unpin for biodivine_lib_bdd::BddPointer
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddPointer
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddPointer
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddPointer where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddPointer::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddPointer where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddPointer::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddPointer::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddPointer where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddPointer::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddPointer::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddPointer where T: core::clone::Clone
+pub type biodivine_lib_bdd::BddPointer::Owned = T
+pub fn biodivine_lib_bdd::BddPointer::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::BddPointer::to_owned(&self) -> T
+impl<T> alloc::string::ToString for biodivine_lib_bdd::BddPointer where T: core::fmt::Display + core::marker::Sized
+pub fn biodivine_lib_bdd::BddPointer::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for biodivine_lib_bdd::BddPointer where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddPointer::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddPointer where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddPointer::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddPointer where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddPointer::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddPointer
+pub fn biodivine_lib_bdd::BddPointer::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddPointer where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddPointer::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddSatisfyingValuations<'a>
+impl core::iter::traits::iterator::Iterator for biodivine_lib_bdd::BddSatisfyingValuations<'_>
+pub type biodivine_lib_bdd::BddSatisfyingValuations<'_>::Item = biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'_>::next(&mut self) -> core::option::Option<Self::Item>
+impl<'a> core::marker::Freeze for biodivine_lib_bdd::BddSatisfyingValuations<'a>
+impl<'a> core::marker::Send for biodivine_lib_bdd::BddSatisfyingValuations<'a>
+impl<'a> core::marker::Sync for biodivine_lib_bdd::BddSatisfyingValuations<'a>
+impl<'a> core::marker::Unpin for biodivine_lib_bdd::BddSatisfyingValuations<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddSatisfyingValuations<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddSatisfyingValuations<'a>
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_bdd::BddSatisfyingValuations<'a> where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_bdd::BddSatisfyingValuations<'a>::IntoIter = I
+pub type biodivine_lib_bdd::BddSatisfyingValuations<'a>::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_bdd::BddSatisfyingValuations<'a> where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddSatisfyingValuations<'a> where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddSatisfyingValuations<'a> where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddSatisfyingValuations<'a>::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddSatisfyingValuations<'a> where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddSatisfyingValuations<'a>::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_bdd::BddSatisfyingValuations<'a> where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddSatisfyingValuations<'a> where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddSatisfyingValuations<'a> where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddSatisfyingValuations<'a>
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddSatisfyingValuations<'a> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddSatisfyingValuations<'a>::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddValuation(_)
+impl biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::all_false(num_vars: u16) -> biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::all_true(num_vars: u16) -> biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::clear(&mut self, variable: biodivine_lib_bdd::BddVariable)
+pub fn biodivine_lib_bdd::BddValuation::extends(&self, valuation: &biodivine_lib_bdd::BddPartialValuation) -> bool
+pub fn biodivine_lib_bdd::BddValuation::flip_value(&mut self, variable: biodivine_lib_bdd::BddVariable)
+pub fn biodivine_lib_bdd::BddValuation::new(values: alloc::vec::Vec<bool>) -> biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::num_vars(&self) -> u16
+pub fn biodivine_lib_bdd::BddValuation::set(&mut self, variable: biodivine_lib_bdd::BddVariable)
+pub fn biodivine_lib_bdd::BddValuation::set_value(&mut self, variable: biodivine_lib_bdd::BddVariable, value: bool)
+pub fn biodivine_lib_bdd::BddValuation::to_values(&self) -> alloc::vec::Vec<(biodivine_lib_bdd::BddVariable, bool)>
+pub fn biodivine_lib_bdd::BddValuation::value(&self, variable: biodivine_lib_bdd::BddVariable) -> bool
+pub fn biodivine_lib_bdd::BddValuation::vector(self) -> alloc::vec::Vec<bool>
+impl core::clone::Clone for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::clone(&self) -> biodivine_lib_bdd::BddValuation
+impl core::cmp::Eq for biodivine_lib_bdd::BddValuation
+impl core::cmp::Ord for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::cmp(&self, other: &biodivine_lib_bdd::BddValuation) -> core::cmp::Ordering
+impl core::cmp::PartialEq for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::eq(&self, other: &biodivine_lib_bdd::BddValuation) -> bool
+impl core::cmp::PartialOrd for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::partial_cmp(&self, other: &biodivine_lib_bdd::BddValuation) -> core::option::Option<core::cmp::Ordering>
+impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::from(valuation: biodivine_lib_bdd::BddValuation) -> Self
+impl core::convert::From<biodivine_lib_bdd::BddValuation> for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::from(value: biodivine_lib_bdd::BddValuation) -> Self
+impl core::convert::TryFrom<biodivine_lib_bdd::BddPartialValuation> for biodivine_lib_bdd::BddValuation
+pub type biodivine_lib_bdd::BddValuation::Error = ()
+pub fn biodivine_lib_bdd::BddValuation::try_from(value: biodivine_lib_bdd::BddPartialValuation) -> core::result::Result<Self, Self::Error>
+impl core::fmt::Debug for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
+impl core::hash::Hash for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddValuation
+impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddValuation
+pub type biodivine_lib_bdd::BddValuation::Output = bool
+pub fn biodivine_lib_bdd::BddValuation::index(&self, index: biodivine_lib_bdd::BddVariable) -> &Self::Output
+impl core::ops::index::IndexMut<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::index_mut(&mut self, index: biodivine_lib_bdd::BddVariable) -> &mut Self::Output
+impl core::marker::Freeze for biodivine_lib_bdd::BddValuation
+impl core::marker::Send for biodivine_lib_bdd::BddValuation
+impl core::marker::Sync for biodivine_lib_bdd::BddValuation
+impl core::marker::Unpin for biodivine_lib_bdd::BddValuation
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddValuation
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddValuation
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddValuation where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddValuation::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddValuation where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddValuation::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddValuation::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddValuation where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddValuation::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddValuation::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddValuation where T: core::clone::Clone
+pub type biodivine_lib_bdd::BddValuation::Owned = T
+pub fn biodivine_lib_bdd::BddValuation::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::BddValuation::to_owned(&self) -> T
+impl<T> alloc::string::ToString for biodivine_lib_bdd::BddValuation where T: core::fmt::Display + core::marker::Sized
+pub fn biodivine_lib_bdd::BddValuation::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for biodivine_lib_bdd::BddValuation where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddValuation::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddValuation where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddValuation::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddValuation where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddValuation::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddValuation where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddValuation::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddValuationIterator(_)
+impl biodivine_lib_bdd::BddValuationIterator
+pub fn biodivine_lib_bdd::BddValuationIterator::new(num_vars: u16) -> biodivine_lib_bdd::BddValuationIterator
+impl core::iter::traits::iterator::Iterator for biodivine_lib_bdd::BddValuationIterator
+pub type biodivine_lib_bdd::BddValuationIterator::Item = biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuationIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl core::marker::Freeze for biodivine_lib_bdd::BddValuationIterator
+impl core::marker::Send for biodivine_lib_bdd::BddValuationIterator
+impl core::marker::Sync for biodivine_lib_bdd::BddValuationIterator
+impl core::marker::Unpin for biodivine_lib_bdd::BddValuationIterator
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddValuationIterator
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddValuationIterator
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_bdd::BddValuationIterator where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_bdd::BddValuationIterator::IntoIter = I
+pub type biodivine_lib_bdd::BddValuationIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_bdd::BddValuationIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_bdd::BddValuationIterator where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddValuationIterator where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddValuationIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddValuationIterator where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddValuationIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddValuationIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddValuationIterator where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddValuationIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddValuationIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_lib_bdd::BddValuationIterator where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddValuationIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddValuationIterator where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddValuationIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddValuationIterator where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddValuationIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddValuationIterator
+pub fn biodivine_lib_bdd::BddValuationIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddValuationIterator where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddValuationIterator::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddVariable(_)
+impl biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::from_index(index: usize) -> biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::to_index(self) -> usize
+impl biodivine_lib_bdd::IntoBdd for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
+impl core::clone::Clone for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::clone(&self) -> biodivine_lib_bdd::BddVariable
+impl core::cmp::Eq for biodivine_lib_bdd::BddVariable
+impl core::cmp::Ord for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::cmp(&self, other: &biodivine_lib_bdd::BddVariable) -> core::cmp::Ordering
+impl core::cmp::PartialEq for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::eq(&self, other: &biodivine_lib_bdd::BddVariable) -> bool
+impl core::cmp::PartialOrd for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::partial_cmp(&self, other: &biodivine_lib_bdd::BddVariable) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::result::Result<(), core::fmt::Error>
+impl core::hash::Hash for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for biodivine_lib_bdd::BddVariable
+impl core::marker::StructuralPartialEq for biodivine_lib_bdd::BddVariable
+impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddPartialValuation
+pub type biodivine_lib_bdd::BddPartialValuation::Output = core::option::Option<bool>
+pub fn biodivine_lib_bdd::BddPartialValuation::index(&self, index: biodivine_lib_bdd::BddVariable) -> &Self::Output
+impl core::ops::index::Index<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddValuation
+pub type biodivine_lib_bdd::BddValuation::Output = bool
+pub fn biodivine_lib_bdd::BddValuation::index(&self, index: biodivine_lib_bdd::BddVariable) -> &Self::Output
+impl core::ops::index::IndexMut<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddPartialValuation
+pub fn biodivine_lib_bdd::BddPartialValuation::index_mut(&mut self, index: biodivine_lib_bdd::BddVariable) -> &mut Self::Output
+impl core::ops::index::IndexMut<biodivine_lib_bdd::BddVariable> for biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::BddValuation::index_mut(&mut self, index: biodivine_lib_bdd::BddVariable) -> &mut Self::Output
+impl core::marker::Freeze for biodivine_lib_bdd::BddVariable
+impl core::marker::Send for biodivine_lib_bdd::BddVariable
+impl core::marker::Sync for biodivine_lib_bdd::BddVariable
+impl core::marker::Unpin for biodivine_lib_bdd::BddVariable
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddVariable
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddVariable
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddVariable where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddVariable::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddVariable where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddVariable::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddVariable::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddVariable where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddVariable::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddVariable::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddVariable where T: core::clone::Clone
+pub type biodivine_lib_bdd::BddVariable::Owned = T
+pub fn biodivine_lib_bdd::BddVariable::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::BddVariable::to_owned(&self) -> T
+impl<T> alloc::string::ToString for biodivine_lib_bdd::BddVariable where T: core::fmt::Display + core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariable::to_string(&self) -> alloc::string::String
+impl<T> core::any::Any for biodivine_lib_bdd::BddVariable where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariable::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddVariable where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariable::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddVariable where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariable::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddVariable where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddVariable::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddVariableSet
+impl biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::eval_expression(&self, expression: &biodivine_lib_bdd::boolean_expression::BooleanExpression) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::eval_expression_string(&self, expression: &str) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::safe_eval_expression(&self, expression: &biodivine_lib_bdd::boolean_expression::BooleanExpression) -> core::option::Option<biodivine_lib_bdd::Bdd>
+impl biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::mk_cnf(&self, cnf: &[biodivine_lib_bdd::BddPartialValuation]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_conjunctive_clause(&self, clause: &biodivine_lib_bdd::BddPartialValuation) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_disjunctive_clause(&self, clause: &biodivine_lib_bdd::BddPartialValuation) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_dnf(&self, dnf: &[biodivine_lib_bdd::BddPartialValuation]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_false(&self) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_literal(&self, var: biodivine_lib_bdd::BddVariable, value: bool) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_not_var(&self, var: biodivine_lib_bdd::BddVariable) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_not_var_by_name(&self, var: &str) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_sat_exactly_k(&self, k: usize, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_sat_up_to_k(&self, k: usize, variables: &[biodivine_lib_bdd::BddVariable]) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_true(&self) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_var(&self, var: biodivine_lib_bdd::BddVariable) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::mk_var_by_name(&self, var: &str) -> biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::BddVariableSet::name_of(&self, variable: biodivine_lib_bdd::BddVariable) -> alloc::string::String
+pub fn biodivine_lib_bdd::BddVariableSet::new(vars: &[&str]) -> biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::new_anonymous(num_vars: u16) -> biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::num_vars(&self) -> u16
+pub fn biodivine_lib_bdd::BddVariableSet::transfer_from(&self, bdd: &biodivine_lib_bdd::Bdd, ctx: &biodivine_lib_bdd::BddVariableSet) -> core::option::Option<biodivine_lib_bdd::Bdd>
+pub fn biodivine_lib_bdd::BddVariableSet::var_by_name(&self, name: &str) -> core::option::Option<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_bdd::BddVariableSet::variables(&self) -> alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+impl core::clone::Clone for biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::clone(&self) -> biodivine_lib_bdd::BddVariableSet
+impl core::convert::From<alloc::vec::Vec<&str>> for biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::from(value: alloc::vec::Vec<&str>) -> Self
+impl core::convert::From<alloc::vec::Vec<alloc::string::String>> for biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::from(value: alloc::vec::Vec<alloc::string::String>) -> Self
+impl core::iter::traits::collect::FromIterator<alloc::string::String> for biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::from_iter<T: core::iter::traits::collect::IntoIterator<Item = alloc::string::String>>(iter: T) -> Self
+impl core::marker::Freeze for biodivine_lib_bdd::BddVariableSet
+impl core::marker::Send for biodivine_lib_bdd::BddVariableSet
+impl core::marker::Sync for biodivine_lib_bdd::BddVariableSet
+impl core::marker::Unpin for biodivine_lib_bdd::BddVariableSet
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddVariableSet
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddVariableSet
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddVariableSet where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddVariableSet::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddVariableSet where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddVariableSet::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddVariableSet::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddVariableSet where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddVariableSet::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddVariableSet::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddVariableSet where T: core::clone::Clone
+pub type biodivine_lib_bdd::BddVariableSet::Owned = T
+pub fn biodivine_lib_bdd::BddVariableSet::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::BddVariableSet::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_bdd::BddVariableSet where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariableSet::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddVariableSet where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariableSet::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddVariableSet where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariableSet::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSet::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddVariableSet where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddVariableSet::vzip(self) -> V
+pub struct biodivine_lib_bdd::BddVariableSetBuilder
+impl biodivine_lib_bdd::BddVariableSetBuilder
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::build(self) -> biodivine_lib_bdd::BddVariableSet
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::make<const X: usize>(&mut self, names: &[&str; X]) -> [biodivine_lib_bdd::BddVariable; X]
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::make_variable(&mut self, name: &str) -> biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::make_variables(&mut self, names: &[&str]) -> alloc::vec::Vec<biodivine_lib_bdd::BddVariable>
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::new() -> biodivine_lib_bdd::BddVariableSetBuilder
+impl core::clone::Clone for biodivine_lib_bdd::BddVariableSetBuilder
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::clone(&self) -> biodivine_lib_bdd::BddVariableSetBuilder
+impl core::default::Default for biodivine_lib_bdd::BddVariableSetBuilder
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::default() -> Self
+impl core::marker::Freeze for biodivine_lib_bdd::BddVariableSetBuilder
+impl core::marker::Send for biodivine_lib_bdd::BddVariableSetBuilder
+impl core::marker::Sync for biodivine_lib_bdd::BddVariableSetBuilder
+impl core::marker::Unpin for biodivine_lib_bdd::BddVariableSetBuilder
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::BddVariableSetBuilder
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::BddVariableSetBuilder
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::BddVariableSetBuilder where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::BddVariableSetBuilder where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::BddVariableSetBuilder::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::BddVariableSetBuilder where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::BddVariableSetBuilder::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::BddVariableSetBuilder where T: core::clone::Clone
+pub type biodivine_lib_bdd::BddVariableSetBuilder::Owned = T
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_bdd::BddVariableSetBuilder where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::BddVariableSetBuilder where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::BddVariableSetBuilder where T: core::marker::Sized
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::BddVariableSetBuilder
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::BddVariableSetBuilder where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::BddVariableSetBuilder::vzip(self) -> V
+pub struct biodivine_lib_bdd::ValuationsOfClauseIterator
+impl biodivine_lib_bdd::ValuationsOfClauseIterator
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::empty() -> biodivine_lib_bdd::ValuationsOfClauseIterator
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::new(clause: biodivine_lib_bdd::BddPartialValuation, num_vars: u16) -> biodivine_lib_bdd::ValuationsOfClauseIterator
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::new_unconstrained(num_vars: u16) -> biodivine_lib_bdd::ValuationsOfClauseIterator
+impl core::clone::Clone for biodivine_lib_bdd::ValuationsOfClauseIterator
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::clone(&self) -> biodivine_lib_bdd::ValuationsOfClauseIterator
+impl core::iter::traits::iterator::Iterator for biodivine_lib_bdd::ValuationsOfClauseIterator
+pub type biodivine_lib_bdd::ValuationsOfClauseIterator::Item = biodivine_lib_bdd::BddValuation
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::next(&mut self) -> core::option::Option<Self::Item>
+impl core::marker::Freeze for biodivine_lib_bdd::ValuationsOfClauseIterator
+impl core::marker::Send for biodivine_lib_bdd::ValuationsOfClauseIterator
+impl core::marker::Sync for biodivine_lib_bdd::ValuationsOfClauseIterator
+impl core::marker::Unpin for biodivine_lib_bdd::ValuationsOfClauseIterator
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_lib_bdd::ValuationsOfClauseIterator
+impl core::panic::unwind_safe::UnwindSafe for biodivine_lib_bdd::ValuationsOfClauseIterator
+impl<I> core::iter::traits::collect::IntoIterator for biodivine_lib_bdd::ValuationsOfClauseIterator where I: core::iter::traits::iterator::Iterator
+pub type biodivine_lib_bdd::ValuationsOfClauseIterator::IntoIter = I
+pub type biodivine_lib_bdd::ValuationsOfClauseIterator::Item = <I as core::iter::traits::iterator::Iterator>::Item
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::into_iter(self) -> I
+impl<I> rand::seq::IteratorRandom for biodivine_lib_bdd::ValuationsOfClauseIterator where I: core::iter::traits::iterator::Iterator
+impl<T, U> core::convert::Into<U> for biodivine_lib_bdd::ValuationsOfClauseIterator where U: core::convert::From<T>
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_lib_bdd::ValuationsOfClauseIterator where U: core::convert::Into<T>
+pub type biodivine_lib_bdd::ValuationsOfClauseIterator::Error = core::convert::Infallible
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_lib_bdd::ValuationsOfClauseIterator where U: core::convert::TryFrom<T>
+pub type biodivine_lib_bdd::ValuationsOfClauseIterator::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_lib_bdd::ValuationsOfClauseIterator where T: core::clone::Clone
+pub type biodivine_lib_bdd::ValuationsOfClauseIterator::Owned = T
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::clone_into(&self, target: &mut T)
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_lib_bdd::ValuationsOfClauseIterator where T: 'static + core::marker::Sized
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_lib_bdd::ValuationsOfClauseIterator where T: core::marker::Sized
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_lib_bdd::ValuationsOfClauseIterator where T: core::marker::Sized
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_lib_bdd::ValuationsOfClauseIterator
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_lib_bdd::ValuationsOfClauseIterator where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_lib_bdd::ValuationsOfClauseIterator::vzip(self) -> V
+pub trait biodivine_lib_bdd::IntoBdd
+pub fn biodivine_lib_bdd::IntoBdd::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
+impl biodivine_lib_bdd::IntoBdd for &biodivine_lib_bdd::Bdd
+pub fn &biodivine_lib_bdd::Bdd::into_bdd(self, _variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
+impl biodivine_lib_bdd::IntoBdd for &str
+pub fn &str::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
+impl biodivine_lib_bdd::IntoBdd for biodivine_lib_bdd::Bdd
+pub fn biodivine_lib_bdd::Bdd::into_bdd(self, _variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd
+impl biodivine_lib_bdd::IntoBdd for biodivine_lib_bdd::BddVariable
+pub fn biodivine_lib_bdd::BddVariable::into_bdd(self, variables: &biodivine_lib_bdd::BddVariableSet) -> biodivine_lib_bdd::Bdd

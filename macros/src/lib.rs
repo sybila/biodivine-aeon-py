@@ -1,7 +1,7 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
-use syn::__private::ToTokens;
 use std::io::Write;
+use syn::__private::ToTokens;
 
 #[proc_macro_derive(Wrapper)]
 pub fn derive_wrapper(item: TokenStream) -> TokenStream {
@@ -37,11 +37,19 @@ pub fn derive_wrapper(item: TokenStream) -> TokenStream {
     writeln!(result, "}}").unwrap();
 
     // AsNative implementation.
-    writeln!(result, "impl crate::AsNative<{wrapped_type}> for {wrapper_type} {{").unwrap();
+    writeln!(
+        result,
+        "impl crate::AsNative<{wrapped_type}> for {wrapper_type} {{"
+    )
+    .unwrap();
     writeln!(result, "   fn as_native(&self) -> &{wrapped_type} {{").unwrap();
     writeln!(result, "      &self.0").unwrap();
     writeln!(result, "   }}").unwrap();
-    writeln!(result, "   fn as_native_mut(&mut self) -> &mut {wrapped_type} {{").unwrap();
+    writeln!(
+        result,
+        "   fn as_native_mut(&mut self) -> &mut {wrapped_type} {{"
+    )
+    .unwrap();
     writeln!(result, "      &mut self.0").unwrap();
     writeln!(result, "   }}").unwrap();
     writeln!(result, "}}").unwrap();
