@@ -74,7 +74,14 @@ fn should_log(log_level: usize) -> bool {
     log_level > LOG_NOTHING
 }
 
-/// AEON.py is a library...
+/// AEON.py is a Python library for working with Boolean networks. It supports a wide
+/// range of features, including symbolic representation of network dynamics. More general
+/// information is available on [GitHub](https://github.com/sybila/biodivine-aeon-py/).
+///
+/// To explore the library documentation, you can start with one of the core data classes:
+/// `RegulatoryGraph`, `BooleanNetwork` and `AsynchronousGraph`. Alternatively, to learn more about the available
+/// algorithms, you may want to look at `Attractors`, `TrapSpaces`, `FixedPoints`, `Classification`,
+/// or `Control`.
 #[pymodule]
 fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     set_log_level(py, module)?;
