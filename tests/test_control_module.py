@@ -273,3 +273,17 @@ def test_symbolic_representation():
     assert len(some_set_one.select_by_robustness(0.50)) == 5
     assert some_set_one.select_by_robustness(0.99, result_limit=1)[0][0].perturbation_size() == 1
     assert some_set_one.select_by_robustness(0.50, result_limit=1)[0][0].perturbation_size() == 0
+
+# def test_base_network_compatibility():
+#     bn = BooleanNetwork.from_aeon("""
+#     a -> b
+#     b -|? c
+#     c -?? b
+#     c -| a
+#     $b: a & f(c)
+#     """)
+#
+#     graph = AsynchronousPerturbationGraph(bn)
+#
+#     for p in graph.mk_unit_colors():
+#         p.instantiate(bn)
