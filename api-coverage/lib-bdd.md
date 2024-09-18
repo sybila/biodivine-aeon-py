@@ -911,6 +911,26 @@ we will need either complicated generics, or heavy use of `Any`.
             <td><code>Bdd::to_nodes</code></td>
             <td></td>
         </tr>
+        <tr>
+            <td><code>Bdd::cmp_cardinality</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_cardinality_strict</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_implies</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_size</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_structural</code></td>
+            <td></td>
+        </tr>
     </tbody>
 </table>
 
