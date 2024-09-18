@@ -218,10 +218,26 @@ impl Bdd {
     /// actual canonical clauses of this BDD as reported by `Bdd.clause_iterator`.
     ///
     /// See also `BddVariableSet.mk_dnf`.
-    #[pyo3(signature = (optimize = true))]
-    fn to_dnf(&self, py: Python, optimize: bool) -> PyResult<Vec<BddPartialValuation>> {
+    #[pyo3(signature = (optimize = true, size_limit = None))]
+    fn to_dnf(
+        &self,
+        py: Python,
+        optimize: bool,
+        size_limit: Option<usize>,
+    ) -> PyResult<Vec<BddPartialValuation>> {
         let native = if optimize {
-            self.as_native()._to_optimized_dnf(&|| py.check_signals())?
+            self.as_native()._to_optimized_dnf(&|dnf| {
+                if let Some(size_limit) = size_limit {
+                    println!("{}, {}", size_limit, dnf.len());
+                    if size_limit < dnf.len() {
+                        return throw_interrupted_error(format!(
+                            "Exceeded size limit of {} clauses",
+                            size_limit
+                        ));
+                    }
+                }
+                py.check_signals()
+            })?
         } else {
             self.as_native().to_dnf()
         };

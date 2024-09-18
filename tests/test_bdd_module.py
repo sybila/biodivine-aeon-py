@@ -255,15 +255,18 @@ def test_bdd():
     assert bdd_x.to_dot() != bdd_x.to_dot(zero_pruned=False)
     assert str(bdd_x.to_expression()) == "((a & b) | (!a & (b & !c)))"
     assert BddPartialValuation(ctx, {'a': True, 'b': True}) == BddPartialValuation(ctx, {'a': 1, 'b': 1})
-    # (!a & b & c) | (a & b)
+    # (b & !c) | (a & b)
     dnf = bdd_x.to_dnf()
     dnf_basic = bdd_x.to_dnf(optimize=False)
+    with pytest.raises(InterruptedError):
+        # The method should fail if the DNF is larger than requested.
+        bdd_x.to_dnf(size_limit=0)
     # For a very simple BDD like this, the optimization does not really do much.
     assert len(dnf) == len(dnf_basic)
     assert len(dnf_basic) == bdd_x.clause_cardinality()
     assert len(dnf) == 2
-    assert dnf[0] == BddPartialValuation(ctx, {'a': True, 'b': True})
-    assert dnf[1] == BddPartialValuation(ctx, {'a': False, 'b': True, 'c': False})
+    assert dnf[0] == BddPartialValuation(ctx, {'b': True, 'c': False})
+    assert dnf[1] == BddPartialValuation(ctx, {'a': True, 'b': True})
     # (a | b) & (a | !b | !c) & (!a | b)
     cnf = bdd_x.to_cnf()
     assert len(cnf) == 3
