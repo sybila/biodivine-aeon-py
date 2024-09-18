@@ -404,27 +404,7 @@ impl BooleanExpression {
 
     /// Return the set of Boolean variable names that appear in this `BooleanExpression`.
     pub fn support_set(&self) -> HashSet<String> {
-        fn recursive(e: &RsBooleanExpression, result: &mut HashSet<String>) {
-            match e {
-                RsBooleanExpression::Const(_) => (),
-                Variable(name) => {
-                    result.insert(name.clone());
-                }
-                Not(inner) => recursive(inner, result),
-                And(l, r) | Or(l, r) | Imp(l, r) | Iff(l, r) | Xor(l, r) => {
-                    recursive(l, result);
-                    recursive(r, result);
-                }
-                Cond(test, branch1, branch2) => {
-                    recursive(test, result);
-                    recursive(branch1, result);
-                    recursive(branch2, result);
-                }
-            };
-        }
-        let mut result = HashSet::new();
-        recursive(self.as_native(), &mut result);
-        result
+        self.as_native().support_set()
     }
 }
 

@@ -1168,7 +1168,7 @@ added a bunch of utility methods similar to how `FnUpdate` is expected to work.
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
-            <td></td>
+            <td><code>BooleanExpression::support_set</code></td>
             <td><code>BooleanExpression.support_set</code></td>
         </tr>
     </tbody>
