@@ -894,7 +894,10 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::rename_variable</code></td>
-            <td><code>Bdd.rename</code></td>
+            <td rowspan="2"><code>Bdd.rename</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::rename_variables</code></td> 
         </tr>
         <tr>
             <td><code>Bdd::set_num_vars</code></td>

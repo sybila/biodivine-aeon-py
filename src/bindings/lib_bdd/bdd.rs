@@ -1024,13 +1024,15 @@ impl Bdd {
     /// identifiers with new ones. As such, rename operation is only permitted if it does not violate
     /// the current ordering. If this is not satisfied, the method panics.
     pub fn rename(&self, py: Python, replace_with: Vec<(Py<PyAny>, Py<PyAny>)>) -> PyResult<Bdd> {
-        let mut result = self.value.clone();
+        let mut permutation = HashMap::new();
         for (a, b) in replace_with {
             let a = self.ctx.get().resolve_variable(a.bind(py))?;
             let b = self.ctx.get().resolve_variable(b.bind(py))?;
-            unsafe {
-                result.rename_variable(a, b);
-            }
+            permutation.insert(a, b);
+        }
+        let mut result = self.value.clone();
+        unsafe {
+            result.rename_variables(&permutation);
         }
         Ok(self.new_from(result))
     }
