@@ -231,7 +231,7 @@ explore it in the future.
             <td><code>BddVariableSet.__len__</code></td>
         </tr>
         <tr>
-            <td></td>
+            <td><code>BddVariableSet::to_string</code></td>
             <td><code>BddVariableSet.__str__</code></td>
         </tr>
         <tr>
@@ -894,7 +894,10 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::rename_variable</code></td>
-            <td><code>Bdd.rename</code></td>
+            <td rowspan="2"><code>Bdd.rename</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::rename_variables</code></td> 
         </tr>
         <tr>
             <td><code>Bdd::set_num_vars</code></td>
@@ -906,6 +909,26 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::to_nodes</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_cardinality</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_cardinality_strict</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_implies</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_size</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::cmp_structural</code></td>
             <td></td>
         </tr>
     </tbody>
@@ -923,7 +946,7 @@ The original Rust method is then called with a function that is based on
 this lookup table. Since the lookup tables are small, the overhead is acceptable 
 for any sufficiently large `Bdd`.
 
-## `BddPathIterator` and `ValuationsOfClauseIterator`
+## `BddPathIterator`, `ValuationsOfClauseIterator` and owned iterators.
 
 We do not export the iterator types directly, because the API is quite low level and 
 frankly kind of weird. Instead, we have two Python-only types: `BddClauseIterator` 
@@ -931,6 +954,10 @@ and `BddValuationIterator`. These just go through all relevant clauses/valuation
 a single `Bdd` and have no other public API. If you still want to replicate the behaviour 
 of the Rust iterators, you can always create a `Bdd` representing a single clause 
 (or a `True` BDD) and iterate over that.
+
+Owned iterators are currently ignored. We could use them instead of the unsafe trick that
+we have now, but that would require cloning the BDD, which we currently avoid (the BDD
+is tracked with python reference counting instead).
 
 <table>
     <thead>
@@ -1168,7 +1195,7 @@ added a bunch of utility methods similar to how `FnUpdate` is expected to work.
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
-            <td></td>
+            <td><code>BooleanExpression::support_set</code></td>
             <td><code>BooleanExpression.support_set</code></td>
         </tr>
     </tbody>

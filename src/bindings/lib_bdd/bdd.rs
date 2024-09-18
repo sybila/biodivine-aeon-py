@@ -218,10 +218,26 @@ impl Bdd {
     /// actual canonical clauses of this BDD as reported by `Bdd.clause_iterator`.
     ///
     /// See also `BddVariableSet.mk_dnf`.
-    #[pyo3(signature = (optimize = true))]
-    fn to_dnf(&self, py: Python, optimize: bool) -> PyResult<Vec<BddPartialValuation>> {
+    #[pyo3(signature = (optimize = true, size_limit = None))]
+    fn to_dnf(
+        &self,
+        py: Python,
+        optimize: bool,
+        size_limit: Option<usize>,
+    ) -> PyResult<Vec<BddPartialValuation>> {
         let native = if optimize {
-            self.as_native()._to_optimized_dnf(&|| py.check_signals())?
+            self.as_native()._to_optimized_dnf(&|dnf| {
+                if let Some(size_limit) = size_limit {
+                    println!("{}, {}", size_limit, dnf.len());
+                    if size_limit < dnf.len() {
+                        return throw_interrupted_error(format!(
+                            "Exceeded size limit of {} clauses",
+                            size_limit
+                        ));
+                    }
+                }
+                py.check_signals()
+            })?
         } else {
             self.as_native().to_dnf()
         };
@@ -1008,13 +1024,15 @@ impl Bdd {
     /// identifiers with new ones. As such, rename operation is only permitted if it does not violate
     /// the current ordering. If this is not satisfied, the method panics.
     pub fn rename(&self, py: Python, replace_with: Vec<(Py<PyAny>, Py<PyAny>)>) -> PyResult<Bdd> {
-        let mut result = self.value.clone();
+        let mut permutation = HashMap::new();
         for (a, b) in replace_with {
             let a = self.ctx.get().resolve_variable(a.bind(py))?;
             let b = self.ctx.get().resolve_variable(b.bind(py))?;
-            unsafe {
-                result.rename_variable(a, b);
-            }
+            permutation.insert(a, b);
+        }
+        let mut result = self.value.clone();
+        unsafe {
+            result.rename_variables(&permutation);
         }
         Ok(self.new_from(result))
     }
