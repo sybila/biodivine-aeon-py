@@ -89,6 +89,24 @@ def test_attractor_classification():
     mapping = Classification.classify_attractor_bifurcation(stg)
     assert len(mapping) == 1 and mapping[Class(["disorder", "stability", "stability"])] == stg.mk_unit_colors()
 
+def test_attractor_bifurcation_with_perturbations():
+    path = './tests/model-myeloid-witness.aeon'
+    model_unknown = BooleanNetwork.from_file(path)
+    model_unknown.set_update_function("GATA1", None)
+    model_unknown.set_update_function("CEBPa", None)
+    model_unknown.set_update_function("PU1", None)
+
+    pstg = AsynchronousPerturbationGraph(model_unknown)
+    stg = AsynchronousGraph(model_unknown)
+    mapping_pstg = Classification.classify_attractor_bifurcation(pstg)
+    mapping_stg = Classification.classify_attractor_bifurcation(stg)
+
+    assert len(mapping_stg) == len(mapping_pstg)
+
+    for (cls, colors) in mapping_stg.items():
+        assert pstg.transfer_from(colors, stg) == mapping_pstg[cls]
+    for (cls, colors) in mapping_pstg.items():
+        assert stg.transfer_from(colors, pstg) == mapping_stg[cls]
 
 def test_property_classification():
     path = "./tests/model-with-properties.aeon"
