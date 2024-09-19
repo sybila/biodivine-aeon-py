@@ -385,45 +385,134 @@ impl Classification {
             .collect())
     }
 
+    /// Classify the *individual attractors* of an `AsynchronousGraph` according to their affinity
+    /// to biological phenotypes.
+    ///
+    /// This is similar to `Classification.classify_phenotypes`, but it actually returns
+    /// per-attractor results instead of lumping all attractors of one phenotype into
+    /// a single class. This results in a sort-of nested classification, where each class
+    /// consists of entries for individual attractors, but each entry is itself a class
+    /// that describes the phenotypes of that particular attractor.
+    ///
+    /// For example, given phenotypes `"a"` and `"b"`, the result could contain a class
+    /// `Class(["Class(['a'])", "Class(['b'])", "Class(['a', 'b'])"])`. This means that there
+    /// are three attractors: One with only the "a" phenotype, one with only the "b" phenotype,
+    /// and one with both phenotypes. Note that the "inner" classes are encoded as strings
+    /// (you can convert such string into a proper class object by running
+    /// `c = eval(class_string)`).
+    ///
+    /// The meaning of `oscillation_types` is the same as in `Classification.classify_phenotypes`:
+    /// `Forbidden` oscillation means the attractor must be a subset of the phenotype, `allowed`
+    /// oscillation means the attractor must intersect the phenotype, and `required` oscillation
+    /// means that the attractor must intersect the phenotype, but can't be its subset.
+    ///
+    /// Similar to `Classification.classify_phenotypes`, the method allows you to provide
+    /// a collection of `traps` that will be considered instead of the network attractors.
+    /// The method checks that these sets are indeed trap sets, but they do not have to be
+    /// minimal (i.e. attractors). If `traps` are given, the classification treats each trap
+    /// set as a separate "attractor".
+    ///
+    /// Finally, if `count_multiplicity` is set to `False`, the method will lump together
+    /// attractors that satisfy the same phenotypes, meaning the resulting `Class` object
+    /// will only contain up to one instance of the same phenotype configuration. For example,
+    /// if I have two attractors, each satisfying phenotype `"a"`, then by default the result
+    /// is a `Class(["Class(['a'])", "Class(['a'])"])` (and this situation is different compared
+    /// to the case when I only have one such attractor). If I set `count_multiplicity=False`,
+    /// the result will be `Class(["Class(['a'])"])`, regardless of how many attractors actually
+    /// satisfy the `"a"` phenotype.
+    #[staticmethod]
+    #[pyo3(signature = (graph, phenotypes, oscillation_types = None, traps = None, count_multiplicity = true))]
+    pub fn classify_attractor_phenotypes(
+        py: Python,
+        graph: &AsynchronousGraph,
+        phenotypes: HashMap<Class, VertexSet>,
+        oscillation_types: Option<HashMap<Class, String>>,
+        traps: Option<Vec<ColoredVertexSet>>,
+        count_multiplicity: bool,
+    ) -> PyResult<HashMap<Class, ColorSet>> {
+        // Initialize the attractor set.
+        let traps = if let Some(traps) = traps {
+            traps
+        } else {
+            Attractors::attractors(graph, None, None, py)?
+        };
+
+        let mut all_colors = graph.mk_empty_colors();
+        for attr in &traps {
+            all_colors = all_colors.union(&attr.colors());
+        }
+
+        let mut result = HashMap::new();
+        result.insert(Class::new_native(Vec::new()), all_colors);
+
+        for attr in &traps {
+            let attr_classes = Self::classify_phenotypes(
+                py,
+                graph,
+                phenotypes.clone(),
+                oscillation_types.clone(),
+                Some(attr.clone()),
+            )?;
+            for (cls, set) in attr_classes {
+                let cls_str = cls.__repr__();
+                let cls_py = Py::new(py, Class::new_native(vec![cls_str]))?;
+                if count_multiplicity {
+                    result = Self::append(result, cls_py.into_bound(py), set)?;
+                } else {
+                    result = Self::ensure(result, cls_py.into_bound(py), set)?;
+                }
+            }
+        }
+
+        Ok(result)
+    }
+
     /// Classify the colors of an `AsynchronousGraph` according to their affinity to biological
     /// phenotypes.
     ///
     /// Each phenotype is given as an arbitrary `VertexSet`, identified by a `Class` instance.
-    /// Most often, phenotypes are described through sub-spaces (see also
-    /// `AsynchronousGraph.mk_subspace_vertices`). Each phenotype either holds or does not hold
-    /// in each network attractor. The conditions for this depend on the `PhenotypeOscillation`
-    /// type, that can be optionally given as a second dictionary.
+    /// Most often, phenotypes are described through pair-wise disjoint sub-spaces (see also
+    /// `AsynchronousGraph.mk_subspace_vertices`). The result of this method then associates
+    /// each network color with a collection of phenotypes (i.e. `Class`) that are attainable
+    /// in the corresponding fully instantiated network.
     ///
-    ///  - [default] `forbidden`: Phenotype is satisfied if all attractor vertices belong to the
+    /// By default, the network exhibits a phenotype if it can stay in the phenotype set
+    /// forever (i.e. there exists at least one attractor that is fully in this set). However,
+    /// we also allow other types of phenotypes based on the `PhenotypeOscillation`:
+    ///
+    ///  - [default] `forbidden`: There *exists* an attractor that is a *subset* of the
     ///    given phenotype `VertexSet` (oscillation is forbidden).
-    ///  - `required`: Phenotype is satisfied if the attractor intersects the phenotype set,
-    ///    but is not a proper subset (oscillation always occurs).
-    ///  - `allowed`: Phenotype is satisfied if *some* attractor state belongs to the given
-    ///    phenotype set (i.e. the attractor can be a subset of the phenotype, or just have
-    ///    a non-empty intersection).
+    ///  - `required`: There *exists* an attractor that *intersects* the phenotype set, but
+    ///    is not a *proper subset* (phenotype is visited intermittently).
+    ///  - `allowed`: There *exists* an attractor that *intersects* the phenotype set, but
+    ///    can be also a proper subset (i.e. the network either stays in the phenotype forever,
+    ///    or visits it intermittently, we don't care which one).
     ///
-    /// A network color `c` then satisfies a phenotype if there *exists* an attractor in `c`
-    /// for which the phenotype holds. Colors that do not match any phenotype are returned with
-    /// an empty class (i.e. `Class([])`).
+    /// Colors that do not match any phenotype are returned with an empty class (i.e. `Class([])`).
     ///
-    /// Typically, phenotypes correspond to disjoint sets of vertices. However, this
-    /// is not a rule. Furthermore, the method can also deal with colors that satisfy multiple
-    /// phenotypes. Such colors are assigned a class that is the sum of all satisfied phenotype
-    /// classes.
+    /// Note that this method does not count the number of attractors, and it can assign the
+    /// same attractor to multiple phenotypes (for example, a network with a fixed-point `111`
+    /// exhibits both phenotype `a=11*` and `b=*11`, i.e. the network will be returned within
+    /// the class `Class(['a','b'])`). This is usually not a problem for disjoint phenotypes with
+    /// forbidden oscillation, just beware that for more complex phenotypes,
+    /// you might need additional analysis of the relevant colors.
     ///
-    /// Note that you can (optionally) provide your own attractor states (or any other relevant
+    /// If you do also need to map attractors to phenotypes, have a look at
+    /// `Classification.classify_attractor_phenotypes`.
+    ///
+    /// You can (optionally) provide your own attractor states (or any other relevant
     /// set of states) as the `initial_trap` argument (the method assumes this is a trap set).
     /// However, computing phenotype classification does not require precise knowledge of
     /// attractors. Thus, it can be often much faster than exact attractor computation (especially
     /// if the number of attractors is high). However, you can use this option to restrict the
-    /// input space if you want to explicitly ignore certain attractors.
+    /// input space if you want to explicitly ignore certain parts of the state space.
     ///
     /// You can also combine the results of this analysis with other classifications (e.g.
     /// attractor bifurcations, or HCTL properties) using `Classification.ensure` or
     /// `Classification.append`.
     #[staticmethod]
     #[pyo3(signature = (graph, phenotypes, oscillation_types = None, initial_trap = None))]
-    pub fn classify_attractor_phenotypes(
+    pub fn classify_phenotypes(
         py: Python,
         graph: &AsynchronousGraph,
         phenotypes: HashMap<Class, VertexSet>,
@@ -431,10 +520,20 @@ impl Classification {
         initial_trap: Option<ColoredVertexSet>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let mut map = HashMap::new();
-        map.insert(Class::new_native(Vec::new()), graph.mk_unit_colors());
 
         let unit = graph.mk_unit_colored_vertices();
         let initial_trap = initial_trap.unwrap_or_else(|| graph.mk_unit_colored_vertices());
+        if !graph
+            .as_native()
+            .can_post_out(initial_trap.as_native())
+            .is_empty()
+        {
+            return throw_runtime_error(
+                "Given initial trap set is not a trap set (it can be escaped).",
+            );
+        }
+
+        map.insert(Class::new_native(Vec::new()), initial_trap.colors());
 
         for (cls, phenotype) in phenotypes {
             let p_type = oscillation_types
