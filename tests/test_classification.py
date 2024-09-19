@@ -143,3 +143,56 @@ def test_property_classification():
     assert str(l_ann) == str(annotations)
 
     os.remove("classification.test.2.zip")
+
+def test_phenotype_classification():
+    path = "./tests/model-myeloid-3-unknown.aeon"
+
+    bn = BooleanNetwork.from_file(path)
+
+    graph = AsynchronousGraph(bn)
+    phenotypes = {
+        Class('erythrocyte'): graph.mk_subspace_vertices({"EKLF": True}),
+        Class('megakaryocyte'): graph.mk_subspace_vertices({"Fli1": True}),
+        Class('monocyte'): graph.mk_subspace_vertices({"cJun": True}),
+        Class('granulocyte'): graph.mk_subspace_vertices({"Gfi1": True})
+    }
+    phenotype_mapping = Classification.classify_phenotypes(graph, phenotypes)
+    phenotype_attractor_mapping = Classification.classify_attractor_phenotypes(graph, phenotypes, count_multiplicity=False)
+
+    # An example of how to nicely print the mappings:
+    for (cls, colors) in phenotype_mapping.items():
+        print(cls, colors)
+    # Expected output:
+    # ["granulocyte", "megakaryocyte", "monocyte"] ColorSet(cardinality=1423062, symbolic_size=543)
+    # ["erythrocyte", "granulocyte", "megakaryocyte"] ColorSet(cardinality=4617, symbolic_size=197)
+    # ["granulocyte", "monocyte"] ColorSet(cardinality=58482, symbolic_size=295)
+    # ["granulocyte", "megakaryocyte"] ColorSet(cardinality=4617, symbolic_size=197)
+    # ["erythrocyte", "megakaryocyte"] ColorSet(cardinality=53865, symbolic_size=279)
+    # ["megakaryocyte"] ColorSet(cardinality=53865, symbolic_size=279)
+    # ["erythrocyte", "granulocyte", "megakaryocyte", "monocyte"] ColorSet(cardinality=1364580, symbolic_size=561)
+
+    for (cls, colors) in phenotype_attractor_mapping.items():
+        print([eval(x).feature_list() for x in cls.feature_list()], colors)
+
+    # Expected output:
+    # [['granulocyte', 'megakaryocyte'], ['megakaryocyte', 'monocyte'], ['megakaryocyte']] ColorSet(cardinality=1364976, symbolic_size=675)
+    # [['granulocyte', 'megakaryocyte'], ['megakaryocyte', 'monocyte']] ColorSet(cardinality=58086, symbolic_size=408)
+    # [['granulocyte', 'megakaryocyte'], ['megakaryocyte']] ColorSet(cardinality=4617, symbolic_size=197)
+    # [['erythrocyte', 'granulocyte'], ['erythrocyte'], ['granulocyte', 'megakaryocyte'], ['megakaryocyte']] ColorSet(cardinality=4221, symbolic_size=213)
+    # [['megakaryocyte']] ColorSet(cardinality=53865, symbolic_size=279)
+    # [['granulocyte'], ['monocyte']] ColorSet(cardinality=58086, symbolic_size=408)
+    # [['granulocyte'], ['monocyte'], []] ColorSet(cardinality=396, symbolic_size=141)
+    # [['erythrocyte'], ['granulocyte'], ['megakaryocyte'], ['monocyte'], []] ColorSet(cardinality=4617, symbolic_size=165)
+    # [['erythrocyte'], ['granulocyte'], ['megakaryocyte'], ['monocyte']] ColorSet(cardinality=1281078, symbolic_size=858)
+    # [['erythrocyte', 'granulocyte'], ['erythrocyte'], ['granulocyte', 'megakaryocyte'], ['granulocyte'], ['megakaryocyte'], ['monocyte']] ColorSet(cardinality=78885, symbolic_size=453)
+    # [['erythrocyte'], ['megakaryocyte']] ColorSet(cardinality=53865, symbolic_size=279)
+    # [['erythrocyte'], ['granulocyte'], ['megakaryocyte']] ColorSet(cardinality=396, symbolic_size=141)
+
+    # Test that every attractor class is a subset of the corresponding phenotype class:
+    for (cls, colors) in phenotype_attractor_mapping.items():
+        phenotype_class = Class([])
+        for inner in cls.feature_list():
+            inner_cls: Class = eval(inner)
+            for phenotype in inner_cls.feature_list():
+                phenotype_class = phenotype_class.ensure(phenotype)
+        assert colors.is_subset(phenotype_mapping[phenotype_class])

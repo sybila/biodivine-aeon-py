@@ -10,14 +10,14 @@ use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{throw_runtime_error, throw_type_error};
 
-/// A `Class` is an immutable collection of sorted "features", such as each feature is
+/// A `Class` is an immutable collection of sorted "features", such that each feature is
 /// a described by its string name. A `Class` is used by the various classification workflows
 /// in AEON to label a specific mode of behavior that a system can exhibit.
 ///
 /// Depending on which operations are used, a class can behave either as a `set` (each feature
 /// can only appear once in a `Class`), or a `list` (multiple features of the same name appear
 /// multiple times). This entirely depends on the classification workflow used and is not
-/// a property of a `Class` (you can even mix the `set` and `list` behavior depending on
+/// a property of a `Class` itself (you can even mix the `set` and `list` behavior depending on
 /// the exact feature you are adding). Note that an "empty" class is allowed.
 ///
 /// The main reason why we even need `Class` is that lists and sets are not hash-able in Python,
@@ -89,11 +89,11 @@ impl Class {
         hasher.finish()
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!("{:?}", self.items)
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Class({})", self.__str__())
     }
 
