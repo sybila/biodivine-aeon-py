@@ -127,7 +127,7 @@ def test_property_classification():
     os.remove("classification.test.2.zip")
 
 def test_phenotype_classification():
-    path = "./example/case-study/control/myeloid_3unknown.aeon"
+    path = "./tests/model-myeloid-3-unknown.aeon"
 
     bn = BooleanNetwork.from_file(path)
 
