@@ -24,7 +24,8 @@ use std::hash::{Hash, Hasher};
 ///
 /// The value of `VariableId` is frozen (i.e. immutable).
 ///
-/// See also `VariableIdType`.
+/// See also `VariableIdType`: In most cases where the ID can be "inferred from context",
+/// a name can be also used to identify a network variable.
 ///  
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Wrapper)]

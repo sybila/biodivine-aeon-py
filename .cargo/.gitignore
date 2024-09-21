@@ -1,0 +1,2 @@
+# Ignore the actual `cargo/config.toml`. You should pick one of the pre-defined values for your current machine.
+config.toml

@@ -6,7 +6,7 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
+use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
 use crate::{global_log_level, throw_type_error, AsNative};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
 use biodivine_lib_param_bn::trap_spaces::{NetworkColoredSpaces, NetworkSpaces};
@@ -333,8 +333,8 @@ impl SymbolicSpaceContext {
                     continue;
                 }
                 let k = self_.borrow(py).as_ref().resolve_network_variable(&k)?;
-                let v = resolve_boolean(&v)?;
-                result.push((k, v));
+                let v = v.extract::<BoolLikeValue>()?;
+                result.push((k, v.bool()));
             }
             return Ok(result);
         }

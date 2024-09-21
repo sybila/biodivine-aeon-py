@@ -156,21 +156,17 @@ impl Control {
             PhenotypeOscillationType::Forbidden
         };
 
-        let perturbations = if let Some(size) = size_limit {
-            graph.get().as_native().ceiled_phenotype_permanent_control(
-                phenotype.as_native().clone(),
-                size,
-                p_type,
-                stop_when_found,
-                verbose,
-            )
-        } else {
-            graph.get().as_native().phenotype_permanent_control(
-                phenotype.as_native().clone(),
-                p_type,
-                verbose,
-            )
-        };
+        // If size limit is not set, we consider the largest possible size.
+        let size_limit =
+            size_limit.unwrap_or_else(|| graph.get().as_native().perturbable_variables().len());
+
+        let perturbations = graph.get().as_native().ceiled_phenotype_permanent_control(
+            phenotype.as_native().clone(),
+            size_limit,
+            p_type,
+            stop_when_found,
+            verbose,
+        );
 
         Ok(sanitize_control_map(graph, perturbations.as_bdd().clone()))
     }

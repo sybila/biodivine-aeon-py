@@ -20,7 +20,7 @@ use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::control::sanitize_control_map;
 use crate::bindings::pbn_control::set_colored_perturbation::ColoredPerturbationSet;
 use crate::bindings::pbn_control::PerturbationSet;
-use crate::pyo3_utils::resolve_boolean;
+use crate::pyo3_utils::BoolLikeValue;
 use crate::{throw_runtime_error, AsNative};
 
 /// An extension of `AsynchronousGraph` that admits various variable perturbations through
@@ -133,7 +133,7 @@ impl AsynchronousPerturbationGraph {
         _self: Bound<'_, Self>,
         function: &Bound<'_, PyAny>,
         row: &Bound<'_, PyList>,
-        value: &Bound<'_, PyAny>,
+        value: BoolLikeValue,
     ) -> PyResult<ColorSet> {
         let result = _self
             .borrow()
@@ -307,7 +307,7 @@ impl AsynchronousPerturbationGraph {
     ) -> PyResult<ColoredPerturbationSet> {
         let source = source
             .iter()
-            .map(|it| resolve_boolean(&it))
+            .map(|it| it.extract::<BoolLikeValue>().map(bool::from))
             .collect::<PyResult<Vec<bool>>>()?;
         let source = ArrayBitVector::from(source);
         let result = _self

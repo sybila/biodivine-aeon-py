@@ -352,4 +352,9 @@ impl _PerturbationModelIterator {
             PerturbationModel::new_native(self.ctx.clone(), it, self.parameter_mapping.clone())
         })
     }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<PerturbationModel> {
+        self.__next__()
+    }
 }

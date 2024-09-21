@@ -1,4 +1,4 @@
-use crate::pyo3_utils::{resolve_boolean, richcmp_eq_by_key};
+use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
 use crate::{throw_runtime_error, throw_type_error};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_bdd::boolean_expression::BooleanExpression::{And, Cond, Iff, Imp, Or, Xor};
@@ -98,9 +98,8 @@ impl BooleanExpression {
 
     /// Return a `BooleanExpression` of a constant value.
     #[staticmethod]
-    pub fn mk_const(value: &Bound<'_, PyAny>) -> PyResult<BooleanExpression> {
-        let value = resolve_boolean(value)?;
-        Ok(Self::from_native(RsBooleanExpression::Const(value)))
+    pub fn mk_const(value: BoolLikeValue) -> PyResult<BooleanExpression> {
+        Ok(Self::from_native(RsBooleanExpression::Const(value.bool())))
     }
 
     /// Return a `BooleanExpression` of a single named variable.
@@ -405,27 +404,7 @@ impl BooleanExpression {
 
     /// Return the set of Boolean variable names that appear in this `BooleanExpression`.
     pub fn support_set(&self) -> HashSet<String> {
-        fn recursive(e: &RsBooleanExpression, result: &mut HashSet<String>) {
-            match e {
-                RsBooleanExpression::Const(_) => (),
-                Variable(name) => {
-                    result.insert(name.clone());
-                }
-                Not(inner) => recursive(inner, result),
-                And(l, r) | Or(l, r) | Imp(l, r) | Iff(l, r) | Xor(l, r) => {
-                    recursive(l, result);
-                    recursive(r, result);
-                }
-                Cond(test, branch1, branch2) => {
-                    recursive(test, result);
-                    recursive(branch1, result);
-                    recursive(branch2, result);
-                }
-            };
-        }
-        let mut result = HashSet::new();
-        recursive(self.as_native(), &mut result);
-        result
+        self.as_native().support_set()
     }
 }
 
@@ -476,7 +455,7 @@ fn eval(e: &RsBooleanExpression, valuation: &Bound<'_, PyDict>) -> PyResult<bool
             let Some(value) = valuation.get_item(name)? else {
                 return throw_runtime_error(format!("Missing value of {}.", name));
             };
-            resolve_boolean(&value)
+            value.extract::<BoolLikeValue>().map(bool::from)
         }
         Not(inner) => {
             let inner = eval(inner, valuation)?;

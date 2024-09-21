@@ -366,4 +366,9 @@ impl _ColorVertexModelIterator {
             (color, vertex)
         })
     }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<(ColorModel, VertexModel)> {
+        self.__next__()
+    }
 }

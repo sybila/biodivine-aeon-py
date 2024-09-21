@@ -251,4 +251,9 @@ impl _VertexModelIterator {
             .next()
             .map(|it| VertexModel::new_native(self.ctx.clone(), it))
     }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<VertexModel> {
+        self.__next__()
+    }
 }

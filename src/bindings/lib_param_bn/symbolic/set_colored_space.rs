@@ -382,4 +382,9 @@ impl _ColorSpaceModelIterator {
             Ok(None)
         }
     }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self, py: Python) -> PyResult<Option<(ColorModel, SpaceModel)>> {
+        self.__next__(py)
+    }
 }

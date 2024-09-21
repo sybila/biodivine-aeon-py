@@ -1,5 +1,8 @@
 # Biodivine/AEON.py
 
+ > AEON.py now finally has API documentation! You can learn more about the individual methods and classes 
+ > [here](https://biodivine.fi.muni.cz/docs/aeon-py/latest/). 
+
 AEON.py provides Python bindings for the internal and experimental functionality of the tool
 [AEON](https://biodivine.fi.muni.cz/aeon/). You can use it to perform analysis of 
 Boolean networks with symbolic (BDD-based or solver-based) methods. In particular, AEON.py supports:
@@ -11,7 +14,7 @@ Boolean networks with symbolic (BDD-based or solver-based) methods. In particula
     - Fixed-point enumeration.
     - Minimal/maximal trap space enumeration.
  - Symbolic (H)CTL model checking and parameter synthesis.
- - Basic control/reprogramming methods.
+ - Control/reprogramming methods.
  - Arbitrary symbolic operations on sets of Boolean states/space/functions represented through BDDs.
 
 ### Installation
@@ -20,7 +23,7 @@ The package is available through `PyPI` for all major operating systems (Windows
 To install it, you can simply run:
 
 ```
-pip install biodivine-aeon
+pip install biodivine_aeon
 ```
 
 AEON.py is also available through [conda](https://anaconda.org/daemontus/biodivine_aeon) 
@@ -39,12 +42,11 @@ Bioinformatics, 38(21), 4978-4980.
 
 ### Documentation
 
-> While AEON.py is relatively mature, as with many academic tools, there are still aspects of the
-> documentation that are not completely finalized. If you find that something is missing, or just 
-> want us to give you a demo of what the tool is capable of, feel free to get in touch!
+The documentation of the AEON.py API is available [here](https://biodivine.fi.muni.cz/docs/aeon-py/latest/).
+It should describe the functionality of all the classes/methods, but it currently does not 
+provide self-contained examples.
 
-For new users that are already familiar with the concept of Boolean networks, we recommend the
-Jupyter notebooks available in the `examples` directory:
+For that, we recommend the Jupyter notebooks available in the `examples` directory:
  - There are three non-trivial case studies using AEON.py for analysing attractor and phenotype
  bifurcations in real-world Boolean networks.
  - There are several "workflow" examples. Some are focused on a specific task (e.g. attractor
@@ -54,20 +56,7 @@ Jupyter notebooks available in the `examples` directory:
 Additionally, the 
 [manual](https://biodivine.fi.muni.cz/aeon/manual/v0.4.0/index.html) of the standalone AEON tool
 can be helpful to understand some of the high-level concepts related
-to Boolean networks (both classical and partially specified).
-
-Finally, more informed users can inspect a detailed API documentation available 
-[here](https://biodivine.fi.muni.cz/docs/aeon-py/v0.1.0/). Note that this is a documentation generated 
-for the *Rust* codebase, which is then exported into Python using the `PyO3` tool. 
-As such, naming can be different in the exported Python library (observe the `name` 
-attribute on most structs that is used for this reason). Nevertheless, the documentation should 
-describe all available methods and data structures.
-
-> A proper Python documentation of the full library API is planned later for the `1.0.0` release.
-> Until then, you may also inspect the internal documentation of the underlying Rust libraries
-> to see what functionality is generally available: 
-> [lib-bdd](https://docs.rs/biodivine-lib-bdd/0.5.1/biodivine_lib_bdd/), 
-> [lib-param-bn](https://docs.rs/biodivine-lib-param-bn/0.4.5/biodivine_lib_param_bn/).
+to partially specified Boolean networks (both classical and partially specified).
 
 ## Development instructions
 
