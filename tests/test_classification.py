@@ -172,6 +172,7 @@ def test_phenotype_classification():
     # ["erythrocyte", "granulocyte", "megakaryocyte", "monocyte"] ColorSet(cardinality=1364580, symbolic_size=561)
 
     for (cls, colors) in phenotype_attractor_mapping.items():
+        print(cls)
         print([eval(x).feature_list() for x in cls.feature_list()], colors)
 
     # Expected output:
@@ -196,3 +197,7 @@ def test_phenotype_classification():
             for phenotype in inner_cls.feature_list():
                 phenotype_class = phenotype_class.ensure(phenotype)
         assert colors.is_subset(phenotype_mapping[phenotype_class])
+
+
+
+test_phenotype_classification()
