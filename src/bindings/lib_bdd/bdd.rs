@@ -228,7 +228,6 @@ impl Bdd {
         let native = if optimize {
             self.as_native()._to_optimized_dnf(&|dnf| {
                 if let Some(size_limit) = size_limit {
-                    println!("{}, {}", size_limit, dnf.len());
                     if size_limit < dnf.len() {
                         return throw_interrupted_error(format!(
                             "Exceeded size limit of {} clauses",
