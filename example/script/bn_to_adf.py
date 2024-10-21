@@ -13,7 +13,7 @@ python3 bn_to_adf.py path/to/bn_model.aeon > adf_file.txt
 bn = BooleanNetwork.from_file(sys.argv[1])
 
 for var in bn.variables():
-	print(f"s({int(var) + 1})")
+	print(f"s({int(var) + 1}).")	
 
 def convert_function(function):
 	if function.is_const():
@@ -28,24 +28,24 @@ def convert_function(function):
 		raise Error("Parameters not supported.")
 	if function.is_not():
 		inner = function.as_not()
-		return f"not({convert_function(inner)})"
+		return f"neg({convert_function(inner)})"
 	if function.is_and():
 		(a, b) = function.as_and()
-		return f"and({convert_function(a)},{convert_function(b)})"
+		return f"and({convert_function(a)}, {convert_function(b)})"
 	if function.is_or():
 		(a, b) = function.as_or()
-		return f"or({convert_function(a)},{convert_function(b)})"
+		return f"or({convert_function(a)}, {convert_function(b)})"
 	if function.is_xor():
 		(a, b) = function.as_xor()
-		return f"xor({convert_function(a)},{convert_function(b)})"
+		return f"xor({convert_function(a)}, {convert_function(b)})"
 	if function.is_imp():
 		(a, b) = function.as_imp()
-		return f"imp({convert_function(a)},{convert_function(b)})"
+		return f"imp({convert_function(a)}, {convert_function(b)})"
 	if function.is_iff():
 		(a, b) = function.as_iff()
-		return f"iff({convert_function(a)},{convert_function(b)})"
+		return f"iff({convert_function(a)}, {convert_function(b)})"
 
 
 for var in bn.variables():
 	function = bn.get_update_function(var)
-	print(f"ac({int(var) + 1}, {convert_function(function)})")
+	print(f"ac({int(var) + 1}, {convert_function(function)}).")
