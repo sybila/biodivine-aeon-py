@@ -23,6 +23,9 @@ def test_hctl_formula():
     assert HctlFormula.mk_hybrid("forall", "v", f) == HctlFormula.mk_forall("v", f)
     assert HctlFormula.mk_hybrid("bind", "v", f) == HctlFormula.mk_bind("v", f)
     assert HctlFormula.mk_hybrid("jump", "v", f) == HctlFormula.mk_jump("v", f)
+    assert HctlFormula.mk_hybrid("exists", "v", f, "dom") == HctlFormula.mk_exists("v", f, "dom")
+    assert HctlFormula.mk_hybrid("forall", "v", f, "dom") == HctlFormula.mk_forall("v", f, "dom")
+    assert HctlFormula.mk_hybrid("bind", "v", f, "dom") == HctlFormula.mk_bind("v", f, "dom")
 
     assert HctlFormula.mk_temporal("exist_next", f) == HctlFormula.mk_exist_next(f)
     assert HctlFormula.mk_temporal("all_next", f) == HctlFormula.mk_all_next(f)
@@ -55,15 +58,33 @@ def test_hctl_formula():
 
     ff = HctlFormula("3{x}: a")
     assert ff.is_exists() and ff.is_hybrid()
+    assert not (ff.is_exists_in() or ff.is_hybrid_in())
     assert ff.as_exists() == ("x", a) and ff.as_hybrid() == ("exists", "x", a)
+
+    ff = HctlFormula("3{x} in %dom%: a")
+    assert ff.is_exists_in() and ff.is_hybrid_in()
+    assert not (ff.is_exists() or ff.is_hybrid())
+    assert ff.as_exists_in() == ("x", "dom", a) and ff.as_hybrid_in() == ("exists", "x", "dom", a)
 
     ff = HctlFormula("V{x}: a")
     assert ff.is_forall() and ff.is_hybrid()
+    assert not (ff.is_forall_in() or ff.is_hybrid_in())
     assert ff.as_forall() == ("x", a) and ff.as_hybrid() == ("forall", "x", a)
+
+    ff = HctlFormula("V{x} in %dom%: a")
+    assert ff.is_forall_in() and ff.is_hybrid_in()
+    assert not (ff.is_forall() or ff.is_hybrid())
+    assert ff.as_forall_in() == ("x", "dom", a) and ff.as_hybrid_in() == ("forall", "x", "dom", a)
 
     ff = HctlFormula("!{x}: a")
     assert ff.is_bind() and ff.is_hybrid()
+    assert not (ff.is_bind_in() or ff.is_hybrid_in())
     assert ff.as_bind() == ("x", a) and ff.as_hybrid() == ("bind", "x", a)
+
+    ff = HctlFormula("!{x} in %dom%: a")
+    assert ff.is_bind_in() and ff.is_hybrid_in()
+    assert not (ff.is_bind() or ff.is_hybrid())
+    assert ff.as_bind_in() == ("x", "dom", a) and ff.as_hybrid_in() == ("bind", "x", "dom", a)
 
     ff = HctlFormula("@{x}: a")
     assert ff.is_jump() and ff.is_hybrid()

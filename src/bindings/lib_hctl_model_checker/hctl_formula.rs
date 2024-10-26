@@ -233,45 +233,92 @@ impl HctlFormula {
     }
 
     /// Create a new `HctlFormula` that uses a hybrid operator (see also `HybridOperator`).
+    ///
+    /// Optionally, you can provide a named `domain` which further restricts the validity
+    /// of the operator. Note that such formulas have separate pattern matching methods
+    /// (e.g. `HctlFormula.is_hybrid_in` instead of `HctlFormula.is_hybrid`).
     #[staticmethod]
-    fn mk_hybrid(op: String, state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
+    #[pyo3(signature = (op, state_variable, inner, domain = None))]
+    fn mk_hybrid(
+        op: String,
+        state_variable: String,
+        inner: &HctlFormula,
+        domain: Option<String>,
+    ) -> PyResult<HctlFormula> {
         let op = resolve_hybrid_operator(op)?;
-        let formula_native =
-            HctlTreeNode::mk_hybrid(inner.as_native().clone(), state_variable.as_str(), None, op);
+        if op == HybridOp::Jump && domain.is_some() {
+            return throw_type_error("Jump operator does not support domain restrictions.");
+        }
+        let formula_native = HctlTreeNode::mk_hybrid(
+            inner.as_native().clone(),
+            state_variable.as_str(),
+            domain,
+            op,
+        );
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `3{x}` operator.
+    ///
+    /// Optionally, you can provide a named `domain` which further restricts the validity
+    /// of the operator (i.e. it creates the `3{x} in %domain%` operator). Note that such
+    /// formulas have separate pattern matching methods (e.g. `HctlFormula.is_exists_in`
+    /// instead of `HctlFormula.is_exists`).
     #[staticmethod]
-    fn mk_exists(state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
+    #[pyo3(signature = (state_variable, inner, domain = None))]
+    fn mk_exists(
+        state_variable: String,
+        inner: &HctlFormula,
+        domain: Option<String>,
+    ) -> PyResult<HctlFormula> {
         let formula_native = HctlTreeNode::mk_hybrid(
             inner.as_native().clone(),
             state_variable.as_str(),
-            None,
+            domain,
             HybridOp::Exists,
         );
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `V{x}` operator.
+    ///
+    /// Optionally, you can provide a named `domain` which further restricts the validity
+    /// of the operator (i.e. it creates the `V{x} in %domain%` operator). Note that such
+    /// formulas have separate pattern matching methods (e.g. `HctlFormula.is_forall_in`
+    /// instead of `HctlFormula.is_forall`).
     #[staticmethod]
-    fn mk_forall(state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
+    #[pyo3(signature = (state_variable, inner, domain = None))]
+    fn mk_forall(
+        state_variable: String,
+        inner: &HctlFormula,
+        domain: Option<String>,
+    ) -> PyResult<HctlFormula> {
         let formula_native = HctlTreeNode::mk_hybrid(
             inner.as_native().clone(),
             state_variable.as_str(),
-            None,
+            domain,
             HybridOp::Forall,
         );
         Ok(Self::from_native(formula_native))
     }
 
     /// Create a new `HctlFormula` that uses the `!{x}` operator.
+    ///
+    /// Optionally, you can provide a named `domain` which further restricts the validity
+    /// of the operator (i.e. it creates the `!{x} in %domain%` operator). Note that such
+    /// formulas have separate pattern matching methods (e.g. `HctlFormula.is_forall_in`
+    /// instead of `HctlFormula.is_forall`).
     #[staticmethod]
-    fn mk_bind(state_variable: String, inner: &HctlFormula) -> PyResult<HctlFormula> {
+    #[pyo3(signature = (state_variable, inner, domain = None))]
+    fn mk_bind(
+        state_variable: String,
+        inner: &HctlFormula,
+        domain: Option<String>,
+    ) -> PyResult<HctlFormula> {
         let formula_native = HctlTreeNode::mk_hybrid(
             inner.as_native().clone(),
             state_variable.as_str(),
-            None,
+            domain,
             HybridOp::Bind,
         );
         Ok(Self::from_native(formula_native))
@@ -464,9 +511,16 @@ impl HctlFormula {
         Ok(Self::from_native(formula_native))
     }
 
-    /// Check if this `HctlFormula` represents on of the hybrid operators (see `HybridOperator`).
+    /// Check if this `HctlFormula` represents on of the hybrid operators *without* a domain
+    /// restriction (see `HybridOperator`).
     fn is_hybrid(&self) -> bool {
-        matches!(self.value.node_type, NodeType::Hybrid(_, _, _, _))
+        matches!(self.value.node_type, NodeType::Hybrid(_, _, None, _))
+    }
+
+    /// Check if this `HctlFormula` represents on of the hybrid operators *with* a domain
+    /// restriction (see `HybridOperator`).
+    fn is_hybrid_in(&self) -> bool {
+        matches!(self.value.node_type, NodeType::Hybrid(_, _, Some(_), _))
     }
 
     /// Check if this `HctlFormula` represents on of the temporal operators (see `TemporalUnaryOperator` and `TemporalBinaryOperator`).
@@ -539,7 +593,15 @@ impl HctlFormula {
     fn is_exists(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::Hybrid(HybridOp::Exists, _, _, _)
+            NodeType::Hybrid(HybridOp::Exists, _, None, _)
+        )
+    }
+
+    /// Check if this `HctlFormula` represents the `3{x} in %domain%` operator.
+    fn is_exists_in(&self) -> bool {
+        matches!(
+            self.value.node_type,
+            NodeType::Hybrid(HybridOp::Exists, _, Some(_), _)
         )
     }
 
@@ -547,7 +609,15 @@ impl HctlFormula {
     fn is_forall(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::Hybrid(HybridOp::Forall, _, _, _)
+            NodeType::Hybrid(HybridOp::Forall, _, None, _)
+        )
+    }
+
+    /// Check if this `HctlFormula` represents the `V{x} in %domain%` operator.
+    fn is_forall_in(&self) -> bool {
+        matches!(
+            self.value.node_type,
+            NodeType::Hybrid(HybridOp::Forall, _, Some(_), _)
         )
     }
 
@@ -555,7 +625,15 @@ impl HctlFormula {
     fn is_bind(&self) -> bool {
         matches!(
             self.value.node_type,
-            NodeType::Hybrid(HybridOp::Bind, _, _, _)
+            NodeType::Hybrid(HybridOp::Bind, _, None, _)
+        )
+    }
+
+    /// Check if this `HctlFormula` represents the `!{x} in %domain%` operator.
+    fn is_bind_in(&self) -> bool {
+        matches!(
+            self.value.node_type,
+            NodeType::Hybrid(HybridOp::Bind, _, Some(_), _)
         )
     }
 
@@ -647,12 +725,27 @@ impl HctlFormula {
         matches!(self.value.node_type, NodeType::Binary(BinaryOp::AW, _, _))
     }
 
-    /// Return the operator, variable and argument if this `HctlFormula` represents a hybrid operator.
+    /// Return the operator, variable and argument if this `HctlFormula` represents a
+    /// hybrid operator *without domain restriction*.
     fn as_hybrid(&self) -> Option<(String, String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::Hybrid(op, var, _, inner) => Some((
+            NodeType::Hybrid(op, var, None, inner) => Some((
                 encode_hybrid_operator(op),
                 var.clone(),
+                self.mk_child_ref(inner),
+            )),
+            _ => None,
+        }
+    }
+
+    /// Return the operator, variable, *domain* and argument if this `HctlFormula` represents a
+    /// hybrid operator *with domain restriction*.
+    fn as_hybrid_in(&self) -> Option<(String, String, String, HctlFormula)> {
+        match &self.value.node_type {
+            NodeType::Hybrid(op, var, Some(domain), inner) => Some((
+                encode_hybrid_operator(op),
+                var.clone(),
+                domain.clone(),
                 self.mk_child_ref(inner),
             )),
             _ => None,
@@ -742,10 +835,23 @@ impl HctlFormula {
 
     /// Return the state variable name and the child formula if this `HctlFormula` represents
     /// the `3{x}` hybrid operator.
+    ///
+    /// (This method returns `None` if the formula represents the `3{x} in %domain%` operator.)
     fn as_exists(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::Hybrid(HybridOp::Exists, name, _, inner) => {
+            NodeType::Hybrid(HybridOp::Exists, name, None, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
+            }
+            _ => None,
+        }
+    }
+
+    /// Return the state variable name, *domain name*, and the child formula if this
+    /// `HctlFormula` represents the `3{x} in %domain%` hybrid operator.
+    fn as_exists_in(&self) -> Option<(String, String, HctlFormula)> {
+        match &self.value.node_type {
+            NodeType::Hybrid(HybridOp::Exists, name, Some(domain), inner) => {
+                Some((name.clone(), domain.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
         }
@@ -753,10 +859,23 @@ impl HctlFormula {
 
     /// Return the state variable name and the child formula if this `HctlFormula` represents
     /// the `V{x}` hybrid operator.
+    ///
+    /// (This method returns `None` if the formula represents the `V{x} in %domain%` operator.)
     fn as_forall(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::Hybrid(HybridOp::Forall, name, _, inner) => {
+            NodeType::Hybrid(HybridOp::Forall, name, None, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
+            }
+            _ => None,
+        }
+    }
+
+    /// Return the state variable name, *domain name*, and the child formula if this
+    /// `HctlFormula` represents the `V{x} in %domain%` hybrid operator.
+    fn as_forall_in(&self) -> Option<(String, String, HctlFormula)> {
+        match &self.value.node_type {
+            NodeType::Hybrid(HybridOp::Forall, name, Some(domain), inner) => {
+                Some((name.clone(), domain.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
         }
@@ -764,10 +883,23 @@ impl HctlFormula {
 
     /// Return the state variable name and the child formula if this `HctlFormula` represents
     /// the `!{x}` hybrid operator.
+    ///
+    /// (This method returns `None` if the formula represents the `!{x} in %domain%` operator.)
     fn as_bind(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::Hybrid(HybridOp::Bind, name, _, inner) => {
+            NodeType::Hybrid(HybridOp::Bind, name, None, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
+            }
+            _ => None,
+        }
+    }
+
+    /// Return the state variable name, *domain name*, and the child formula if this
+    /// `HctlFormula` represents the `!{x} in %domain%` hybrid operator.
+    fn as_bind_in(&self) -> Option<(String, String, HctlFormula)> {
+        match &self.value.node_type {
+            NodeType::Hybrid(HybridOp::Bind, name, Some(domain), inner) => {
+                Some((name.clone(), domain.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
         }
@@ -777,7 +909,7 @@ impl HctlFormula {
     /// the `@{x}` hybrid operator.
     fn as_jump(&self) -> Option<(String, HctlFormula)> {
         match &self.value.node_type {
-            NodeType::Hybrid(HybridOp::Jump, name, _, inner) => {
+            NodeType::Hybrid(HybridOp::Jump, name, None, inner) => {
                 Some((name.clone(), self.mk_child_ref(inner)))
             }
             _ => None,
@@ -941,7 +1073,7 @@ impl HctlFormula {
         collect_unique_hctl_vars(self.as_native().clone())
     }
 
-    /// Returns the set of extended property names that are used in this formula.
+    /// Returns the set of extended property names and domain names that are used in this formula.
     pub fn used_extended_properties(&self) -> HashSet<String> {
         collect_unique_wild_cards(self.as_native().clone()).0
     }

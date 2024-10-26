@@ -26,9 +26,9 @@ impl ModelChecking {
     /// case the result is a single `ColoredVertexSet`. Alternatively, you can provide a list
     /// of formulas, in which case the result is a `list[ColoredVertexSet]`.
     ///
-    /// If the formulas contain extended propositions, you should provide a `substitution`
-    /// map which assigns each proposition a set of valid vertex-color pairs (the algorithm
-    /// fails if the used extended propositions cannot be resolved).
+    /// If the formulas contain extended propositions or quantifier domains, you should provide
+    /// a `substitution` map which assigns each proposition a set of valid vertex-color pairs
+    /// (the algorithm fails if the used extended propositions cannot be resolved).
     ///
     /// *The following only applies to HCTL formulas that use quantified state variables (i.e.
     /// "plain" CTL formulas do not need this):*

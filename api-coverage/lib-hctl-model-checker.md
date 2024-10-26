@@ -1,6 +1,6 @@
 # Biodivine `lib-hctl-model-checker` API coverage
 
-This document should be up-to-date with `lib-hctl-model-checker` version `0.2.2`.
+This document should be up-to-date with `lib-hctl-model-checker` version `0.3.0`.
 
 Overall, the library exposes a lot of methods that could be considered "internal",
 so a lot of the low-level features are not exposed in the Python bindings.
@@ -357,6 +357,10 @@ the current API of `BooleanExpression` and `UpdateFunction`.
         </tr>
         <tr>
             <td></td>
+            <td><code>HctlFormula.is_hybrid_in</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>HctlFormula.is_temporal</code></td>
         </tr>
         <tr>
@@ -393,11 +397,23 @@ the current API of `BooleanExpression` and `UpdateFunction`.
         </tr>
         <tr>
             <td></td>
+            <td><code>HctlFormula.is_exists_in</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>HctlFormula.is_forall</code></td>
         </tr>
         <tr>
             <td></td>
+            <td><code>HctlFormula.is_forall_in</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>HctlFormula.is_bind</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>HctlFormula.is_bind_in</code></td>
         </tr>
         <tr>
             <td></td>
@@ -474,6 +490,10 @@ the current API of `BooleanExpression` and `UpdateFunction`.
         </tr>
         <tr>
             <td></td>
+            <td><code>HctlFormula.as_hybrid_in</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>HctlFormula.as_temporal_unary</code></td>
         </tr>
         <tr>
@@ -506,11 +526,23 @@ the current API of `BooleanExpression` and `UpdateFunction`.
         </tr>
         <tr>
             <td></td>
+            <td><code>HctlFormula.as_exists_in</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>HctlFormula.as_forall</code></td>
         </tr>
         <tr>
             <td></td>
+            <td><code>HctlFormula.as_forall_in</code></td>
+        </tr>
+        <tr>
+            <td></td>
             <td><code>HctlFormula.as_bind</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>HctlFormula.as_bind_in</code></td>
         </tr>
         <tr>
             <td></td>
@@ -592,10 +624,13 @@ the current API of `BooleanExpression` and `UpdateFunction`.
     </tbody>
 </table>
 
-### `result_print`, `analysis`, `postprocessing` and `evaluation` modules
+### `result_print`, `analysis`, `postprocessing`, `evaluation`, `generate_output`, and `load_inputs` modules
 
 These modules are not mapped to the Python API. Modules `result_print` and `analysis` are only
 relevant for an "executable" mode where the results are printed directly to standard output.
+
+Modules `generate_output` and `load_inputs` are also currently only relevant for various
+forms of serialization which are not yet supported in AEON.py.
 
 Module `evaluation` is the internal implementation of the algorithm that is largely too technical to
 use as a high-level API from Python.
