@@ -1,4 +1,5 @@
 use std::collections::hash_map::DefaultHasher;
+use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
@@ -8,6 +9,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphVertices};
+use biodivine_lib_param_bn::{ExtendedBoolean, Space};
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -20,6 +22,7 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSe
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::AsNative;
 
@@ -215,6 +218,43 @@ impl VertexSet {
         let native = self.as_native().to_singleton_spaces(ctx.get().as_native());
         SpaceSet::wrap_native(ctx, native)
     }
+
+    /// Compute the smallest enclosing subspace, represented as `dict[VariableId, bool]` with
+    /// missing variables being treated as unrestricted.
+    ///
+    /// Returns `None` if the set is empty.
+    pub fn enclosing_subspace(&self) -> Option<HashMap<VariableId, bool>> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(
+                self.enclosing_subspace_native()
+                    .to_values()
+                    .into_iter()
+                    .map(|(a, b)| (a.into(), b))
+                    .collect(),
+            )
+        }
+    }
+
+    /// Compute the smallest enclosing subspace, represented as `dict[str, bool]`, using variable
+    /// names as keys and with missing variables being treated as unrestricted.
+    ///
+    /// Returns `None` if the set is empty.
+    pub fn enclosing_named_subspace(&self) -> Option<HashMap<String, bool>> {
+        let ctx = self.ctx.get().as_native();
+        if self.is_empty() {
+            None
+        } else {
+            Some(
+                self.enclosing_subspace_native()
+                    .to_values()
+                    .into_iter()
+                    .map(|(a, b)| (ctx.get_network_variable_name(a), b))
+                    .collect(),
+            )
+        }
+    }
 }
 
 impl VertexSet {
@@ -237,6 +277,25 @@ impl VertexSet {
         }
 
         RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+    }
+
+    /// Returns the smallest enclosing subspace, as long as the set is not empty.
+    pub fn enclosing_subspace_native(&self) -> Space {
+        let ctx = self.ctx.get().as_native();
+        let mut space = Space::new_raw(ctx.num_state_variables());
+        for var in ctx.network_variables() {
+            let bdd_var = ctx.get_state_variable(var);
+            let true_subset = self.native.as_bdd().var_select(bdd_var, true);
+            let false_subset = self.native.as_bdd().var_select(bdd_var, false);
+            assert!(!true_subset.is_false() || !false_subset.is_false());
+            match (true_subset.is_false(), false_subset.is_false()) {
+                (true, true) => unreachable!("The set is empty!"),
+                (false, false) => space[var] = ExtendedBoolean::Any,
+                (false, true) => space[var] = ExtendedBoolean::One,
+                (true, false) => space[var] = ExtendedBoolean::Zero,
+            }
+        }
+        space
     }
 }
 

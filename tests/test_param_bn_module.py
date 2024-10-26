@@ -1014,6 +1014,10 @@ def test_symbolic_iterators():
         assert vertex.to_symbolic().is_singleton()
         assert vertex.to_symbolic() == graph.mk_subspace_vertices(vertex.to_dict())
 
+        # For a single vertex, the enclosing subspace should be equal to the vertex.
+        assert vertex.to_symbolic() == graph.mk_subspace_vertices(vertex.to_symbolic().enclosing_subspace())
+        assert vertex.to_symbolic() == graph.mk_subspace_vertices(vertex.to_symbolic().enclosing_named_subspace())
+
     assert sum(1 for _ in b_or_c) == 6
 
     for vertex in b_or_c.items(["b", "c"]):

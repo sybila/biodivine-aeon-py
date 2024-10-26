@@ -42,6 +42,9 @@ Bioinformatics, 38(21), 4978-4980.
 
 ### Documentation
 
+ > We also provide some simple scripts for performing common tasks in the `example/scripts` folder. However, these
+ > by far do not cover everything that is supported by AEON.py. 
+
 The documentation of the AEON.py API is available [here](https://biodivine.fi.muni.cz/docs/aeon-py/latest/).
 It should describe the functionality of all the classes/methods, but it currently does not 
 provide self-contained examples.

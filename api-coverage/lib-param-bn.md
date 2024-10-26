@@ -1648,6 +1648,14 @@ see below.
             <td><code>GraphVertices::restrict_network_variable</code></td>
             <td></td>
         </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexSet::enclosing_subspace</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>VertexSet::enclosing_named_subspace</code></td>
+        </tr>
     </tbody>
 </table>
 
