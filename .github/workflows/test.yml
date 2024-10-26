@@ -240,3 +240,34 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.lcov,coverage.xml
+
+  notebooks-linux:
+    # This also tests that compilation with dynamic Z3 linking is not broken.
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v4
+      - name: Setup Z3.
+        id: z3
+        uses: daemontus/setup-z3@v1.3.1
+        with:
+          version: ${{ env.Z3_VERSION }}
+          add_to_library_path: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Python.
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      - name: Run tests.
+        run: |
+          python3 -m venv venv
+          source ./venv/bin/activate
+          ./venv/bin/pip3 install -r dev-requirements.txt      
+          maturin develop --release
+          pytest --nbmake ./example/**/*.ipynb
