@@ -25,7 +25,7 @@ def convert_function(function):
 		var = function.as_var()
 		return str(int(var) + 1)
 	if function.is_param():
-		raise Error("Parameters not supported.")
+		raise RuntimeError("Parameters not supported.")
 	if function.is_not():
 		inner = function.as_not()
 		return f"neg({convert_function(inner)})"

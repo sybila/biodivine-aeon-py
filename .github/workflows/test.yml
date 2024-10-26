@@ -118,6 +118,7 @@ jobs:
           ./venv/bin/pip3 install -r dev-requirements.txt      
           maturin develop
           mypy ./tests --check-untyped-defs
+          mypy ./example/script --check-untyped-defs
 
   tests-linux:
     # This also tests that compilation with dynamic Z3 linking is not broken.
