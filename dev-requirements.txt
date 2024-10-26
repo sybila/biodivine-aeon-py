@@ -3,3 +3,4 @@ pytest-cov==4.1.0
 maturin==1.4.0
 mypy==1.7.1
 nbmake==1.5.4
+graphviz==0.20.3
