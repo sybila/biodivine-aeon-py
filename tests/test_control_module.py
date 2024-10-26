@@ -61,7 +61,7 @@ def test_asynchronous_graph_inheritance():
     c -?? b
     c -| a
     $b: a & f(c)    
-    """)
+    """).name_implicit_parameters()
 
     graph = AsynchronousPerturbationGraph(bn, perturb=["a", "c"])
     ctx = graph.symbolic_context()
@@ -164,7 +164,7 @@ def test_symbolic_representation():
     c -?? b
     c -| a
     $b: a & f(c)    
-    """)
+    """).name_implicit_parameters()
 
     graph = AsynchronousPerturbationGraph(bn, perturb=["a", "c"])
 

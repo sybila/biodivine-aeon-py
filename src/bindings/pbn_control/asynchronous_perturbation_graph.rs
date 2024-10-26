@@ -82,6 +82,13 @@ impl AsynchronousPerturbationGraph {
             Vec::from_iter(n_ref.as_native().variables())
         };
 
+        let implicit_params = n_ref.as_native().implicit_parameters();
+        if !implicit_params.is_empty() {
+            return throw_runtime_error(
+                "`PerturbationGraph` cannot be created from a network with implicit parameters.\nUse `BooleanNetwork.name_implicit_parameters` to assign names to all anonymous functions."
+            );
+        }
+
         let stg = PerturbationGraph::with_restricted_variables(n_ref.as_native(), perturb_native);
         let parent = stg.as_original().clone();
 
