@@ -1033,10 +1033,12 @@ def test_symbolic_iterators():
     assert sum(1 for _ in unit_colors) == unit_colors.cardinality()
 
     for i in unit_colors:
-        i_bn = i.instantiate(bn)
+        i_bn = i.instantiate(bn, infer_regulations=False)
         assert i_bn.variable_count() == bn.variable_count()
         assert i_bn.regulation_count() == bn.regulation_count()
         assert i_bn.implicit_parameter_count() == 0 and i_bn.explicit_parameter_count() == 0
+        assert i_bn.infer_valid_graph() != i_bn
+        assert i_bn.infer_valid_graph() == i.instantiate(bn, infer_regulations=True)
 
         fn_b = bn.get_update_function("b")
         assert fn_b is not None

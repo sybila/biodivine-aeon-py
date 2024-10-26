@@ -5,7 +5,7 @@ use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::{throw_index_error, throw_type_error, AsNative};
+use crate::{runtime_error, throw_index_error, throw_type_error, AsNative};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_bdd::BddPartialValuation;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
@@ -200,7 +200,11 @@ impl ColorModel {
     ///  - If `item` is an `UpdateFunction`, the result is a new `UpdateFunction` that only depends
     ///    on network variables and is the interpretation of the original function under this model.
     ///  - If `item` is a `BooleanNetwork`, the result is a new `BooleanNetwork` where all
-    ///    uninterpreted functions that are retained in this model are instantiated.
+    ///    uninterpreted functions that are retained in this model are instantiated. By default,
+    ///    the new `BooleanNetwork` has a regulatory graph that is inferred from the update
+    ///    functions (in particular, this removes all unused regulations). If you want to retain
+    ///    the original regulatory graph, use `infer_regulations=False` (this argument has no
+    ///    effect in the other use cases).
     ///  - If `item` identifies an uninterpreted function (by `ParameterId`, `VariableId`, or
     ///    a string name), the method returns an `UpdateFunction` that is an interpretation of the
     ///    uninterpreted function with specified `args` under this model. This is equivalent to
@@ -214,32 +218,42 @@ impl ColorModel {
     /// regardless of the interpretation of `f`. Hence, you can assume that while interpretations
     /// (i.e. `model["f"]`) are unique within a set, the instantiations of more complex functions
     /// that depend on them are not.*
-    #[pyo3(signature = (item, args = None))]
+    #[pyo3(signature = (item, args = None, infer_regulations = None))]
     pub fn instantiate(
         &self,
         py: Python,
         item: &Bound<'_, PyAny>,
         args: Option<Bound<'_, PyList>>,
+        infer_regulations: Option<bool>,
     ) -> PyResult<PyObject> {
+        fn assert_args_is_none(args: Option<Bound<'_, PyList>>) -> PyResult<()> {
+            if args.is_some() {
+                throw_type_error("Argument `args` not expected when `item` is an `UpdateFunction`.")
+            } else {
+                Ok(())
+            }
+        }
+        fn assert_infer_is_none(infer_regulations: Option<bool>) -> PyResult<()> {
+            if infer_regulations.is_some() {
+                throw_type_error(
+                    "Argument `infer_regulations` is not valid when `item` is an `UpdateFunction`.",
+                )
+            } else {
+                Ok(())
+            }
+        }
         let ctx = self.ctx.get();
         if let Ok(update_function) = item.extract::<UpdateFunction>() {
             // For an update function, we just return a version of the same function with all
             // explicit parameters instantiated.
-            if args.is_some() {
-                return throw_type_error(
-                    "Argument `args` not expected when `item` is an `UpdateFunction`.",
-                );
-            }
+            assert_args_is_none(args)?;
+            assert_infer_is_none(infer_regulations)?;
             return self.instantiate_update_function(py, update_function);
         }
         if let Ok(network) = item.extract::<Py<BooleanNetwork>>() {
             // For a Boolean network, we try to instantiate every update function separately
             // and then remove all unused parameters.
-            if args.is_some() {
-                return throw_type_error(
-                    "Argument `args` not expected when `item` is a `BooleanNetwork`.",
-                );
-            }
+            assert_args_is_none(args)?;
             let mut bn = network.borrow(py).as_native().clone();
 
             // This is the expected number of parameters after the ones available in this model
@@ -266,9 +280,16 @@ impl ColorModel {
             let bn = bn.prune_unused_parameters();
             assert_eq!(bn.num_parameters() + bn.num_implicit_parameters(), expected);
 
+            let bn = if infer_regulations.unwrap_or_default() {
+                bn.infer_valid_graph().map_err(runtime_error)?
+            } else {
+                bn
+            };
+
             return Ok(BooleanNetwork::from(bn).export_to_python(py)?.into_py(py));
         }
         if let Ok(function) = ctx.resolve_function(item) {
+            assert_infer_is_none(infer_regulations)?;
             let Some(args) = args else {
                 return throw_type_error(
                     "Argument `args` is mandatory when `item` is a function identifier.",
