@@ -255,6 +255,48 @@ impl VertexSet {
             )
         }
     }
+
+    /// Compute the largest subspace that is fully enclosed in this vertex set. Note that such
+    /// subspace may not be unique (i.e. there can be other subspaces that are just as large).
+    ///
+    /// Returns `None` if the set is empty.
+    pub fn enclosed_subspace(&self) -> Option<HashMap<VariableId, bool>> {
+        let ctx = self.ctx.get().as_native();
+        let bdd = self.as_native().as_bdd();
+        let clause = bdd.most_free_clause()?;
+        Some(
+            clause
+                .to_values()
+                .into_iter()
+                .map(|(bdd_var, value)| {
+                    let network_var = ctx
+                        .find_state_variable(bdd_var)
+                        .expect("Expected network variable.");
+                    (VariableId::from(network_var), value)
+                })
+                .collect(),
+        )
+    }
+
+    /// Same as `VertexSet.enclosed_subspace`, but uses names instead of IDs.
+    pub fn enclosed_named_subspace(&self) -> Option<HashMap<String, bool>> {
+        let ctx = self.ctx.get().as_native();
+        let bdd = self.as_native().as_bdd();
+        let clause = bdd.most_free_clause()?;
+        Some(
+            clause
+                .to_values()
+                .into_iter()
+                .map(|(bdd_var, value)| {
+                    let network_var = ctx
+                        .find_state_variable(bdd_var)
+                        .expect("Expected network variable.");
+                    let name = ctx.get_network_variable_name(network_var);
+                    (name, value)
+                })
+                .collect(),
+        )
+    }
 }
 
 impl VertexSet {
