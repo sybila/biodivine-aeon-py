@@ -1035,6 +1035,15 @@ impl Bdd {
         }
         Ok(self.new_from(result))
     }
+
+    /// Raise a `RuntimeError` if this BDD violates some internal invariants.
+    ///
+    /// Normally, all BDDs should satisfy internal invariants at all times, but in case we load
+    /// a corrupted BDD file or the BDD is transferred from some other implementation other than
+    /// our own, the BDD structure might become corrupted.
+    pub fn validate(&self) -> PyResult<()> {
+        self.as_native().validate().map_err(runtime_error)
+    }
 }
 
 impl AsNative<RsBdd> for Bdd {

@@ -251,6 +251,7 @@ def test_bdd():
     assert Bdd(ctx, bdd_x.data_string()) == bdd_x
     assert Bdd(ctx, bdd_x.data_bytes()) == bdd_x
     assert pickle.loads(pickle.dumps(bdd_x)) == bdd_x
+    pickle.loads(pickle.dumps(bdd_x)).validate()
 
     assert bdd_x.to_dot() != bdd_x.to_dot(zero_pruned=False)
     assert str(bdd_x.to_expression()) == "((a & b) | (!a & (b & !c)))"
