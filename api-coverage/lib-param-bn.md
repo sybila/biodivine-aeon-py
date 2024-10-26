@@ -624,6 +624,14 @@ we export trivial iterators as lists.
             <td><code>BooleanNetwork::prune_unused_parameters</code></td>
             <td><code>BooleanNetwork.prune_unused_parameters</code></td>
         </tr>
+        <tr>
+            <td><code>BooleanNetwork::assign_parameter_name</code></td>
+            <td><code>BooleanNetwork.assign_parameter_name</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::name_implicit_parameters</code></td>
+            <td><code>BooleanNetwork.name_implicit_parameters</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
             <td><code>BooleanNetwork::is_valid_name</code></td>

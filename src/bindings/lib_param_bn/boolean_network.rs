@@ -857,6 +857,32 @@ impl BooleanNetwork {
         let bn = self.as_native().prune_unused_parameters();
         BooleanNetwork(bn).export_to_python(py)
     }
+
+    /// Replaces an implicit parameter (i.e. an anonymous update function) with an explicit
+    /// parameter of the given name. If no name is provided, a default name is generated instead.
+    ///
+    /// The arguments of the newly created update function follow the ordering of variable IDs.
+    #[pyo3(signature = (variable, name = None))]
+    pub fn assign_parameter_name(
+        &mut self,
+        variable: &Bound<'_, PyAny>,
+        name: Option<String>,
+    ) -> PyResult<ParameterId> {
+        let variable = self.resolve_network_variable(variable)?;
+        let name = name.as_deref();
+        self.as_native_mut()
+            .assign_parameter_name(variable, name)
+            .map_err(runtime_error)
+            .map(|it| it.into())
+    }
+
+    /// Replaces all implicit parameters with explicit counterparts using default names.
+    ///
+    /// See also `BooleanNetwork.assign_parameter_name`.
+    pub fn name_implicit_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        let new_bn = self.as_native().name_implicit_parameters();
+        BooleanNetwork(new_bn).export_to_python(py)
+    }
 }
 
 impl BooleanNetwork {

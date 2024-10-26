@@ -451,6 +451,20 @@ def test_boolean_network():
     assert bn1x.variable_names() == ["b", "c"]
     assert str(bn1x.get_update_function("b")) == "f(c)"
 
+    bn1.set_update_function("a", None)
+    bn1.set_update_function("c", None)
+    bn1named = bn1.name_implicit_parameters()
+    assert bn1named.implicit_parameter_count() == 0
+    assert bn1named.explicit_parameter_names() == ["f", "f_a", "f_c"]
+
+    bn1.assign_parameter_name("a")
+    bn1.assign_parameter_name("c", "foo_c")
+    assert bn1.implicit_parameter_count() == 0
+    assert bn1.explicit_parameter_names() == ["f", "f_a", "foo_c"]
+
+    with pytest.raises(RuntimeError):
+        bn1.assign_parameter_name("a") # Variable has no implicit parameter.
+
 
 def test_update_function():
     bn1 = BooleanNetwork(variables=["a", "b", "c"], parameters=[("f", 1), ("g", 2)])

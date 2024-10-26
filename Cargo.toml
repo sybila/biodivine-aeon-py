@@ -18,7 +18,7 @@ static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
 pyo3 = { version = "0.22.2", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
-biodivine-lib-param-bn = { version="0.5.11", features=["solver-z3"] }
+biodivine-lib-param-bn = { version="0.5.12", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.21"
 #biodivine-pbn-control = "0.3.1"
 biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "99f9da756c370daf5428b3d61ef76c24e7d8de5f" }
