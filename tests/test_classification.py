@@ -95,6 +95,7 @@ def test_attractor_bifurcation_with_perturbations():
     model_unknown.set_update_function("GATA1", None)
     model_unknown.set_update_function("CEBPa", None)
     model_unknown.set_update_function("PU1", None)
+    model_unknown = model_unknown.name_implicit_parameters()
 
     pstg = AsynchronousPerturbationGraph(model_unknown)
     stg = AsynchronousGraph(model_unknown)
