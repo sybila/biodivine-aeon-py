@@ -855,8 +855,13 @@ def test_symbolic_space_context():
     assert ctx.mk_unit_colored_spaces(stg).spaces() == ctx.mk_unit_spaces()
 
     space = ctx.mk_singleton({'a': True, 'c': False})
+    c_space = ctx.mk_unit_colored_spaces(stg).intersect_spaces(space)
     assert ctx.mk_sub_spaces(space).cardinality() == 3
+    assert ctx.mk_sub_spaces(space) == space.with_all_sub_spaces()
+    assert ctx.mk_sub_spaces(c_space) == c_space.with_all_sub_spaces()
     assert ctx.mk_super_spaces(space).cardinality() == 4
+    assert ctx.mk_super_spaces(space) == space.with_all_super_spaces()
+    assert ctx.mk_super_spaces(c_space) == c_space.with_all_super_spaces()
 
     # We don't really know what the result should be here, but it should not be a constant.
     fn_b_bdd = ctx.mk_update_function(fn_b)

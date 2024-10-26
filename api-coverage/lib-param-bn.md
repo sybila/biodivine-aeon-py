@@ -1743,6 +1743,14 @@ see below.
             <td></td>
             <td><code>SpaceSet.extend_with_colors</code></td>
         </tr>
+        <tr>
+            <td><code>NetworkSpaces::with_all_sub_spaces</code></td>
+            <td><code>SpaceSet.with_all_sub_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkSpaces::with_all_super_spaces</code></td>
+            <td><code>SpaceSet.with_all_super_spaces</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
             <td><code>NetworkSpaces::as_bdd</code></td>
@@ -2036,6 +2044,14 @@ see below.
         <tr>
             <td><code>NetworkColoredSpaces::to_colored_vertices</code></td>
             <td><code>ColoredSpaceSet.to_colored_vertices</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces::with_all_sub_spaces</code></td>
+            <td><code>ColoredSpaceSet.with_all_sub_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>NetworkColoredSpaces.with_all_super_spaces</code></td>
+            <td><code>ColoredSpaceSet.with_all_super_spaces</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>

@@ -216,6 +216,23 @@ impl SpaceSet {
         let parent = ctx.extract::<Py<SymbolicContext>>(py)?;
         Ok(VertexSet::mk_native(parent, native))
     }
+
+    /// Produce a set of spaces that is a superset of this set, and in addition contains
+    /// all spaces that are a subspace of *some* item in this set.
+    pub fn with_all_sub_spaces(&self) -> Self {
+        let ctx = self.ctx.get().as_native();
+        Self::wrap_native(self.ctx.clone(), self.as_native().with_all_sub_spaces(ctx))
+    }
+
+    /// Produce a set of spaces that is a superset of this set, and in addition contains
+    /// all spaces that are a super-spaces of *some* item in this set.
+    pub fn with_all_super_spaces(&self) -> Self {
+        let ctx = self.ctx.get().as_native();
+        Self::wrap_native(
+            self.ctx.clone(),
+            self.as_native().with_all_super_spaces(ctx),
+        )
+    }
 }
 
 impl SpaceSet {

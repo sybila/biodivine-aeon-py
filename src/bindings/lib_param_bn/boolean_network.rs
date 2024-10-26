@@ -947,9 +947,7 @@ impl BooleanNetwork {
         self.as_native()
             .inputs(infer)
             .into_iter()
-            .map(|it| {
-                self.as_native().get_variable_name(it).clone()
-            })
+            .map(|it| self.as_native().get_variable_name(it).clone())
             .collect()
     }
 
@@ -974,9 +972,7 @@ impl BooleanNetwork {
         self.as_native()
             .constants(infer)
             .into_iter()
-            .map(|(a, b)| {
-                (self.as_native().get_variable_name(a).clone(), b)
-            })
+            .map(|(a, b)| (self.as_native().get_variable_name(a).clone(), b))
             .collect()
     }
 }
