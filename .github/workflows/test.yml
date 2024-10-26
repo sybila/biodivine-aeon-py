@@ -264,6 +264,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
+      - name: Install graphviz
+        run: sudo apt-get install -y graphviz
       - name: Run tests.
         run: |
           python3 -m venv venv
