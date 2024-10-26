@@ -603,6 +603,28 @@ we export trivial iterators as lists.
         <tr>
             <td><code>BooleanNetwork::add_string_update_function</code></td>
         </tr>
+        <tr>
+            <td><code>BooleanNetwork::is_var_input</code></td>
+            <td><code>BooleanNetwork.is_variable_input</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::is_var_constant</code></td>
+            <td><code>BooleanNetwork.is_variable_constant</code></td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>BooleanNetwork::inputs</code></td>
+            <td><code>BooleanNetwork.inputs</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork.input_names</code></td>
+        </tr>
+        <tr>
+            <td rowspan="2"><code>BooleanNetwork::constants</code></td>
+            <td><code>BooleanNetwork.constants</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork.constant_names</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Structural updates</td></tr>
         <tr>
             <td><code>BooleanNetwork::infer_valid_graph</code></td>

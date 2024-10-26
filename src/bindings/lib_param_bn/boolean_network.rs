@@ -1,5 +1,6 @@
 use super::regulatory_graph::RegulatoryGraph;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
+use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
@@ -882,6 +883,101 @@ impl BooleanNetwork {
     pub fn name_implicit_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let new_bn = self.as_native().name_implicit_parameters();
         BooleanNetwork(new_bn).export_to_python(py)
+    }
+
+    /// Returns `True` if the given `variable` is an input of the `BooleanNetwork`.
+    ///
+    /// Input can be either:
+    ///  - A variable with no incoming regulations and no update function.
+    ///  - A variable with a positive self-regulation and an update function that is equivalent
+    ///    to an identity function.
+    ///
+    /// Note that by default, function equivalent is tested only syntactically (with basic
+    /// simplifications applied). To test equivalence semantically, you have to provide
+    /// a `SymbolicContext` object as the second argument.
+    #[pyo3(signature = (variable, ctx = None))]
+    pub fn is_variable_input(
+        &self,
+        variable: &Bound<PyAny>,
+        ctx: Option<&SymbolicContext>,
+    ) -> PyResult<bool> {
+        let variable = self.resolve_network_variable(variable)?;
+        let ctx = ctx.map(|it| it.as_native());
+        Ok(self.as_native().is_var_input(variable, ctx))
+    }
+
+    /// Tests whether the given `variable` is a constant of the `BooleanNetwork`. A variable
+    /// is a constant if it's update function is equivalent to `True` or `False`. Note that
+    /// this differs from *inputs*, whose update function is equivalent to identity.
+    ///
+    /// If the variable is not constant, the function returns `None`. If it is constant,
+    /// it returns its constant value.
+    ///
+    /// By default, function equivalent is tested only syntactically (with basic
+    /// simplifications applied). To test equivalence semantically, you have to provide
+    /// a `SymbolicContext` object as the second argument.
+    #[pyo3(signature = (variable, ctx = None))]
+    pub fn is_variable_constant(
+        &self,
+        variable: &Bound<PyAny>,
+        ctx: Option<&SymbolicContext>,
+    ) -> PyResult<Option<bool>> {
+        let variable = self.resolve_network_variable(variable)?;
+        let ctx = ctx.map(|it| it.as_native());
+        Ok(self.as_native().is_var_constant(variable, ctx))
+    }
+
+    /// Return the list of all inputs that are present in this `BooleanNetwork`. See also
+    /// `BooleanNetwork.is_var_input`.
+    ///
+    /// If `infer=True`, the method will use symbolic equivalence check for identifying
+    /// input variables, which is more accurate but also more resource intensive.
+    #[pyo3(signature = (infer = false))]
+    pub fn inputs(&self, infer: bool) -> Vec<VariableId> {
+        self.as_native()
+            .inputs(infer)
+            .into_iter()
+            .map(|it| it.into())
+            .collect()
+    }
+
+    /// Same as `BooleanNetwork.inputs`, but returns a list of variable names instead.
+    #[pyo3(signature = (infer = false))]
+    pub fn input_names(&self, infer: bool) -> Vec<String> {
+        self.as_native()
+            .inputs(infer)
+            .into_iter()
+            .map(|it| {
+                self.as_native().get_variable_name(it).clone()
+            })
+            .collect()
+    }
+
+    /// Return the dictionary of all constants that are present in this `BooleanNetwork`. See also
+    /// `BooleanNetwork.is_var_constant`.
+    ///
+    /// If `infer=True`, the method will use symbolic equivalence check for identifying
+    /// constant variables, which is more accurate but also more resource intensive.
+    #[pyo3(signature = (infer = false))]
+    pub fn constants(&self, infer: bool) -> HashMap<VariableId, bool> {
+        self.as_native()
+            .constants(infer)
+            .into_iter()
+            .map(|(a, b)| (a.into(), b))
+            .collect()
+    }
+
+    /// Same as `BooleanNetwork.constants`, but the keys in the dictionary are variable names,
+    /// not IDs.
+    #[pyo3(signature = (infer = false))]
+    pub fn constant_names(&self, infer: bool) -> HashMap<String, bool> {
+        self.as_native()
+            .constants(infer)
+            .into_iter()
+            .map(|(a, b)| {
+                (self.as_native().get_variable_name(a).clone(), b)
+            })
+            .collect()
     }
 }
 

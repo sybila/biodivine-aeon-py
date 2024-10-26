@@ -442,11 +442,19 @@ def test_boolean_network():
         assert not reg['essential']
         assert reg['sign'] is None
 
+    assert bn1.is_variable_input("a")
+    assert not bn1.is_variable_input("b")
+    assert bn1.inputs() == [VariableId(0)]
+    assert bn1.input_names() == ["a"]
     bn1x = bn1.inline_inputs()
     assert bn1x.explicit_parameter_names() == ["f", "a"]
     assert bn1x.find_explicit_parameter("a") == ParameterId(1)
 
     bn1.set_update_function("a", "false")
+    assert bn1.is_variable_constant("a") == False
+    assert bn1.is_variable_constant("b") is None
+    assert bn1.constants() == { VariableId(0): False }
+    assert bn1.constant_names() == { "a": False }
     bn1x = bn1.inline_constants()
     assert bn1x.variable_names() == ["b", "c"]
     assert str(bn1x.get_update_function("b")) == "f(c)"
