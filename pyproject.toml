@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "biodivine_aeon"
 description = "Python bindings for the tool AEON."
-version = "1.1.2"
+version = "1.2.0"
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Rust",
