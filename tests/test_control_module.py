@@ -7,24 +7,18 @@ def test_witness():
     # This test is based on the case study notebook.
 
     bn = BooleanNetwork.from_file("./tests/model-myeloid-witness.aeon")
-    pstg = AsynchronousPerturbationGraph(bn)
+    p_stg = AsynchronousPerturbationGraph(bn)
 
-    attractors = Attractors.attractors(pstg)
+    attractors = Attractors.attractors(p_stg)
     attractor_states = [a.vertices() for a in attractors]
 
-    erythrocyte = pstg.mk_subspace_vertices({"EKLF": True})
+    erythrocyte = p_stg.mk_subspace_vertices({"EKLF": True})
     erythrocyte_att = [a for a in attractor_states if not a.intersect(erythrocyte).is_empty()][0]
 
-    megakaryocyte = pstg.mk_subspace_vertices({"Fli1": True})
+    megakaryocyte = p_stg.mk_subspace_vertices({"Fli1": True})
     megakaryocyte_att = [a for a in attractor_states if not a.intersect(megakaryocyte).is_empty()][0]
 
-    # monocyte = pstg.mk_subspace_vertices({"cJun": True})
-    # monocyte_att = [a for a in attractor_states if not a.intersect(monocyte).is_empty()][0]
-
-    # granulocyte = pstg.mk_subspace_vertices({"Gfi1": True})
-    # granulocyte_att = [a for a in attractor_states if not a.intersect(granulocyte).is_empty()][0]
-
-    sym_results = Control.attractor_one_step(pstg, erythrocyte_att, megakaryocyte_att)
+    sym_results = Control.attractor_one_step(p_stg, erythrocyte_att, megakaryocyte_att)
 
     assert sym_results.select_perturbation({"EKLF": True}).is_empty()
     assert sym_results.select_perturbation({"EKLF": None}).is_empty()
@@ -36,7 +30,7 @@ def test_witness():
     assert good[0][0]["EKLF"] is False
     assert good[0][0]["Fli1"] is True
 
-    phen_sym_results = Control.phenotype_permanent(pstg,
+    phen_sym_results = Control.phenotype_permanent(p_stg,
                                                    megakaryocyte_att,
                                                    oscillation_type="forbidden",
                                                    stop_when_found=False,
@@ -216,6 +210,13 @@ def test_symbolic_representation():
     assert unit_pert.pick_singleton().is_singleton()
     assert unit_pert.pick_singleton().cardinality() == 1
 
+    for p in unit_pert.items():
+        # For one perturbation without projection, the results should match.
+        assert p.to_symbolic() == graph.mk_perturbation(p)
+        assert p.to_symbolic() == graph.mk_perturbations(p)
+        assert unit_set.select_perturbation(p) == unit_set.intersect_perturbations(p.to_symbolic()).colors()
+        assert unit_set.select_perturbations(p) == unit_set.intersect_perturbations(p.to_symbolic())
+
     it = unit_set.__iter__()
     (m1, m2) = it.__next__()
     assert m1.to_symbolic().is_singleton()
@@ -274,16 +275,20 @@ def test_symbolic_representation():
     assert some_set_one.select_by_robustness(0.99, result_limit=1)[0][0].perturbation_size() == 1
     assert some_set_one.select_by_robustness(0.50, result_limit=1)[0][0].perturbation_size() == 0
 
-# def test_base_network_compatibility():
-#     bn = BooleanNetwork.from_aeon("""
-#     a -> b
-#     b -|? c
-#     c -?? b
-#     c -| a
-#     $b: a & f(c)
-#     """)
-#
-#     graph = AsynchronousPerturbationGraph(bn)
-#
-#     for p in graph.mk_unit_colors():
-#         p.instantiate(bn)
+def test_base_network_compatibility():
+    bn = BooleanNetwork.from_aeon("""
+    a -> b
+    b -|? c
+    c -?? b
+    c -| a
+    $b: a & f(c)
+    """).name_implicit_parameters()
+
+    graph = AsynchronousPerturbationGraph(bn)
+
+    for p in graph.mk_unit_colors():
+        expected = p.instantiate(graph.unperturbed_network(), infer_regulations=True)
+        actual = p.instantiate(bn, infer_regulations=True)
+        # The networks are not equal normally, because the influence graph is different,
+        # but with the graph auto-generated, they should be the same.
+        assert expected == actual

@@ -7,6 +7,7 @@ use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
+use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::BoolLikeValue;
@@ -751,8 +752,15 @@ impl AsynchronousGraph {
                 result.push((k, v.bool()));
             }
             return Ok(result);
+        } else if let Ok(model) = subspace.downcast::<VertexModel>() {
+            return Ok(model
+                .get()
+                .items()
+                .into_iter()
+                .map(|(a, b)| (a.into(), b))
+                .collect());
         }
-        throw_type_error("Expected a dictionary of `VariableIdType` keys and `BoolType` values.")
+        throw_type_error("Expected a dictionary of `VariableIdType` keys and `BoolType` values or a `VertexModel`.")
     }
 
     pub fn wrap_native(py: Python, stg: SymbolicAsyncGraph) -> PyResult<AsynchronousGraph> {

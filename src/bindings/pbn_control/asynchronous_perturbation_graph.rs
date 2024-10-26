@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
@@ -19,9 +19,9 @@ use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::control::sanitize_control_map;
 use crate::bindings::pbn_control::set_colored_perturbation::ColoredPerturbationSet;
-use crate::bindings::pbn_control::PerturbationSet;
+use crate::bindings::pbn_control::{PerturbationModel, PerturbationSet};
 use crate::pyo3_utils::BoolLikeValue;
-use crate::{throw_runtime_error, AsNative};
+use crate::{throw_runtime_error, throw_type_error, AsNative};
 
 /// An extension of `AsynchronousGraph` that admits various variable perturbations through
 /// additional colors/parameters. Such graph can then be analyzed to extract control strategies
@@ -384,7 +384,7 @@ impl AsynchronousPerturbationGraph {
     pub fn mk_perturbation(
         _self: Py<Self>,
         py: Python,
-        perturbation: &Bound<'_, PyDict>,
+        perturbation: &Bound<'_, PyAny>,
     ) -> PyResult<PerturbationSet> {
         let self_borrow = _self.borrow(py);
         let parent = self_borrow.as_ref();
@@ -394,24 +394,20 @@ impl AsynchronousPerturbationGraph {
             .get()
             .as_native()
             .get_perturbation_bdd_mapping(perturbable);
+
         // Init the partial valuation such that everything is unperturbed initially.
         for bdd_var in map.values() {
             partial_valuation.set_value(*bdd_var, false);
         }
 
+        let perturbation = Self::resolve_perturbation(&self_borrow, perturbation)?;
+
         // Read data from the dictionary.
         for (k, v) in perturbation {
-            let k_var = parent.resolve_network_variable(&k)?;
-            let s_var = parent
-                .as_native()
-                .symbolic_context()
-                .get_state_variable(k_var);
-            let Some(p_var) = map.get(&k_var).cloned() else {
-                return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
-            };
+            let s_var = parent.as_native().symbolic_context().get_state_variable(k);
+            let p_var = *map.get(&k).unwrap();
 
-            let val = v.extract::<Option<bool>>()?;
-            match val {
+            match v {
                 None => partial_valuation.set_value(p_var, false),
                 Some(val) => {
                     partial_valuation.set_value(p_var, true);
@@ -440,7 +436,7 @@ impl AsynchronousPerturbationGraph {
     pub fn mk_perturbations(
         _self: Py<Self>,
         py: Python,
-        perturbations: &Bound<'_, PyDict>,
+        perturbations: &Bound<'_, PyAny>,
     ) -> PyResult<PerturbationSet> {
         let self_borrow = _self.borrow(py);
         let parent = self_borrow.as_ref();
@@ -450,18 +446,12 @@ impl AsynchronousPerturbationGraph {
             .get()
             .as_native()
             .get_perturbation_bdd_mapping(perturbable);
+        let perturbations = Self::resolve_perturbation(&self_borrow, perturbations)?;
         for (k, v) in perturbations {
-            let k_var = parent.resolve_network_variable(&k)?;
-            let s_var = parent
-                .as_native()
-                .symbolic_context()
-                .get_state_variable(k_var);
-            let Some(p_var) = map.get(&k_var).cloned() else {
-                return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
-            };
+            let s_var = parent.as_native().symbolic_context().get_state_variable(k);
+            let p_var = *map.get(&k).unwrap();
 
-            let val = v.extract::<Option<bool>>()?;
-            match val {
+            match v {
                 None => partial_valuation.set_value(p_var, false),
                 Some(val) => {
                     partial_valuation.set_value(p_var, true);
@@ -620,5 +610,43 @@ impl AsynchronousPerturbationGraph {
         let ctx = self_ref.as_ref().symbolic_context();
         let set = GraphColoredVertices::new(bdd, ctx.get().as_native());
         ColoredVertexSet::mk_native(self_ref.as_ref().symbolic_context(), set)
+    }
+
+    /// Returns a list of perturbed variables together with their values, or error if the
+    /// variables are invalid (e.g. not perturbable). If a variable is not present, it is not
+    /// returned. It is up to the caller to interpret this correctly.
+    pub fn resolve_perturbation(
+        _self: &PyRef<'_, AsynchronousPerturbationGraph>,
+        value: &Bound<'_, PyAny>,
+    ) -> PyResult<HashMap<biodivine_lib_param_bn::VariableId, Option<bool>>> {
+        let parent_ref = _self.as_ref();
+        let perturbable: HashSet<biodivine_lib_param_bn::VariableId> =
+            HashSet::from_iter(_self.as_native().perturbable_variables().clone());
+        let mut result = HashMap::new();
+        if let Ok(dict) = value.downcast::<PyDict>() {
+            for (k, v) in dict {
+                let k_var = parent_ref.resolve_network_variable(&k)?;
+
+                if !perturbable.contains(&k_var) {
+                    return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
+                };
+
+                let val = v.extract::<Option<bool>>()?;
+                result.insert(k_var, val);
+            }
+        } else if let Ok(model) = value.downcast::<PerturbationModel>() {
+            for (k, v) in model.get().items() {
+                let k_var: biodivine_lib_param_bn::VariableId = k.into();
+
+                if !perturbable.contains(&k_var) {
+                    return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
+                };
+
+                result.insert(k_var, v);
+            }
+        } else {
+            return throw_type_error("Expected a dictionary of `VariableIdType` keys and `BoolType | None` values, or a `PerturbationModel`.");
+        }
+        Ok(result)
     }
 }

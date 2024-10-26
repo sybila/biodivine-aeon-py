@@ -12,7 +12,7 @@ use either::Either;
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
-use pyo3::types::{PyAnyMethods, PyDict, PyList};
+use pyo3::types::PyList;
 use pyo3::{pyclass, pymethods, Bound, IntoPy, Py, PyAny, PyResult, Python};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
@@ -267,31 +267,30 @@ impl ColoredPerturbationSet {
     ///
     /// To specify that a variable should be unperturbed, use `"var": None`. Any variable that
     /// should remain unrestricted should be completely omitted from the `perturbations`
-    /// dictionary. This is similar to `AsynchronousPerturbationGraph.mk_perturbations`.
-    fn select_perturbations(
+    /// dictionary. This is similar to `AsynchronousPerturbationGraph.mk_perturbations`. If a
+    /// `PerturbationModel` is given, only values that are omitted through projection will be
+    /// considered as unrestricted.
+    pub fn select_perturbations(
         &self,
         py: Python,
-        perturbations: &Bound<'_, PyDict>,
+        perturbations: &Bound<'_, PyAny>,
     ) -> PyResult<ColoredPerturbationSet> {
         let borrowed = self.ctx.borrow(py);
         let parent = borrowed.as_ref();
         let native_graph = self.ctx.get().as_native();
         let mapping =
             native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
+
+        let perturbations =
+            AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbations)?;
         let mut selection = biodivine_lib_bdd::BddPartialValuation::empty();
 
         // Go through the given perturbation and mark everything that should be perturbed.
         for (k, v) in perturbations {
-            let k_var = parent.resolve_network_variable(&k)?;
-            let s_var = parent
-                .as_native()
-                .symbolic_context()
-                .get_state_variable(k_var);
-            let Some(p_var) = mapping.get(&k_var).cloned() else {
-                return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
-            };
+            let s_var = parent.as_native().symbolic_context().get_state_variable(k);
+            let p_var = *mapping.get(&k).unwrap();
 
-            match v.extract::<Option<bool>>()? {
+            match v {
                 Some(val) => {
                     selection.set_value(p_var, true);
                     selection.set_value(s_var, val);
@@ -312,18 +311,22 @@ impl ColoredPerturbationSet {
     ///
     /// *Note that here, we assume that the dictionary represents a single perturbation. Therefore,
     /// any missing perturbable variables are treated as unperturbed.* This is the same behavior
-    /// as in `AsynchronousPerturbationGraph.mk_perturbation`.
+    /// as in `AsynchronousPerturbationGraph.mk_perturbation`. Similarly, if a `PerturbationModel`
+    /// is provided with some values eliminated through projection, these are assumed to be
+    /// unperturbed.
     ///
     fn select_perturbation(
         &self,
         py: Python,
-        perturbation: &Bound<'_, PyDict>,
+        perturbation: &Bound<'_, PyAny>,
     ) -> PyResult<ColorSet> {
         let borrowed = self.ctx.borrow(py);
         let parent = borrowed.as_ref();
         let native_graph = self.ctx.get().as_native();
         let mapping =
             native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
+        let perturbation =
+            AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbation)?;
         let mut restriction = biodivine_lib_bdd::BddPartialValuation::empty();
 
         // Initially, set all variables to unperturbed.
@@ -333,16 +336,11 @@ impl ColoredPerturbationSet {
 
         // Then go through the given perturbation and mark everything that should be perturbed.
         for (k, v) in perturbation {
-            let k_var = parent.resolve_network_variable(&k)?;
-            let s_var = parent
-                .as_native()
-                .symbolic_context()
-                .get_state_variable(k_var);
-            let Some(p_var) = mapping.get(&k_var).cloned() else {
-                return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
-            };
+            let s_var = parent.as_native().symbolic_context().get_state_variable(k);
+            // Unwrap safe because of `resolve_perturbation`.
+            let p_var = *mapping.get(&k).unwrap();
 
-            if let Some(val) = v.extract::<Option<bool>>()? {
+            if let Some(val) = v {
                 restriction.set_value(p_var, true);
                 restriction.set_value(s_var, val);
             }
@@ -373,7 +371,7 @@ impl ColoredPerturbationSet {
     fn perturbation_robustness(
         &self,
         py: Python,
-        perturbation: &Bound<'_, PyDict>,
+        perturbation: &Bound<'_, PyAny>,
     ) -> PyResult<f64> {
         let colors = self.select_perturbation(py, perturbation)?;
         AsynchronousPerturbationGraph::colored_robustness(self.ctx.bind(py).clone(), &colors)
