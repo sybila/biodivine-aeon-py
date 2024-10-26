@@ -5,6 +5,9 @@ is mapped to the AEON.py API. Specifically, for every Rust library, we have a te
 Markdown document which outlines how the public API maps to Python
 classes/methods.
 
+ > When using `cargo public-api`, add the `-sss` argument to generate a
+ > simplified summary. 
+
 When you update the Rust dependency, you should:
 
 - Generate a new public API text file (or download it from the release
