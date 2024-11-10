@@ -73,26 +73,29 @@ impl BooleanNetwork {
     /// variables *or* regulations need to be specified in a non-empty network. That is, variables and regulations
     /// cannot be currently inferred from functions alone. Similarly, explicit parameters are not inferred from
     /// update functions automatically.
+    ///
+    /// Optionally, you can also provide model annotations as either string, or `ModelAnnotation` object.
     #[new]
-    #[pyo3(signature = (variables = None, regulations = None, parameters = None, functions = None))]
+    #[pyo3(signature = (variables = None, regulations = None, parameters = None, functions = None, annotations = None))]
     fn new(
         variables: Option<&Bound<'_, PyAny>>,
         regulations: Option<&Bound<'_, PyList>>,
         parameters: Option<Vec<(String, u32)>>,
         functions: Option<&Bound<'_, PyAny>>,
+        annotations: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<(BooleanNetwork, RegulatoryGraph)> {
         let rg = if let Some(x) = variables {
             if let Ok(rg) = x.extract::<RegulatoryGraph>() {
                 rg
             } else if let Ok(list) = x.extract::<Vec<String>>() {
-                RegulatoryGraph::new(Some(list), regulations)?
+                RegulatoryGraph::new(Some(list), regulations, annotations)?
             } else {
                 return throw_type_error(
                     "Expected `RegulatoryGraph` or `list[str]` of variable names.",
                 );
             }
         } else {
-            RegulatoryGraph::new(None, regulations)?
+            RegulatoryGraph::new(None, regulations, annotations)?
         };
         // The functions could be either a `Vec<Option<String>>` or `HashMap<String, String>`.
         // Technically we could also allow FnUpdate, but that would be a huge pain to resolve
@@ -145,7 +148,8 @@ impl BooleanNetwork {
     }
 
     pub fn __repr__(self_: PyRef<'_, Self>) -> String {
-        let (names, regulations, parameters, functions) = BooleanNetwork::__getnewargs__(self_);
+        let (names, regulations, parameters, functions, annotations) =
+            BooleanNetwork::__getnewargs__(self_);
         let functions = functions
             .into_iter()
             .map(|it| match it {
@@ -153,12 +157,17 @@ impl BooleanNetwork {
                 Some(fun) => format!("\"{}\"", fun),
             })
             .collect::<Vec<_>>();
+        // "Inherited" from RegulatoryGraph.
+        let ann_string = annotations
+            .map(|it| format!("{:?}", it))
+            .unwrap_or_else(|| "None".to_string());
         format!(
-            "BooleanNetwork({:?}, {:?}, {:?}, [{}])",
+            "BooleanNetwork({:?}, {:?}, {:?}, [{}], {})",
             names,
             regulations,
             parameters,
-            functions.join(", ")
+            functions.join(", "),
+            ann_string
         )
     }
 
@@ -170,8 +179,9 @@ impl BooleanNetwork {
         Vec<String>,
         Vec<(String, u32)>,
         Vec<Option<String>>,
+        Option<String>,
     ) {
-        let (names, regulations) = self_.as_ref().__getnewargs__();
+        let (names, regulations, annotations) = self_.as_ref().__getnewargs__(self_.py());
         let mut functions = Vec::new();
         for var in self_.as_native().variables() {
             let function = self_.as_native().get_update_function(var).as_ref();
@@ -186,7 +196,7 @@ impl BooleanNetwork {
                 (param.get_name().clone(), param.get_arity())
             })
             .collect::<Vec<_>>();
-        (names, regulations, parameters, functions)
+        (names, regulations, parameters, functions, annotations)
     }
 
     pub fn __copy__(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
@@ -382,7 +392,7 @@ impl BooleanNetwork {
         py: Python,
         variables: Vec<String>,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let extended_rg = self_.as_ref().extend(variables)?;
+        let extended_rg = self_.as_ref().extend(py, variables)?;
         let mut extended_bn =
             biodivine_lib_param_bn::BooleanNetwork::new(extended_rg.as_native().clone());
         for param in self_.as_native().parameters() {
@@ -426,7 +436,7 @@ impl BooleanNetwork {
     ) -> PyResult<Py<BooleanNetwork>> {
         let removed = self_.as_ref().resolve_variables(variables)?;
 
-        let drop_rg = self_.as_ref().drop(variables)?;
+        let drop_rg = self_.as_ref().drop(py, variables)?;
         let mut drop_bn = biodivine_lib_param_bn::BooleanNetwork::new(drop_rg.as_native().clone());
         for param in self_.as_native().parameters() {
             let param = self_.as_native().get_parameter(param);

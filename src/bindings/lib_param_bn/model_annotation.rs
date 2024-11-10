@@ -325,3 +325,43 @@ impl ModelAnnotation {
         }
     }
 }
+
+impl ModelAnnotation {
+    pub fn from_root(py: Python, root: ModelAnnotationRoot) -> PyResult<ModelAnnotation> {
+        let root = Py::new(py, root)?;
+        Ok(ModelAnnotation {
+            root,
+            path: Vec::new(),
+        })
+    }
+
+    pub fn to_root(&self) -> Py<ModelAnnotationRoot> {
+        self.root.clone()
+    }
+}
+
+/// Helper methods that are used to implement annotations that are officially supported by AEON.
+impl ModelAnnotationRoot {
+    /// Make a copy with all variable and regulation annotations that are associated
+    /// with one of the provided variables removed.
+    pub fn drop_variables(&self, _names: &[String]) -> PyResult<ModelAnnotationRoot> {
+        unimplemented!()
+    }
+
+    pub fn inline_variable(&self, _name: &str) -> PyResult<ModelAnnotationRoot> {
+        unimplemented!()
+    }
+
+    pub fn remove_regulation(&mut self, _source: &str, _target: &str) -> PyResult<()> {
+        unimplemented!()
+    }
+
+    pub fn rename_variable(&mut self, _old_name: &str, _new_name: &str) -> PyResult<()> {
+        unimplemented!()
+    }
+
+    /// Make a copy that is a separate python object, referencing a copy of the native annotation data.
+    pub fn py_copy(&self, py: Python) -> PyResult<Py<ModelAnnotationRoot>> {
+        Py::new(py, ModelAnnotationRoot(self.0.clone()))
+    }
+}
