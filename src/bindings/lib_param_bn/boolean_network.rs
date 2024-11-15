@@ -1,3 +1,4 @@
+use super::model_annotation::ModelAnnotationRoot;
 use super::regulatory_graph::RegulatoryGraph;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
@@ -144,6 +145,7 @@ impl BooleanNetwork {
 
     pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         // The BN and its underlying RG should be up-to-date, hence it should be ok to just compare the BN.
+        // Note that we are currently not considering annotations, as these are seen as "outside" data.
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
@@ -199,16 +201,17 @@ impl BooleanNetwork {
         (names, regulations, parameters, functions, annotations)
     }
 
-    pub fn __copy__(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
-        self.clone().export_to_python(py)
+    pub fn __copy__(self_: PyRef<'_, Self>, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        let bn_copy = self_.clone();
+        bn_copy.export_to_python(py, self_.as_ref().annotations.clone())
     }
 
     pub fn __deepcopy__(
-        &self,
+        self_: PyRef<'_, Self>,
         py: Python,
         _memo: &Bound<'_, PyAny>,
     ) -> PyResult<Py<BooleanNetwork>> {
-        self.__copy__(py)
+        Self::__copy__(self_, py)
     }
 
     /* First, "override" all methods from RegulatoryGraph that need to behave differently. */
@@ -234,7 +237,18 @@ impl BooleanNetwork {
         } else {
             bn
         };
-        BooleanNetwork(bn).export_to_python(py)
+
+        let ann = if file_path.ends_with("aeon") {
+            let file_content = std::fs::read_to_string(file_path)
+                .map_err(|e| runtime_error(format!("Cannot open file: {}", e)))?;
+            let ann =
+                biodivine_lib_param_bn::ModelAnnotation::from_model_string(file_content.as_str());
+            Some(Py::new(py, ModelAnnotationRoot::from(ann))?)
+        } else {
+            None
+        };
+
+        BooleanNetwork(bn).export_to_python(py, ann)
     }
 
     /// Try to read a `BooleanNetwork` from a string representing the contents of an `.aeon` file.
@@ -242,18 +256,30 @@ impl BooleanNetwork {
     pub fn from_aeon(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
         let bn = biodivine_lib_param_bn::BooleanNetwork::try_from(file_contents)
             .map_err(runtime_error)?;
-        BooleanNetwork(bn).export_to_python(py)
+        let ann = biodivine_lib_param_bn::ModelAnnotation::from_model_string(file_contents);
+        BooleanNetwork(bn).export_to_python(py, Some(Py::new(py, ModelAnnotationRoot::from(ann))?))
     }
 
     /// Convert this `BooleanNetwork` to a string representation of a valid `.aeon` file.
-    pub fn to_aeon(&self) -> String {
-        self.as_native().to_string()
+    //noinspection RsSelfConvention
+    pub fn to_aeon(self_: PyRef<'_, Self>, py: Python) -> String {
+        if let Some(annotations) = self_.as_ref().annotations.as_ref() {
+            let ann_string = annotations.borrow(py).as_native().to_string();
+            // If annotations are present, print them, leave two lines empty, and then print
+            // the regulations.
+            format!("{}\n\n{}", ann_string, self_.as_native().to_string())
+        } else {
+            self_.as_native().to_string()
+        }
     }
 
     /// Update the variable name of the provided `variable`. This does not change the
     /// corresponding `VariableId`.
+    ///
+    /// The variable is also renamed in the associated `ModelAnnotations`.
     pub fn set_variable_name(
         mut self_: PyRefMut<'_, Self>,
+        py: Python,
         variable: &Bound<'_, PyAny>,
         name: &str,
     ) -> PyResult<()> {
@@ -267,12 +293,22 @@ impl BooleanNetwork {
             .as_native_mut()
             .as_graph_mut()
             .set_variable_name(var, name)
-            .map_err(runtime_error)
+            .map_err(runtime_error)?;
+
+        if let Some(ann) = self_.as_ref().annotations.as_ref() {
+            let old_name = self_.as_native().get_variable_name(var);
+            let mut ann = ann.borrow_mut(py);
+            ann.rename_variable(old_name.as_str(), name)?;
+        }
+
+        Ok(())
     }
 
     /// Add a new regulation to the underlying `RegulatoryGraph` of this `BooleanNetwork`, either
     /// using a `NamedRegulation`, `IdRegulation`, or a string representation compatible
     /// with the `.aeon` format.
+    ///
+    /// Model annotations are not affected by this operation.
     pub fn add_regulation(
         mut self_: PyRefMut<'_, Self>,
         regulation: &Bound<'_, PyAny>,
@@ -299,6 +335,9 @@ impl BooleanNetwork {
     /// regulation, or throws a `RuntimeError` if the regulation does not exist. Also throws
     /// a `RuntimeError` if the regulation exists, but is used by the corresponding update
     /// function and so cannot be safely removed.
+    ///
+    /// Also removes any annotation data that is associated with the regulation (however, this
+    /// data is not returned).
     pub fn remove_regulation<'a>(
         mut self_: PyRefMut<'_, Self>,
         py: Python<'a>,
@@ -314,6 +353,13 @@ impl BooleanNetwork {
             }
         }
 
+        // Update annotations.
+        if let Some(ann) = self_.as_ref().annotations.as_ref() {
+            let source_name = self_.as_native().get_variable_name(source);
+            let target_name = self_.as_native().get_variable_name(target);
+            let mut ann = ann.borrow_mut(py);
+            ann.remove_regulation(source_name.as_str(), target_name.as_str())?;
+        }
         // Remove from RG.
         self_
             .as_mut()
@@ -334,6 +380,8 @@ impl BooleanNetwork {
     ///
     /// Returns the previous state of the regulation as an `IdRegulation` dictionary,
     /// assuming the regulation already existed.
+    ///
+    /// Model annotations are not affected by this operation.
     pub fn ensure_regulation<'a>(
         mut self_: PyRefMut<'_, Self>,
         py: Python<'a>,
@@ -387,6 +435,9 @@ impl BooleanNetwork {
     /// The new variables are added *after* the existing ones, so any previously used
     /// `VariableId` references are still valid. However, the added names must still be unique
     /// within the new network.
+    ///
+    /// Model annotations are not affected by this operation (current annotations are copied
+    /// into the new network).
     pub fn extend(
         self_: PyRef<'_, Self>,
         py: Python,
@@ -429,6 +480,8 @@ impl BooleanNetwork {
     /// The new graph follows the variable ordering of the old graph, but since there are now
     /// variables that are missing in the new graph, the `VariableId` objects are not compatible
     /// with the original graph.
+    ///
+    /// Annotations for unaffected variables are preserved.
     pub fn drop(
         self_: PyRef<'_, Self>,
         py: Python,
@@ -522,6 +575,11 @@ impl BooleanNetwork {
     /// This does not mean you cannot use reduction on systems with uninterpreted functions at all,
     /// but be careful about the new meaning of the static constraints on these functions.
     ///
+    /// #### Annotations
+    ///
+    /// This removes any annotations associated with the inlined variable and attempts to merge
+    /// the annotations for affected regulations.
+    ///
     #[pyo3(signature = (variable, repair_graph = false))]
     pub fn inline_variable(
         self_: PyRef<'_, Self>,
@@ -533,7 +591,18 @@ impl BooleanNetwork {
         let Some(bn) = self_.as_native().inline_variable(variable, repair_graph) else {
             return throw_runtime_error("Variable has a self-regulation.");
         };
-        BooleanNetwork(bn).export_to_python(py)
+
+        let name = self_.as_native().get_variable_name(variable);
+        let ann_copy = self_
+            .as_ref()
+            .annotations
+            .as_ref()
+            .map(|it| it.borrow(py).inline_variable(name.as_str()))
+            .transpose()?
+            .map(|it| Py::new(py, it))
+            .transpose()?;
+
+        BooleanNetwork(bn).export_to_python(py, ann_copy)
     }
 
     /// Return *a copy* of the underlying `RegulatoryGraph` for this `BooleanNetwork`.
@@ -569,7 +638,7 @@ impl BooleanNetwork {
         } else {
             bn
         };
-        BooleanNetwork(bn).export_to_python(py)
+        BooleanNetwork(bn).export_to_python(py, None)
     }
 
     /// Produce a `.bnet` string representation of this `BooleanNetwork`.
@@ -588,11 +657,13 @@ impl BooleanNetwork {
     }
 
     /// Try to load a `BooleanNetwork` from the contents of an `.sbml` model file.
+    ///
+    /// Note that SBML import/export currently does not support model annotations.
     #[staticmethod]
     pub fn from_sbml(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
         let (bn, _) = biodivine_lib_param_bn::BooleanNetwork::try_from_sbml(file_contents)
             .map_err(runtime_error)?;
-        BooleanNetwork(bn).export_to_python(py)
+        BooleanNetwork(bn).export_to_python(py, None)
     }
 
     /// Produce a `.sbml` string representation of this `BooleanNetwork`.
@@ -778,18 +849,28 @@ impl BooleanNetwork {
     /// The function can fail if, for whatever reason, it cannot create `SymbolicContext` for
     /// the input network.
     ///
+    /// #### Annotations
+    ///
+    /// TODO: Currently, this function does not preserve graph annotations. However, in the
+    /// future, annotations will be preserved, with unused regulations removed.
+    ///
     pub fn infer_valid_graph(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         self.as_native()
             .infer_valid_graph()
             .map_err(runtime_error)
-            .and_then(|it| BooleanNetwork(it).export_to_python(py))
+            .and_then(|it| BooleanNetwork(it).export_to_python(py, None))
     }
 
     /// Make a copy of this `BooleanNetwork` with all constraints on the regulations removed.
     /// In particular, every regulation is set to non-essential with an unknown sign.
+    ///
+    /// #### Annotations
+    ///
+    /// TODO: Currently, this function does not preserve graph annotations. However, in the
+    /// future, annotations will be preserved, with unused regulations removed.
     pub fn remove_regulation_constraints(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let native = self.as_native().remove_static_constraints();
-        BooleanNetwork(native).export_to_python(py)
+        BooleanNetwork(native).export_to_python(py, None)
     }
 
     /// Similar to `BooleanNetwork.inline_inputs`, but inlines constant values (i.e. `x=true` or
@@ -811,6 +892,11 @@ impl BooleanNetwork {
     /// The method can fail if `infer_constants` or `repair_graph` is specified and the network
     /// does not have a valid symbolic representation.
     ///
+    /// #### Annotations
+    ///
+    /// TODO: Currently, this function does not preserve graph annotations. However, in the
+    /// future, annotations will be preserved, with unused variables/regulations removed.
+    ///
     #[pyo3(signature = (infer_constants = false, repair_graph = false))]
     pub fn inline_constants(
         &self,
@@ -821,7 +907,7 @@ impl BooleanNetwork {
         let bn = self
             .as_native()
             .inline_constants(infer_constants, repair_graph);
-        BooleanNetwork(bn).export_to_python(py)
+        BooleanNetwork(bn).export_to_python(py, None)
     }
 
     /// Try to inline the input nodes (variables) of the network as logical parameters
@@ -848,6 +934,11 @@ impl BooleanNetwork {
     /// inconsistent regulatory graph. If `repair_graph` is set to `True`, the static properties
     /// of relevant regulations are inferred using BDDs.
     ///
+    /// #### Annotations
+    ///
+    /// TODO: Currently, this function does not preserve graph annotations. However, in the
+    /// future, annotations will be preserved, with unused variables/regulations removed.
+    ///
     #[pyo3(signature = (infer_inputs = false, repair_graph = false))]
     pub fn inline_inputs(
         &self,
@@ -856,7 +947,7 @@ impl BooleanNetwork {
         repair_graph: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
         let bn = self.as_native().inline_inputs(infer_inputs, repair_graph);
-        BooleanNetwork(bn).export_to_python(py)
+        BooleanNetwork(bn).export_to_python(py, None)
     }
 
     /// Return a copy of this network where all unused explicit parameters (uninterpreted functions)
@@ -864,15 +955,24 @@ impl BooleanNetwork {
     ///
     /// Note that `VariableId` objects are still valid for the result network, but `ParameterId`
     /// objects can now refer to different parameters.
+    ///
+    /// #### Annotations
+    ///
+    /// TODO: Currently, this function does not preserve graph annotations. However, in the
+    /// future, annotations will be preserved, with unused variables/regulations removed.
+    ///
     pub fn prune_unused_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let bn = self.as_native().prune_unused_parameters();
-        BooleanNetwork(bn).export_to_python(py)
+        BooleanNetwork(bn).export_to_python(py, None)
     }
 
     /// Replaces an implicit parameter (i.e. an anonymous update function) with an explicit
     /// parameter of the given name. If no name is provided, a default name is generated instead.
     ///
     /// The arguments of the newly created update function follow the ordering of variable IDs.
+    ///
+    /// This function does not impact network annotations (since implicit parameters cannot be
+    /// annotated, this is the same as the creation of a new parameter).
     #[pyo3(signature = (variable, name = None))]
     pub fn assign_parameter_name(
         &mut self,
@@ -890,9 +990,14 @@ impl BooleanNetwork {
     /// Replaces all implicit parameters with explicit counterparts using default names.
     ///
     /// See also `BooleanNetwork.assign_parameter_name`.
+    ///
+    /// #### Annotations
+    ///
+    /// TODO: Currently, this function does not preserve graph annotations. However, in the
+    /// future, annotations will be preserved, with unused regulations removed.
     pub fn name_implicit_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let new_bn = self.as_native().name_implicit_parameters();
-        BooleanNetwork(new_bn).export_to_python(py)
+        BooleanNetwork(new_bn).export_to_python(py, None)
     }
 
     /// Returns `True` if the given `variable` is an input of the `BooleanNetwork`.
@@ -990,9 +1095,15 @@ impl BooleanNetwork {
 impl BooleanNetwork {
     /// Export a `BooleanNetwork` to something PyO3 will accept because it respects
     /// the class inheritance hierarchy.
-    pub fn export_to_python(self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    pub fn export_to_python(
+        self,
+        py: Python,
+        annotations: Option<Py<ModelAnnotationRoot>>,
+    ) -> PyResult<Py<BooleanNetwork>> {
         let graph = self.as_native().as_graph().clone();
-        let tuple = (self, RegulatoryGraph::from(graph));
+        let mut rg = RegulatoryGraph::from(graph);
+        rg.annotations = annotations;
+        let tuple = (self, rg);
         Py::new(py, tuple)
     }
 

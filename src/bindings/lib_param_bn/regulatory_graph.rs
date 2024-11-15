@@ -33,7 +33,7 @@ use std::collections::HashSet;
 pub struct RegulatoryGraph {
     native: biodivine_lib_param_bn::RegulatoryGraph,
     // Annotation metadata that is associated with this model.
-    annotations: Option<Py<ModelAnnotationRoot>>,
+    pub annotations: Option<Py<ModelAnnotationRoot>>,
 }
 
 impl From<biodivine_lib_param_bn::RegulatoryGraph> for RegulatoryGraph {
@@ -190,12 +190,21 @@ impl RegulatoryGraph {
         (names, regulations, ann_string)
     }
 
-    fn __copy__(&self) -> RegulatoryGraph {
-        self.clone()
+    fn __copy__(&self, py: Python) -> PyResult<RegulatoryGraph> {
+        // Note that we have to make a new "deep copy" of the model annotations.
+        let ann_copy = self
+            .annotations
+            .as_ref()
+            .map(|it| it.borrow(py).py_copy(py))
+            .transpose()?;
+        Ok(RegulatoryGraph {
+            native: self.as_native().clone(),
+            annotations: ann_copy,
+        })
     }
 
-    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> RegulatoryGraph {
-        self.__copy__()
+    fn __deepcopy__(&self, py: Python, _memo: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
+        self.__copy__(py)
     }
 
     /// Try to read the structure of a `RegulatoryGraph` from an `.aeon` file at the specified path.
@@ -437,7 +446,8 @@ impl RegulatoryGraph {
     /// The new variables are added *after* the existing variables, so any previously used `VariableId` references
     /// are still valid. However, the added names must still be unique within the new graph.
     ///
-    /// Model annotations are not affected by this operation.
+    /// Model annotations are not affected by this operation (current annotations are copied
+    /// into the new network).
     pub fn extend(&self, py: Python, mut variables: Vec<String>) -> PyResult<RegulatoryGraph> {
         let (mut names, regulations, _) = self.__getnewargs__(py);
         names.append(&mut variables);
@@ -464,6 +474,8 @@ impl RegulatoryGraph {
     ///
     /// The new graph follows the variable ordering of the old graph, but since there are now variables that are
     /// missing in the new graph, the `VariableId` objects are not compatible with the original graph.
+    ///
+    /// Annotations for unaffected variables are preserved.
     pub fn drop(&self, py: Python, variables: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
         let to_remove = self
             .resolve_variables(variables)?
@@ -778,6 +790,19 @@ impl RegulatoryGraph {
         };
 
         Ok(cycle.map(|c| c.into_iter().map(VariableId::from).collect()))
+    }
+
+    /// Get a reference to the underlying `ModelAnnotation` object. If the object does not exist,
+    /// it is created. These annotations are preserved when the network is serialized using
+    /// the `.aeon` format.
+    pub fn raw_annotations(&mut self, py: Python) -> PyResult<ModelAnnotation> {
+        if let Some(ann) = self.annotations.as_ref() {
+            Ok(ModelAnnotation::from(ann.clone()))
+        } else {
+            let ann = ModelAnnotation::new(py, None)?;
+            self.annotations = Some(ann.to_root());
+            Ok(ann.into())
+        }
     }
 }
 

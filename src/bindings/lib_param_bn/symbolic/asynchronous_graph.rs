@@ -194,11 +194,13 @@ impl AsynchronousGraph {
     /// (i.e. arity more than zero), because there is no suitable way to reconstruct
     /// a function expression form a partially specified function. The only exception are
     /// implicit parameters (i.e. fully erased functions) that can be reconstructed as well.
+    ///
+    /// The new network does not have any annotations.
     pub fn reconstruct_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let Some(native) = self.native.reconstruct_network() else {
             return throw_runtime_error("Cannot reconstruct network: complex parameters found.");
         };
-        BooleanNetwork::from(native).export_to_python(py)
+        BooleanNetwork::from(native).export_to_python(py, None)
     }
 
     /// Return an empty `ColoredVertexSet`.

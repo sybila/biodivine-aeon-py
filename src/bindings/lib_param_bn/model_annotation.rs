@@ -77,7 +77,7 @@ use pyo3::prelude::*;
 /// unless escaped with `` #`ACTUAL_STRING`# ``. You can also use escaping if you wish to
 /// retain whitespace surrounding the annotation value. As mentioned, multi-line values can be
 /// split into multiple annotation comments.
-#[pyclass(module = "biodivine_aeon", frozen)]
+#[pyclass(module = "biodivine_aeon", frozen, subclass)]
 #[derive(Clone)]
 pub struct ModelAnnotation {
     root: Py<ModelAnnotationRoot>,
@@ -340,24 +340,37 @@ impl ModelAnnotation {
     }
 }
 
+impl From<Py<ModelAnnotationRoot>> for ModelAnnotation {
+    fn from(value: Py<ModelAnnotationRoot>) -> Self {
+        ModelAnnotation {
+            root: value,
+            path: Vec::new(),
+        }
+    }
+}
+
 /// Helper methods that are used to implement annotations that are officially supported by AEON.
 impl ModelAnnotationRoot {
     /// Make a copy with all variable and regulation annotations that are associated
     /// with one of the provided variables removed.
     pub fn drop_variables(&self, _names: &[String]) -> PyResult<ModelAnnotationRoot> {
-        unimplemented!()
+        println!("WARNING: Work in progress. Possible loss of annotation data.");
+        Ok(ModelAnnotationRoot::from(self.clone()))
     }
 
     pub fn inline_variable(&self, _name: &str) -> PyResult<ModelAnnotationRoot> {
-        unimplemented!()
+        println!("WARNING: Work in progress. Possible loss of annotation data.");
+        Ok(ModelAnnotationRoot::from(self.clone()))
     }
 
     pub fn remove_regulation(&mut self, _source: &str, _target: &str) -> PyResult<()> {
-        unimplemented!()
+        println!("WARNING: Work in progress. Possible loss of annotation data.");
+        Ok(())
     }
 
     pub fn rename_variable(&mut self, _old_name: &str, _new_name: &str) -> PyResult<()> {
-        unimplemented!()
+        println!("WARNING: Work in progress. Possible loss of annotation data.");
+        Ok(())
     }
 
     /// Make a copy that is a separate python object, referencing a copy of the native annotation data.

@@ -10,7 +10,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::{
 use biodivine_pbn_control::control::PhenotypeOscillationType;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyList};
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyRef, PyResult, Python};
 
 use crate::bindings::bn_classifier::class::{extend_map, Class};
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
@@ -217,10 +217,11 @@ impl Classification {
     /// Save the classification results into a `.zip` archive that can be analyzed by
     /// the [BN Classifier](https://github.com/sybila/biodivine-bn-classifier/).
     ///
-    /// The `annotations` dictionary is optional. If these include the HCTL properties and
-    /// assertions that were used to create the `classification` dictionary, then the BN Classifier
-    /// will be able to show the exact properties in the UI. Otherwise, names of the classes
-    /// will be used.
+    /// The `annotations` dictionary is optional. By default, all annotations that are already
+    /// associated with the `BooleanNetwork` instance are saved. However, you can use this argument
+    /// to add additional annotations. These could include the HCTL properties and assertions
+    /// that were used to create the `classification` dictionary, assuming they are not part of
+    /// network annotations already.
     ///
     /// Note that this method will automatically sanitize the `ColorSet` objects such that they
     /// use the "default" symbolic encoding for the provided `network`.
@@ -230,7 +231,7 @@ impl Classification {
     pub fn save_classification(
         py: Python,
         path: String,
-        network: &BooleanNetwork,
+        network: PyRef<'_, BooleanNetwork>,
         classification: HashMap<Class, ColorSet>,
         annotations: Option<ModelAnnotation>,
     ) -> PyResult<()> {
@@ -251,7 +252,7 @@ impl Classification {
             })
             .collect::<PyResult<HashMap<_, _>>>()?;
 
-        let mut aeon_file = network.to_aeon();
+        let mut aeon_file = BooleanNetwork::to_aeon(network, py);
         if let Some(annotations) = annotations {
             let ann_string = annotations.__str__(py);
             aeon_file.push('\n');

@@ -280,7 +280,9 @@ impl ColorModel {
                 bn
             };
 
-            return Ok(BooleanNetwork::from(bn).export_to_python(py)?.into_py(py));
+            return Ok(BooleanNetwork::from(bn)
+                .export_to_python(py, None)?
+                .into_py(py));
         }
         if let Ok(function) = ctx.resolve_function(item) {
             assert_infer_is_none(infer_regulations)?;
@@ -302,7 +304,7 @@ impl ColorModel {
             let instantiated_function =
                 FnUpdate::build_from_bdd(ctx.as_native(), &instantiated_bdd);
             let fake_ctx = ctx.mk_fake_network();
-            let fake_ctx = BooleanNetwork::from(fake_ctx).export_to_python(py)?;
+            let fake_ctx = BooleanNetwork::from(fake_ctx).export_to_python(py, None)?;
             return Ok(
                 UpdateFunction::new_raw(fake_ctx, Arc::new(instantiated_function)).into_py(py),
             );

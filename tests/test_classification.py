@@ -137,7 +137,7 @@ def test_property_classification():
     # Test that the result is compatible with the original STG, not the one that is extended for model checking.
     assert mapping[Class("p2")].intersect(graph.mk_unit_colors()) == mapping[Class("p2")]
 
-    Classification.save_classification("classification.test.2.zip", bn, mapping, annotations)
+    Classification.save_classification("classification.test.2.zip", bn, mapping)
     (l_bn, l_cls, l_ann) = Classification.load_classification("classification.test.2.zip")
     assert l_bn == bn
     assert l_cls == mapping

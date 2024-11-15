@@ -183,6 +183,8 @@ impl AsynchronousPerturbationGraph {
     /// A copy of the *base* `BooleanNetwork` that was used to create this graph,
     /// without additional perturbation parameters or any modification (e.g. still with all
     /// implicit parameters).
+    ///
+    /// This operation does not preserve annotations from the original network.
     pub fn base_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
         // a network object.
@@ -192,20 +194,24 @@ impl AsynchronousPerturbationGraph {
             .as_network()
             .unwrap()
             .clone();
-        BooleanNetwork::from(bn).export_to_python(py)
+        BooleanNetwork::from(bn).export_to_python(py, None)
     }
 
     /// A copy of the `BooleanNetwork` with the extra perturbation parameters, but with the
     /// update functions unaffected.
+    ///
+    /// This operation does not preserve annotations from the original network.
     pub fn unperturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
         // a network object.
         let bn = self.as_native().as_original().as_network().unwrap().clone();
-        BooleanNetwork::from(bn).export_to_python(py)
+        BooleanNetwork::from(bn).export_to_python(py, None)
     }
 
     /// A copy of the `BooleanNetwork` with the extra perturbation parameters and with the
     /// update functions changed to reflect the perturbations.
+    ///
+    /// This operation does not preserve annotations from the original network.
     pub fn perturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
         // a network object.
@@ -215,7 +221,7 @@ impl AsynchronousPerturbationGraph {
             .as_network()
             .unwrap()
             .clone();
-        BooleanNetwork::from(bn).export_to_python(py)
+        BooleanNetwork::from(bn).export_to_python(py, None)
     }
 
     /// A copy of the `AsynchronousGraph` that represents the *unperturbed* asynchronous
