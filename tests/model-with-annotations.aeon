@@ -1,0 +1,33 @@
+#! name: My Fancy Model
+#! description: Description of my fancy model.
+#! taxon: mus musculus
+
+#! variable: a: gene_name: CtrA
+#! variable: a: layout: position: 1.1,21.3
+#! variable: b: gene_name: StlB
+#! variable: b: layout: position: 3.14,25.1234
+
+
+#! variable: a: reference: #`https://some-doi.org`#
+#! variable: a: reference: #`https://some-dataset.com`#
+
+#! variable: a: id: uniprot: ID1-uni
+#! variable: a: id: uniprot: ID2-uni
+
+#! variable: a: id: geo_cc: ID1-cc
+#! variable: a: id: geo_cc: ID2-cc
+
+#! variable: a: id: geo_mf: ID1-mf
+#! variable: a: id: geo_mf: ID2-mf
+
+#! variable: a: id: geo_bp: ID1-bp
+#! variable: a: id: geo_bp: ID2-bp
+
+#! variable: a: id: ncbi: ID1-ncbi
+#! variable: a: id: ncbi: ID2-ncbi
+
+#! regulation: a: b: reference: #`https://some-doi.org`#
+
+a -> b
+b -> c
+a -| c

@@ -695,6 +695,8 @@ class RegulatoryGraph:
                        length: Optional[int] = None,
     ) -> Optional[list[VariableId]]:
         ...
+    def raw_annotation(self) -> ModelAnnotation: ...
+    def annotation(self) -> RegulatoryGraphAnnotation: ...
 
 class BooleanNetwork(RegulatoryGraph):
     @overload
@@ -966,6 +968,13 @@ class ModelAnnotation:
         """
     @value.setter
     def value(self, value: Optional[str]) -> None: ...
+    @property
+    def lines(self) -> Optional[list[str]]:
+        """
+        The value of this annotation, but separated into individual lines.
+        """
+    @value.setter
+    def lines(self, value: Optional[list[str]]) -> None: ...
     @staticmethod
     def from_aeon(file_contents: str) -> ModelAnnotation: ...
     @staticmethod
@@ -1812,6 +1821,123 @@ class Control:
                             oscillation_type: Optional[PhenotypeOscillation] = None,
                             size_limit: Optional[int] = None,
                             stop_when_found: bool = False) -> ColoredPerturbationSet: ...
+
+class NetworkVariableAnnotation:
+    @property
+    def gene_names(self) -> Optional[list[str]]:
+        """
+        A list of gene names relevant to this variable, sorted by relevance.
+        """
+    @gene_names.setter
+    def gene_names(self, value: Optional[list[str]]) -> None: ...
+    @property
+    def references(self) -> Optional[list[str]]:
+        """
+        A list of references (publications, datasets, ...) relevant to this variable.
+        """
+    @references.setter
+    def references(self, value: Optional[list[str]]) -> None: ...
+    @property
+    def ids(self) -> VariableIdsAnnotation:
+        """
+        A sub-object that stores various identifiers that can be associated with a variable.
+        """
+    @ids.setter
+    def ids(self, value: VariableIdsAnnotation) -> None: ...
+    @property
+    def layout(self) -> VariableLayoutAnnotation:
+        """
+        A sub-object that stores data related to graph layout of this variable.
+        """
+    @layout.setter
+    def layout(self, value: VariableLayoutAnnotation) -> None: ...
+
+class VariableIdsAnnotation:
+    @property
+    def uniprot(self) -> Optional[list[str]]:
+        """
+        A list of Uniprot identifiers relevant to this variable, sorted by relevance.
+        """
+    @uniprot.setter
+    def uniprot(self, value: Optional[list[str]]) -> None: ...
+    @property
+    def geo_cc(self) -> Optional[list[str]]:
+        """
+        A list of cellular component GEO terms relevant to this variable, sorted by relevance.
+        """
+    @geo_cc.setter
+    def geo_cc(self, value: Optional[list[str]]) -> None: ...
+    @property
+    def geo_mf(self) -> Optional[list[str]]:
+        """
+        A list of molecular function GEO terms relevant to this variable, sorted by relevance.
+        """
+    @geo_mf.setter
+    def geo_mf(self, value: Optional[list[str]]) -> None: ...
+    @property
+    def geo_bp(self) -> Optional[list[str]]:
+        """
+        A list of biological process GEO terms relevant to this variable, sorted by relevance.
+        """
+    @geo_bp.setter
+    def geo_bp(self, value: Optional[list[str]]) -> None: ...
+    @property
+    def ncbi(self) -> Optional[list[str]]:
+        """
+        A list of NCBI gene IDs relevant to this variable, sorted by relevance.
+        """
+    @ncbi.setter
+    def ncbi(self, value: Optional[list[str]]) -> None: ...
+
+class VariableLayoutAnnotation:
+    @property
+    def position(self) -> Optional[tuple[float, float]]:
+        """
+        The position of a variable within model layout.
+        """
+    @position.setter
+    def position(self, value: Optional[tuple[float, float]]) -> None: ...
+
+class NetworkRegulationAnnotation:
+    @property
+    def references(self) -> Optional[list[str]]:
+        """
+        A list of references (publications, datasets, ...) relevant to this regulation.
+        """
+    @references.setter
+    def references(self, value: Optional[list[str]]) -> None: ...
+
+class RegulatoryGraphAnnotation:
+    def variable(self, variable: VariableIdType) -> NetworkVariableAnnotation: ...
+    def regulation(self, source: VariableIdType, target: VariableIdType) -> NetworkRegulationAnnotation: ...
+    @property
+    def references(self) -> Optional[list[str]]:
+        """
+        A list of references (publications, datasets, ...) relevant to this model.
+        """
+    @references.setter
+    def references(self, value: Optional[list[str]]) -> None: ...
+    @property
+    def taxon(self) -> Optional[str]:
+        """
+        Describes the taxon of the organism that is relevant to this model.
+        """
+    @taxon.setter
+    def taxon(self, value: Optional[str]) -> None: ...
+    @property
+    def name(self) -> Optional[str]:
+        """
+        A descriptive name of this model.
+        """
+    @name.setter
+    def name(self, value: Optional[str]) -> None: ...
+    @property
+    def description(self) -> Optional[str]:
+        """
+        A human-readable plaintext description of this model.
+        """
+    @description.setter
+    def description(self, value: Optional[str]) -> None: ...
 
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]

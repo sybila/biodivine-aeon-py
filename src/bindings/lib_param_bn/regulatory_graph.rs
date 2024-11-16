@@ -1,3 +1,4 @@
+use crate::bindings::annotations::regulatory_graph::RegulatoryGraphAnnotation;
 use crate::bindings::lib_param_bn::model_annotation::{ModelAnnotation, ModelAnnotationRoot};
 use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
@@ -307,7 +308,9 @@ impl RegulatoryGraph {
     /// Update the variable name of the provided `variable`. This does not change the
     /// corresponding `VariableId`.
     ///
-    /// The variable is also renamed in the associated `ModelAnnotations`.
+    /// The variable is also renamed in the associated `ModelAnnotations`, but any existing
+    /// annotation objects (i.e. `ModelAnnotation` or `NetworkVariableAnnotation`) referencing
+    /// the renamed annotation become invalid.
     pub fn set_variable_name(
         &mut self,
         py: Python,
@@ -795,14 +798,25 @@ impl RegulatoryGraph {
     /// Get a reference to the underlying `ModelAnnotation` object. If the object does not exist,
     /// it is created. These annotations are preserved when the network is serialized using
     /// the `.aeon` format.
-    pub fn raw_annotations(&mut self, py: Python) -> PyResult<ModelAnnotation> {
+    pub fn raw_annotation(&mut self, py: Python) -> PyResult<ModelAnnotation> {
         if let Some(ann) = self.annotations.as_ref() {
             Ok(ModelAnnotation::from(ann.clone()))
         } else {
             let ann = ModelAnnotation::new(py, None)?;
             self.annotations = Some(ann.to_root());
-            Ok(ann.into())
+            Ok(ann)
         }
+    }
+
+    /// Get a "typed" `RegulatoryGraphAnnotation` object containing all annotation data officially
+    /// supported by AEON.
+    pub fn annotation(
+        self_: Py<RegulatoryGraph>,
+        py: Python,
+    ) -> PyResult<Py<RegulatoryGraphAnnotation>> {
+        let annotation = self_.borrow_mut(py).raw_annotation(py)?;
+        let tuple = (RegulatoryGraphAnnotation::from(self_), annotation);
+        Py::new(py, tuple)
     }
 }
 

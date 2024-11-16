@@ -240,6 +240,18 @@ impl ModelAnnotation {
         *value_ref = value;
     }
 
+    #[getter]
+    pub fn get_lines(&self, py: Python) -> Option<Vec<String>> {
+        self.get_value(py)
+            .map(|data| data.split("\n").map(|it| it.to_string()).collect())
+    }
+
+    #[setter]
+    pub fn set_lines(&self, py: Python, value: Option<Vec<String>>) {
+        let value = value.map(|it| it.join("\n"));
+        self.set_value(py, value)
+    }
+
     /// Parse an annotation object from the string representing the contents of an `.aeon` file.
     #[staticmethod]
     pub fn from_aeon(py: Python, file_contents: &str) -> PyResult<ModelAnnotation> {
@@ -355,12 +367,12 @@ impl ModelAnnotationRoot {
     /// with one of the provided variables removed.
     pub fn drop_variables(&self, _names: &[String]) -> PyResult<ModelAnnotationRoot> {
         println!("WARNING: Work in progress. Possible loss of annotation data.");
-        Ok(ModelAnnotationRoot::from(self.clone()))
+        Ok(self.clone())
     }
 
     pub fn inline_variable(&self, _name: &str) -> PyResult<ModelAnnotationRoot> {
         println!("WARNING: Work in progress. Possible loss of annotation data.");
-        Ok(ModelAnnotationRoot::from(self.clone()))
+        Ok(self.clone())
     }
 
     pub fn remove_regulation(&mut self, _source: &str, _target: &str) -> PyResult<()> {

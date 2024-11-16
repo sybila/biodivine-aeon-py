@@ -267,7 +267,7 @@ impl BooleanNetwork {
             let ann_string = annotations.borrow(py).as_native().to_string();
             // If annotations are present, print them, leave two lines empty, and then print
             // the regulations.
-            format!("{}\n\n{}", ann_string, self_.as_native().to_string())
+            format!("{}\n\n{}", ann_string, self_.as_native())
         } else {
             self_.as_native().to_string()
         }
