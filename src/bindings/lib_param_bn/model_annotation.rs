@@ -1,8 +1,10 @@
+use crate::bindings::annotations::network_regulation::NetworkRegulationAnnotation;
+use crate::bindings::annotations::network_variable::NetworkVariableAnnotation;
+use crate::bindings::annotations::regulatory_graph::{REGULATION, VARIABLE};
 use crate::{throw_runtime_error, AsNative};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-
 /*
    I am sorry for this mess, but this seems to be the best solution at the moment
 */
@@ -243,7 +245,7 @@ impl ModelAnnotation {
     #[getter]
     pub fn get_lines(&self, py: Python) -> Option<Vec<String>> {
         self.get_value(py)
-            .map(|data| data.split("\n").map(|it| it.to_string()).collect())
+            .map(|data| data.lines().map(|it| it.to_string()).collect())
     }
 
     #[setter]
@@ -365,23 +367,147 @@ impl From<Py<ModelAnnotationRoot>> for ModelAnnotation {
 impl ModelAnnotationRoot {
     /// Make a copy with all variable and regulation annotations that are associated
     /// with one of the provided variables removed.
-    pub fn drop_variables(&self, _names: &[String]) -> PyResult<ModelAnnotationRoot> {
-        println!("WARNING: Work in progress. Possible loss of annotation data.");
-        Ok(self.clone())
+    pub fn drop_variables(
+        &self,
+        names: &[String],
+        py: Python,
+    ) -> PyResult<Py<ModelAnnotationRoot>> {
+        let mut copy_native = self.0.clone();
+        let variables = copy_native.get_mut_child(&[VARIABLE]);
+        if let Some(variables) = variables {
+            let variable_annotations = variables.children_mut();
+            for name in names {
+                variable_annotations.remove(name);
+            }
+        }
+        let regulations = copy_native.get_mut_child(&[REGULATION]);
+        if let Some(regulations) = regulations {
+            let source_map = regulations.children_mut();
+            for name in names {
+                source_map.remove(name);
+            }
+            for target_data in source_map.values_mut() {
+                let target_map = target_data.children_mut();
+                for name in names {
+                    target_map.remove(name);
+                }
+            }
+        }
+        Py::new(py, ModelAnnotationRoot(copy_native))
     }
 
-    pub fn inline_variable(&self, _name: &str) -> PyResult<ModelAnnotationRoot> {
-        println!("WARNING: Work in progress. Possible loss of annotation data.");
-        Ok(self.clone())
+    /// Make a copy with the specified variable and its associated regulations "inlined".
+    ///
+    /// This means we try to "merge" the variable data into the variables into which we
+    /// are inlining. This usually just means appending whatever is available into the existing
+    /// structures.
+    pub fn inline_variable(
+        &self,
+        name: &str,
+        old_rg: &biodivine_lib_param_bn::RegulatoryGraph,
+        py: Python,
+    ) -> PyResult<Py<ModelAnnotationRoot>> {
+        // (1) Make a native copy of current annotations.
+        let mut copy_native = self.0.clone();
+
+        // At this point, the variable must be known.
+        let old_id = old_rg.find_variable(name).unwrap();
+
+        // (2) Append inlined variable to all of its targets (assuming we have some
+        // annotation data for it).
+        if let Some(source_ann) = self.0.get_child(&[VARIABLE, name]) {
+            for target in old_rg.targets(old_id) {
+                let target_name = old_rg.get_variable_name(target);
+                let target_ann = copy_native.ensure_child(&[VARIABLE, target_name]);
+                NetworkVariableAnnotation::extend_with(target_ann, source_ann);
+            }
+        }
+
+        // (3) Remove the variable from the annotation copy. Also remove any regulations that are
+        // associated with the variable (we'll copy these separately in the next step).
+        if let Some(variables) = copy_native.get_mut_child(&[VARIABLE]) {
+            variables.children_mut().remove(name);
+        }
+        if let Some(regulations) = copy_native.get_mut_child(&[REGULATION]) {
+            regulations.children_mut().remove(name);
+            for targets_ann in regulations.children_mut().values_mut() {
+                targets_ann.children_mut().remove(name);
+            }
+        }
+
+        // (4) Append affected regulations into the inlined copies. That is, for every A -> B -> C
+        // that got merged into A -> C, we merge the two regulations, preferring
+        // the B -> C regulation. However, there is a slight problem if B -> C already exists.
+        // In that case, we need to merge everything.
+        for regulator in old_rg.regulators(old_id) {
+            let regulator_name = old_rg.get_variable_name(regulator);
+            for target in old_rg.targets(old_id) {
+                let target_name = old_rg.get_variable_name(target);
+                // Retrieve old annotations.
+                let a_b_ann = self
+                    .0
+                    .get_child(&[REGULATION, regulator_name, name])
+                    .cloned();
+                let b_c_ann = self.0.get_child(&[REGULATION, name, target_name]).cloned();
+                // Merge the annotations (assuming they are present).
+                let ann = match (a_b_ann, b_c_ann) {
+                    (Some(a_b), Some(mut b_c)) => {
+                        NetworkRegulationAnnotation::extend_with(&mut b_c, &a_b);
+                        b_c
+                    }
+                    (Some(a_b), None) => a_b,
+                    (None, Some(b_c)) => b_c,
+                    (None, None) => continue, // No annotations, skip.
+                };
+                if let Some(current_a_c) =
+                    copy_native.get_mut_child(&[REGULATION, regulator_name, target_name])
+                {
+                    // If the annotation already exists, we extend it with new data.
+                    NetworkRegulationAnnotation::extend_with(current_a_c, &ann);
+                } else {
+                    // Otherwise, we create it.
+                    copy_native
+                        .ensure_child(&[REGULATION, regulator_name])
+                        .children_mut()
+                        .insert(target_name.clone(), ann);
+                }
+            }
+        }
+
+        Py::new(py, ModelAnnotationRoot(copy_native))
     }
 
-    pub fn remove_regulation(&mut self, _source: &str, _target: &str) -> PyResult<()> {
-        println!("WARNING: Work in progress. Possible loss of annotation data.");
+    /// Remove a regulation from this annotation object.
+    pub fn remove_regulation(&mut self, source: &str, target: &str) -> PyResult<()> {
+        if let Some(regulations) = self.0.get_mut_child(&[REGULATION, source]) {
+            regulations.children_mut().remove(target);
+        }
         Ok(())
     }
 
-    pub fn rename_variable(&mut self, _old_name: &str, _new_name: &str) -> PyResult<()> {
-        println!("WARNING: Work in progress. Possible loss of annotation data.");
+    /// Rename variable inside the "variable" and "regulation" annotation subtrees.
+    pub fn rename_variable(&mut self, old_name: &str, new_name: &str) -> PyResult<()> {
+        if let Some(variables) = self.0.get_mut_child(&[VARIABLE]) {
+            let variables_map = variables.children_mut();
+            let current_data = variables_map.remove(old_name);
+            if let Some(current_data) = current_data {
+                variables_map.insert(new_name.to_string(), current_data);
+            }
+        }
+        if let Some(regulations) = self.0.get_mut_child(&[REGULATION]) {
+            let regulations_map = regulations.children_mut();
+            let current_data = regulations_map.remove(old_name);
+            if let Some(current_data) = current_data {
+                regulations_map.insert(new_name.to_string(), current_data);
+            }
+            for target_data in regulations_map.values_mut() {
+                let target_map = target_data.children_mut();
+                let current_data = target_map.remove(old_name);
+                if let Some(current_data) = current_data {
+                    target_map.insert(new_name.to_string(), current_data);
+                }
+            }
+        }
         Ok(())
     }
 

@@ -284,6 +284,14 @@ impl BooleanNetwork {
         name: &str,
     ) -> PyResult<()> {
         let var = self_.as_ref().resolve_network_variable(variable)?;
+
+        // Update the annotation first to make sure the old name is still present.
+        if let Some(ann) = self_.as_ref().annotations.as_ref() {
+            let old_name = self_.as_native().get_variable_name(var);
+            let mut ann = ann.borrow_mut(py);
+            ann.rename_variable(old_name.as_str(), name)?;
+        }
+
         self_
             .as_mut()
             .as_native_mut()
@@ -294,12 +302,6 @@ impl BooleanNetwork {
             .as_graph_mut()
             .set_variable_name(var, name)
             .map_err(runtime_error)?;
-
-        if let Some(ann) = self_.as_ref().annotations.as_ref() {
-            let old_name = self_.as_native().get_variable_name(var);
-            let mut ann = ann.borrow_mut(py);
-            ann.rename_variable(old_name.as_str(), name)?;
-        }
 
         Ok(())
     }
@@ -597,9 +599,10 @@ impl BooleanNetwork {
             .as_ref()
             .annotations
             .as_ref()
-            .map(|it| it.borrow(py).inline_variable(name.as_str()))
-            .transpose()?
-            .map(|it| Py::new(py, it))
+            .map(|it| {
+                it.borrow(py)
+                    .inline_variable(name.as_str(), self_.as_native().as_graph(), py)
+            })
             .transpose()?;
 
         BooleanNetwork(bn).export_to_python(py, ann_copy)

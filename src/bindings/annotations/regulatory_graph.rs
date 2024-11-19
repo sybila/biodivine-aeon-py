@@ -6,6 +6,8 @@ use crate::bindings::lib_param_bn::regulatory_graph::RegulatoryGraph;
 use crate::throw_runtime_error;
 use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyRef, PyResult, Python};
 
+pub const VARIABLE: &str = "variable";
+pub const REGULATION: &str = "regulation";
 const TAXON: &str = "taxon";
 const NAME: &str = "name";
 const DESCRIPTION: &str = "description";
@@ -30,7 +32,7 @@ impl RegulatoryGraphAnnotation {
         variable: &Bound<'_, PyAny>,
     ) -> PyResult<Py<NetworkVariableAnnotation>> {
         let name = self_.0.borrow(py).get_variable_name(variable)?;
-        let variable_annotations = self_.as_ref().__getitem__("variable");
+        let variable_annotations = self_.as_ref().__getitem__(VARIABLE);
         let variable_data = variable_annotations.__getitem__(name.as_str());
         let tuple = (NetworkVariableAnnotation(), variable_data);
         Py::new(py, tuple)
@@ -52,7 +54,7 @@ impl RegulatoryGraphAnnotation {
         if regulation.is_none() {
             return throw_runtime_error("Regulation does not exist.");
         }
-        let regulation_annotations = self_.as_ref().__getitem__("regulation");
+        let regulation_annotations = self_.as_ref().__getitem__(REGULATION);
         let source_data = regulation_annotations.__getitem__(source_name.as_str());
         let target_data = source_data.__getitem__(target_name.as_str());
         let tuple = (NetworkRegulationAnnotation(), target_data);

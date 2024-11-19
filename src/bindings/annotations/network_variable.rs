@@ -1,5 +1,6 @@
 use crate::bindings::annotations::REFERENCE;
 use crate::bindings::lib_param_bn::model_annotation::ModelAnnotation;
+use biodivine_lib_param_bn::ModelAnnotation as NativeAnnotation;
 use pyo3::{pyclass, pymethods, Py, PyRef, PyResult, Python};
 
 const GENE_NAME: &str = "gene_name";
@@ -12,12 +13,16 @@ const NCBI: &str = "ncbi";
 const LAYOUT: &str = "layout";
 const POSITION: &str = "position";
 
+/// Typed annotation data associated with a network variable.
 #[pyclass(module="biodivine_aeon", extends=ModelAnnotation)]
 pub struct NetworkVariableAnnotation();
 
+/// Part of variable annotation data that represents various variable identifiers
+/// across different sources.
 #[pyclass(module="biodivine_aeon", extends=ModelAnnotation)]
 pub struct VariableIdsAnnotation();
 
+/// Part of variable annotation data that represents various layout-associated properties.
 #[pyclass(module="biodivine_aeon", extends=ModelAnnotation)]
 pub struct VariableLayoutAnnotation();
 
@@ -85,6 +90,37 @@ impl NetworkVariableAnnotation {
     }
 }
 
+impl NetworkVariableAnnotation {
+    /// Merge two native model annotation instances which are assumed to annotate network variables.
+    ///
+    /// What this will do is:
+    ///  - Concatenate gene names.
+    ///  - Concatenate references.
+    ///  - Concatenate ids/uniprot.
+    ///  - Concatenate ids/ncbi.
+    ///  - Concatenate ids/geo_cc.
+    ///  - Concatenate ids/geo_mf.
+    ///  - Concatenate ids/geo_bp.
+    ///
+    /// Layout information is preserved only for the "main" variable.
+    pub fn extend_with(main: &mut NativeAnnotation, sub: &NativeAnnotation) {
+        let concat_paths: [&[&str]; 7] = [
+            &[GENE_NAME],
+            &[REFERENCE],
+            &[ID, UNIPROT],
+            &[ID, NCBI],
+            &[ID, GEO_CC],
+            &[ID, GEO_MF],
+            &[ID, GEO_BP],
+        ];
+        for path in concat_paths {
+            if let Some(data) = sub.get_value(path) {
+                main.append_value(path, format!("\n{}", data).as_str());
+            }
+        }
+    }
+}
+
 #[pymethods]
 impl VariableIdsAnnotation {
     #[getter]
@@ -147,7 +183,7 @@ impl VariableLayoutAnnotation {
             .__getitem__(POSITION)
             .get_value(py)
             .map(|str| {
-                let mut parts = str.split(",");
+                let mut parts = str.split(',');
                 let x = parts
                     .next()
                     .and_then(|x| x.parse::<f64>().ok())

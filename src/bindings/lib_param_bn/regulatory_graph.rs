@@ -485,19 +485,22 @@ impl RegulatoryGraph {
             .into_iter()
             .map(|it| self.as_native().get_variable_name(it).to_string())
             .collect::<HashSet<String>>();
-        let names = self
+        let names_to_keep = self
             .variable_names()
             .into_iter()
             .filter(|it| !to_remove.contains(it))
             .collect::<Vec<_>>();
+        let names_to_drop = self
+            .variable_names()
+            .into_iter()
+            .filter(|it| to_remove.contains(it))
+            .collect::<Vec<_>>();
         let ann_copy = self
             .annotations
             .as_ref()
-            .map(|it| it.borrow(py).drop_variables(&names))
-            .transpose()?
-            .map(|it| Py::new(py, it))
+            .map(|it| it.borrow(py).drop_variables(&names_to_drop, py))
             .transpose()?;
-        let mut result = Self::new(Some(names), None, None)?;
+        let mut result = Self::new(Some(names_to_keep), None, None)?;
         result.annotations = ann_copy;
         for reg in self.as_native().regulations() {
             let source = self.as_native().get_variable_name(reg.get_regulator());
@@ -529,25 +532,25 @@ impl RegulatoryGraph {
     /// a result that is functionally compatible with the original regulatory graph. Of course, you can use
     /// `RegulatoryGraph.remove_regulation` to explicitly remove the self-loop before inlining the variable.
     ///
-    /// This removes any annotations associated with the inlined variable and attempts to merge
-    /// the annotations for affected regulations.
+    /// This attempts to merge the annotations of the inlined variable and associated regulations with the
     pub fn inline_variable(
         &self,
         py: Python,
         variable: &Bound<'_, PyAny>,
     ) -> PyResult<RegulatoryGraph> {
         let variable = self.resolve_network_variable(variable)?;
-        let bn = biodivine_lib_param_bn::BooleanNetwork::new(self.as_native().clone());
-        let Some(bn) = bn.inline_variable(variable, false) else {
+        let old_bn = biodivine_lib_param_bn::BooleanNetwork::new(self.as_native().clone());
+        let Some(bn) = old_bn.inline_variable(variable, false) else {
             return throw_runtime_error("Variable has a self-regulation.");
         };
         let name = self.as_native().get_variable_name(variable);
         let ann_copy = self
             .annotations
             .as_ref()
-            .map(|it| it.borrow(py).inline_variable(name.as_str()))
-            .transpose()?
-            .map(|it| Py::new(py, it))
+            .map(|it| {
+                it.borrow(py)
+                    .inline_variable(name.as_str(), old_bn.as_graph(), py)
+            })
             .transpose()?;
         Ok(RegulatoryGraph {
             native: bn.as_graph().clone(),
