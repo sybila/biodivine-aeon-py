@@ -21,7 +21,7 @@ pyo3 = { version = "0.22.5", features = ["abi3-py37", "extension-module", "num-b
 biodivine-lib-param-bn = { version="0.5.13", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.22"
 #biodivine-pbn-control = "0.3.1"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "99f9da756c370daf5428b3d61ef76c24e7d8de5f" }
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "8ea98af977b43b5bdffd9455e824922be8eda97a", features = ["solver-z3"] }
 biodivine-hctl-model-checker = "0.3.0"
 rand = "0.8.5"
 macros = { path = "macros" }
