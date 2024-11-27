@@ -138,6 +138,10 @@ impl Control {
     /// all network colors). When this option is active, other results that have been computed
     /// so far are still returned.
     ///
+    /// Optionally, you can also provide a set of `initial_states` that will be considered as the
+    /// only potential initial states of the network (e.g. in case of some initial states are not
+    /// considered valid).
+    ///
     #[staticmethod]
     #[pyo3(signature = (graph, phenotype, oscillation_type = None, size_limit = None, stop_when_found = false, initial_states = None))]
     pub fn phenotype_permanent(
