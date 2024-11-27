@@ -1,6 +1,6 @@
 [package]
 name = "biodivine-aeon-py"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 
 [lib]
@@ -21,7 +21,7 @@ pyo3 = { version = "0.22.5", features = ["abi3-py37", "extension-module", "num-b
 biodivine-lib-param-bn = { version="0.5.13", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.22"
 #biodivine-pbn-control = "0.3.1"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "99f9da756c370daf5428b3d61ef76c24e7d8de5f" }
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "1fcef228bd6accd89cb3a287d82c80c9c8f9b6a4" }
 biodivine-hctl-model-checker = "0.3.0"
 rand = "0.8.5"
 macros = { path = "macros" }
@@ -30,6 +30,7 @@ num-bigint = "0.4.6"
 num-traits = "0.2.19"
 either = "1.13.0"
 itertools = "0.13.0"
+clap = "4.5.21"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.

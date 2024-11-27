@@ -139,7 +139,7 @@ impl Control {
     /// so far are still returned.
     ///
     #[staticmethod]
-    #[pyo3(signature = (graph, phenotype, oscillation_type = None, size_limit = None, stop_when_found = false))]
+    #[pyo3(signature = (graph, phenotype, oscillation_type = None, size_limit = None, stop_when_found = false, initial_states = None))]
     pub fn phenotype_permanent(
         py: Python,
         graph: Py<AsynchronousPerturbationGraph>,
@@ -147,6 +147,7 @@ impl Control {
         oscillation_type: Option<String>,
         size_limit: Option<usize>,
         stop_when_found: bool,
+        initial_states: Option<&VertexSet>,
     ) -> PyResult<ColoredPerturbationSet> {
         let verbose = should_log(global_log_level(py)?);
 
@@ -154,6 +155,12 @@ impl Control {
             extract_phenotype_type(p_type.as_str())?
         } else {
             PhenotypeOscillationType::Forbidden
+        };
+
+        // If initial states is not set, we consider all networks states as potential initial states
+        let initial_states_native = match initial_states {
+            Some(x) => x.as_native().clone(),
+            None => graph.get().as_native().mk_unit_colored_vertices().vertices().clone()
         };
 
         // If size limit is not set, we consider the largest possible size.
@@ -164,6 +171,7 @@ impl Control {
             phenotype.as_native().clone(),
             size_limit,
             p_type,
+            initial_states_native,
             stop_when_found,
             verbose,
         );
