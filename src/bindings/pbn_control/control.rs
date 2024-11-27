@@ -160,7 +160,12 @@ impl Control {
         // If initial states is not set, we consider all networks states as potential initial states
         let initial_states_native = match initial_states {
             Some(x) => x.as_native().clone(),
-            None => graph.get().as_native().mk_unit_colored_vertices().vertices().clone()
+            None => graph
+                .get()
+                .as_native()
+                .mk_unit_colored_vertices()
+                .vertices()
+                .clone(),
         };
 
         // If size limit is not set, we consider the largest possible size.
