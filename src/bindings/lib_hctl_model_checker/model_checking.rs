@@ -113,7 +113,7 @@ impl ModelChecking {
                             )
                         })
                         .collect::<PyResult<Vec<Py<ColoredVertexSet>>>>()?;
-                    let result_list = PyList::new_bound(py, result_iter);
+                    let result_list = PyList::new(py, result_iter)?;
 
                     Ok(result_list.into_any())
                 }

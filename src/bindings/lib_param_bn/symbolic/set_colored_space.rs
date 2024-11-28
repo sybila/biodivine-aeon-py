@@ -25,6 +25,7 @@ use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpa
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use pyo3::IntoPyObjectExt;
 
 /// A symbolic representation of a colored relation of "spaces", i.e. hypercubes in the state space
 /// of a particular partially specified `BooleanNetwork` together with the instantiations of
@@ -70,11 +71,11 @@ impl ColoredSpaceSet {
         }
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         match op {
-            CompareOp::Eq => Self::semantic_eq(self, other).into_py(py),
-            CompareOp::Ne => Self::semantic_eq(self, other).not().into_py(py),
-            _ => py.NotImplemented(),
+            CompareOp::Eq => Self::semantic_eq(self, other).into_py_any(py),
+            CompareOp::Ne => Self::semantic_eq(self, other).not().into_py_any(py),
+            _ => Ok(py.NotImplemented()),
         }
     }
 

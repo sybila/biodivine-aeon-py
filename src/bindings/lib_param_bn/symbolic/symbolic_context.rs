@@ -13,6 +13,7 @@ use either::{Either, Left, Right};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
+use pyo3::IntoPyObjectExt;
 use std::collections::HashMap;
 
 /// Intuitively, a `SymbolicContext` encodes the entities of a `BooleanNetwork` into a set
@@ -142,7 +143,7 @@ impl SymbolicContext {
         })
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
@@ -412,12 +413,12 @@ impl SymbolicContext {
 
     /// The list of all explicit and implicit uninterpreted functions in this encoding.
     pub fn functions<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
-        let result = PyList::empty_bound(py);
+        let result = PyList::empty(py);
         for x in self.explicit_functions() {
-            result.append(x.into_py(py))?;
+            result.append(x)?;
         }
         for x in self.implicit_functions() {
-            result.append(x.into_py(py))?;
+            result.append(x)?;
         }
         Ok(result)
     }
@@ -440,12 +441,12 @@ impl SymbolicContext {
     /// A dictionary which maps the `VariableId` and `ParameterId` objects identifying individual
     /// uninterpreted functions to the symbolic variables that are used to encode said function.
     pub fn functions_bdd_variables<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDict>> {
-        let result = PyDict::new_bound(py);
+        let result = PyDict::new(py);
         for (k, v) in self.explicit_functions_bdd_variables() {
-            result.set_item(k.into_py(py), v.into_py(py))?;
+            result.set_item(k, v)?;
         }
         for (k, v) in self.implicit_functions_bdd_variables() {
-            result.set_item(k.into_py(py), v.into_py(py))?;
+            result.set_item(k, v)?;
         }
         Ok(result)
     }
@@ -455,16 +456,12 @@ impl SymbolicContext {
     ///
     /// The function can accept a `BddVariable`. In such case, it will try to identify the
     /// function table in which the variable resides. Note that this is a linear search.
-    pub fn find_function(
-        &self,
-        function: &Bound<'_, PyAny>,
-        py: Python,
-    ) -> PyResult<Option<PyObject>> {
+    pub fn find_function(&self, function: &Bound<'_, PyAny>, py: Python) -> PyResult<PyObject> {
         if let Ok(id) = function.extract::<ParameterId>() {
             return if id.__index__() < self.explicit_function_count() {
-                Ok(Some(id.into_py(py)))
+                id.into_py_any(py)
             } else {
-                Ok(None)
+                Ok(py.None())
             };
         }
 
@@ -476,12 +473,12 @@ impl SymbolicContext {
                     .get_implicit_function_table(id_native)
                     .is_some()
                 {
-                    Ok(Some(id.into_py(py)))
+                    id.into_py_any(py)
                 } else {
-                    Ok(None)
+                    Ok(py.None())
                 }
             } else {
-                Ok(None)
+                Ok(py.None())
             };
         }
 
@@ -489,18 +486,18 @@ impl SymbolicContext {
             let var_id = self.as_native().find_network_variable(name.as_str());
             let par_id = self.as_native().find_network_parameter(name.as_str());
             return match (var_id, par_id) {
-                (None, None) => Ok(None),
+                (None, None) => Ok(py.None()),
                 (Some(_), Some(_)) => unreachable!(),
-                (_, Some(par_id)) => Ok(Some(ParameterId::from(par_id).into_py(py))),
+                (_, Some(par_id)) => ParameterId::from(par_id).into_py_any(py),
                 (Some(var_id), _) => {
                     if self
                         .as_native()
                         .get_implicit_function_table(var_id)
                         .is_some()
                     {
-                        Ok(Some(VariableId::from(var_id).into_py(py)))
+                        VariableId::from(var_id).into_py_any(py)
                     } else {
-                        Ok(None)
+                        Ok(py.None())
                     }
                 }
             };
@@ -513,17 +510,17 @@ impl SymbolicContext {
             for var in self.as_native().network_variables() {
                 if let Some(table) = self.as_native().get_implicit_function_table(var) {
                     if table.contains(bdd_var) {
-                        return Ok(Some(VariableId::from(var).into_py(py)));
+                        return VariableId::from(var).into_py_any(py);
                     }
                 }
             }
             for par in self.as_native().network_parameters() {
                 let table = self.as_native().get_explicit_function_table(par);
                 if table.contains(bdd_var) {
-                    return Ok(Some(ParameterId::from(par).into_py(py)));
+                    return ParameterId::from(par).into_py_any(py);
                 }
             }
-            return Ok(None);
+            return Ok(py.None());
         }
 
         throw_type_error("Expected `ParameterId`, `VariableId`, `BddVariable`, or a string name.")

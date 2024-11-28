@@ -1,6 +1,6 @@
 use pyo3::exceptions::{PyIndexError, PyInterruptedError, PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
-use pyo3::{PyResult, Python};
+use pyo3::{PyErrArguments, PyResult, Python};
 
 /// A module with all the glue and wrapper code that makes the Python bindings work.
 ///
@@ -58,7 +58,7 @@ fn set_log_level(_py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
 }
 
 fn global_log_level(py: Python) -> PyResult<usize> {
-    let module = PyModule::import_bound(py, "biodivine_aeon")?;
+    let module = PyModule::import(py, "biodivine_aeon")?;
     module.getattr("LOG_LEVEL")?.extract()
 }
 
@@ -107,7 +107,7 @@ trait AsNative<T> {
 /// Helper function to quickly throw a type error.
 fn throw_type_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
+    A: Send + Sync + PyErrArguments + 'static,
 {
     Err(PyTypeError::new_err(message))
 }
@@ -115,7 +115,7 @@ where
 /// Helper function to quickly throw a runtime error.
 fn throw_runtime_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
+    A: Send + Sync + PyErrArguments + 'static,
 {
     Err(runtime_error::<A>(message))
 }
@@ -123,28 +123,28 @@ where
 /// Helper function to quickly create a runtime error.
 fn runtime_error<A>(message: A) -> PyErr
 where
-    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
+    A: Send + Sync + PyErrArguments + 'static,
 {
     PyRuntimeError::new_err(message)
 }
 
 fn throw_index_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
+    A: Send + Sync + PyErrArguments + 'static,
 {
     Err(PyIndexError::new_err(message))
 }
 
 fn index_error<A>(message: A) -> PyErr
 where
-    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
+    A: Send + Sync + PyErrArguments + 'static,
 {
     PyIndexError::new_err(message)
 }
 
 fn throw_interrupted_error<T, A>(message: A) -> PyResult<T>
 where
-    A: Send + Sync + IntoPy<Py<PyAny>> + 'static,
+    A: Send + Sync + PyErrArguments + 'static,
 {
     Err(PyInterruptedError::new_err(message))
 }

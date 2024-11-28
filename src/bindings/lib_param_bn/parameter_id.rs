@@ -59,7 +59,7 @@ impl ParameterId {
         self.0.to_index()
     }
 
-    pub fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
-        PyTuple::new_bound(py, [self.0.to_index()])
+    pub fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
+        PyTuple::new(py, [self.0.to_index()])
     }
 }

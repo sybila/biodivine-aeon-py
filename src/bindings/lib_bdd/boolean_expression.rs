@@ -59,7 +59,7 @@ impl BooleanExpression {
         hasher.finish()
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |it| it.as_native())
     }
 
@@ -71,11 +71,11 @@ impl BooleanExpression {
         format!("BooleanExpression({:?})", self.__str__())
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
         // Technically, this is a "different" expression because it is created with a completely new `root`,
         // but it is much easier (and more transparent) than serializing the root expression and trying to figure
         // out how to serialize a pointer into the AST.
-        PyTuple::new_bound(py, [self.__str__()])
+        PyTuple::new(py, [self.__str__()])
     }
 
     fn __root__(&self) -> BooleanExpression {
@@ -91,7 +91,7 @@ impl BooleanExpression {
     ) -> PyResult<bool> {
         match (valuation, kwargs) {
             (Some(_), Some(_)) => throw_type_error("Cannot use both explicit and named arguments."),
-            (None, None) => eval(self.as_native(), &PyDict::new_bound(py)),
+            (None, None) => eval(self.as_native(), &PyDict::new(py)),
             (Some(v), None) | (None, Some(v)) => eval(self.as_native(), v),
         }
     }

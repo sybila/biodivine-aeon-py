@@ -139,7 +139,7 @@ impl BooleanNetwork {
         )
     }
 
-    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         // The BN and its underlying RG should be up-to-date, hence it should be ok to just compare the BN.
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }

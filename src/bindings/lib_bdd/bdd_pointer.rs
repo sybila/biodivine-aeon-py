@@ -76,8 +76,8 @@ impl BddPointer {
         self.0.to_index()
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
-        PyTuple::new_bound(py, [self.0.to_index()])
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
+        PyTuple::new(py, [self.0.to_index()])
     }
 
     /// Returns the `BddPointer` referencing the `0` terminal node.

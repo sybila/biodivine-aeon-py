@@ -19,6 +19,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGra
 use either::{Left, Right};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
+use pyo3::IntoPyObjectExt;
 use std::collections::HashMap;
 
 #[pyclass(module = "biodivine_aeon", frozen, subclass)]
@@ -420,18 +421,19 @@ impl AsynchronousGraph {
         let set = if let Ok(set) = set.extract::<ColorSet>() {
             self.as_native()
                 .transfer_colors_from(set.as_native(), original_ctx.as_native())
-                .map(|it| ColorSet::mk_native(self.ctx.clone(), it).into_py(py))
+                .map(|it| ColorSet::mk_native(self.ctx.clone(), it).into_py_any(py))
         } else if let Ok(set) = set.extract::<VertexSet>() {
             self.as_native()
                 .transfer_vertices_from(set.as_native(), original_ctx.as_native())
-                .map(|it| VertexSet::mk_native(self.ctx.clone(), it).into_py(py))
+                .map(|it| VertexSet::mk_native(self.ctx.clone(), it).into_py_any(py))
         } else if let Ok(set) = set.extract::<ColoredVertexSet>() {
             self.as_native()
                 .transfer_from(set.as_native(), original_ctx.as_native())
-                .map(|it| ColoredVertexSet::mk_native(self.ctx.clone(), it).into_py(py))
+                .map(|it| ColoredVertexSet::mk_native(self.ctx.clone(), it).into_py_any(py))
         } else {
             return throw_type_error("Expected `ColorSet`, `VartexSet`, or `ColoredVertexSet`.");
-        };
+        }
+        .transpose()?;
         if let Some(set) = set {
             Ok(set)
         } else {

@@ -12,7 +12,7 @@ use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use either::Either;
 use pyo3::prelude::{PyAnyMethods, PyListMethods};
 use pyo3::types::{PyDict, PyList, PyTuple};
-use pyo3::{pyclass, pymethods, Bound, IntoPy, Py, PyAny, PyObject, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyObject, PyResult, Python};
 use std::sync::Arc;
 use Either::{Left, Right};
 
@@ -96,12 +96,12 @@ impl ColorModel {
     /// This is the list of all `ParameterId` and `VariableId` objects that admit an associated
     /// uninterpreted function and said function is present in this `ColorModel`.
     pub fn keys<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
-        let result = PyList::empty_bound(py);
+        let result = PyList::empty(py);
         for x in &self.retained_explicit {
-            result.append(ParameterId::from(*x).into_py(py))?;
+            result.append(ParameterId::from(*x))?;
         }
         for x in &self.retained_implicit {
-            result.append(VariableId::from(*x).into_py(py))?;
+            result.append(VariableId::from(*x))?;
         }
         Ok(result)
     }
@@ -121,31 +121,31 @@ impl ColorModel {
 
     /// The list of key-value pairs represented in this model.
     pub fn items<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
-        let result = PyList::empty_bound(py);
+        let result = PyList::empty(py);
         for x in &self.retained_explicit {
-            let k = ParameterId::from(*x).into_py(py);
-            let v = self.instantiate_expression(Right(*x))?.into_py(py);
-            result.append(PyTuple::new_bound(py, [k, v]))?;
+            let k = ParameterId::from(*x).into_py_any(py)?;
+            let v = self.instantiate_expression(Right(*x))?.into_py_any(py)?;
+            result.append(PyTuple::new(py, [k, v])?)?;
         }
         for x in &self.retained_implicit {
-            let k = VariableId::from(*x).into_py(py);
-            let v = self.instantiate_expression(Left(*x))?.into_py(py);
-            result.append(PyTuple::new_bound(py, [k, v]))?;
+            let k = VariableId::from(*x).into_py_any(py)?;
+            let v = self.instantiate_expression(Left(*x))?.into_py_any(py)?;
+            result.append(PyTuple::new(py, [k, v])?)?;
         }
         Ok(result)
     }
 
     /// The same as `VertexModel.items`, but returns a dictionary instead.
     pub fn to_dict<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDict>> {
-        let result = PyDict::new_bound(py);
+        let result = PyDict::new(py);
         for x in &self.retained_explicit {
-            let k = ParameterId::from(*x).into_py(py);
-            let v = self.instantiate_expression(Right(*x))?.into_py(py);
+            let k = ParameterId::from(*x);
+            let v = self.instantiate_expression(Right(*x))?;
             result.set_item(k, v)?;
         }
         for x in &self.retained_implicit {
-            let k = VariableId::from(*x).into_py(py);
-            let v = self.instantiate_expression(Left(*x))?.into_py(py);
+            let k = VariableId::from(*x);
+            let v = self.instantiate_expression(Left(*x))?;
             result.set_item(k, v)?;
         }
         Ok(result)
@@ -153,15 +153,15 @@ impl ColorModel {
 
     /// The same as `ColorModel.to_dict`, but the keys in the dictionary are names, not IDs.
     pub fn to_named_dict<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyDict>> {
-        let result = PyDict::new_bound(py);
+        let result = PyDict::new(py);
         for x in &self.retained_explicit {
             let k = self.ctx.get().as_native().get_network_parameter_name(*x);
-            let v = self.instantiate_expression(Right(*x))?.into_py(py);
+            let v = self.instantiate_expression(Right(*x))?;
             result.set_item(k, v)?;
         }
         for x in &self.retained_implicit {
             let k = self.ctx.get().as_native().get_network_variable_name(*x);
-            let v = self.instantiate_expression(Left(*x))?.into_py(py);
+            let v = self.instantiate_expression(Left(*x))?;
             result.set_item(k, v)?;
         }
         Ok(result)
@@ -280,7 +280,9 @@ impl ColorModel {
                 bn
             };
 
-            return Ok(BooleanNetwork::from(bn).export_to_python(py)?.into_py(py));
+            return BooleanNetwork::from(bn)
+                .export_to_python(py)?
+                .into_py_any(py);
         }
         if let Ok(function) = ctx.resolve_function(item) {
             assert_infer_is_none(infer_regulations)?;
@@ -303,9 +305,8 @@ impl ColorModel {
                 FnUpdate::build_from_bdd(ctx.as_native(), &instantiated_bdd);
             let fake_ctx = ctx.mk_fake_network();
             let fake_ctx = BooleanNetwork::from(fake_ctx).export_to_python(py)?;
-            return Ok(
-                UpdateFunction::new_raw(fake_ctx, Arc::new(instantiated_function)).into_py(py),
-            );
+            return UpdateFunction::new_raw(fake_ctx, Arc::new(instantiated_function))
+                .into_py_any(py);
         }
         throw_type_error("Expected `UpdateFunction`, `BooleanNetwork`, or a valid function identifier (`VariableId`, `ParameterId`, or a string name) with an `args` collection.")
     }
@@ -345,7 +346,7 @@ impl ColorModel {
         let instantiated_function = self.instantiate_fn_update(update_function.as_native())?;
         let update =
             UpdateFunction::new_raw(update_function.__ctx__(), Arc::new(instantiated_function));
-        Ok(update.into_py(py))
+        update.into_py_any(py)
     }
 
     pub fn instantiate_fn_update(&self, fn_update: &FnUpdate) -> PyResult<FnUpdate> {

@@ -80,7 +80,7 @@ impl UpdateFunction {
         hasher.finish()
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |it| it.as_native())
     }
 

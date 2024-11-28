@@ -64,7 +64,7 @@ impl BddVariableSet {
         throw_type_error("Expected `int` or `list[str]`.")
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |x| x.variable_names())
     }
 
@@ -81,8 +81,8 @@ impl BddVariableSet {
         format!("BddVariableSet({:?})", names)
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
-        PyTuple::new_bound(py, [self.variable_names()])
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
+        PyTuple::new(py, [self.variable_names()])
     }
 
     /// Return the number of variables managed by this `BddVariableSet`.

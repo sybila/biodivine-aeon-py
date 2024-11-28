@@ -79,7 +79,7 @@ impl Class {
         Ok(Class { items })
     }
 
-    fn __richcmp__(&self, py: Python, other: &Class, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Class, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |x| &x.items)
     }
 
@@ -97,8 +97,8 @@ impl Class {
         format!("Class({})", self.__str__())
     }
 
-    fn __getnewargs__<'a>(&self, py: Python<'a>) -> Bound<'a, PyTuple> {
-        PyTuple::new_bound(py, vec![self.feature_list()])
+    fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
+        PyTuple::new(py, vec![self.feature_list()])
     }
 
     fn __len__(&self) -> usize {

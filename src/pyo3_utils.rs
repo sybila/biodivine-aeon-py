@@ -3,7 +3,10 @@ use biodivine_lib_param_bn::{Monotonicity, Sign};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyBool, PyString};
-use pyo3::{Bound, FromPyObject, IntoPy, Py, PyAny, PyObject, PyResult, Python, ToPyObject};
+use pyo3::{
+    Borrowed, Bound, FromPyObject, IntoPyObject, IntoPyObjectExt, Py, PyAny, PyResult, Python,
+};
+use std::convert::Infallible;
 
 /// Compare the equality of two objects based on the given `cmp` operator and a "key" returned by the `key` function
 /// for each of the objects.
@@ -13,11 +16,11 @@ pub fn richcmp_eq_by_key<T: Sized, R: Eq>(
     x: &T,
     y: &T,
     key: fn(&T) -> R,
-) -> Py<PyAny> {
+) -> PyResult<Py<PyAny>> {
     match cmp {
-        CompareOp::Eq => key(x).eq(&key(y)).into_py(py),
-        CompareOp::Ne => key(x).ne(&key(y)).into_py(py),
-        _ => py.NotImplemented(),
+        CompareOp::Eq => key(x).eq(&key(y)).into_py_any(py),
+        CompareOp::Ne => key(x).ne(&key(y)).into_py_any(py),
+        _ => Ok(py.NotImplemented()),
     }
 }
 
@@ -53,9 +56,17 @@ impl<'py> FromPyObject<'py> for BoolLikeValue {
     }
 }
 
-impl ToPyObject for BoolLikeValue {
-    fn to_object(&self, py: Python<'_>) -> PyObject {
-        PyBool::new_bound(py, self.0).to_object(py)
+impl<'py> IntoPyObject<'py> for BoolLikeValue {
+    //fn to_object(&self, py: Python<'_>) -> PyObject {
+    //    PyBool::new_bound(py, self.0).to_object(py)
+    //}
+
+    type Target = PyBool;
+    type Output = Borrowed<'py, 'py, PyBool>;
+    type Error = Infallible;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        Ok(PyBool::new(py, self.0))
     }
 }
 
@@ -108,13 +119,17 @@ impl<'py> FromPyObject<'py> for SignValue {
     }
 }
 
-impl ToPyObject for SignValue {
-    fn to_object(&self, py: Python<'_>) -> PyObject {
-        let str_value = match self.0 {
+impl<'py> IntoPyObject<'py> for SignValue {
+    type Target = PyString;
+    type Output = Bound<'py, PyString>;
+    type Error = Infallible;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        match self.0 {
             Sign::Positive => "+",
             Sign::Negative => "-",
-        };
-        PyString::new_bound(py, str_value).to_object(py)
+        }
+        .into_pyobject(py)
     }
 }
 

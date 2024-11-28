@@ -2,6 +2,7 @@ use crate::{throw_runtime_error, AsNative};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use pyo3::IntoPyObjectExt;
 
 /*
    I am sorry for this mess, but this seems to be the best solution at the moment
@@ -113,28 +114,33 @@ impl ModelAnnotation {
         })
     }
 
-    pub fn __richcmp__(&self, py: Python, other: &ModelAnnotation, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(
+        &self,
+        py: Python,
+        other: &ModelAnnotation,
+        op: CompareOp,
+    ) -> PyResult<Py<PyAny>> {
         // First, check the paths.
         match op {
             CompareOp::Eq => {
                 if self.path != other.path {
-                    return false.into_py(py);
+                    return false.into_py_any(py);
                 }
             }
             CompareOp::Ne => {
                 if self.path != other.path {
-                    return true.into_py(py);
+                    return true.into_py_any(py);
                 }
             }
-            _ => return py.NotImplemented(),
+            _ => return Ok(py.NotImplemented()),
         }
 
         // If paths match the operator, do the same thing with the root references.
         // Here, we are not doing semantic checking, just pointer equivalence, which makes
         // sure both objects reference the same underlying dictionary.
         match op {
-            CompareOp::Eq => (self.root.as_ptr() == other.root.as_ptr()).into_py(py),
-            CompareOp::Ne => (self.root.as_ptr() != other.root.as_ptr()).into_py(py),
+            CompareOp::Eq => (self.root.as_ptr() == other.root.as_ptr()).into_py_any(py),
+            CompareOp::Ne => (self.root.as_ptr() != other.root.as_ptr()).into_py_any(py),
             _ => unreachable!(),
         }
     }

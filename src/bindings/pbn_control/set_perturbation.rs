@@ -12,7 +12,7 @@ use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, IntoPy, Py, PyAny, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
@@ -68,11 +68,13 @@ impl PerturbationSet {
         }
     }
 
-    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         match op {
-            CompareOp::Eq => PerturbationSet::semantic_eq(self, other).into_py(py),
-            CompareOp::Ne => PerturbationSet::semantic_eq(self, other).not().into_py(py),
-            _ => py.NotImplemented(),
+            CompareOp::Eq => PerturbationSet::semantic_eq(self, other).into_py_any(py),
+            CompareOp::Ne => PerturbationSet::semantic_eq(self, other)
+                .not()
+                .into_py_any(py),
+            _ => Ok(py.NotImplemented()),
         }
     }
 

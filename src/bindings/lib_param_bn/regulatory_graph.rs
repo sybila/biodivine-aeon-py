@@ -120,7 +120,7 @@ impl RegulatoryGraph {
         )
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
@@ -238,7 +238,7 @@ impl RegulatoryGraph {
     /// Return the list of all regulations (represented as `IdRegulation` dictionaries) that are currently
     /// managed by this `RegulatoryGraph`.
     pub fn regulations<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
-        let result = PyList::empty_bound(py);
+        let result = PyList::empty(py);
         for reg in self.as_native().regulations() {
             let reg = Self::encode_regulation(py, reg)?;
             result.append(reg)?;
@@ -762,14 +762,14 @@ impl RegulatoryGraph {
         py: Python<'a>,
         regulation: &biodivine_lib_param_bn::Regulation,
     ) -> PyResult<Bound<'a, PyDict>> {
-        let result = PyDict::new_bound(py);
+        let result = PyDict::new(py);
         let source = VariableId::from(regulation.get_regulator());
         let target = VariableId::from(regulation.get_target());
-        result.set_item("source", source.into_py(py))?;
-        result.set_item("target", target.into_py(py))?;
-        result.set_item("essential", regulation.is_observable().into_py(py))?;
+        result.set_item("source", source)?;
+        result.set_item("target", target)?;
+        result.set_item("essential", regulation.is_observable())?;
         match regulation.get_monotonicity() {
-            None => result.set_item("sign", Option::<&str>::None.into_py(py))?,
+            None => result.set_item("sign", py.None())?,
             Some(Monotonicity::Activation) => result.set_item("sign", "+")?,
             Some(Monotonicity::Inhibition) => result.set_item("sign", "-")?,
         }
