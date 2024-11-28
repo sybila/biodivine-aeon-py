@@ -30,7 +30,6 @@ num-bigint = "0.4.6"
 num-traits = "0.2.19"
 either = "1.13.0"
 itertools = "0.13.0"
-clap = "4.5.21"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
