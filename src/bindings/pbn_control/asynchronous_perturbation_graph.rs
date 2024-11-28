@@ -523,6 +523,36 @@ impl AsynchronousPerturbationGraph {
 
         Ok(robustness.to_f64().unwrap_or(f64::NAN) / 1_000_000.0)
     }
+
+    /// Transform the given `ColorSet` such that any information about perturbations is removed
+    /// and transformed into the "canonical" representation (i.e. perturbation parameters are
+    /// set to `false`).
+    ///
+    /// *This is a relatively low-level operation that you should not need unless you are working
+    ///  with internal encoding of colored perturbations.*
+    ///
+    /// See also `AsynchronousPerturbationGraph.mk_unit_colors` vs
+    /// `AsynchronousPerturbationGraph.mk_perturbable_unit_colors`.
+    pub fn strip_perturbation_data(
+        _self: &Bound<'_, AsynchronousPerturbationGraph>,
+        set: &ColorSet,
+    ) -> ColorSet {
+        let native_ref = _self.get().as_native();
+        let perturbable = native_ref.perturbable_variables();
+        let map = native_ref.get_perturbation_bdd_mapping(perturbable);
+        let perturbation_bdd_vars = map.values().cloned().collect::<Vec<_>>();
+        let native_bdd = set.as_native().as_bdd().clone();
+        let bdd_with_dropped = native_bdd.exists(&perturbation_bdd_vars);
+        let perturbation_vars_false = perturbation_bdd_vars
+            .into_iter()
+            .map(|it| (it, false))
+            .collect::<Vec<_>>();
+        let bdd_with_fixed = bdd_with_dropped.select(&perturbation_vars_false);
+
+        let ctx = _self.borrow().as_ref().symbolic_context();
+        let native_set = GraphColors::new(bdd_with_fixed, ctx.get().as_native());
+        ColorSet::mk_native(ctx, native_set)
+    }
 }
 
 impl AsynchronousPerturbationGraph {

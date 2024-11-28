@@ -13,7 +13,7 @@ use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, IntoPy, Py, PyAny, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
@@ -67,13 +67,13 @@ impl ColoredPerturbationSet {
         }
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         match op {
-            CompareOp::Eq => ColoredPerturbationSet::semantic_eq(self, other).into_py(py),
+            CompareOp::Eq => ColoredPerturbationSet::semantic_eq(self, other).into_py_any(py),
             CompareOp::Ne => ColoredPerturbationSet::semantic_eq(self, other)
                 .not()
-                .into_py(py),
-            _ => py.NotImplemented(),
+                .into_py_any(py),
+            _ => Ok(py.NotImplemented()),
         }
     }
 
@@ -283,7 +283,7 @@ impl ColoredPerturbationSet {
 
         let perturbations =
             AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbations)?;
-        let mut selection = biodivine_lib_bdd::BddPartialValuation::empty();
+        let mut selection = BddPartialValuation::empty();
 
         // Go through the given perturbation and mark everything that should be perturbed.
         for (k, v) in perturbations {
@@ -327,7 +327,7 @@ impl ColoredPerturbationSet {
             native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
         let perturbation =
             AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbation)?;
-        let mut restriction = biodivine_lib_bdd::BddPartialValuation::empty();
+        let mut restriction = BddPartialValuation::empty();
 
         // Initially, set all variables to unperturbed.
         for var in mapping.values() {

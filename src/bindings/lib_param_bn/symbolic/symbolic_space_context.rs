@@ -14,6 +14,7 @@ use biodivine_lib_param_bn::{ExtendedBoolean, Space};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use pyo3::IntoPyObjectExt;
 
 /// An extension of the `SymbolicContext` which supports symbolic representation of network
 /// sub-spaces.
@@ -51,7 +52,7 @@ impl SymbolicSpaceContext {
         Ok((SymbolicSpaceContext(ctx), inner))
     }
 
-    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native().inner_context())
     }
 
@@ -210,7 +211,7 @@ impl SymbolicSpaceContext {
                 &|| py.check_signals(),
             )?;
             let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
-            return Ok(ColoredSpaceSet::wrap_native(self_.clone(), set).into_py(py));
+            return ColoredSpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
         }
         if let Ok(set) = set.extract::<SpaceSet>() {
             let bdd = ctx.as_native()._mk_sub_spaces(
@@ -219,7 +220,7 @@ impl SymbolicSpaceContext {
                 &|| py.check_signals(),
             )?;
             let set = NetworkSpaces::new(bdd, ctx.as_native());
-            return Ok(SpaceSet::wrap_native(self_.clone(), set).into_py(py));
+            return SpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
         }
         if let Ok(bdd) = set.extract::<Bdd>() {
             let bdd =
@@ -228,7 +229,7 @@ impl SymbolicSpaceContext {
                         py.check_signals()
                     })?;
             let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
-            return Ok(bdd.into_py(py));
+            return bdd.into_py_any(py);
         }
         throw_type_error("Expected `ColoredSpaceSet`, `SpaceSet`, or `Bdd`.")
     }
@@ -250,7 +251,7 @@ impl SymbolicSpaceContext {
                 &|| py.check_signals(),
             )?;
             let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
-            return Ok(ColoredSpaceSet::wrap_native(self_.clone(), set).into_py(py));
+            return ColoredSpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
         }
         if let Ok(set) = set.extract::<SpaceSet>() {
             let bdd = ctx.as_native()._mk_super_spaces(
@@ -259,7 +260,7 @@ impl SymbolicSpaceContext {
                 &|| py.check_signals(),
             )?;
             let set = NetworkSpaces::new(bdd, ctx.as_native());
-            return Ok(SpaceSet::wrap_native(self_.clone(), set).into_py(py));
+            return SpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
         }
         if let Ok(bdd) = set.extract::<Bdd>() {
             let bdd = ctx.as_native()._mk_super_spaces(
@@ -268,7 +269,7 @@ impl SymbolicSpaceContext {
                 &|| py.check_signals(),
             )?;
             let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
-            return Ok(bdd.into_py(py));
+            return bdd.into_py_any(py);
         }
         throw_type_error("Expected `ColoredSpaceSet`, `SpaceSet`, or `Bdd`.")
     }

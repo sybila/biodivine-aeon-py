@@ -74,7 +74,7 @@ impl BddValuation {
                 let var_count = ctx.get().variable_count();
                 match values {
                     None => {
-                        let var_count = u16::try_from(var_count).unwrap();
+                        let var_count = u16::try_from(var_count)?;
                         let value = biodivine_lib_bdd::BddValuation::all_false(var_count);
                         Ok(BddValuation { ctx, value })
                     }
@@ -101,7 +101,7 @@ impl BddValuation {
         }
     }
 
-    fn __richcmp__(&self, py: Python, other: &BddValuation, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(&self, py: Python, other: &BddValuation, op: CompareOp) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |x| &x.value)
     }
 
@@ -323,7 +323,12 @@ impl BddPartialValuation {
         }
     }
 
-    fn __richcmp__(&self, py: Python, other: &BddPartialValuation, op: CompareOp) -> Py<PyAny> {
+    fn __richcmp__(
+        &self,
+        py: Python,
+        other: &BddPartialValuation,
+        op: CompareOp,
+    ) -> PyResult<Py<PyAny>> {
         richcmp_eq_by_key(py, op, &self, &other, |x| &x.value)
     }
 

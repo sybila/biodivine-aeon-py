@@ -178,7 +178,7 @@ impl Bdd {
 
     /// Convert this `Bdd` into a serialized `bytes` format that can be read using the `Bdd` constructor.
     fn data_bytes<'a>(&self, py: Python<'a>) -> Bound<'a, PyBytes> {
-        PyBytes::new_bound(py, &self.as_native().to_bytes())
+        PyBytes::new(py, &self.as_native().to_bytes())
     }
 
     /// Produce a `graphviz`-compatible `.dot` representation of the underlying graph. If `zero_pruned` is set,

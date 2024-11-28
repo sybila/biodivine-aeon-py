@@ -164,6 +164,8 @@ def test_symbolic_representation():
 
     normal_colors = graph.mk_unit_colors()
     perturbable_colors = graph.mk_perturbable_unit_colors()
+    assert perturbable_colors != normal_colors
+    assert graph.strip_perturbation_data(perturbable_colors) == normal_colors
 
     normal_vertices = graph.mk_unit_colored_vertices()
     perturbable_vertices = graph.mk_perturbable_unit_colored_vertices()

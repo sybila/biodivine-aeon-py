@@ -14,6 +14,7 @@ use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+use pyo3::IntoPyObjectExt;
 
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
@@ -67,11 +68,11 @@ impl VertexSet {
         }
     }
 
-    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         match op {
-            CompareOp::Eq => VertexSet::semantic_eq(self, other).into_py(py),
-            CompareOp::Ne => VertexSet::semantic_eq(self, other).not().into_py(py),
-            _ => py.NotImplemented(),
+            CompareOp::Eq => VertexSet::semantic_eq(self, other).into_py_any(py),
+            CompareOp::Ne => VertexSet::semantic_eq(self, other).not().into_py_any(py),
+            _ => Ok(py.NotImplemented()),
         }
     }
 

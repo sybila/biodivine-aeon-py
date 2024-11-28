@@ -19,6 +19,7 @@ use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+use pyo3::IntoPyObjectExt;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
@@ -70,11 +71,13 @@ impl ColoredVertexSet {
         }
     }
 
-    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
+    pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
         match op {
-            CompareOp::Eq => ColoredVertexSet::semantic_eq(self, other).into_py(py),
-            CompareOp::Ne => ColoredVertexSet::semantic_eq(self, other).not().into_py(py),
-            _ => py.NotImplemented(),
+            CompareOp::Eq => ColoredVertexSet::semantic_eq(self, other).into_py_any(py),
+            CompareOp::Ne => ColoredVertexSet::semantic_eq(self, other)
+                .not()
+                .into_py_any(py),
+            _ => Ok(py.NotImplemented()),
         }
     }
 
