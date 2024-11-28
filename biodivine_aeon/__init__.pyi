@@ -1811,7 +1811,8 @@ class Control:
                             phenotype: VertexSet,
                             oscillation_type: Optional[PhenotypeOscillation] = None,
                             size_limit: Optional[int] = None,
-                            stop_when_found: bool = False) -> ColoredPerturbationSet: ...
+                            stop_when_found: bool = False,
+                            initial_states: VertexSet | None = None) -> ColoredPerturbationSet: ...
 
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]
