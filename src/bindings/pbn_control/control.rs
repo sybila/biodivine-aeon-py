@@ -139,7 +139,7 @@ impl Control {
     /// so far are still returned.
     ///
     /// Finally, you can specify an `initial_states` set. If specified, the resulting control
-    /// strategies only work across the states in this set.
+    /// strategies only work across the states reachable from this set.
     ///
     #[staticmethod]
     #[pyo3(signature = (graph, phenotype, oscillation_type = None, size_limit = None, stop_when_found = false, initial_states = None))]
