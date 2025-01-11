@@ -1,5 +1,6 @@
 use pyo3::{PyResult, Python};
 
+pub mod algorithms;
 pub mod bn_classifier;
 pub mod lib_bdd;
 pub mod lib_hctl_model_checker;
