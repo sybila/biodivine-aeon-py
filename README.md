@@ -1,3 +1,11 @@
+# Fork information
+
+> This part of the README documents fork changes, regular documentation
+> continues below.
+
+To test the changes made so far, run
+`python example/script/algorithms.py edition-2022-aeon/001.aeon`.
+
 # Biodivine/AEON.py
 
  > AEON.py now finally has API documentation! You can learn more about the individual methods and classes 
