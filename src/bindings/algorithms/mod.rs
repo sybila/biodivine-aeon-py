@@ -1,17 +1,22 @@
 use std::collections::HashSet;
 
-use biodivine_lib_param_bn::{
-    symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
-    VariableId,
+use pyo3::{
+    pyclass, pymethods,
+    types::{PyModule, PyModuleMethods},
+    Bound, Py, PyResult,
 };
-use pyo3::{types::PyModule, Bound, PyResult};
+
+use crate::bindings::lib_param_bn::{
+    symbolic::{asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet},
+    variable_id::VariableId,
+};
 
 /// A configuration struct for the [Reachability] algorithms.
-// #[derive(Clone)]
+#[pyclass(module = "biodivine_aeon", frozen)]
 pub struct ReachabilityConfig {
     /// The symbolic graph that will be used to compute the successors and predecessors of
     /// individual states.
-    pub graph: SymbolicAsyncGraph,
+    pub graph: Py<AsynchronousGraph>,
 
     /// Restricts the reachability operation to the given set of vertices. This also includes
     /// edges! For example, if a vertex `x` only has outgoing edges into vertices outside the
@@ -20,7 +25,7 @@ pub struct ReachabilityConfig {
     /// The initial set must be a subset of the subgraph vertices.
     ///
     /// Default: `None`.
-    pub subgraph: Option<GraphColoredVertices>,
+    pub subgraph: Option<ColoredSpaceSet>,
 
     /// Specifies the set of variables that can be updated by the reachability process.
     /// Remaining variables stay constant, because they are never updated.
@@ -54,6 +59,31 @@ pub struct ReachabilityConfig {
     pub steps_limit: usize,
 }
 
-pub fn register(_module: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pymethods]
+impl ReachabilityConfig {
+    #[new]
+    pub fn new(graph: Py<AsynchronousGraph>) -> Self {
+        ReachabilityConfig {
+            subgraph: None,
+            variables: graph.get().network_variables().into_iter().collect(),
+            bdd_size_limit: usize::MAX,
+            steps_limit: usize::MAX,
+            graph,
+        }
+    }
+
+    // TODO: remove, only here for testing
+    pub fn get_graph(&self) -> &Py<AsynchronousGraph> {
+        &self.graph
+    }
+
+    // TODO: remove, only here for testing
+    pub fn get_variables(&self) -> HashSet<VariableId> {
+        self.variables.clone()
+    }
+}
+
+pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    module.add_class::<ReachabilityConfig>()?;
     Ok(())
 }

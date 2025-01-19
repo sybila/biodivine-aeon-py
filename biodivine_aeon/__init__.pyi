@@ -1844,3 +1844,9 @@ class NamedRegulation(TypedDict):
     sign: Optional[SignType]
     essential: BoolType
 Regulation = Union[IdRegulation, NamedRegulation]
+
+class ReachabilityConfig:
+    def __init__(self,
+                 graph: AsynchronousGraph,
+                 ) -> None:
+        ...
