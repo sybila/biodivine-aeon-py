@@ -68,12 +68,12 @@ impl ReachabilityConfig {
         }
     }
 
-    // TODO: remove, only here for testing
+    // TODO: ohtenkay - remove, only here for testing
     pub fn get_graph(&self) -> &Py<AsynchronousGraph> {
         &self.graph
     }
 
-    // TODO: remove, only here for testing
+    // TODO: ohtenkay - remove, only here for testing
     pub fn get_variables(&self) -> HashSet<VariableId> {
         self.variables.clone()
     }
