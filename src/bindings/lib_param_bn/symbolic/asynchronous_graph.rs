@@ -528,6 +528,20 @@ impl AsynchronousGraph {
         ))
     }
 
+    /// Compute the set of direct successors of the given `set` by updating the specified `var` that are *outside*
+    /// of the given `set`. The `variable` is already resolved.
+    pub fn var_post_out_resolved(
+        &self,
+        variable: VariableId,
+        set: &ColoredVertexSet,
+    ) -> ColoredVertexSet {
+        ColoredVertexSet::mk_native(
+            self.ctx.clone(),
+            self.as_native()
+                .var_post_out(variable.into(), set.as_native()),
+        )
+    }
+
     /// Compute the set of direct successors of the given `set` by updating the specified `var` that are *within*
     /// the given `set`.
     pub fn var_post_within(
@@ -567,6 +581,20 @@ impl AsynchronousGraph {
             self.ctx.clone(),
             self.as_native().var_pre_out(variable, set.as_native()),
         ))
+    }
+
+    /// Compute the set of direct predecessors of the given `set` by updating the specified `var` that are *outside*
+    /// of the given `set`. The `variable` is already resolved.
+    pub fn var_pre_out_resolved(
+        &self,
+        variable: VariableId,
+        set: &ColoredVertexSet,
+    ) -> ColoredVertexSet {
+        ColoredVertexSet::mk_native(
+            self.ctx.clone(),
+            self.as_native()
+                .var_pre_out(variable.into(), set.as_native()),
+        )
     }
 
     /// Compute the set of direct predecessors of the given `set` by updating the specified `var` that are *within*

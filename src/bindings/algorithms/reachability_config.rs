@@ -73,8 +73,14 @@ impl ReachabilityConfig {
         &self.graph
     }
 
-    // TODO: ohtenkay - remove, only here for testing
-    pub fn get_variables(&self) -> HashSet<VariableId> {
-        self.variables.clone()
+    // // TODO: ohtenkay - remove, only here for testing
+    // pub fn get_variables(&self) -> HashSet<VariableId> {
+    //     self.variables.clone()
+    // }
+
+    pub fn sorted_variables(&self) -> Vec<VariableId> {
+        let mut variables = Vec::from_iter(self.variables.clone());
+        variables.sort();
+        variables
     }
 }

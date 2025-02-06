@@ -11,4 +11,4 @@ stg = AsynchronousGraph(bn)
 config = ReachabilityConfig(stg)
 
 print(config.get_graph())
-print(config.get_variables())
+print(config.sorted_variables())

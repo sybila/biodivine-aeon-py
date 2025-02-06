@@ -4,7 +4,7 @@ use pyo3::{
 };
 use reachability_config::ReachabilityConfig;
 
-// mod reachability;
+mod reachability;
 mod reachability_config;
 mod reachability_error;
 
