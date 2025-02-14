@@ -1664,6 +1664,10 @@ class Classification:
                                       count_multiplicity: bool = True) -> dict[Class, ColorSet]: ...
     @staticmethod
     def classify_dynamic_properties(graph: AsynchronousGraph, properties: dict[str, HctlFormula], assertions: Optional[list[HctlFormula]] = None, substitution: Optional[dict[str, ColoredVertexSet]] = None) -> dict[Class, ColorSet]: ...
+    @staticmethod
+    def classify_stable_phenotypes(ctx: SymbolicSpaceContext,
+                                   graph: AsynchronousGraph,
+                                   variables: Optional[list[VariableIdType]] = None) -> dict[Class, ColorSet]: ...
 
 class PerturbationSet:
     def __init__(self, ctx: SymbolicSpaceContext, bdd: Bdd):

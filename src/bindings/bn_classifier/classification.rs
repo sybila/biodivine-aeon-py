@@ -4,9 +4,11 @@ use std::collections::HashMap;
 use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
 use biodivine_hctl_model_checker::model_checking::model_check_multiple_extended_formulae_dirty;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::RawProjection;
 use biodivine_lib_param_bn::symbolic_async_graph::{
     GraphColors, SymbolicContext as RsSymbolicContext,
 };
+use biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces;
 use biodivine_pbn_control::control::PhenotypeOscillationType;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyList};
@@ -23,11 +25,13 @@ use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::extract_phenotype_type;
 use crate::internal::classification::load_inputs::load_classification_archive;
 use crate::internal::classification::write_output::build_classification_archive;
 use crate::internal::scc::{Behaviour, Classifier};
-use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{global_log_level, runtime_error, throw_runtime_error, throw_type_error, AsNative};
 
 /// An "algorithm object" that groups all methods related to the classification of various
 /// model properties.
@@ -729,6 +733,89 @@ impl Classification {
         }
 
         Ok(classification)
+    }
+
+    /// Identifies all *stable* phenotypes (i.e. unique maximal combinations of fixed variables)
+    /// that are admissible in a network. Then for each phenotype, computes the set of colors
+    /// that admit said phenotype, and returns this as a classification mapping.
+    ///
+    /// In this classification, each fixed variable is listed either using `+name` (if said
+    /// variable is fixed to `1`), or as `-name` (if said variable is fixed to `0`).
+    ///
+    /// If you only care about the values of certain network variables (for example outputs),
+    /// you can use `variables` to list them. The method will then only consider unique
+    /// combinations of these variables, instead of all variables. This can be used to
+    /// significantly reduce the number of phenotypes in large networks.
+    #[staticmethod]
+    #[pyo3(signature = (ctx, graph, variables = None))]
+    pub fn classify_stable_phenotypes(
+        py: Python,
+        ctx: &SymbolicSpaceContext,
+        graph: &AsynchronousGraph,
+        variables: Option<&Bound<'_, PyList>>,
+    ) -> PyResult<HashMap<Class, ColorSet>> {
+        // First, compute minimal trap spaces (these correspond to stable phenotypes)
+        let initial_spaces = ctx.as_native().mk_unit_colored_spaces(graph.as_native());
+        let trap_spaces = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
+            ctx.as_native(),
+            graph.as_native(),
+            &initial_spaces,
+            global_log_level(py)?,
+            &|| py.check_signals(),
+        )?;
+
+        let retained_network_variables = if let Some(variables) = variables {
+            let mut result = Vec::new();
+            for item in variables {
+                result.push(graph.resolve_network_variable(&item)?);
+            }
+            result
+        } else {
+            graph.as_native().variables().collect::<Vec<_>>()
+        };
+
+        let mut retained_symbolic_variables = Vec::new();
+        for var in &retained_network_variables {
+            let p_var = ctx.as_native().get_positive_variable(*var);
+            let n_var = ctx.as_native().get_negative_variable(*var);
+            retained_symbolic_variables.push(p_var);
+            retained_symbolic_variables.push(n_var);
+        }
+
+        let projection = RawProjection::new(retained_symbolic_variables, trap_spaces.as_bdd());
+
+        let bdd_ctx = ctx.as_native().bdd_variable_set();
+        let mut result = HashMap::new();
+        for x in projection {
+            let mut class_data = Vec::new();
+            for var in &retained_network_variables {
+                let var_name = graph.as_native().get_variable_name(*var);
+                let p_var = ctx.as_native().get_positive_variable(*var);
+                let n_var = ctx.as_native().get_negative_variable(*var);
+                let p_val = x
+                    .get_value(p_var)
+                    .expect("Retained variables must be present.");
+                let n_val = x
+                    .get_value(n_var)
+                    .expect("Retained variables must be present.");
+                match (p_val, n_val) {
+                    (true, false) => class_data.push(format!("+{}", var_name)),
+                    (false, true) => class_data.push(format!("-{}", var_name)),
+                    (false, false) | (true, true) => (),
+                }
+            }
+            let class = Class::new_native(class_data);
+
+            // Restrict trap spaces only to the relevant cases.
+            let restricted_traps = trap_spaces.as_bdd().and(&bdd_ctx.mk_conjunctive_clause(&x));
+            let restricted_traps = NetworkColoredSpaces::new(restricted_traps, ctx.as_native());
+
+            let relevant_colors = restricted_traps.colors();
+            let relevant_colors = ColorSet::mk_native(graph.symbolic_context(), relevant_colors);
+            result.insert(class, relevant_colors);
+        }
+
+        Ok(result)
     }
 }
 

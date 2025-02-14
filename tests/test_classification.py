@@ -199,6 +199,26 @@ def test_phenotype_classification():
                 phenotype_class = phenotype_class.ensure(phenotype)
         assert colors.is_subset(phenotype_mapping[phenotype_class])
 
+def test_stable_phenotype_classification():
+    path = "./tests/model-myeloid-3-unknown.aeon"
 
+    bn = BooleanNetwork.from_file(path)
+    ctx = SymbolicSpaceContext(bn)
+    stg = AsynchronousGraph(bn, ctx)
+
+    classes = Classification.classify_stable_phenotypes(ctx, stg, ['EKLF', 'Fli1', 'cJun', 'Gfi1'])
+    assert len(classes) == 11
+
+    # Compare a subset of representative classes:
+    assert classes[Class(['-Gfi1'])].cardinality() == 396
+    assert classes[Class(['+Gfi1', '-cJun'])].cardinality() == 396
+    assert classes[Class(['+Fli1', '+Gfi1', '-EKLF', '-cJun'])].cardinality() == 1510785
+
+    # Classified colors together should be the same as all colors:
+    all_colors = stg.mk_empty_colors()
+    for k, v in classes.items():
+        all_colors = all_colors.union(v)
+
+    assert all_colors == stg.mk_unit_colors()
 
 test_phenotype_classification()
