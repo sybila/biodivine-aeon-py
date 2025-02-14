@@ -1667,7 +1667,7 @@ class Classification:
     @staticmethod
     def classify_stable_phenotypes(ctx: SymbolicSpaceContext,
                                    graph: AsynchronousGraph,
-                                   variables: Optional[list[VariableIdType]] = None) -> dict[Class, ColorSet]: ...
+                                   variables: Optional[Sequence[VariableIdType]] = None) -> dict[Class, ColorSet]: ...
 
 class PerturbationSet:
     def __init__(self, ctx: SymbolicSpaceContext, bdd: Bdd):

@@ -1,6 +1,8 @@
 from biodivine_aeon import *
 import sys
 
+from typing import Optional, Sequence
+
 # Compute the stable phenotypes of a Boolean network, and list the number of interpretations (colors) that
 # allow said phenotype.
 #
@@ -24,6 +26,7 @@ import sys
 bn = BooleanNetwork.from_file(sys.argv[1])
 bn = bn.infer_valid_graph()
 
+variables: Optional[Sequence[str]]
 if len(sys.argv) > 2:
     variables = sys.argv[2:]
     print("Variable restriction:", variables)
