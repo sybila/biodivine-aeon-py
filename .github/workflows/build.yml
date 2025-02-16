@@ -38,7 +38,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux
           path: target/dist
 
   build-macos:
@@ -65,7 +65,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-macos
           path: target/dist
 
   build-windows:
@@ -90,7 +90,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-windows
           path: target/dist
 
   release:
@@ -98,9 +98,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build-macos, build-windows, build-linux ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: wheels
+          pattern: wheels-*
+          merge-multiple: 'true'
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
@@ -129,7 +130,7 @@ jobs:
           auto-activate-base: false
           show-channel-urls: true
       - name: Build and upload the conda packages
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.3.0
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.4.0
         with:
           python-version: ${{ matrix.python }}
           meta_yaml_dir: "conda"
