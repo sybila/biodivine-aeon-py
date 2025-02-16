@@ -192,7 +192,7 @@ jobs:
     needs: check
     # For reasons unbeknownst to mankind, llvm-cov segfaults on ubuntu runners
     # when combined with pytest. The solution for now is to use macOS.
-    runs-on: macos-12
+    runs-on: macos-latest
     env:
       # These are the env variables set by llvm-cov, but modified such that they actually work in GH actions.
       # In particular, we changed the paths from absolute to relative.
