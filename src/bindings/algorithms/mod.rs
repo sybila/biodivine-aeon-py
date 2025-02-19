@@ -10,5 +10,6 @@ mod reachability_error;
 
 pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<ReachabilityConfig>()?;
+    module.add_class::<reachability::Reachability>()?;
     Ok(())
 }
