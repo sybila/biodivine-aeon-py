@@ -4,7 +4,9 @@ use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 use crate::{
     bindings::{
         algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
-        lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet,
+        lib_param_bn::symbolic::{
+            asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
+        },
     },
     throw_runtime_error,
 };
@@ -25,31 +27,30 @@ pub struct Reachability {
     config: Py<ReachabilityConfig>,
 }
 
+impl Reachability {
+    /// Retrieve the internal [ReachabilityConfig] of this instance.
+    fn config(&self) -> &ReachabilityConfig {
+        self.config.get()
+    }
+}
+
 #[pymethods]
 impl Reachability {
-    #[new]
+    /// Create a new [Reachability] instance with the given [AsynchronousGraph]
+    /// and otherwise default configuration.
+    #[staticmethod]
+    pub fn with_graph(py: Python, graph: Py<AsynchronousGraph>) -> Self {
+        Reachability {
+            config: Py::new(py, ReachabilityConfig::with_graph(graph)).unwrap(),
+        }
+    }
+
     /// Create a new [Reachability] instance with the given [ReachabilityConfig].
-    pub fn new(config: Py<ReachabilityConfig>) -> Self {
+    #[staticmethod]
+    pub fn with_config(config: Py<ReachabilityConfig>) -> Self {
         Reachability { config }
     }
 
-    // /// Create a new [Reachability] instance with the given [AsynchronousGraph]
-    // /// and otherwise default configuration.
-    // pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
-    //     Reachability(ReachabilityConfig::new(graph))
-    // }
-
-    /// Create a new [Reachability] instance with the given [ReachabilityConfig].
-    // #[staticmethod]
-    // pub fn with_config(config: Py<ReachabilityConfig>) -> Self {
-    //     Reachability(config.get().clone())
-    // }
-    //
-    /// Retrieve the internal [ReachabilityConfig] of this instance.
-    // pub fn config(&self) -> &ReachabilityConfig {
-    //     &self.0
-    // }
-    //
     /// Compute the *greatest superset* of the given `initial` set that is forward closed.
     ///
     /// Intuitively, these are all the vertices that are reachable from the `initial` set.
@@ -62,9 +63,9 @@ impl Reachability {
 
         let mut result = initial.clone();
 
-        let variables = self.config.get().sorted_variables();
-        let graph = &self.config.get().graph.get();
-        let subgraph = &self.config.get().subgraph;
+        let variables = self.config().sorted_variables();
+        let graph = &self.config().graph.get();
+        let subgraph = &self.config().subgraph;
 
         if let Some(subgraph) = subgraph {
             if !initial.is_subset(subgraph) {
@@ -81,7 +82,7 @@ impl Reachability {
                 // result = is_cancelled!(self.config(), result)?;
 
                 let mut successors = graph.var_post_out_resolved(*var, &result);
-                if let Some(subgraph) = self.config.get().subgraph.as_ref() {
+                if let Some(subgraph) = self.config().subgraph.as_ref() {
                     successors = successors.intersect(subgraph)
                 }
 
@@ -92,10 +93,10 @@ impl Reachability {
                     result = result.union(&successors);
                     steps += 1;
 
-                    // TODO: here was approx_cardinality()
+                    // TODO: ohtenkay - here was approx_cardinality()
                     debug!(target: TARGET_FORWARD_SUPERSET, "Expanded result to {}[bdd_nodes:{}].", result.cardinality(), result.symbolic_size());
 
-                    if result.to_bdd(py).node_count() > self.config.get().bdd_size_limit {
+                    if result.to_bdd(py).node_count() > self.config().bdd_size_limit {
                         info!(target: TARGET_FORWARD_SUPERSET, "Exceeded BDD size limit.");
                         return throw_runtime_error(format!(
                             "{:?}",
@@ -103,7 +104,7 @@ impl Reachability {
                         ));
                     }
 
-                    if steps > self.config.get().steps_limit {
+                    if steps > self.config().steps_limit {
                         info!(target: TARGET_FORWARD_SUPERSET, "Exceeded step limit.");
                         return throw_runtime_error(format!(
                             "{:?}",
@@ -133,9 +134,9 @@ impl Reachability {
 
         let mut result = initial.clone();
 
-        let variables = self.config.get().sorted_variables();
-        let graph = &self.config.get().graph.get();
-        let subgraph = &self.config.get().subgraph;
+        let variables = self.config().sorted_variables();
+        let graph = &self.config().graph.get();
+        let subgraph = &self.config().subgraph;
 
         if let Some(subgraph) = subgraph {
             if !initial.is_subset(subgraph) {
@@ -152,7 +153,7 @@ impl Reachability {
                 // result = is_cancelled!(self.config(), result)?;
 
                 let mut predecessors = graph.var_pre_out_resolved(*var, &result);
-                if let Some(subgraph) = self.config.get().subgraph.as_ref() {
+                if let Some(subgraph) = self.config().subgraph.as_ref() {
                     predecessors = predecessors.intersect(subgraph)
                 }
 
@@ -166,7 +167,7 @@ impl Reachability {
                     // TODO: ohtenkay - here was approx_cardinality()
                     debug!(target: TARGET_BACKWARD_SUPERSET, "Expanded result to {}[bdd_nodes:{}].", result.cardinality(), result.symbolic_size());
 
-                    if result.to_bdd(py).node_count() > self.config.get().bdd_size_limit {
+                    if result.to_bdd(py).node_count() > self.config().bdd_size_limit {
                         info!(target: TARGET_BACKWARD_SUPERSET, "Exceeded BDD size limit.");
                         return throw_runtime_error(format!(
                             "{:?}",
@@ -174,7 +175,7 @@ impl Reachability {
                         ));
                     }
 
-                    if steps > self.config.get().steps_limit {
+                    if steps > self.config().steps_limit {
                         info!(target: TARGET_BACKWARD_SUPERSET, "Exceeded step limit.");
                         return throw_runtime_error(format!(
                             "{:?}",

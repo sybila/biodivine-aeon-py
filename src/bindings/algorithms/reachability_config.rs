@@ -57,8 +57,8 @@ pub struct ReachabilityConfig {
 
 #[pymethods]
 impl ReachabilityConfig {
-    #[new]
-    pub fn new(graph: Py<AsynchronousGraph>) -> Self {
+    #[staticmethod]
+    pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
         ReachabilityConfig {
             subgraph: None,
             variables: graph.get().network_variables().into_iter().collect(),
@@ -67,16 +67,6 @@ impl ReachabilityConfig {
             graph,
         }
     }
-
-    // TODO: ohtenkay - remove, only here for testing
-    pub fn get_graph(&self) -> &Py<AsynchronousGraph> {
-        &self.graph
-    }
-
-    // // TODO: ohtenkay - remove, only here for testing
-    // pub fn get_variables(&self) -> HashSet<VariableId> {
-    //     self.variables.clone()
-    // }
 
     pub fn sorted_variables(&self) -> Vec<VariableId> {
         let mut variables = Vec::from_iter(self.variables.clone());

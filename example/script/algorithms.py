@@ -2,21 +2,30 @@ import sys
 
 from biodivine_aeon import *
 
-print("Hello from algorithms.py")
-
 bn = BooleanNetwork.from_file(sys.argv[1])
 bn = bn.infer_valid_graph()
+print("Boolean network loaded.\n")
 
 stg = AsynchronousGraph(bn)
+config = ReachabilityConfig.with_graph(stg)
+print("Reachability config created.\n")
 
-config = ReachabilityConfig(stg)
-
-# print(config.get_graph())
-# print(config.sorted_variables())
-
-reach = Reachability(config)
 singleton = stg.mk_unit_colored_vertices().pick_singleton()
+print("Initial state:")
 print(singleton)
-print("running forward_closed_superset")
+print()
+
+reach = Reachability.with_config(config)
+print("Reachability running forward_closed_superset.")
 result = reach.forward_closed_superset(singleton)
+
+print("Result state:")
+print(result)
+print()
+
+reach_with_graph = Reachability.with_graph(stg)
+print("Reachability running backward_closed_superset.")
+result = reach_with_graph.backward_closed_superset(singleton)
+
+print("Result state:")
 print(result)

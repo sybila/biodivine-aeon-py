@@ -1,4 +1,5 @@
-from typing import Literal, Callable, Sequence, TypedDict, Iterator, overload, Mapping, Union, Optional
+from typing import (Callable, Iterator, Literal, Mapping, Optional, Sequence,
+                    TypedDict, Union, overload)
 
 LOG_NOTHING: Literal[0]
 LOG_ESSENTIAL: Literal[1]
@@ -1423,11 +1424,12 @@ class Percolation:
     @staticmethod
     def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
 
-class Reachability:
-    @staticmethod
-    def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-    @staticmethod
-    def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+# TODO: ohtenkay - delete
+# class Reachability:
+#     @staticmethod
+#     def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+#     @staticmethod
+#     def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
 
 class RegulationConstraint:
     @staticmethod
@@ -1846,7 +1848,14 @@ class NamedRegulation(TypedDict):
 Regulation = Union[IdRegulation, NamedRegulation]
 
 class ReachabilityConfig:
-    def __init__(self,
-                 graph: AsynchronousGraph,
-                 ) -> None:
-        ...
+    @staticmethod
+    def with_graph(graph: AsynchronousGraph) -> ReachabilityConfig: ...
+    def sorted_variables(self) -> list[VariableId]: ...
+
+class Reachability:
+    @staticmethod
+    def with_graph(graph: AsynchronousGraph) -> Reachability: ...
+    @staticmethod
+    def with_config(config: ReachabilityConfig) -> Reachability: ...
+    def forward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    def backward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...

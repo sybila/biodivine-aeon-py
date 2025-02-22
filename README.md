@@ -4,7 +4,7 @@
 > continues below.
 
 To test the changes made so far, run
-`python example/script/algorithms.py edition-2022-aeon/001.aeon`.
+`python example/script/algorithms.py edition-2022-aeon/007.aeon`.
 
 # Biodivine/AEON.py
 
