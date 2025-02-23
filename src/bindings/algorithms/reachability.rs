@@ -1,14 +1,11 @@
 use log::{debug, info, trace};
 use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 
-use crate::{
-    bindings::{
-        algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
-        lib_param_bn::symbolic::{
-            asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
-        },
+use crate::bindings::{
+    algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
+    lib_param_bn::symbolic::{
+        asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
     },
-    throw_runtime_error,
 };
 
 pub const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
@@ -70,7 +67,7 @@ impl Reachability {
         if let Some(subgraph) = subgraph {
             if !initial.is_subset(subgraph) {
                 info!(target: TARGET_FORWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
-                return throw_runtime_error(format!("{:?}", ReachabilityError::InvalidSubgraph));
+                return Err(ReachabilityError::InvalidSubgraph.into());
             }
         }
 
@@ -98,18 +95,12 @@ impl Reachability {
 
                     if result.to_bdd(py).node_count() > self.config().bdd_size_limit {
                         info!(target: TARGET_FORWARD_SUPERSET, "Exceeded BDD size limit.");
-                        return throw_runtime_error(format!(
-                            "{:?}",
-                            ReachabilityError::BddSizeLimitExceeded(result)
-                        ));
+                        return Err(ReachabilityError::BddSizeLimitExceeded(result).into());
                     }
 
                     if steps > self.config().steps_limit {
                         info!(target: TARGET_FORWARD_SUPERSET, "Exceeded step limit.");
-                        return throw_runtime_error(format!(
-                            "{:?}",
-                            ReachabilityError::StepsLimitExceeded(result)
-                        ));
+                        return Err(ReachabilityError::StepsLimitExceeded(result).into());
                     }
 
                     // Restart the loop.
@@ -141,7 +132,7 @@ impl Reachability {
         if let Some(subgraph) = subgraph {
             if !initial.is_subset(subgraph) {
                 info!(target: TARGET_BACKWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
-                return throw_runtime_error(format!("{:?}", ReachabilityError::InvalidSubgraph));
+                return Err(ReachabilityError::InvalidSubgraph.into());
             }
         }
 
@@ -169,18 +160,12 @@ impl Reachability {
 
                     if result.to_bdd(py).node_count() > self.config().bdd_size_limit {
                         info!(target: TARGET_BACKWARD_SUPERSET, "Exceeded BDD size limit.");
-                        return throw_runtime_error(format!(
-                            "{:?}",
-                            ReachabilityError::BddSizeLimitExceeded(result)
-                        ));
+                        return Err(ReachabilityError::BddSizeLimitExceeded(result).into());
                     }
 
                     if steps > self.config().steps_limit {
                         info!(target: TARGET_BACKWARD_SUPERSET, "Exceeded step limit.");
-                        return throw_runtime_error(format!(
-                            "{:?}",
-                            ReachabilityError::StepsLimitExceeded(result)
-                        ));
+                        return Err(ReachabilityError::StepsLimitExceeded(result).into());
                     }
 
                     // Restart the loop.

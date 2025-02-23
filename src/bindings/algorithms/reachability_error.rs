@@ -1,5 +1,13 @@
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Formatter, Result};
 
+use pyo3::{
+    create_exception,
+    exceptions::{
+        asyncio::{CancelledError, InvalidStateError},
+        PyException,
+    },
+    PyErr,
+};
 use thiserror::Error;
 
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
@@ -19,7 +27,7 @@ pub enum ReachabilityError {
 
 /// The default implementation will print the whole BDD, which can be quite large.
 impl Debug for ReachabilityError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
             ReachabilityError::Cancelled(x) => {
                 write!(f, "Cancelled(partial_result={})", x.cardinality())
@@ -40,3 +48,31 @@ impl Debug for ReachabilityError {
         }
     }
 }
+
+impl From<ReachabilityError> for PyErr {
+    fn from(err: ReachabilityError) -> Self {
+        match err {
+            ReachabilityError::Cancelled(x) => PyErr::new::<CancelledError, _>(format!(
+                "Cancelled(partial_result={})",
+                x.cardinality()
+            )),
+            ReachabilityError::StepsLimitExceeded(x) => PyErr::new::<StepsLimitExceededError, _>(
+                format!("StepsLimitExceeded(partial_result={})", x.cardinality()),
+            ),
+            ReachabilityError::BddSizeLimitExceeded(x) => {
+                PyErr::new::<BddSizeLimitExceededError, _>(format!(
+                    "BddSizeLimitExceeded(partial_result={})",
+                    x.cardinality()
+                ))
+            }
+            ReachabilityError::InvalidSubgraph => {
+                PyErr::new::<InvalidStateError, _>("InvalidSubgraph")
+            }
+        }
+    }
+}
+
+// TODO: ohtenkay - think about the module name, maybe make it more specific,
+// TODO: ohtenkay - add fourth argument, documentation
+create_exception!(bindings, BddSizeLimitExceededError, PyException);
+create_exception!(bindings, StepsLimitExceededError, PyException);
