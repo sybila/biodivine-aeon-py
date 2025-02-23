@@ -10,13 +10,17 @@ use pyo3::{
 };
 use thiserror::Error;
 
-use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::{
+    algorithms::cancellation_error::CancellationError,
+    lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet,
+};
 
 /// An error returned by a [Reachability] procedure.
 #[derive(Error)]
 pub enum ReachabilityError {
-    #[error("operation cancelled")]
-    Cancelled(ColoredVertexSet),
+    // TODO: ohtenkay - chech if this is needed
+    // #[error("operation cancelled")]
+    // Cancelled(ColoredVertexSet),
     #[error("steps limit exceeded")]
     StepsLimitExceeded(ColoredVertexSet),
     #[error("BDD size limit exceeded")]
@@ -29,9 +33,9 @@ pub enum ReachabilityError {
 impl Debug for ReachabilityError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            ReachabilityError::Cancelled(x) => {
-                write!(f, "Cancelled(partial_result={})", x.cardinality())
-            }
+            // ReachabilityError::Cancelled(x) => {
+            //     write!(f, "Cancelled(partial_result={})", x.cardinality())
+            // }
             ReachabilityError::StepsLimitExceeded(x) => {
                 write!(f, "StepsLimitExceeded(partial_result={})", x.cardinality())
             }
@@ -52,10 +56,10 @@ impl Debug for ReachabilityError {
 impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {
         match err {
-            ReachabilityError::Cancelled(x) => PyErr::new::<CancelledError, _>(format!(
-                "Cancelled(partial_result={})",
-                x.cardinality()
-            )),
+            // ReachabilityError::Cancelled(x) => PyErr::new::<CancelledError, _>(format!(
+            //     "Cancelled(partial_result={})",
+            //     x.cardinality()
+            // )),
             ReachabilityError::StepsLimitExceeded(x) => PyErr::new::<StepsLimitExceededError, _>(
                 format!("StepsLimitExceeded(partial_result={})", x.cardinality()),
             ),
@@ -76,3 +80,12 @@ impl From<ReachabilityError> for PyErr {
 // TODO: ohtenkay - add fourth argument, documentation
 create_exception!(bindings, BddSizeLimitExceededError, PyException);
 create_exception!(bindings, StepsLimitExceededError, PyException);
+
+impl From<CancellationError<ColoredVertexSet>> for PyErr {
+    fn from(value: CancellationError<ColoredVertexSet>) -> Self {
+        PyErr::new::<CancelledError, _>(format!(
+            "Cancelled(partial_result={})",
+            value.partial_data().cardinality()
+        ))
+    }
+}

@@ -2,13 +2,17 @@ use std::collections::HashSet;
 
 use pyo3::{pyclass, pymethods, Py};
 
-use crate::bindings::lib_param_bn::{
-    symbolic::{asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet},
-    variable_id::VariableId,
+use crate::bindings::{
+    algorithms::cancellation_handler::{CancelTokenNever, CancellationHandler},
+    lib_param_bn::{
+        symbolic::{asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet},
+        variable_id::VariableId,
+    },
 };
 
 /// A configuration struct for the [Reachability] algorithms.
 #[pyclass(module = "biodivine_aeon", frozen)]
+#[derive(Clone)]
 pub struct ReachabilityConfig {
     /// The symbolic graph that will be used to compute the successors and predecessors of
     /// individual states.
@@ -35,10 +39,11 @@ pub struct ReachabilityConfig {
     /// Default: `graph.network_variables()`.
     pub variables: HashSet<VariableId>,
 
-    // /// A `CancellationHandler` that can be used to stop the algorithm externally.
-    // ///
-    // /// Default: [CancelTokenNever].
-    // pub cancellation: Box<dyn CancellationHandler>,
+    /// A `CancellationHandler` that can be used to stop the algorithm externally.
+    ///
+    /// Default: [CancelTokenNever].
+    pub cancellation: Box<dyn CancellationHandler>,
+
     /// The maximum BDD size of the reachable set.
     ///
     /// Note that the algorithm can use other auxiliary BDDs that do not
@@ -62,6 +67,8 @@ impl ReachabilityConfig {
         ReachabilityConfig {
             subgraph: None,
             variables: graph.get().network_variables().into_iter().collect(),
+            // TODO: ohtenkay - make this configurable from Python
+            cancellation: Box::new(CancelTokenNever),
             bdd_size_limit: usize::MAX,
             steps_limit: usize::MAX,
             graph,
@@ -72,5 +79,11 @@ impl ReachabilityConfig {
         let mut variables = Vec::from_iter(self.variables.clone());
         variables.sort();
         variables
+    }
+}
+
+impl CancellationHandler for ReachabilityConfig {
+    fn is_cancelled(&self) -> bool {
+        self.cancellation.is_cancelled()
     }
 }

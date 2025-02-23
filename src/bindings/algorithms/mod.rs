@@ -5,6 +5,9 @@ use pyo3::{
 use reachability::Reachability;
 use reachability_config::ReachabilityConfig;
 
+mod cancellation;
+mod cancellation_error;
+mod cancellation_handler;
 mod reachability;
 mod reachability_config;
 mod reachability_error;

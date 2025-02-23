@@ -34,8 +34,11 @@ either = "1.13.0"
 # this to change because it might break our release builds.
 z3="^0.12.1"
 z3-sys = "^0.8.1"
+
+# TODO: ohtenkay - added dependencies, consider removing
 thiserror = "2.0.11"
 log = "0.4.22"
+dyn-clone = "1.0.18"
 
 [build-dependencies]
 pyo3-build-config = "0.23.2"

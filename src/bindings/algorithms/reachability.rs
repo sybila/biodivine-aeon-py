@@ -1,11 +1,14 @@
 use log::{debug, info, trace};
 use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 
-use crate::bindings::{
-    algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
-    lib_param_bn::symbolic::{
-        asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
+use crate::{
+    bindings::{
+        algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
+        lib_param_bn::symbolic::{
+            asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
+        },
     },
+    is_cancelled,
 };
 
 pub const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
@@ -75,8 +78,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                // TODO: ohtenkay
-                // result = is_cancelled!(self.config(), result)?;
+                result = is_cancelled!(self.config(), result)?;
 
                 let mut successors = graph.var_post_out_resolved(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
@@ -140,8 +142,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                // TODO: ohtenkay
-                // result = is_cancelled!(self.config(), result)?;
+                result = is_cancelled!(self.config(), result)?;
 
                 let mut predecessors = graph.var_pre_out_resolved(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
