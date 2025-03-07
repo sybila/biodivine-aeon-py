@@ -5,9 +5,12 @@ use biodivine_lib_param_bn::{
 use pyo3::{pyclass, pymethods, Py};
 use std::collections::HashSet;
 
-use crate::bindings::{
-    algorithms::cancellation_handler::{CancelTokenNever, CancellationHandler},
-    lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph,
+use crate::{
+    bindings::{
+        algorithms::cancellation_handler::{CancelTokenNever, CancellationHandler},
+        lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph,
+    },
+    AsNative,
 };
 
 /// A configuration struct for the [Reachability] algorithms.
@@ -90,5 +93,14 @@ impl ReachabilityConfig {
 impl CancellationHandler for ReachabilityConfig {
     fn is_cancelled(&self) -> bool {
         self.cancellation.is_cancelled()
+    }
+}
+
+// TODO: ohtenkay - make this optional with a feature flag
+#[pymethods]
+impl ReachabilityConfig {
+    #[staticmethod]
+    pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
+        ReachabilityConfig::with_graph(graph.get().as_native().clone())
     }
 }

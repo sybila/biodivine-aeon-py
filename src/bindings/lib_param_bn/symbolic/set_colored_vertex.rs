@@ -375,3 +375,10 @@ impl _ColorVertexModelIterator {
         self.__next__()
     }
 }
+
+// TODO: ohtenkay - consult
+impl ColoredVertexSet {
+    pub fn ctx(&self) -> Py<SymbolicContext> {
+        self.ctx.clone()
+    }
+}

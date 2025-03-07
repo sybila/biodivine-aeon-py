@@ -3,11 +3,16 @@ use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
 };
 use log::{debug, info, trace};
-use pyo3::pyclass;
+use pyo3::{pyclass, pymethods, Py, PyResult};
 
 use crate::{
-    bindings::algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
-    is_cancelled,
+    bindings::{
+        algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
+        lib_param_bn::symbolic::{
+            asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
+        },
+    },
+    is_cancelled, AsNative,
 };
 
 pub const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
@@ -299,18 +304,59 @@ impl Reachability {
     }
 }
 
-// #[pymethods]
-// impl Reachability {
-//     /// Create a new [Reachability] instance with the given [AsynchronousGraph]
-//     /// and otherwise default configuration.
-//     #[staticmethod]
-//     pub fn with_graph_py(py: Python, graph: Py<AsynchronousGraph>) -> Self {
-//         Reachability {
-//             config: Py::new(py, ReachabilityConfig::with_graph(graph)).unwrap(),
-//             config_rs: None,
-//         }
-//     }
-//
+// TODO: ohtenkay - make this optional with a feature flag
+#[pymethods]
+impl Reachability {
+    /// Create a new [Reachability] instance with the given [AsynchronousGraph]
+    /// and otherwise default configuration.
+    #[staticmethod]
+    pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
+        Reachability {
+            config: ReachabilityConfig::with_graph_py(graph),
+        }
+    }
+
+    // TODO: ohtenkay - docs
+    pub fn forward_closed_superset_py(
+        &self,
+        initial: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let result_set = self.forward_closed_superset(initial.as_native())?;
+        // TODO: ohtenkay - consult
+        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+    }
+
+    // TODO: ohtenkay - docs
+    pub fn backward_closed_superset_py(
+        &self,
+        initial: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let result_set = self.backward_closed_superset(initial.as_native())?;
+        // TODO: ohtenkay - consult
+        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+    }
+
+    // TODO: ohtenkay - docs
+    pub fn forward_closed_subset_py(
+        &self,
+        initial: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let result_set = self.forward_closed_subset(initial.as_native())?;
+        // TODO: ohtenkay - consult
+        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+    }
+
+    // TODO: ohtenkay - docs
+    pub fn backward_closed_subset_py(
+        &self,
+        initial: &ColoredVertexSet,
+    ) -> PyResult<ColoredVertexSet> {
+        let result_set = self.backward_closed_subset(initial.as_native())?;
+        // TODO: ohtenkay - consult
+        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+    }
+}
+
 //     /// Create a new [Reachability] instance with the given [ReachabilityConfig].
 //     #[staticmethod]
 //     pub fn with_config_py(config: Py<ReachabilityConfig>) -> Self {
@@ -319,132 +365,3 @@ impl Reachability {
 //             config_rs: None,
 //         }
 //     }
-//
-//     /// Compute the *greatest superset* of the given `initial` set that is forward closed.
-//     ///
-//     /// Intuitively, these are all the vertices that are reachable from the `initial` set.
-//     pub fn forward_closed_superset_py(
-//         &self,
-//         py: Python,
-//         initial: &ColoredVertexSet,
-//     ) -> PyResult<ColoredVertexSet> {
-//         info!(target: TARGET_FORWARD_SUPERSET, "Started with {} initial states.", initial.cardinality());
-//
-//         let mut result = initial.clone();
-//
-//         let variables = self.config().sorted_variables();
-//         let graph = &self.config().graph.get();
-//         let subgraph = &self.config().subgraph;
-//
-//         if let Some(subgraph) = subgraph {
-//             if !initial.is_subset(subgraph) {
-//                 info!(target: TARGET_FORWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
-//                 return Err(ReachabilityError::InvalidSubgraph.into());
-//             }
-//         }
-//
-//         let mut steps = 0usize;
-//
-//         'reach: loop {
-//             for var in variables.iter().rev() {
-//                 result = is_cancelled!(self.config(), result)?;
-//
-//                 let mut successors = graph.var_post_out_resolved(*var, &result);
-//                 if let Some(subgraph) = self.config().subgraph.as_ref() {
-//                     successors = successors.intersect(subgraph)
-//                 }
-//
-//                 // TODO: ohtenkay - here was approx_cardinality()
-//                 trace!(target: TARGET_FORWARD_SUPERSET, "Found {} successors for {:?}", successors.cardinality(), var);
-//
-//                 if !successors.is_empty() {
-//                     result = result.union(&successors);
-//                     steps += 1;
-//
-//                     // TODO: ohtenkay - here was approx_cardinality()
-//                     debug!(target: TARGET_FORWARD_SUPERSET, "Expanded result to {}[bdd_nodes:{}].", result.cardinality(), result.symbolic_size());
-//
-//                     if result.to_bdd(py).node_count() > self.config().bdd_size_limit {
-//                         info!(target: TARGET_FORWARD_SUPERSET, "Exceeded BDD size limit.");
-//                         return Err(ReachabilityError::BddSizeLimitExceeded(result).into());
-//                     }
-//
-//                     if steps > self.config().steps_limit {
-//                         info!(target: TARGET_FORWARD_SUPERSET, "Exceeded step limit.");
-//                         return Err(ReachabilityError::StepsLimitExceeded(result).into());
-//                     }
-//
-//                     // Restart the loop.
-//                     continue 'reach;
-//                 }
-//             }
-//
-//             info!(target: TARGET_FORWARD_SUPERSET, "Done. Result: {} states.", result.cardinality());
-//             return Ok(result);
-//         }
-//     }
-//
-//     /// Compute the *greatest superset* of the given `initial` set that is backward closed.
-//     ///
-//     /// Intuitively, these are all the vertices that can reach a vertex in the `initial` set.
-//     pub fn backward_closed_superset_py(
-//         &self,
-//         py: Python,
-//         initial: &ColoredVertexSet,
-//     ) -> PyResult<ColoredVertexSet> {
-//         info!(target: TARGET_BACKWARD_SUPERSET, "Started with {} initial states.", initial.cardinality());
-//
-//         let mut result = initial.clone();
-//
-//         let variables = self.config().sorted_variables();
-//         let graph = &self.config().graph.get();
-//         let subgraph = &self.config().subgraph;
-//
-//         if let Some(subgraph) = subgraph {
-//             if !initial.is_subset(subgraph) {
-//                 info!(target: TARGET_BACKWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
-//                 return Err(ReachabilityError::InvalidSubgraph.into());
-//             }
-//         }
-//
-//         let mut steps = 0usize;
-//
-//         'reach: loop {
-//             for var in variables.iter().rev() {
-//                 result = is_cancelled!(self.config(), result)?;
-//
-//                 let mut predecessors = graph.var_pre_out_resolved(*var, &result);
-//                 if let Some(subgraph) = self.config().subgraph.as_ref() {
-//                     predecessors = predecessors.intersect(subgraph)
-//                 }
-//
-//                 // TODO: ohtenkay - here was approx_cardinality()
-//                 trace!(target: TARGET_BACKWARD_SUPERSET, "Found {} predecessors for {:?}", predecessors.cardinality(), var);
-//
-//                 if !predecessors.is_empty() {
-//                     result = result.union(&predecessors);
-//                     steps += 1;
-//
-//                     // TODO: ohtenkay - here was approx_cardinality()
-//                     debug!(target: TARGET_BACKWARD_SUPERSET, "Expanded result to {}[bdd_nodes:{}].", result.cardinality(), result.symbolic_size());
-//
-//                     if result.to_bdd(py).node_count() > self.config().bdd_size_limit {
-//                         info!(target: TARGET_BACKWARD_SUPERSET, "Exceeded BDD size limit.");
-//                         return Err(ReachabilityError::BddSizeLimitExceeded(result).into());
-//                     }
-//
-//                     if steps > self.config().steps_limit {
-//                         info!(target: TARGET_BACKWARD_SUPERSET, "Exceeded step limit.");
-//                         return Err(ReachabilityError::StepsLimitExceeded(result).into());
-//                     }
-//
-//                     // Restart the loop.
-//                     continue 'reach;
-//                 }
-//             }
-//
-//             info!(target: TARGET_BACKWARD_SUPERSET, "Done. Result: {} states.", result.cardinality());
-//             return Ok(result);
-//         }
-//     }
-// }
