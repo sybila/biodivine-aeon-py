@@ -15,13 +15,13 @@ print("Initial state:")
 print(singleton)
 print()
 
-reach = Reachability.with_config(config)
-print("Reachability running forward_closed_superset.")
-result = reach.forward_closed_superset(singleton)
-
-print("Result state:")
-print(result)
-print()
+# reach = Reachability.with_config(config)
+# print("Reachability running forward_closed_superset.")
+# result = reach.forward_closed_superset(singleton)
+#
+# print("Result state:")
+# print(result)
+# print()
 
 reach_with_graph = Reachability.with_graph(stg)
 print("Reachability running backward_closed_superset.")

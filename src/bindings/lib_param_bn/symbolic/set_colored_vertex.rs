@@ -31,7 +31,7 @@ use std::ops::Not;
 /// valuation of network variables.
 ///
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ColoredVertexSet {
     ctx: Py<SymbolicContext>,
     native: GraphColoredVertices,

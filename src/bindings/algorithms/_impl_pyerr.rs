@@ -38,7 +38,7 @@ impl From<ReachabilityError> for PyErr {
 
 // TODO: ohtenkay - think about the module name, maybe make it more specific,
 // TODO: ohtenkay - add fourth argument, documentation
-// TODO: ohtenkay - considet making all the reachability errors with this macro
+// TODO: ohtenkay - considet creating all the reachability errors with this macro
 create_exception!(bindings, BddSizeLimitExceededError, PyException);
 create_exception!(bindings, StepsLimitExceededError, PyException);
 

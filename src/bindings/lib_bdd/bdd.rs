@@ -259,8 +259,7 @@ impl Bdd {
     }
 
     /// Return the number of graph nodes in this `Bdd`.
-    // TODO: ohtenkay - made public, check if that is necessary
-    pub fn node_count(&self) -> usize {
+    fn node_count(&self) -> usize {
         self.as_native().size()
     }
 

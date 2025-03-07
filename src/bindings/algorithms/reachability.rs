@@ -27,27 +27,23 @@ pub const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 /// which restricts the set of relevant vertices, as well as a BDD size limit and steps limit.
 /// See [ReachabilityConfig] and [ReachabilityError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct Reachability {
-    config: ReachabilityConfig,
-}
+pub struct Reachability(ReachabilityConfig);
 
 impl Reachability {
     /// Create a new [Reachability] instance with the given [SymbolicAsyncGraph]
     /// and otherwise default configuration.
     pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
-        Reachability {
-            config: ReachabilityConfig::with_graph(graph),
-        }
+        Reachability(ReachabilityConfig::with_graph(graph))
     }
 
     /// Create a new [Reachability] instance with the given [ReachabilityConfig].
     pub fn with_config(config: ReachabilityConfig) -> Self {
-        Reachability { config }
+        Reachability(config)
     }
 
     /// Retrieve the internal [ReachabilityConfig] of this instance.
     pub fn config(&self) -> &ReachabilityConfig {
-        &self.config
+        &self.0
     }
 
     /// Compute the *greatest superset* of the given `initial` set that is forward closed.
@@ -310,13 +306,19 @@ impl Reachability {
     /// Create a new [Reachability] instance with the given [AsynchronousGraph]
     /// and otherwise default configuration.
     #[staticmethod]
+    #[pyo3(name = "with_graph")]
     pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
-        Reachability {
-            config: ReachabilityConfig::with_graph_py(graph),
-        }
+        Reachability(ReachabilityConfig::with_graph_py(graph))
     }
 
+    // /// Create a new [Reachability] instance with the given [ReachabilityConfig].
+    // #[staticmethod]
+    // pub fn with_config_py(config: Py<ReachabilityConfig>) -> Self {
+    //     Reachability(config)
+    // }
+
     // TODO: ohtenkay - docs
+    #[pyo3(name = "forward_closed_superset")]
     pub fn forward_closed_superset_py(
         &self,
         initial: &ColoredVertexSet,
@@ -327,6 +329,7 @@ impl Reachability {
     }
 
     // TODO: ohtenkay - docs
+    #[pyo3(name = "backward_closed_superset")]
     pub fn backward_closed_superset_py(
         &self,
         initial: &ColoredVertexSet,
@@ -337,6 +340,7 @@ impl Reachability {
     }
 
     // TODO: ohtenkay - docs
+    #[pyo3(name = "forward_closed_subset")]
     pub fn forward_closed_subset_py(
         &self,
         initial: &ColoredVertexSet,
@@ -347,6 +351,7 @@ impl Reachability {
     }
 
     // TODO: ohtenkay - docs
+    #[pyo3(name = "backward_closed_subset")]
     pub fn backward_closed_subset_py(
         &self,
         initial: &ColoredVertexSet,
@@ -356,12 +361,3 @@ impl Reachability {
         Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
     }
 }
-
-//     /// Create a new [Reachability] instance with the given [ReachabilityConfig].
-//     #[staticmethod]
-//     pub fn with_config_py(config: Py<ReachabilityConfig>) -> Self {
-//         Reachability {
-//             config,
-//             config_rs: None,
-//         }
-//     }

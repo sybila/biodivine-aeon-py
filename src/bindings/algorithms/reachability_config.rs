@@ -76,6 +76,8 @@ impl ReachabilityConfig {
         }
     }
 
+    // TODO: ohtenkay - create and set from python
+
     /// Return the variables sorted in ascending order.
     pub fn sorted_variables(&self) -> Vec<VariableId> {
         let mut variables = Vec::from_iter(self.variables.clone());
@@ -100,6 +102,7 @@ impl CancellationHandler for ReachabilityConfig {
 #[pymethods]
 impl ReachabilityConfig {
     #[staticmethod]
+    #[pyo3(name = "with_graph")]
     pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
         ReachabilityConfig::with_graph(graph.get().as_native().clone())
     }
