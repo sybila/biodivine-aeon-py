@@ -1,13 +1,13 @@
-use biodivine_lib_param_bn::{
-    symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
-    VariableId,
-};
-use pyo3::{pyclass, pymethods, Py};
 use std::collections::HashSet;
+
+use pyo3::{pyclass, pymethods, Py};
 
 use crate::bindings::{
     algorithms::cancellation_handler::{CancelTokenNever, CancellationHandler},
-    lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph,
+    lib_param_bn::{
+        symbolic::{asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet},
+        variable_id::VariableId,
+    },
 };
 
 /// A configuration struct for the [Reachability] algorithms.
@@ -16,7 +16,7 @@ use crate::bindings::{
 pub struct ReachabilityConfig {
     /// The symbolic graph that will be used to compute the successors and predecessors of
     /// individual states.
-    pub graph: SymbolicAsyncGraph,
+    pub graph: Py<AsynchronousGraph>,
 
     /// Restricts the reachability operation to the given set of vertices. This also includes
     /// edges! For example, if a vertex `x` only has outgoing edges into vertices outside the
@@ -25,7 +25,7 @@ pub struct ReachabilityConfig {
     /// The initial set must be a subset of the subgraph vertices.
     ///
     /// Default: `None`.
-    pub subgraph: Option<GraphColoredVertices>,
+    pub subgraph: Option<ColoredVertexSet>,
 
     /// Specifies the set of variables that can be updated by the reachability process.
     /// Remaining variables stay constant, because they are never updated.
@@ -60,12 +60,14 @@ pub struct ReachabilityConfig {
     pub steps_limit: usize,
 }
 
+#[pymethods]
 impl ReachabilityConfig {
-    /// Create a new "default" [ReachabilityConfig] for the given [SymbolicAsyncGraph].
-    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
+    #[staticmethod]
+    pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
         ReachabilityConfig {
-            variables: HashSet::from_iter(graph.variables()),
             subgraph: None,
+            variables: graph.get().network_variables().into_iter().collect(),
+            // TODO: ohtenkay - make this configurable from Python
             cancellation: Box::new(CancelTokenNever),
             bdd_size_limit: usize::MAX,
             steps_limit: usize::MAX,
@@ -73,17 +75,10 @@ impl ReachabilityConfig {
         }
     }
 
-    /// Return the variables sorted in ascending order.
     pub fn sorted_variables(&self) -> Vec<VariableId> {
         let mut variables = Vec::from_iter(self.variables.clone());
         variables.sort();
         variables
-    }
-
-    /// Update the `cancellation` property, automatically wrapping the [CancellationHandler]
-    /// in a `Box`.
-    pub fn set_cancellation<C: CancellationHandler + 'static>(&mut self, cancellation: C) {
-        self.cancellation = Box::new(cancellation);
     }
 }
 
