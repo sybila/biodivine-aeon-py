@@ -1843,6 +1843,7 @@ Regulation = Union[IdRegulation, NamedRegulation]
 class ReachabilityConfig:
     @staticmethod
     def with_graph(graph: AsynchronousGraph) -> ReachabilityConfig: ...
+    def cancel_after(self, duration_in_secs: int) -> ReachabilityConfig: ...
 
 class Reachability:
     @staticmethod

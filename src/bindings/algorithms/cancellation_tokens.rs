@@ -108,4 +108,10 @@ impl CancellationHandler for CancelTokenPython {
     }
 }
 
+impl CancelTokenPython {
+    pub fn with_inner(handler: Box<dyn CancellationHandler>) -> Self {
+        CancelTokenPython(handler)
+    }
+}
+
 /* Python - End */

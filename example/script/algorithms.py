@@ -7,7 +7,7 @@ bn = bn.infer_valid_graph()
 print("Boolean network loaded.\n")
 
 stg = AsynchronousGraph(bn)
-config = ReachabilityConfig.with_graph(stg)
+config = ReachabilityConfig.with_graph(stg).cancel_after(10)
 print("Reachability config created.\n")
 
 singleton = stg.mk_unit_colored_vertices().pick_singleton()
@@ -18,6 +18,13 @@ print()
 reach = Reachability.with_config(config)
 print("Reachability running forward_closed_superset.")
 result = reach.forward_closed_superset(singleton)
+
+print("Result state:")
+print(result)
+print()
+
+print("Reachability running backward_closed_superset.")
+result = reach.backward_closed_superset(singleton)
 
 print("Result state:")
 print(result)

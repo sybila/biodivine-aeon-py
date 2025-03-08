@@ -3,12 +3,13 @@ use biodivine_lib_param_bn::{
     VariableId,
 };
 use pyo3::{pyclass, pymethods, Py};
-use std::collections::HashSet;
+use std::{collections::HashSet, time::Duration};
 
 use crate::{
     bindings::{
         algorithms::{
-            cancellation_handler::CancellationHandler, cancellation_tokens::CancelTokenPython,
+            cancellation_handler::CancellationHandler,
+            cancellation_tokens::{CancelTokenPython, CancelTokenTimer},
         },
         lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph,
     },
@@ -91,7 +92,7 @@ impl ReachabilityConfig {
         self.cancellation = Box::new(cancellation);
     }
 
-    // TODO: ohtenkay - discuss API design and add documentation
+    // TODO: ohtenkay - discuss API design (with_, builder pattern, new() funciton) and add documentation
     pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
         self.cancellation = Box::new(cancellation);
         self
@@ -112,5 +113,17 @@ impl ReachabilityConfig {
     pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
         ReachabilityConfig::with_graph(graph.get().as_native().clone())
             .with_cancellation(CancelTokenPython::default())
+    }
+
+    // TODO: ohtenkay - consult, frozen does not allow mutability, mbe pyref? also, downcast - setter
+    // wont work, im not sure about interior mutability
+    // TODO: ohtenkay - consult abi-py37, disables PyDelta
+    #[pyo3(name = "cancel_after")]
+    pub fn cancel_after_py(&self, duration_in_secs: u64) -> Self {
+        let mut new = self.clone();
+        new.cancellation = Box::new(CancelTokenPython::with_inner(Box::new(
+            CancelTokenTimer::start(Duration::from_secs(duration_in_secs)),
+        )));
+        new
     }
 }
