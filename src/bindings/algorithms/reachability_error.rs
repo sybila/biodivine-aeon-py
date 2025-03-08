@@ -51,3 +51,5 @@ impl From<CancellationError<GraphColoredVertices>> for ReachabilityError {
         ReachabilityError::Cancelled(value.into_partial_data())
     }
 }
+
+// TODO: ohtenkay - print also cause of cancellation

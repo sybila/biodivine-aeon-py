@@ -3,6 +3,8 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSe
 use crate::{global_log_level, AsNative};
 use pyo3::prelude::*;
 
+// TODO: ohtenkay - delete this file
+
 /// An "algorithm object" that facilitates reachability procedures, i.e. iterative computation
 /// of successors (or predecessors) of a particular symbolic set.
 #[pyclass(module = "biodivine_aeon", frozen)]

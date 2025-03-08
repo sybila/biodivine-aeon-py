@@ -41,12 +41,3 @@ impl From<ReachabilityError> for PyErr {
 // TODO: ohtenkay - considet creating all the reachability errors with this macro
 create_exception!(bindings, BddSizeLimitExceededError, PyException);
 create_exception!(bindings, StepsLimitExceededError, PyException);
-
-impl From<CancellationError<GraphColoredVertices>> for PyErr {
-    fn from(value: CancellationError<GraphColoredVertices>) -> Self {
-        PyErr::new::<CancelledError, _>(format!(
-            "Cancelled(partial_result={})",
-            value.partial_data().exact_cardinality()
-        ))
-    }
-}

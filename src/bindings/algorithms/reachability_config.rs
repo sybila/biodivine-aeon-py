@@ -7,7 +7,9 @@ use std::collections::HashSet;
 
 use crate::{
     bindings::{
-        algorithms::cancellation_handler::{CancelTokenNever, CancellationHandler},
+        algorithms::{
+            cancellation_handler::CancellationHandler, cancellation_tokens::CancelTokenPython,
+        },
         lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph,
     },
     AsNative,
@@ -69,14 +71,12 @@ impl ReachabilityConfig {
         ReachabilityConfig {
             variables: HashSet::from_iter(graph.variables()),
             subgraph: None,
-            cancellation: Box::new(CancelTokenNever),
+            cancellation: Default::default(),
             bdd_size_limit: usize::MAX,
             steps_limit: usize::MAX,
             graph,
         }
     }
-
-    // TODO: ohtenkay - create and set from python
 
     /// Return the variables sorted in ascending order.
     pub fn sorted_variables(&self) -> Vec<VariableId> {
@@ -89,6 +89,12 @@ impl ReachabilityConfig {
     /// in a `Box`.
     pub fn set_cancellation<C: CancellationHandler + 'static>(&mut self, cancellation: C) {
         self.cancellation = Box::new(cancellation);
+    }
+
+    // TODO: ohtenkay - discuss API design and add documentation
+    pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
+        self.cancellation = Box::new(cancellation);
+        self
     }
 }
 
@@ -105,5 +111,6 @@ impl ReachabilityConfig {
     #[pyo3(name = "with_graph")]
     pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
         ReachabilityConfig::with_graph(graph.get().as_native().clone())
+            .with_cancellation(CancelTokenPython::default())
     }
 }
