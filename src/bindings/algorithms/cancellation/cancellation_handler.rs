@@ -1,8 +1,7 @@
+use dyn_clone::{clone_trait_object, DynClone};
 use std::fmt::{Debug, Formatter, Result};
 
-use dyn_clone::{clone_trait_object, DynClone};
-
-use crate::bindings::algorithms::cancellation_tokens::CancelTokenNever;
+use crate::bindings::algorithms::cancellation::cancellation_tokens::CancelTokenNever;
 
 pub trait CancellationHandler: Send + Sync + DynClone {
     /// Returns `true` if the computation associated with this handler is cancelled.

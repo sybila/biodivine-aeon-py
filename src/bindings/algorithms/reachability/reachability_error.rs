@@ -1,9 +1,8 @@
-use std::fmt::{Debug, Formatter, Result};
-
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
+use std::fmt::{Debug, Formatter, Result};
 use thiserror::Error;
 
-use crate::bindings::algorithms::cancellation_error::CancellationError;
+use crate::bindings::algorithms::cancellation::CancellationError;
 
 /// An error returned by a [Reachability] procedure.
 #[derive(Error)]

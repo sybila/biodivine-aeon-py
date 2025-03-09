@@ -7,7 +7,7 @@ use pyo3::{
     PyErr,
 };
 
-use crate::bindings::algorithms::reachability_error::ReachabilityError;
+use crate::bindings::algorithms::reachability::ReachabilityError;
 
 impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {

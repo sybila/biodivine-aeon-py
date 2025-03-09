@@ -7,9 +7,9 @@ use std::{collections::HashSet, time::Duration};
 
 use crate::{
     bindings::{
-        algorithms::{
-            cancellation_handler::CancellationHandler,
+        algorithms::cancellation::{
             cancellation_tokens::{CancelTokenPython, CancelTokenTimer},
+            CancellationHandler,
         },
         lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph,
     },

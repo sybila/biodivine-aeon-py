@@ -9,7 +9,7 @@ use std::{
     time::Duration,
 };
 
-use crate::bindings::algorithms::cancellation_handler::CancellationHandler;
+use crate::bindings::algorithms::cancellation::CancellationHandler;
 
 /* Never - Start */
 

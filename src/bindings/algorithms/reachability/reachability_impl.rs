@@ -7,7 +7,7 @@ use pyo3::{pyclass, pymethods, Py, PyResult};
 
 use crate::{
     bindings::{
-        algorithms::{reachability_error::ReachabilityError, ReachabilityConfig},
+        algorithms::reachability::{ReachabilityConfig, ReachabilityError},
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
         },

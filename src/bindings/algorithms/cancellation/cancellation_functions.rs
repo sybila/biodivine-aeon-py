@@ -1,7 +1,6 @@
-use crate::bindings::algorithms::{
-    cancellation_error::CancellationError, cancellation_handler::CancellationHandler,
-};
 use std::fmt::Debug;
+
+use crate::bindings::algorithms::cancellation::{CancellationError, CancellationHandler};
 
 #[macro_export]
 macro_rules! is_cancelled {

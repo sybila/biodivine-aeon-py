@@ -1,21 +1,9 @@
-use pyo3::{
-    types::{PyModule, PyModuleMethods},
-    Bound, PyResult,
-};
-use reachability::Reachability;
-use reachability_config::ReachabilityConfig;
+use pyo3::{types::PyModule, Bound, PyResult};
 
-mod _impl_pyerr;
-mod cancellation;
-mod cancellation_error;
-mod cancellation_handler;
-mod cancellation_tokens;
-mod reachability;
-mod reachability_config;
-mod reachability_error;
+pub mod cancellation;
+pub mod reachability;
 
 pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add_class::<ReachabilityConfig>()?;
-    module.add_class::<Reachability>()?;
+    reachability::register(module)?;
     Ok(())
 }
