@@ -11,6 +11,8 @@ use std::{
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
+// TODO: ohtenkay - discuss whether to expose this to the Python api, probalbly not
+
 /* Never - Start */
 
 /// An implementation of [CancellationHandler] that cannot be cancelled.
@@ -109,8 +111,12 @@ impl CancellationHandler for CancelTokenPython {
 }
 
 impl CancelTokenPython {
-    pub fn with_inner(handler: Box<dyn CancellationHandler>) -> Self {
-        CancelTokenPython(handler)
+    pub fn with_inner<T: CancellationHandler + 'static>(handler: T) -> Self {
+        CancelTokenPython(Box::new(handler))
+    }
+
+    pub fn set_inner<T: CancellationHandler + 'static>(&mut self, handler: T) {
+        self.0 = Box::new(handler)
     }
 }
 

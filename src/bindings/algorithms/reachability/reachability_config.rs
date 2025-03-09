@@ -8,7 +8,7 @@ use std::{collections::HashSet, time::Duration};
 use crate::{
     bindings::{
         algorithms::cancellation::{
-            cancellation_tokens::{CancelTokenPython, CancelTokenTimer},
+            tokens::{CancelTokenPython, CancelTokenTimer},
             CancellationHandler,
         },
         lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph,
@@ -115,15 +115,14 @@ impl ReachabilityConfig {
             .with_cancellation(CancelTokenPython::default())
     }
 
-    // TODO: ohtenkay - consult, frozen does not allow mutability, mbe pyref? also, downcast - setter
-    // wont work, im not sure about interior mutability
-    // TODO: ohtenkay - consult abi-py37, disables PyDelta
+    // TODO: ohtenkay - consult, frozen does not allow mutability. also, downcast - setter
+    // wont work, im not sure about interior mutabilit, mbe pyref?
+    // TODO: ohtenkay - consult abi3-py37, disables PyDelta
     #[pyo3(name = "cancel_after")]
     pub fn cancel_after_py(&self, duration_in_secs: u64) -> Self {
-        let mut new = self.clone();
-        new.cancellation = Box::new(CancelTokenPython::with_inner(Box::new(
-            CancelTokenTimer::start(Duration::from_secs(duration_in_secs)),
-        )));
-        new
+        self.clone()
+            .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::start(
+                Duration::from_secs(duration_in_secs),
+            )))
     }
 }
