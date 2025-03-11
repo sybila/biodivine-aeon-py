@@ -1,11 +1,4 @@
-use pyo3::{
-    create_exception,
-    exceptions::{
-        asyncio::{CancelledError, InvalidStateError},
-        PyException,
-    },
-    PyErr,
-};
+use pyo3::{create_exception, exceptions::PyException, PyErr};
 
 use crate::bindings::algorithms::reachability::ReachabilityError;
 
@@ -29,14 +22,14 @@ impl From<ReachabilityError> for PyErr {
                 ))
             }
             ReachabilityError::InvalidSubgraph => {
-                PyErr::new::<InvalidStateError, _>("InvalidSubgraph")
+                PyErr::new::<InvalidSubgraphError, _>("InvalidSubgraph")
             }
         }
     }
 }
 
-// TODO: ohtenkay - think about the module name, maybe make it more specific,
 // TODO: ohtenkay - add fourth argument, documentation
-// TODO: ohtenkay - consider creating all the reachability errors with this macro
-create_exception!(bindings, BddSizeLimitExceededError, PyException);
-create_exception!(bindings, StepsLimitExceededError, PyException);
+create_exception!(reachability, CancelledError, PyException);
+create_exception!(reachability, StepsLimitExceededError, PyException);
+create_exception!(reachability, BddSizeLimitExceededError, PyException);
+create_exception!(reachability, InvalidSubgraphError, PyException);

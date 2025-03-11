@@ -11,7 +11,7 @@ use std::{
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
-// TODO: ohtenkay - discuss whether to expose this to the Python api, probalbly not
+// TODO: ohtenkay - nice to have - consider trying this with an enum
 
 /* Never - Start */
 

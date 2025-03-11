@@ -9,9 +9,6 @@ pub trait CancellationHandler: Send + Sync + DynClone {
     /// (This usually checks some shared, thread-safe variable, like an atomic or mutex
     /// that is set by the thread responsible for user interactions)
     fn is_cancelled(&self) -> bool;
-
-    // TODO: ohtenkay - Consider using enum to encapsulate tokens
-    // fn set_inner<T: CancellationHandler>(&mut self, handler: T) {}
 }
 
 clone_trait_object!(CancellationHandler);

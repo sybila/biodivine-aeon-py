@@ -51,4 +51,4 @@ impl From<CancellationError<GraphColoredVertices>> for ReachabilityError {
     }
 }
 
-// TODO: ohtenkay - print also cause of cancellation
+// TODO: ohtenkay - nice to have - print also cause of cancellation

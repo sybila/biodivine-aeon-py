@@ -324,7 +324,6 @@ impl Reachability {
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let result_set = self.forward_closed_superset(initial.as_native())?;
-        // TODO: ohtenkay - consult
         Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
     }
 
@@ -334,7 +333,6 @@ impl Reachability {
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let result_set = self.backward_closed_superset(initial.as_native())?;
-        // TODO: ohtenkay - consult
         Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
     }
 
@@ -344,7 +342,6 @@ impl Reachability {
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let result_set = self.forward_closed_subset(initial.as_native())?;
-        // TODO: ohtenkay - consult
         Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
     }
 
@@ -354,7 +351,6 @@ impl Reachability {
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
         let result_set = self.backward_closed_subset(initial.as_native())?;
-        // TODO: ohtenkay - consult
         Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
     }
 }

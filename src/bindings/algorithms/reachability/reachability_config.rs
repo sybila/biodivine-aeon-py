@@ -79,23 +79,18 @@ impl ReachabilityConfig {
         }
     }
 
+    /// Update the `cancellation` property, automatically wrapping the [CancellationHandler]
+    /// in a `Box`.
+    pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
+        self.cancellation = Box::new(cancellation);
+        self
+    }
+
     /// Return the variables sorted in ascending order.
     pub fn sorted_variables(&self) -> Vec<VariableId> {
         let mut variables = Vec::from_iter(self.variables.clone());
         variables.sort();
         variables
-    }
-
-    /// Update the `cancellation` property, automatically wrapping the [CancellationHandler]
-    /// in a `Box`.
-    pub fn set_cancellation<C: CancellationHandler + 'static>(&mut self, cancellation: C) {
-        self.cancellation = Box::new(cancellation);
-    }
-
-    // TODO: ohtenkay - discuss API design (with_, builder pattern, new() funciton) and add documentation
-    pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
-        self.cancellation = Box::new(cancellation);
-        self
     }
 }
 
@@ -115,9 +110,7 @@ impl ReachabilityConfig {
             .with_cancellation(CancelTokenPython::default())
     }
 
-    // TODO: ohtenkay - consult, frozen does not allow mutability. also, downcast - setter
-    // wont work, im not sure about interior mutabilit, mbe pyref?
-    // TODO: ohtenkay - consult abi3-py37, disables PyDelta
+    // TODO: if we ever move away from abi3-py37, use Duration as an argument
     #[pyo3(name = "cancel_after")]
     pub fn cancel_after_py(&self, duration_in_secs: u64) -> Self {
         self.clone()
