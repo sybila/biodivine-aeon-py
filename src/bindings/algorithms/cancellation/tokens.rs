@@ -64,6 +64,7 @@ impl CancellationHandler for CancelTokenTimer {
     }
 }
 
+// TODO: ohtenkay - consider restarting the timer for every algorithm
 impl CancelTokenTimer {
     /// Create a new timer for the specified `duration` that is immediately running.
     pub fn start(duration: Duration) -> CancelTokenTimer {

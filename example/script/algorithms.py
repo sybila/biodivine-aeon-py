@@ -7,8 +7,12 @@ bn = bn.infer_valid_graph()
 print("Boolean network loaded.\n")
 
 stg = AsynchronousGraph(bn)
-config = ReachabilityConfig.with_graph(stg).cancel_after(10)
+config = ReachabilityConfig.with_graph(stg).with_time_limit(10_000)
 print("Reachability config created.\n")
+
+test_set = {VariableId(1), VariableId(2)}
+test_config = ReachabilityConfig(stg, variables=test_set, time_limit_millis=5_000)
+test_config = test_config.with_variables(test_set)
 
 singleton = stg.mk_unit_colored_vertices().pick_singleton()
 print("Initial state:")
