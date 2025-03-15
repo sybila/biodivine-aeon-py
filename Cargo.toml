@@ -39,6 +39,7 @@ z3-sys = "^0.8.1"
 thiserror = "2.0.11"
 log = "0.4.22"
 dyn-clone = "1.0.18"
+pyo3-log = "0.12.1"
 
 [build-dependencies]
 pyo3-build-config = "0.23.2"
