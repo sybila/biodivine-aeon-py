@@ -1211,3 +1211,28 @@ def test_symbolic_iterators():
     (_, m4) = it2.__next__()
     combined2 = m3.to_symbolic().extend_with_spaces(m4.to_symbolic())
     assert not combined2.is_empty() and combined2.is_singleton()
+
+def test_asynchronous_graph_restrict():
+    bn = BooleanNetwork.from_bnet("""
+    a,a
+    b,b
+    c,1
+    """)
+
+    stg_full = AsynchronousGraph(bn)
+
+    # All states where c=1 are fixed points
+    assert FixedPoints.symbolic(stg_full).cardinality() == 4.0
+
+    space_a = stg_full.mk_subspace({ 'a': 0 })
+    space_c = stg_full.mk_subspace({ 'c': 0 })
+
+    stg_a = stg_full.restrict(space_a)
+    stg_c = stg_full.restrict(space_c)
+
+    # Here, fixed points are those where c=1 and a=0
+    assert FixedPoints.symbolic(stg_a).cardinality() == 2.0
+
+    # Here, fixed points are those where c=0, because we cut off
+    # all edges going into the c=1 subspace
+    assert FixedPoints.symbolic(stg_c).cardinality() == 4.0

@@ -739,6 +739,39 @@ impl AsynchronousGraph {
             ctx: py_ctx,
         })
     }
+
+    /// Create a copy of this graph that is restricted only to the given set of values.
+    ///
+    /// This restriction can be a `ColoredVertexSet` (affects both colors and vertices),
+    /// a `ColorSet`, or a `VertexSet` (only affects colors or vertices, respectively).
+    ///
+    /// Note that only the intersection with the existing unit set is considered in the result
+    /// (i.e. this method cannot be used to *add* new values to the graph).
+    ///
+    /// Also note that this not only restricts vertices/colors, but also the edges of the graph.
+    pub fn restrict(&self, vertices: &Bound<'_, PyAny>, py: Python) -> PyResult<AsynchronousGraph> {
+        let native_result = if let Ok(vertices) = vertices.extract::<ColoredVertexSet>() {
+            self.as_native().restrict(vertices.as_native())
+        } else if let Ok(vertices) = vertices.extract::<VertexSet>() {
+            let native_set = vertices.as_native();
+            let colored = self
+                .as_native()
+                .unit_colored_vertices()
+                .intersect_vertices(native_set);
+            self.as_native().restrict(&colored)
+        } else if let Ok(colors) = vertices.extract::<ColorSet>() {
+            let native_set = colors.as_native();
+            let colored = self
+                .as_native()
+                .unit_colored_vertices()
+                .intersect_colors(native_set);
+            self.as_native().restrict(&colored)
+        } else {
+            return throw_type_error("Expected `VertexSet`, `ColorSet`, or `ColoredVertexSet`.");
+        };
+
+        AsynchronousGraph::wrap_native(py, native_result)
+    }
 }
 
 impl AsynchronousGraph {
