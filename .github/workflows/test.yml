@@ -19,11 +19,11 @@ env:
   # A fixed version used for testing, so that the builds don't
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
-  RUST_VERSION: "1.79.0"
+  RUST_VERSION: "1.84.0"
   # This is the version currently used by `z3-sys`.
   # If this ever changes, you might also need to increase
   # the minimum macOS version below.
-  Z3_VERSION: "4.8.12"
+  Z3_VERSION: "4.13.4"
   MACOS_TARGET: "11.0"
   PYTHON_VERSION: "3.12"
 
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: daemontus/setup-z3@v1.3.1
+        uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
           add_to_library_path: true
@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: daemontus/setup-z3@v1.3.1
+        uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
           add_to_library_path: true
@@ -97,7 +97,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: daemontus/setup-z3@v1.3.1
+        uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
           add_to_library_path: true
@@ -135,7 +135,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: daemontus/setup-z3@v1.3.1
+        uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
           add_to_library_path: true
@@ -166,7 +166,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: daemontus/setup-z3@v1.3.1
+        uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
           add_to_library_path: true
@@ -192,7 +192,7 @@ jobs:
     needs: check
     # For reasons unbeknownst to mankind, llvm-cov segfaults on ubuntu runners
     # when combined with pytest. The solution for now is to use macOS.
-    runs-on: macos-12
+    runs-on: macos-latest
     env:
       # These are the env variables set by llvm-cov, but modified such that they actually work in GH actions.
       # In particular, we changed the paths from absolute to relative.
@@ -208,7 +208,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: daemontus/setup-z3@v1.3.1
+        uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
           add_to_library_path: true
@@ -250,7 +250,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Z3.
         id: z3
-        uses: daemontus/setup-z3@v1.3.1
+        uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
           add_to_library_path: true

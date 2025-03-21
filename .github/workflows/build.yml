@@ -13,11 +13,11 @@ env:
   # A fixed version used for testing, so that the builds don't
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
-  RUST_VERSION: "1.79.0"
+  RUST_VERSION: "1.84.0"
   # This is the version currently used by `z3-sys`.
   # If this ever changes, you might also need to increase
   # the minimum macOS version below.
-  Z3_VERSION: "4.8.12"
+  Z3_VERSION: "4.13.4"
   MACOS_TARGET: "11.0"
   PYTHON_VERSION: "3.12"
 
@@ -33,12 +33,12 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: x86_64
-          container: daemontus/manylinux-aeon:latest                   
+          container: daemontus/manylinux-aeon:latest
           args: "--release --features static-z3 --compatibility manylinux_2_28 --out=target/dist"
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux
           path: target/dist
 
   build-macos:
@@ -63,9 +63,9 @@ jobs:
           command: build
           args: "--release --target universal2-apple-darwin --features static-z3 --out=target/dist"
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-macos
           path: target/dist
 
   build-windows:
@@ -88,9 +88,9 @@ jobs:
           target: x64
           args: "--release --features static-z3 --out=target/dist"
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-windows
           path: target/dist
 
   release:
@@ -98,9 +98,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build-macos, build-windows, build-linux ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: wheels
+          pattern: wheels-*
+          merge-multiple: 'true'
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
@@ -129,7 +130,7 @@ jobs:
           auto-activate-base: false
           show-channel-urls: true
       - name: Build and upload the conda packages
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.3.0
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.4.0
         with:
           python-version: ${{ matrix.python }}
           meta_yaml_dir: "conda"
