@@ -1,5 +1,6 @@
-use dyn_clone::{clone_trait_object, DynClone};
 use std::fmt::{Debug, Formatter, Result};
+
+use dyn_clone::{clone_trait_object, DynClone};
 
 use crate::bindings::algorithms::cancellation::tokens::CancelTokenNever;
 

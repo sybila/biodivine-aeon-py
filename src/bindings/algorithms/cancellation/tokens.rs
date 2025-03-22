@@ -1,5 +1,3 @@
-use log::info;
-use pyo3::Python;
 use std::{
     fmt::Debug,
     sync::{
@@ -8,6 +6,9 @@ use std::{
     },
     time::Duration,
 };
+
+use log::info;
+use pyo3::Python;
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 

@@ -1,3 +1,5 @@
+use std::{collections::HashSet, time::Duration};
+
 use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     VariableId,
@@ -7,7 +9,6 @@ use pyo3::{
     types::{PyAnyMethods, PySet, PySetMethods},
     Py, Python,
 };
-use std::{collections::HashSet, time::Duration};
 
 use crate::{
     bindings::{

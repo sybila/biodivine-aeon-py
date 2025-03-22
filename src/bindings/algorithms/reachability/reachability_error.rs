@@ -1,5 +1,6 @@
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use std::fmt::{Debug, Formatter, Result};
+
+use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use thiserror::Error;
 
 use crate::bindings::algorithms::cancellation::CancellationError;
