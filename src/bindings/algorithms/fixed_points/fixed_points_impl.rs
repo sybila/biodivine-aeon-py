@@ -2,7 +2,8 @@ use std::collections::{HashMap, HashSet};
 
 use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
 use biodivine_lib_param_bn::{
-    biodivine_std::traits::Set, symbolic_async_graph::GraphColoredVertices,
+    biodivine_std::traits::Set,
+    symbolic_async_graph::{GraphColoredVertices, GraphVertices},
 };
 use log::{debug, info, trace};
 use pyo3::pyclass;
@@ -13,6 +14,8 @@ use crate::bindings::algorithms::fixed_points::{
 
 const TARGET_NAIVE_SYMBOLIC: &str = "FixedPoints::naive_symbolic";
 const TARGET_SYMBOLIC: &str = "FixedPoints::symbolic";
+const TARGET_SYMBOLIC_VERTICES: &str = "FixedPoints::symbolic_vertices";
+const TARGET_SYMBOLIC_COLORS: &str = "FixedPoints::symbolic_colors";
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct FixedPoints(FixedPointsConfig);
@@ -138,6 +141,55 @@ impl FixedPoints {
         );
 
         Ok(fixed_points)
+    }
+
+    pub fn symbolic_vertices(
+        &self,
+        restriction: &GraphColoredVertices,
+    ) -> Result<GraphVertices, FixedPointsError> {
+        info!(
+            target: TARGET_SYMBOLIC_VERTICES,
+            "Started search with {}[nodes:{}] candidates.",
+            restriction.approx_cardinality(),
+            restriction.symbolic_size()
+        );
+
+        let stg = &self.config().graph;
+        let mut to_merge = self.prepare_to_merge(TARGET_SYMBOLIC_VERTICES)?;
+
+        // Finally add the global requirement on the whole state space, if it is relevant.
+        if !stg.unit_colored_vertices().is_subset(restriction) {
+            to_merge.push(restriction.as_bdd().clone());
+        }
+
+        let projections: HashSet<BddVariable> = stg
+            .symbolic_context()
+            .parameter_variables()
+            .iter()
+            .cloned()
+            .collect();
+
+        // interrupt()?;
+
+        let bdd = Self::symbolic_merge(
+            stg.symbolic_context().bdd_variable_set(),
+            to_merge,
+            projections,
+            TARGET_SYMBOLIC_VERTICES,
+        )?;
+
+        let vertices = stg.empty_colored_vertices().vertices().copy(bdd);
+
+        // interrupt()?;
+
+        info!(
+        target: TARGET_SYMBOLIC_VERTICES,
+            "Found {}[nodes:{}] fixed-point vertices.",
+            vertices.approx_cardinality(),
+            vertices.symbolic_size(),
+        );
+
+        Ok(vertices)
     }
 }
 
