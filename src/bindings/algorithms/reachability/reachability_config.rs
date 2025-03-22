@@ -119,7 +119,9 @@ impl ReachabilityConfig {
         self.steps_limit = steps_limit;
         self
     }
+}
 
+impl ReachabilityConfig {
     /// Return the variables sorted in ascending order.
     pub fn sorted_variables(&self) -> Vec<VariableId> {
         let mut variables = Vec::from_iter(self.variables.clone());

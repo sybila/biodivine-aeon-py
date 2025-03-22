@@ -45,7 +45,9 @@ impl Reachability {
     pub fn config(&self) -> &ReachabilityConfig {
         &self.0
     }
+}
 
+impl Reachability {
     /// Compute the *greatest superset* of the given `initial` set that is forward closed.
     ///
     /// Intuitively, these are all the vertices that are reachable from the `initial` set.
