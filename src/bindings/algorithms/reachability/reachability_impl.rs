@@ -15,10 +15,10 @@ use crate::{
     is_cancelled, AsNative,
 };
 
-pub const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
-pub const TARGET_FORWARD_SUBSET: &str = "Reachability::forward_closed_subset";
-pub const TARGET_BACKWARD_SUPERSET: &str = "Reachability::backward_closed_superset";
-pub const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
+const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
+const TARGET_FORWARD_SUBSET: &str = "Reachability::forward_closed_subset";
+const TARGET_BACKWARD_SUPERSET: &str = "Reachability::backward_closed_superset";
+const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 
 /// Implements symbolic reachability operations over a `SymbolicAsyncGraph`. This means the
 /// computation of both largets and smallest forward- or backward-closed sets of states.
