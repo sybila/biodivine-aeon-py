@@ -57,21 +57,29 @@ impl CancelTokenAtomic {
 pub struct CancelTokenTimer {
     cancelled: Arc<AtomicBool>,
     started: Arc<AtomicBool>,
+    time_limit: Duration,
 }
 
 impl CancellationHandler for CancelTokenTimer {
     fn is_cancelled(&self) -> bool {
         self.cancelled.load(SeqCst)
     }
+
+    // TODO: ohtenkay - kill threads on restart
+    fn start_timer(&self) {
+        assert!(self.cancel_after(self.time_limit));
+    }
 }
 
 // TODO: ohtenkay - consider restarting the timer for every algorithm
 impl CancelTokenTimer {
-    /// Create a new timer for the specified `duration` that is immediately running.
-    pub fn start(duration: Duration) -> CancelTokenTimer {
-        let timer = Self::default();
-        assert!(timer.cancel_after(duration));
-        timer
+    /// Create a new timer with the specified `duration` that is not running.
+    pub fn new(duration: Duration) -> CancelTokenTimer {
+        CancelTokenTimer {
+            cancelled: Default::default(),
+            started: Default::default(),
+            time_limit: duration,
+        }
     }
 
     /// Start the cancellation timer for the given `duration`.
@@ -109,6 +117,10 @@ impl CancellationHandler for CancelTokenPython {
         }
 
         Python::with_gil(|py| py.check_signals()).is_err()
+    }
+
+    fn start_timer(&self) {
+        self.0.start_timer()
     }
 }
 

@@ -10,6 +10,10 @@ pub trait CancellationHandler: Send + Sync + DynClone {
     /// (This usually checks some shared, thread-safe variable, like an atomic or mutex
     /// that is set by the thread responsible for user interactions)
     fn is_cancelled(&self) -> bool;
+
+    /// This is a no-op by default, but if cancellation is implemented using a timer,
+    /// this function starts the timer.
+    fn start_timer(&self) {}
 }
 
 clone_trait_object!(CancellationHandler);

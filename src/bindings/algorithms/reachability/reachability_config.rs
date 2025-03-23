@@ -131,9 +131,14 @@ impl ReachabilityConfig {
     }
 }
 
+// TODO: ohtenkay - maybe implement this for `Reachability` instead
 impl CancellationHandler for ReachabilityConfig {
     fn is_cancelled(&self) -> bool {
         self.cancellation.is_cancelled()
+    }
+
+    fn start_timer(&self) {
+        self.cancellation.start_timer()
     }
 }
 
@@ -153,7 +158,7 @@ impl ReachabilityConfig {
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
         steps_limit: Option<usize>,
-    ) -> ReachabilityConfig {
+    ) -> Self {
         let mut config = ReachabilityConfig::with_graph(graph.get().as_native().clone());
 
         if let Some(subgraph) = subgraph {
@@ -171,11 +176,10 @@ impl ReachabilityConfig {
             )
         }
 
-        // TODO: ohtenkay - cancellation starts but should not
         if let Some(millis) = time_limit_millis {
-            config = config.with_cancellation(CancelTokenPython::with_inner(
-                CancelTokenTimer::start(Duration::from_millis(millis)),
-            ))
+            config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
+                Duration::from_millis(millis),
+            )))
         }
 
         if let Some(limit) = bdd_size_limit {
@@ -215,11 +219,10 @@ impl ReachabilityConfig {
     }
 
     // TODO: if we ever move away from abi3-py37, use Duration as an argument
-    // TODO: - ohtenkay - make this start with calling an algorithm
     #[pyo3(name = "with_time_limit")]
     pub fn with_time_limit_py(&self, duration_in_millis: u64) -> Self {
         self.clone()
-            .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::start(
+            .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(duration_in_millis),
             )))
     }

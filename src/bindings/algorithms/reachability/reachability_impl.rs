@@ -7,7 +7,10 @@ use pyo3::{pyclass, pymethods, Py, PyResult};
 
 use crate::{
     bindings::{
-        algorithms::reachability::{ReachabilityConfig, ReachabilityError},
+        algorithms::{
+            cancellation::CancellationHandler,
+            reachability::{ReachabilityConfig, ReachabilityError},
+        },
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
         },
@@ -27,6 +30,7 @@ const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 /// which restricts the set of relevant vertices, as well as a BDD size limit and steps limit.
 /// See [ReachabilityConfig] and [ReachabilityError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
+#[derive(Clone)]
 pub struct Reachability(ReachabilityConfig);
 
 impl Reachability {
@@ -55,6 +59,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
+        self.config().start_timer();
         info!(target: TARGET_FORWARD_SUPERSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
@@ -116,6 +121,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
+        self.config().start_timer();
         info!(target: TARGET_BACKWARD_SUPERSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
@@ -178,6 +184,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
+        self.config().start_timer();
         info!(target: TARGET_FORWARD_SUBSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
@@ -244,6 +251,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
+        self.config().start_timer();
         info!(target: TARGET_BACKWARD_SUBSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
