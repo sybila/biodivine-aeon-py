@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
 use biodivine_lib_param_bn::{
     biodivine_std::traits::Set,
-    symbolic_async_graph::{GraphColoredVertices, GraphColors, GraphVertices},
+    symbolic_async_graph::{GraphColoredVertices, GraphColors, GraphVertices, SymbolicAsyncGraph},
 };
 use log::{debug, info, trace};
 use pyo3::pyclass;
@@ -21,6 +21,17 @@ const TARGET_SYMBOLIC_COLORS: &str = "FixedPoints::symbolic_colors";
 pub struct FixedPoints(FixedPointsConfig);
 
 impl FixedPoints {
+    /// Create a new [FixedPoints] instance with the given [SymbolicAsyncGraph]
+    /// and otherwise default configuration.
+    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
+        FixedPoints(FixedPointsConfig::with_graph(graph))
+    }
+
+    /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
+    pub fn with_config(config: FixedPointsConfig) -> Self {
+        FixedPoints(config)
+    }
+
     /// Retrieve the internal [FixedPointsConfig] of this instance.
     pub fn config(&self) -> &FixedPointsConfig {
         &self.0
