@@ -187,6 +187,54 @@ impl FixedPoints {
 
         Ok(vertices)
     }
+
+    pub fn symbolic_colors(&self) -> Result<GraphColors, FixedPointsError> {
+        let stg = &self.config().graph;
+        let restriction = &self.config().restriction;
+
+        info!(
+            target: TARGET_SYMBOLIC_COLORS,
+            "Started search with {}[nodes:{}] candidates.",
+            restriction.approx_cardinality(),
+            restriction.symbolic_size()
+        );
+
+        let mut to_merge = self.prepare_to_merge(TARGET_SYMBOLIC_COLORS)?;
+
+        // Finally add the global requirement on the whole state space, if it is relevant.
+        if !stg.unit_colored_vertices().is_subset(restriction) {
+            to_merge.push(restriction.as_bdd().clone());
+        }
+
+        let projections: HashSet<BddVariable> = stg
+            .symbolic_context()
+            .state_variables()
+            .iter()
+            .cloned()
+            .collect();
+
+        // interrupt()?;
+
+        let bdd = Self::symbolic_merge(
+            stg.symbolic_context().bdd_variable_set(),
+            to_merge,
+            projections,
+            TARGET_SYMBOLIC_COLORS,
+        )?;
+
+        let colors = stg.empty_colored_vertices().colors().copy(bdd);
+
+        // interrupt()?;
+
+        info!(
+            target: TARGET_SYMBOLIC_COLORS,
+            "Found {}[nodes:{}] fixed-point colors.",
+            colors.approx_cardinality(),
+            colors.symbolic_size(),
+        );
+
+        Ok(colors)
+    }
 }
 
 impl FixedPoints {
