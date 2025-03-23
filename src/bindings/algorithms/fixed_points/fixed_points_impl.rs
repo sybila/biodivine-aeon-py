@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
 use biodivine_lib_param_bn::{
     biodivine_std::traits::Set,
-    symbolic_async_graph::{GraphColoredVertices, GraphVertices},
+    symbolic_async_graph::{GraphColoredVertices, GraphColors, GraphVertices},
 };
 use log::{debug, info, trace};
 use pyo3::pyclass;
@@ -29,18 +29,16 @@ impl FixedPoints {
 
 impl FixedPoints {
     // TODO: ohtenkay - document this, discuss whether to take the documentation from lib_param_bn
-    pub fn naive_symbolic(
-        &self,
-        restriction: &GraphColoredVertices,
-    ) -> Result<GraphColoredVertices, FixedPointsError> {
+    pub fn naive_symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
+        let stg = &self.config().graph;
+        let restriction = &self.config().restriction;
+
         info!(
             target: TARGET_NAIVE_SYMBOLIC,
             "Started search with {}[nodes:{}] candidates.",
             restriction.approx_cardinality(),
             restriction.symbolic_size()
         );
-
-        let stg = &self.config().graph;
 
         let mut to_merge: Vec<GraphColoredVertices> = stg
             .variables()
@@ -99,10 +97,10 @@ impl FixedPoints {
         Ok(fixed_points)
     }
 
-    pub fn symbolic(
-        &self,
-        restriction: &GraphColoredVertices,
-    ) -> Result<GraphColoredVertices, FixedPointsError> {
+    pub fn symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
+        let stg = &self.config().graph;
+        let restriction = &self.config().restriction;
+
         info!(
             target: TARGET_SYMBOLIC,
             "Started search with {}[nodes:{}] candidates.",
@@ -110,7 +108,6 @@ impl FixedPoints {
             restriction.symbolic_size()
         );
 
-        let stg = &self.config().graph;
         let mut to_merge = self.prepare_to_merge(TARGET_SYMBOLIC)?;
 
         // TODO: ohtenkay - deleted note to self
@@ -143,10 +140,10 @@ impl FixedPoints {
         Ok(fixed_points)
     }
 
-    pub fn symbolic_vertices(
-        &self,
-        restriction: &GraphColoredVertices,
-    ) -> Result<GraphVertices, FixedPointsError> {
+    pub fn symbolic_vertices(&self) -> Result<GraphVertices, FixedPointsError> {
+        let stg = &self.config().graph;
+        let restriction = &self.config().restriction;
+
         info!(
             target: TARGET_SYMBOLIC_VERTICES,
             "Started search with {}[nodes:{}] candidates.",
@@ -154,7 +151,6 @@ impl FixedPoints {
             restriction.symbolic_size()
         );
 
-        let stg = &self.config().graph;
         let mut to_merge = self.prepare_to_merge(TARGET_SYMBOLIC_VERTICES)?;
 
         // Finally add the global requirement on the whole state space, if it is relevant.
@@ -183,7 +179,7 @@ impl FixedPoints {
         // interrupt()?;
 
         info!(
-        target: TARGET_SYMBOLIC_VERTICES,
+            target: TARGET_SYMBOLIC_VERTICES,
             "Found {}[nodes:{}] fixed-point vertices.",
             vertices.approx_cardinality(),
             vertices.symbolic_size(),
