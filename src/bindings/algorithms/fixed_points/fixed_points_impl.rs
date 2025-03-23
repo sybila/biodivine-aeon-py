@@ -6,10 +6,22 @@ use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, GraphColors, GraphVertices, SymbolicAsyncGraph},
 };
 use log::{debug, info, trace};
-use pyo3::pyclass;
+use pyo3::{pyclass, pymethods, Py, PyResult};
 
-use crate::bindings::algorithms::fixed_points::{
-    fixed_points_config::FixedPointsConfig, fixed_points_error::FixedPointsError,
+use crate::{
+    bindings::{
+        algorithms::{
+            cancellation::CancellationHandler,
+            fixed_points::{
+                fixed_points_config::FixedPointsConfig, fixed_points_error::FixedPointsError,
+            },
+        },
+        lib_param_bn::symbolic::{
+            asynchronous_graph::AsynchronousGraph, set_color::ColorSet,
+            set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
+        },
+    },
+    is_cancelled,
 };
 
 const TARGET_NAIVE_SYMBOLIC: &str = "FixedPoints::naive_symbolic";
@@ -41,6 +53,7 @@ impl FixedPoints {
 impl FixedPoints {
     // TODO: ohtenkay - document this, discuss whether to take the documentation from lib_param_bn
     pub fn naive_symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
+        self.config().start_timer();
         let stg = &self.config().graph;
         let restriction = &self.config().restriction;
 
@@ -57,7 +70,7 @@ impl FixedPoints {
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = restriction.minus(&can_step);
 
-                // interrupt()?;
+                is_cancelled!(self.config())?;
 
                 trace!(
                     target: TARGET_NAIVE_SYMBOLIC,
@@ -66,9 +79,9 @@ impl FixedPoints {
                     is_stable.symbolic_size()
                 );
 
-                is_stable
+                Ok(is_stable)
             })
-            .collect();
+            .collect::<Result<Vec<_>, FixedPointsError>>()?;
 
         while to_merge.len() > 1 {
             to_merge.sort_by_key(|it| -(it.symbolic_size() as isize));
@@ -81,7 +94,8 @@ impl FixedPoints {
                 to_merge.iter().map(|it| it.symbolic_size()).sum::<usize>(),
             );
 
-            // interrupt()?;
+            // TODO: ohtenkay - is there a partial result in any of the algorithms?
+            is_cancelled!(self.config())?;
 
             let x = to_merge.pop().unwrap();
             let y = to_merge.pop().unwrap();
@@ -109,6 +123,7 @@ impl FixedPoints {
     }
 
     pub fn symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
+        self.config().start_timer();
         let stg = &self.config().graph;
         let restriction = &self.config().restriction;
 
@@ -128,16 +143,16 @@ impl FixedPoints {
             to_merge.push(restriction.as_bdd().clone());
         }
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
-        let fixed_points = Self::symbolic_merge(
+        let fixed_points = self.symbolic_merge(
             stg.symbolic_context().bdd_variable_set(),
             to_merge,
             HashSet::default(),
             TARGET_SYMBOLIC,
         )?;
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
         let fixed_points = stg.unit_colored_vertices().copy(fixed_points);
 
@@ -152,6 +167,7 @@ impl FixedPoints {
     }
 
     pub fn symbolic_vertices(&self) -> Result<GraphVertices, FixedPointsError> {
+        self.config().start_timer();
         let stg = &self.config().graph;
         let restriction = &self.config().restriction;
 
@@ -176,9 +192,9 @@ impl FixedPoints {
             .cloned()
             .collect();
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
-        let bdd = Self::symbolic_merge(
+        let bdd = self.symbolic_merge(
             stg.symbolic_context().bdd_variable_set(),
             to_merge,
             projections,
@@ -187,7 +203,7 @@ impl FixedPoints {
 
         let vertices = stg.empty_colored_vertices().vertices().copy(bdd);
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
         info!(
             target: TARGET_SYMBOLIC_VERTICES,
@@ -224,9 +240,9 @@ impl FixedPoints {
             .cloned()
             .collect();
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
-        let bdd = Self::symbolic_merge(
+        let bdd = self.symbolic_merge(
             stg.symbolic_context().bdd_variable_set(),
             to_merge,
             projections,
@@ -235,7 +251,7 @@ impl FixedPoints {
 
         let colors = stg.empty_colored_vertices().colors().copy(bdd);
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
         info!(
             target: TARGET_SYMBOLIC_COLORS,
@@ -258,7 +274,7 @@ impl FixedPoints {
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = stg.unit_colored_vertices().minus(&can_step);
 
-                // interrupt()?;
+                is_cancelled!(self.config())?;
 
                 trace!(
                     target: target,
@@ -267,14 +283,15 @@ impl FixedPoints {
                     is_stable.symbolic_size()
                 );
 
-                is_stable.into_bdd()
+                Ok(is_stable.into_bdd())
             })
-            .collect();
+            .collect::<Result<Vec<_>, FixedPointsError>>()?;
 
         Ok(result)
     }
 
-    pub fn symbolic_merge(
+    fn symbolic_merge(
+        &self,
         // TODO: ohtenkay - discuss this argument being removed and the function taking &self instead
         universe: &BddVariableSet,
         to_merge: Vec<Bdd>,
@@ -308,7 +325,7 @@ impl FixedPoints {
         let mut result = universe.mk_true();
         let mut merged = HashSet::new();
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
         // TODO: ohtenkay - deleted note to self
 
@@ -319,7 +336,7 @@ impl FixedPoints {
                     result = result.var_exists(p_var);
                     projections.remove(&p_var);
 
-                    // interrupt()?;
+                    is_cancelled!(self.config())?;
 
                     trace!(
                         target: target,
@@ -348,7 +365,7 @@ impl FixedPoints {
                     biodivine_lib_bdd::op_function::and,
                 );
 
-                // interrupt()?;
+                is_cancelled!(self.config())?;
 
                 if let Some(bdd) = bdd {
                     // At this point, the size of the BDD should be smaller or equal to the
@@ -380,7 +397,7 @@ impl FixedPoints {
             }
         }
 
-        // interrupt()?;
+        is_cancelled!(self.config())?;
 
         info!(target: target, "Merge finished with {} BDD nodes.", result.size());
 
@@ -390,5 +407,60 @@ impl FixedPoints {
         assert_eq!(merged.len(), support_sets.len());
 
         Ok(result)
+    }
+}
+
+// TODO: ohtenkay - make this optional with a feature flag
+#[pymethods]
+impl FixedPoints {
+    /// Create a new [Reachability] instance with the given [AsynchronousGraph]
+    /// and otherwise default configuration.
+    #[staticmethod]
+    #[pyo3(name = "with_graph")]
+    pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
+        FixedPoints(FixedPointsConfig::with_graph_py(graph))
+    }
+
+    /// Create a new [Reachability] instance with the given [ReachabilityConfig].
+    #[staticmethod]
+    #[pyo3(name = "with_config")]
+    pub fn with_config_py(config: Py<FixedPointsConfig>) -> Self {
+        FixedPoints(config.get().clone())
+    }
+
+    #[pyo3(name = "naive_symbolic")]
+    pub fn naive_symbolic_py(&self) -> PyResult<ColoredVertexSet> {
+        let result_set = self.naive_symbolic()?;
+        Ok(ColoredVertexSet::mk_native(
+            self.config().symbolic_context(),
+            result_set,
+        ))
+    }
+
+    #[pyo3(name = "symbolic")]
+    pub fn symbolic_py(&self) -> PyResult<ColoredVertexSet> {
+        let result_set = self.symbolic()?;
+        Ok(ColoredVertexSet::mk_native(
+            self.config().symbolic_context(),
+            result_set,
+        ))
+    }
+
+    #[pyo3(name = "symbolic_vertices")]
+    pub fn symbolic_vertices_py(&self) -> PyResult<VertexSet> {
+        let result_set = self.symbolic_vertices()?;
+        Ok(VertexSet::mk_native(
+            self.config().symbolic_context(),
+            result_set,
+        ))
+    }
+
+    #[pyo3(name = "symbolic_colors")]
+    pub fn symbolic_colors_py(&self) -> PyResult<ColorSet> {
+        let result_set = self.symbolic_colors()?;
+        Ok(ColorSet::mk_native(
+            self.config().symbolic_context(),
+            result_set,
+        ))
     }
 }

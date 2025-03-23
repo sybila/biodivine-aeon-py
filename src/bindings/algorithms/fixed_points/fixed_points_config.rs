@@ -11,6 +11,7 @@ use crate::{
         },
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
+            symbolic_context::SymbolicContext,
         },
     },
     AsNative,
@@ -22,6 +23,7 @@ pub struct FixedPointsConfig {
     pub graph: SymbolicAsyncGraph,
     pub restriction: GraphColoredVertices,
     pub cancellation: Box<dyn CancellationHandler>,
+    pub symbolic_context: Option<Py<SymbolicContext>>,
     // TODO: ohtenkay - discuss the rest of the fields.
 }
 
@@ -31,6 +33,7 @@ impl FixedPointsConfig {
         FixedPointsConfig {
             restriction: graph.unit_colored_vertices().clone(),
             cancellation: Default::default(),
+            symbolic_context: None,
             graph,
         }
     }
@@ -46,6 +49,17 @@ impl FixedPointsConfig {
     pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
         self.cancellation = Box::new(cancellation);
         self
+    }
+
+    // TODO: ohtenkay - discuss where to get the context
+    fn with_symbolic_context(mut self, context: Py<SymbolicContext>) -> Self {
+        self.symbolic_context = Some(context);
+        self
+    }
+
+    /// Get the symbolic context of the graph.
+    pub fn symbolic_context(&self) -> Py<SymbolicContext> {
+        self.symbolic_context.clone().unwrap()
     }
 }
 
@@ -88,6 +102,13 @@ impl FixedPointsConfig {
     pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
         FixedPointsConfig::with_graph(graph.get().as_native().clone())
             .with_cancellation(CancelTokenPython::default())
+            .with_symbolic_context(graph.get().symbolic_context())
+    }
+
+    #[pyo3(name = "with_restriction")]
+    pub fn with_restriction_py(&self, restriction: Py<ColoredVertexSet>) -> Self {
+        self.clone()
+            .with_restriction(restriction.get().as_native().clone())
     }
 
     // TODO: if we ever move away from abi3-py37, use Duration as an argument

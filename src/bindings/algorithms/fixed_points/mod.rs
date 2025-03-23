@@ -4,6 +4,7 @@ use pyo3::{
     Bound, PyResult,
 };
 
+mod _impl_pyerr;
 mod fixed_points_config;
 mod fixed_points_error;
 mod fixed_points_impl;
