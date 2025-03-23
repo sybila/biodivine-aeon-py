@@ -1,5 +1,7 @@
 use std::fmt::Debug;
 
+use pyo3::{create_exception, exceptions::PyException};
+
 /// Represents the fact that the operation has been cancelled before completion.
 ///
 /// The struct can contain the partial results of the cancelled operation. If you don't intend
@@ -32,3 +34,5 @@ impl<T: Sized + Debug + 'static + Default> Default for CancellationError<T> {
         CancellationError(Default::default())
     }
 }
+
+create_exception!(cancellation, CancelledError, PyException);

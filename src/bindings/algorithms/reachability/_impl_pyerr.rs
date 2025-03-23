@@ -1,6 +1,6 @@
 use pyo3::{create_exception, exceptions::PyException, PyErr};
 
-use crate::bindings::algorithms::reachability::ReachabilityError;
+use crate::bindings::algorithms::{cancellation::CancelledError, reachability::ReachabilityError};
 
 impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {
@@ -29,7 +29,6 @@ impl From<ReachabilityError> for PyErr {
 }
 
 // TODO: ohtenkay - add fourth argument, documentation
-create_exception!(reachability, CancelledError, PyException);
 create_exception!(reachability, StepsLimitExceededError, PyException);
 create_exception!(reachability, BddSizeLimitExceededError, PyException);
 create_exception!(reachability, InvalidSubgraphError, PyException);

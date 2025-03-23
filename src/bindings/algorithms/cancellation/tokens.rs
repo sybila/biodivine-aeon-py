@@ -128,10 +128,6 @@ impl CancelTokenPython {
     pub fn with_inner<T: CancellationHandler + 'static>(handler: T) -> Self {
         CancelTokenPython(Box::new(handler))
     }
-
-    pub fn set_inner<T: CancellationHandler + 'static>(&mut self, handler: T) {
-        self.0 = Box::new(handler)
-    }
 }
 
 /* Python - End */
