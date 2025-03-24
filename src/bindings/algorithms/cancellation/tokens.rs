@@ -12,7 +12,7 @@ use pyo3::Python;
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
-// TODO: ohtenkay - nice to have - consider trying this with an enum
+// TODO: nice to have - consider trying this with an enum
 
 /* Never - Start */
 
@@ -62,16 +62,15 @@ pub struct CancelTokenTimer {
 
 impl CancellationHandler for CancelTokenTimer {
     fn is_cancelled(&self) -> bool {
+        // TODO: ohtenkay - assert that the timer is started
         self.cancelled.load(SeqCst)
     }
 
-    // TODO: ohtenkay - kill threads on restart
     fn start_timer(&self) {
         assert!(self.cancel_after(self.time_limit));
     }
 }
 
-// TODO: ohtenkay - consider restarting the timer for every algorithm
 impl CancelTokenTimer {
     /// Create a new timer with the specified `duration` that is not running.
     pub fn new(duration: Duration) -> CancelTokenTimer {

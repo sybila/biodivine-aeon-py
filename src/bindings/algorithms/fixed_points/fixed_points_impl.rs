@@ -51,7 +51,7 @@ impl FixedPoints {
 }
 
 impl FixedPoints {
-    // TODO: ohtenkay - document this, discuss whether to take the documentation from lib_param_bn
+    // TODO: docs - document these methods using the lib_param_bn docs
     pub fn naive_symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
         self.config().start_timer();
         let stg = &self.config().graph;
@@ -86,7 +86,6 @@ impl FixedPoints {
         while to_merge.len() > 1 {
             to_merge.sort_by_key(|it| -(it.symbolic_size() as isize));
 
-            // TODO: ohtenkay - ask what should be debug and what slould be trace
             debug!(
                 target: TARGET_NAIVE_SYMBOLIC,
                 " > Merging {} sets using {} BDD nodes.",
@@ -102,15 +101,9 @@ impl FixedPoints {
             to_merge.push(x.intersect(&y));
         }
 
-        // TODO: ohtenkay - discuss this error
-        let Some(fixed_points) = to_merge.pop() else {
-            info!(
-                target: TARGET_NAIVE_SYMBOLIC,
-                "No fixed points found using {} BDD nodes.",
-                restriction.symbolic_size()
-            );
-            return Err(FixedPointsError::NoFixedPointsFound);
-        };
+        let fixed_points = to_merge
+            .pop()
+            .expect("SymbolicAsyncGraph has no variables, invalid state.");
 
         info!(
             target: TARGET_NAIVE_SYMBOLIC,
@@ -410,7 +403,7 @@ impl FixedPoints {
     }
 }
 
-// TODO: ohtenkay - make this optional with a feature flag
+// TODO: finalize - make this optional with a feature flag
 #[pymethods]
 impl FixedPoints {
     /// Create a new [Reachability] instance with the given [AsynchronousGraph]

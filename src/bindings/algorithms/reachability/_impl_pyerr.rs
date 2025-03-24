@@ -2,6 +2,7 @@ use pyo3::{create_exception, exceptions::PyException, PyErr};
 
 use crate::bindings::algorithms::{cancellation::CancelledError, reachability::ReachabilityError};
 
+// TODO: nice to have - convert x to native Python object, also for fixed points
 impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {
         match err {
@@ -28,7 +29,7 @@ impl From<ReachabilityError> for PyErr {
     }
 }
 
-// TODO: ohtenkay - add fourth argument, documentation
+// TODO: docs - add fourth argument, documentation
 create_exception!(reachability, StepsLimitExceededError, PyException);
 create_exception!(reachability, BddSizeLimitExceededError, PyException);
 create_exception!(reachability, InvalidSubgraphError, PyException);

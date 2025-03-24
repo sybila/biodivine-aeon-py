@@ -142,7 +142,7 @@ impl CancellationHandler for ReachabilityConfig {
     }
 }
 
-// TODO: ohtenkay - make this optional with a feature flag
+// TODO: finalize - make this optional with a feature flag
 /// These methods are Python facing wrappers of native mehtods and thus should not be used from
 /// within Rust. When working with [ReachibilityConfig] from Rust, use methods without the _py
 /// suffix.

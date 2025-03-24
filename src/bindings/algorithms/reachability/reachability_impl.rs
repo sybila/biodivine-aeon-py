@@ -310,7 +310,7 @@ impl Reachability {
     }
 }
 
-// TODO: ohtenkay - make this optional with a feature flag
+// TODO: finalize - make this optional with a feature flag
 #[pymethods]
 impl Reachability {
     /// Create a new [Reachability] instance with the given [AsynchronousGraph]

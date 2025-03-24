@@ -23,8 +23,10 @@ pub struct FixedPointsConfig {
     pub graph: SymbolicAsyncGraph,
     pub restriction: GraphColoredVertices,
     pub cancellation: Box<dyn CancellationHandler>,
+    // TODO: ohtenkay - move this to a wrapper struct
     pub symbolic_context: Option<Py<SymbolicContext>>,
-    // TODO: ohtenkay - discuss the rest of the fields.
+    // TODO: ohtenkay - add with_ constructors
+    pub bdd_size_limit: usize,
 }
 
 impl FixedPointsConfig {
@@ -34,6 +36,7 @@ impl FixedPointsConfig {
             restriction: graph.unit_colored_vertices().clone(),
             cancellation: Default::default(),
             symbolic_context: None,
+            bdd_size_limit: usize::MAX,
             graph,
         }
     }
@@ -51,7 +54,6 @@ impl FixedPointsConfig {
         self
     }
 
-    // TODO: ohtenkay - discuss where to get the context
     fn with_symbolic_context(mut self, context: Py<SymbolicContext>) -> Self {
         self.symbolic_context = Some(context);
         self
