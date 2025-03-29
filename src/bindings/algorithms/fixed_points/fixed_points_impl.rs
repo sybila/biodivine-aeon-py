@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use biodivine_lib_bdd::{Bdd, BddVariable, BddVariableSet};
+use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::{
     biodivine_std::traits::Set,
     symbolic_async_graph::{GraphColoredVertices, GraphColors, GraphVertices, SymbolicAsyncGraph},
@@ -30,6 +30,7 @@ const TARGET_SYMBOLIC_VERTICES: &str = "FixedPoints::symbolic_vertices";
 const TARGET_SYMBOLIC_COLORS: &str = "FixedPoints::symbolic_colors";
 
 #[pyclass(module = "biodivine_aeon", frozen)]
+#[derive(Clone)]
 pub struct FixedPoints(FixedPointsConfig);
 
 impl FixedPoints {
@@ -50,10 +51,20 @@ impl FixedPoints {
     }
 }
 
+impl CancellationHandler for FixedPoints {
+    fn is_cancelled(&self) -> bool {
+        self.config().cancellation.is_cancelled()
+    }
+
+    fn start_timer(&self) {
+        self.config().cancellation.start_timer()
+    }
+}
+
 impl FixedPoints {
     // TODO: docs - document these methods using the lib_param_bn docs
     pub fn naive_symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
-        self.config().start_timer();
+        self.start_timer();
         let stg = &self.config().graph;
         let restriction = &self.config().restriction;
 
@@ -70,7 +81,7 @@ impl FixedPoints {
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = restriction.minus(&can_step);
 
-                is_cancelled!(self.config())?;
+                is_cancelled!(self)?;
 
                 trace!(
                     target: TARGET_NAIVE_SYMBOLIC,
@@ -94,7 +105,7 @@ impl FixedPoints {
             );
 
             // TODO: ohtenkay - is there a partial result in any of the algorithms?
-            is_cancelled!(self.config())?;
+            is_cancelled!(self)?;
 
             let x = to_merge.pop().unwrap();
             let y = to_merge.pop().unwrap();
@@ -116,7 +127,7 @@ impl FixedPoints {
     }
 
     pub fn symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
-        self.config().start_timer();
+        self.start_timer();
         let stg = &self.config().graph;
         let restriction = &self.config().restriction;
 
@@ -129,23 +140,23 @@ impl FixedPoints {
 
         let mut to_merge = self.prepare_to_merge(TARGET_SYMBOLIC)?;
 
-        // TODO: ohtenkay - deleted note to self
+        /*
+           Note to self: There is actually a marginally faster version of this algorithm that
+           does not throw away the intermediate results but instead carries them over to the
+           next iteration. Nevertheless, this version also wastes much more memory, as all
+           results have to be preserved, so I ultimately decided not to use it.
+        */
 
         // Finally add the global requirement on the whole state space, if it is relevant.
         if !stg.unit_colored_vertices().is_subset(restriction) {
             to_merge.push(restriction.as_bdd().clone());
         }
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
-        let fixed_points = self.symbolic_merge(
-            stg.symbolic_context().bdd_variable_set(),
-            to_merge,
-            HashSet::default(),
-            TARGET_SYMBOLIC,
-        )?;
+        let fixed_points = self.symbolic_merge(to_merge, HashSet::default(), TARGET_SYMBOLIC)?;
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
         let fixed_points = stg.unit_colored_vertices().copy(fixed_points);
 
@@ -160,7 +171,7 @@ impl FixedPoints {
     }
 
     pub fn symbolic_vertices(&self) -> Result<GraphVertices, FixedPointsError> {
-        self.config().start_timer();
+        self.start_timer();
         let stg = &self.config().graph;
         let restriction = &self.config().restriction;
 
@@ -185,18 +196,13 @@ impl FixedPoints {
             .cloned()
             .collect();
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
-        let bdd = self.symbolic_merge(
-            stg.symbolic_context().bdd_variable_set(),
-            to_merge,
-            projections,
-            TARGET_SYMBOLIC_VERTICES,
-        )?;
+        let bdd = self.symbolic_merge(to_merge, projections, TARGET_SYMBOLIC_VERTICES)?;
 
         let vertices = stg.empty_colored_vertices().vertices().copy(bdd);
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
         info!(
             target: TARGET_SYMBOLIC_VERTICES,
@@ -233,18 +239,13 @@ impl FixedPoints {
             .cloned()
             .collect();
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
-        let bdd = self.symbolic_merge(
-            stg.symbolic_context().bdd_variable_set(),
-            to_merge,
-            projections,
-            TARGET_SYMBOLIC_COLORS,
-        )?;
+        let bdd = self.symbolic_merge(to_merge, projections, TARGET_SYMBOLIC_COLORS)?;
 
         let colors = stg.empty_colored_vertices().colors().copy(bdd);
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
         info!(
             target: TARGET_SYMBOLIC_COLORS,
@@ -267,7 +268,7 @@ impl FixedPoints {
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = stg.unit_colored_vertices().minus(&can_step);
 
-                is_cancelled!(self.config())?;
+                is_cancelled!(self)?;
 
                 trace!(
                     target: target,
@@ -285,8 +286,6 @@ impl FixedPoints {
 
     fn symbolic_merge(
         &self,
-        // TODO: ohtenkay - discuss this argument being removed and the function taking &self instead
-        universe: &BddVariableSet,
         to_merge: Vec<Bdd>,
         // The set of variables that will be eliminated from the result.
         mut projections: HashSet<BddVariable>,
@@ -315,12 +314,21 @@ impl FixedPoints {
             })
             .collect();
 
+        let universe = self.config().graph.symbolic_context().bdd_variable_set();
         let mut result = universe.mk_true();
         let mut merged = HashSet::new();
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
-        // TODO: ohtenkay - deleted note to self
+        /*
+           Note to self: It seems that not all projections are always beneficial to the BDD size.
+           At the same time, a non-optimal merge may enable a very useful projection. It is
+           not entirely clear how to greedily apply these two observations. Ideally, we'd like
+           to prioritize merges that lead to projections, but this is not universally true.
+
+           Maybe we could at least greedily prefer merging sets that will immediately lead to
+           projections? But even this is not an entirely clear win.
+        */
 
         while !to_merge.is_empty() || !projections.is_empty() {
             for p_var in projections.clone() {
@@ -329,7 +337,7 @@ impl FixedPoints {
                     result = result.var_exists(p_var);
                     projections.remove(&p_var);
 
-                    is_cancelled!(self.config())?;
+                    is_cancelled!(self)?;
 
                     trace!(
                         target: target,
@@ -358,7 +366,7 @@ impl FixedPoints {
                     biodivine_lib_bdd::op_function::and,
                 );
 
-                is_cancelled!(self.config())?;
+                is_cancelled!(self)?;
 
                 if let Some(bdd) = bdd {
                     // At this point, the size of the BDD should be smaller or equal to the
@@ -390,7 +398,7 @@ impl FixedPoints {
             }
         }
 
-        is_cancelled!(self.config())?;
+        is_cancelled!(self)?;
 
         info!(target: target, "Merge finished with {} BDD nodes.", result.size());
 
@@ -406,7 +414,7 @@ impl FixedPoints {
 // TODO: finalize - make this optional with a feature flag
 #[pymethods]
 impl FixedPoints {
-    /// Create a new [Reachability] instance with the given [AsynchronousGraph]
+    /// Create a new [FixedPoints] instance with the given [AsynchronousGraph]
     /// and otherwise default configuration.
     #[staticmethod]
     #[pyo3(name = "with_graph")]
@@ -414,7 +422,7 @@ impl FixedPoints {
         FixedPoints(FixedPointsConfig::with_graph_py(graph))
     }
 
-    /// Create a new [Reachability] instance with the given [ReachabilityConfig].
+    /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
     #[staticmethod]
     #[pyo3(name = "with_config")]
     pub fn with_config_py(config: Py<FixedPointsConfig>) -> Self {

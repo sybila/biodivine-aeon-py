@@ -62,7 +62,7 @@ pub struct CancelTokenTimer {
 
 impl CancellationHandler for CancelTokenTimer {
     fn is_cancelled(&self) -> bool {
-        // TODO: ohtenkay - assert that the timer is started
+        assert!(self.started.load(SeqCst));
         self.cancelled.load(SeqCst)
     }
 

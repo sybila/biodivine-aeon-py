@@ -51,6 +51,16 @@ impl Reachability {
     }
 }
 
+impl CancellationHandler for Reachability {
+    fn is_cancelled(&self) -> bool {
+        self.config().cancellation.is_cancelled()
+    }
+
+    fn start_timer(&self) {
+        self.config().cancellation.start_timer();
+    }
+}
+
 impl Reachability {
     /// Compute the *greatest superset* of the given `initial` set that is forward closed.
     ///
@@ -59,7 +69,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
-        self.config().start_timer();
+        self.start_timer();
         info!(target: TARGET_FORWARD_SUPERSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
@@ -79,7 +89,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self.config(), result)?;
+                result = is_cancelled!(self, result)?;
 
                 let mut successors = graph.var_post_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
@@ -121,7 +131,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
-        self.config().start_timer();
+        self.start_timer();
         info!(target: TARGET_BACKWARD_SUPERSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
@@ -141,7 +151,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self.config(), result)?;
+                result = is_cancelled!(self, result)?;
 
                 let mut predecessors = graph.var_pre_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
@@ -184,7 +194,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
-        self.config().start_timer();
+        self.start_timer();
         info!(target: TARGET_FORWARD_SUBSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
@@ -204,7 +214,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self.config(), result)?;
+                result = is_cancelled!(self, result)?;
 
                 let mut can_go_out = graph.var_can_post_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
@@ -251,7 +261,7 @@ impl Reachability {
         &self,
         initial: &GraphColoredVertices,
     ) -> Result<GraphColoredVertices, ReachabilityError> {
-        self.config().start_timer();
+        self.start_timer();
         info!(target: TARGET_BACKWARD_SUBSET, "Started with {} initial states.", initial.exact_cardinality());
 
         let mut result = initial.clone();
@@ -271,7 +281,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self.config(), result)?;
+                result = is_cancelled!(self, result)?;
 
                 let mut has_predecessor_outside = graph.var_can_pre_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {

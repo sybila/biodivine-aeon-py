@@ -131,17 +131,6 @@ impl ReachabilityConfig {
     }
 }
 
-// TODO: ohtenkay - maybe implement this for `Reachability` instead
-impl CancellationHandler for ReachabilityConfig {
-    fn is_cancelled(&self) -> bool {
-        self.cancellation.is_cancelled()
-    }
-
-    fn start_timer(&self) {
-        self.cancellation.start_timer()
-    }
-}
-
 // TODO: finalize - make this optional with a feature flag
 /// These methods are Python facing wrappers of native mehtods and thus should not be used from
 /// within Rust. When working with [ReachibilityConfig] from Rust, use methods without the _py

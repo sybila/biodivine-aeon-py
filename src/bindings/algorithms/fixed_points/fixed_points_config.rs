@@ -25,7 +25,6 @@ pub struct FixedPointsConfig {
     pub cancellation: Box<dyn CancellationHandler>,
     // TODO: ohtenkay - move this to a wrapper struct
     pub symbolic_context: Option<Py<SymbolicContext>>,
-    // TODO: ohtenkay - add with_ constructors
     pub bdd_size_limit: usize,
 }
 
@@ -54,6 +53,12 @@ impl FixedPointsConfig {
         self
     }
 
+    /// Update the `bdd_size_limit` property.
+    pub fn with_bdd_size_limit(mut self, bdd_size_limit: usize) -> Self {
+        self.bdd_size_limit = bdd_size_limit;
+        self
+    }
+
     fn with_symbolic_context(mut self, context: Py<SymbolicContext>) -> Self {
         self.symbolic_context = Some(context);
         self
@@ -62,16 +67,6 @@ impl FixedPointsConfig {
     /// Get the symbolic context of the graph.
     pub fn symbolic_context(&self) -> Py<SymbolicContext> {
         self.symbolic_context.clone().unwrap()
-    }
-}
-
-impl CancellationHandler for FixedPointsConfig {
-    fn is_cancelled(&self) -> bool {
-        self.cancellation.is_cancelled()
-    }
-
-    fn start_timer(&self) {
-        self.cancellation.start_timer()
     }
 }
 
@@ -120,5 +115,10 @@ impl FixedPointsConfig {
             .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(duration_in_millis),
             )))
+    }
+
+    #[pyo3(name = "with_bdd_size_limit")]
+    pub fn with_bdd_size_limit_py(&self, bdd_size_limit: usize) -> Self {
+        self.clone().with_bdd_size_limit(bdd_size_limit)
     }
 }
