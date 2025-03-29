@@ -13,15 +13,17 @@ use crate::{
         algorithms::{
             cancellation::CancellationHandler,
             fixed_points::{
-                fixed_points_config::FixedPointsConfig, fixed_points_error::FixedPointsError,
+                fixed_points_config::{FixedPointsConfig, FixedPointsConfigPython},
+                fixed_points_error::FixedPointsError,
             },
         },
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_color::ColorSet,
             set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
+            symbolic_context::SymbolicContext,
         },
     },
-    is_cancelled,
+    is_cancelled, AsNative,
 };
 
 const TARGET_NAIVE_SYMBOLIC: &str = "FixedPoints::naive_symbolic";
@@ -29,13 +31,13 @@ const TARGET_SYMBOLIC: &str = "FixedPoints::symbolic";
 const TARGET_SYMBOLIC_VERTICES: &str = "FixedPoints::symbolic_vertices";
 const TARGET_SYMBOLIC_COLORS: &str = "FixedPoints::symbolic_colors";
 
-#[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct FixedPoints(FixedPointsConfig);
 
 impl FixedPoints {
     /// Create a new [FixedPoints] instance with the given [SymbolicAsyncGraph]
     /// and otherwise default configuration.
+    #[allow(dead_code)]
     pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
         FixedPoints(FixedPointsConfig::with_graph(graph))
     }
@@ -412,55 +414,66 @@ impl FixedPoints {
 }
 
 // TODO: finalize - make this optional with a feature flag
+#[pyclass(module = "biodivine_aeon", frozen)]
+#[pyo3(name = "FixedPoints")]
+pub struct FixedPointsPython {
+    inner: FixedPoints,
+    symbolic_context: Py<SymbolicContext>,
+}
+
 #[pymethods]
-impl FixedPoints {
+impl FixedPointsPython {
     /// Create a new [FixedPoints] instance with the given [AsynchronousGraph]
     /// and otherwise default configuration.
     #[staticmethod]
-    #[pyo3(name = "with_graph")]
-    pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
-        FixedPoints(FixedPointsConfig::with_graph_py(graph))
+    pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
+        let config = FixedPointsConfig::with_graph(graph.get().as_native().clone());
+
+        FixedPointsPython {
+            inner: FixedPoints(config),
+            symbolic_context: graph.get().symbolic_context(),
+        }
     }
 
     /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
     #[staticmethod]
-    #[pyo3(name = "with_config")]
-    pub fn with_config_py(config: Py<FixedPointsConfig>) -> Self {
-        FixedPoints(config.get().clone())
+    pub fn with_config(config: Py<FixedPointsConfigPython>) -> Self {
+        FixedPointsPython {
+            inner: FixedPoints::with_config(config.get().inner()),
+            symbolic_context: config.get().symbolic_context(),
+        }
     }
 
-    #[pyo3(name = "naive_symbolic")]
-    pub fn naive_symbolic_py(&self) -> PyResult<ColoredVertexSet> {
-        let result_set = self.naive_symbolic()?;
+    pub fn naive_symbolic(&self) -> PyResult<ColoredVertexSet> {
+        let result_set = self.inner.naive_symbolic()?;
+
         Ok(ColoredVertexSet::mk_native(
-            self.config().symbolic_context(),
+            self.symbolic_context.clone(),
             result_set,
         ))
     }
 
-    #[pyo3(name = "symbolic")]
-    pub fn symbolic_py(&self) -> PyResult<ColoredVertexSet> {
-        let result_set = self.symbolic()?;
+    pub fn symbolic(&self) -> PyResult<ColoredVertexSet> {
+        let result_set = self.inner.symbolic()?;
+
         Ok(ColoredVertexSet::mk_native(
-            self.config().symbolic_context(),
+            self.symbolic_context.clone(),
             result_set,
         ))
     }
 
-    #[pyo3(name = "symbolic_vertices")]
-    pub fn symbolic_vertices_py(&self) -> PyResult<VertexSet> {
-        let result_set = self.symbolic_vertices()?;
+    pub fn symbolic_vertices(&self) -> PyResult<VertexSet> {
+        let result_set = self.inner.symbolic_vertices()?;
         Ok(VertexSet::mk_native(
-            self.config().symbolic_context(),
+            self.symbolic_context.clone(),
             result_set,
         ))
     }
 
-    #[pyo3(name = "symbolic_colors")]
-    pub fn symbolic_colors_py(&self) -> PyResult<ColorSet> {
-        let result_set = self.symbolic_colors()?;
+    pub fn symbolic_colors(&self) -> PyResult<ColorSet> {
+        let result_set = self.inner.symbolic_colors()?;
         Ok(ColorSet::mk_native(
-            self.config().symbolic_context(),
+            self.symbolic_context.clone(),
             result_set,
         ))
     }

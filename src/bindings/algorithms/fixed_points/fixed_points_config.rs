@@ -17,14 +17,11 @@ use crate::{
     AsNative,
 };
 
-#[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct FixedPointsConfig {
     pub graph: SymbolicAsyncGraph,
     pub restriction: GraphColoredVertices,
     pub cancellation: Box<dyn CancellationHandler>,
-    // TODO: ohtenkay - move this to a wrapper struct
-    pub symbolic_context: Option<Py<SymbolicContext>>,
     pub bdd_size_limit: usize,
 }
 
@@ -34,7 +31,6 @@ impl FixedPointsConfig {
         FixedPointsConfig {
             restriction: graph.unit_colored_vertices().clone(),
             cancellation: Default::default(),
-            symbolic_context: None,
             bdd_size_limit: usize::MAX,
             graph,
         }
@@ -58,26 +54,35 @@ impl FixedPointsConfig {
         self.bdd_size_limit = bdd_size_limit;
         self
     }
+}
 
-    fn with_symbolic_context(mut self, context: Py<SymbolicContext>) -> Self {
-        self.symbolic_context = Some(context);
-        self
+#[pyclass(module = "biodivine_aeon", frozen)]
+#[pyo3(name = "FixedPointsConfig")]
+#[derive(Clone)]
+pub struct FixedPointsConfigPython {
+    inner: FixedPointsConfig,
+    symbolic_context: Py<SymbolicContext>,
+}
+
+impl FixedPointsConfigPython {
+    pub fn inner(&self) -> FixedPointsConfig {
+        self.inner.clone()
     }
 
-    /// Get the symbolic context of the graph.
     pub fn symbolic_context(&self) -> Py<SymbolicContext> {
-        self.symbolic_context.clone().unwrap()
+        self.symbolic_context.clone()
     }
 }
 
 #[pymethods]
-impl FixedPointsConfig {
+impl FixedPointsConfigPython {
     #[new]
-    #[pyo3(signature = (graph, restriction = None, time_limit_millis = None))]
+    #[pyo3(signature = (graph, restriction = None, time_limit_millis = None, bdd_size_limit = None))]
     pub fn new_py(
         graph: Py<AsynchronousGraph>,
         restriction: Option<Py<ColoredVertexSet>>,
         time_limit_millis: Option<u64>,
+        bdd_size_limit: Option<usize>,
     ) -> Self {
         let mut config = FixedPointsConfig::with_graph(graph.get().as_native().clone());
 
@@ -91,34 +96,59 @@ impl FixedPointsConfig {
             )))
         }
 
-        config
+        if let Some(size_limit) = bdd_size_limit {
+            config = config.with_bdd_size_limit(size_limit)
+        }
+
+        FixedPointsConfigPython {
+            inner: config,
+            symbolic_context: graph.get().symbolic_context().clone(),
+        }
     }
 
     #[staticmethod]
-    #[pyo3(name = "with_graph")]
-    pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
-        FixedPointsConfig::with_graph(graph.get().as_native().clone())
-            .with_cancellation(CancelTokenPython::default())
-            .with_symbolic_context(graph.get().symbolic_context())
+    pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
+        let config = FixedPointsConfig::with_graph(graph.get().as_native().clone());
+
+        FixedPointsConfigPython {
+            inner: config,
+            symbolic_context: graph.get().symbolic_context().clone(),
+        }
     }
 
-    #[pyo3(name = "with_restriction")]
-    pub fn with_restriction_py(&self, restriction: Py<ColoredVertexSet>) -> Self {
-        self.clone()
-            .with_restriction(restriction.get().as_native().clone())
+    pub fn with_restriction(&self, restriction: Py<ColoredVertexSet>) -> Self {
+        let config = self
+            .inner
+            .clone()
+            .with_restriction(restriction.get().as_native().clone());
+
+        FixedPointsConfigPython {
+            inner: config,
+            symbolic_context: self.symbolic_context.clone(),
+        }
     }
 
     // TODO: if we ever move away from abi3-py37, use Duration as an argument
-    #[pyo3(name = "with_time_limit")]
-    pub fn with_time_limit_py(&self, duration_in_millis: u64) -> Self {
-        self.clone()
+    pub fn with_time_limit(&self, duration_in_millis: u64) -> Self {
+        let config = self
+            .inner
+            .clone()
             .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(duration_in_millis),
-            )))
+            )));
+
+        FixedPointsConfigPython {
+            inner: config,
+            symbolic_context: self.symbolic_context.clone(),
+        }
     }
 
-    #[pyo3(name = "with_bdd_size_limit")]
-    pub fn with_bdd_size_limit_py(&self, bdd_size_limit: usize) -> Self {
-        self.clone().with_bdd_size_limit(bdd_size_limit)
+    pub fn with_bdd_size_limit(&self, bdd_size_limit: usize) -> Self {
+        let config = self.inner.clone().with_bdd_size_limit(bdd_size_limit);
+
+        FixedPointsConfigPython {
+            inner: config,
+            symbolic_context: self.symbolic_context.clone(),
+        }
     }
 }
