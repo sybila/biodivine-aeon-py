@@ -1,20 +1,39 @@
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter, Result};
 
+use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use thiserror::Error;
 
 use crate::bindings::algorithms::cancellation::CancellationError;
 
-// TODO: ohtenkay - impl Debug for FixedPointsError
 /// An error returned by a [FixedPoints] procedure.
-// TODO: ohtenkay - by default GraphColoredVertices is restriction, in the future, consider making it more precise
-#[derive(Error, Debug)]
+#[derive(Error)]
 pub enum FixedPointsError {
     #[error("operation cancelled")]
     CancelledEmpty,
     // #[error("operation cancelled")]
     // Cancelled(GraphColoredVertices),
-    // #[error("BDD size limit exceeded")]
-    // BddSizeLimitExceeded(GraphColoredVertices),
+    // TODO: discuss - Errors can only contain GraphColoredVertices, but algoritms can return also
+    // only Colors or only Vertices
+    #[error("BDD size limit exceeded")]
+    BddSizeLimitExceeded(GraphColoredVertices),
+}
+
+/// The default implementation will print the whole BDD, which can be quite large.
+impl Debug for FixedPointsError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        match self {
+            FixedPointsError::CancelledEmpty => {
+                write!(f, "Cancelled")
+            }
+            FixedPointsError::BddSizeLimitExceeded(x) => {
+                write!(
+                    f,
+                    "BddSizeLimitExceeded(partial_result={})",
+                    x.exact_cardinality()
+                )
+            }
+        }
+    }
 }
 
 impl<T> From<CancellationError<T>> for FixedPointsError

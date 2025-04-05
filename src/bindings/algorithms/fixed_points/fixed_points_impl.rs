@@ -77,9 +77,17 @@ impl FixedPoints {
             restriction.symbolic_size()
         );
 
+        // TODO: discuss - is this correct
+        let mut combined_bdd_size = 0;
         let mut to_merge: Vec<GraphColoredVertices> = stg
             .variables()
             .map(|var| {
+                if combined_bdd_size > self.config().bdd_size_limit {
+                    return Err(FixedPointsError::BddSizeLimitExceeded(
+                        self.config().restriction.clone(),
+                    ));
+                }
+
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = restriction.minus(&can_step);
 
@@ -92,6 +100,7 @@ impl FixedPoints {
                     is_stable.symbolic_size()
                 );
 
+                combined_bdd_size += is_stable.as_bdd().size();
                 Ok(is_stable)
             })
             .collect::<Result<Vec<_>, FixedPointsError>>()?;
@@ -264,9 +273,16 @@ impl FixedPoints {
     fn prepare_to_merge(&self, target: &str) -> Result<Vec<Bdd>, FixedPointsError> {
         let stg = &self.config().graph;
 
+        let mut combined_bdd_size = 0;
         let result = stg
             .variables()
             .map(|var| {
+                if combined_bdd_size > self.config().bdd_size_limit {
+                    return Err(FixedPointsError::BddSizeLimitExceeded(
+                        self.config().restriction.clone(),
+                    ));
+                }
+
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = stg.unit_colored_vertices().minus(&can_step);
 
@@ -279,6 +295,7 @@ impl FixedPoints {
                     is_stable.symbolic_size()
                 );
 
+                combined_bdd_size += is_stable.as_bdd().size();
                 Ok(is_stable.into_bdd())
             })
             .collect::<Result<Vec<_>, FixedPointsError>>()?;
@@ -380,24 +397,33 @@ impl FixedPoints {
                 }
             }
 
-            // This may not be true in the last iteration if the only thing left to do
+            // This may be true in the last iteration if the only thing left to do
             // are projections.
-            if best_result_size != usize::MAX {
-                result = best_result;
-                to_merge.remove(&best_index);
-                merged.insert(best_index);
-
-                if result.is_false() {
-                    return Ok(universe.mk_false());
-                }
-
-                trace!(
-                    target: target,
-                    " > Merge. New result has {} BDD nodes. Remaining constraints: {}.",
-                    result.size(),
-                    to_merge.len(),
-                );
+            if best_result_size == usize::MAX {
+                continue;
             }
+
+            result = best_result;
+            to_merge.remove(&best_index);
+            merged.insert(best_index);
+
+            let sum_to_merge_bdd_sizes = to_merge.values().map(|set| set.size()).sum::<usize>();
+            if sum_to_merge_bdd_sizes + best_result_size > self.config().bdd_size_limit {
+                return Err(FixedPointsError::BddSizeLimitExceeded(
+                    self.config().graph.unit_colored_vertices().copy(result),
+                ));
+            }
+
+            if result.is_false() {
+                return Ok(universe.mk_false());
+            }
+
+            trace!(
+                target: target,
+                " > Merge. New result has {} BDD nodes. Remaining constraints: {}.",
+                result.size(),
+                to_merge.len(),
+            );
         }
 
         is_cancelled!(self)?;
