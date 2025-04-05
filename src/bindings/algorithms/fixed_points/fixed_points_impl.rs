@@ -23,7 +23,7 @@ use crate::{
             symbolic_context::SymbolicContext,
         },
     },
-    is_cancelled, AsNative,
+    is_cancelled,
 };
 
 const TARGET_NAIVE_SYMBOLIC: &str = "FixedPoints::naive_symbolic";
@@ -453,11 +453,11 @@ impl FixedPointsPython {
     /// and otherwise default configuration.
     #[staticmethod]
     pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
-        let config = FixedPointsConfig::with_graph(graph.get().as_native().clone());
+        let config = FixedPointsConfigPython::with_graph(graph);
 
         FixedPointsPython {
-            inner: FixedPoints(config),
-            symbolic_context: graph.get().symbolic_context(),
+            inner: FixedPoints(config.inner()),
+            symbolic_context: config.symbolic_context(),
         }
     }
 

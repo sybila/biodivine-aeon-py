@@ -108,7 +108,8 @@ impl FixedPointsConfigPython {
 
     #[staticmethod]
     pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
-        let config = FixedPointsConfig::with_graph(graph.get().as_native().clone());
+        let config = FixedPointsConfig::with_graph(graph.get().as_native().clone())
+            .with_cancellation(CancelTokenPython::default());
 
         FixedPointsConfigPython {
             inner: config,
@@ -124,7 +125,7 @@ impl FixedPointsConfigPython {
 
         FixedPointsConfigPython {
             inner: config,
-            symbolic_context: self.symbolic_context.clone(),
+            symbolic_context: self.symbolic_context(),
         }
     }
 
@@ -139,7 +140,7 @@ impl FixedPointsConfigPython {
 
         FixedPointsConfigPython {
             inner: config,
-            symbolic_context: self.symbolic_context.clone(),
+            symbolic_context: self.symbolic_context(),
         }
     }
 
@@ -148,7 +149,7 @@ impl FixedPointsConfigPython {
 
         FixedPointsConfigPython {
             inner: config,
-            symbolic_context: self.symbolic_context.clone(),
+            symbolic_context: self.symbolic_context(),
         }
     }
 }

@@ -6,12 +6,12 @@ use crate::{global_log_level, AsNative};
 use pyo3::prelude::*;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct FixedPoints {
+pub struct FixedPointsOld {
     _dummy: (),
 }
 
 #[pymethods]
-impl FixedPoints {
+impl FixedPointsOld {
     /// Iteratively compute the colored set of fixed-points in an `AsynchronousGraph` that are the
     /// subset of the `restriction` set.
     #[staticmethod]
