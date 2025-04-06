@@ -67,7 +67,7 @@ impl CancellationHandler for CancelTokenTimer {
     }
 
     fn start_timer(&self) {
-        assert!(self.cancel_after(self.time_limit));
+        self.cancel_after(self.time_limit);
     }
 }
 

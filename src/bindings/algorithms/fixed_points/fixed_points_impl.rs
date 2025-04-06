@@ -288,7 +288,9 @@ impl FixedPoints {
 
                 is_cancelled!(self)?;
 
-                trace!(
+                // TODO: discuss - if i change this to trace or disable logging, cancellation does
+                // not happen
+                debug!(
                     target: target,
                     " > Created initial set for {:?} using {} BDD nodes.",
                     var,
