@@ -63,11 +63,16 @@ pub struct CancelTokenTimer {
 impl CancellationHandler for CancelTokenTimer {
     fn is_cancelled(&self) -> bool {
         assert!(self.started.load(SeqCst));
+
         self.cancelled.load(SeqCst)
     }
 
     fn start_timer(&self) {
-        self.cancel_after(self.time_limit);
+        if self.cancel_after(self.time_limit) {
+            info!(target: "cancellation", "Timer for {}ms started.", self.time_limit.as_millis());
+        } else {
+            info!(target: "cancellation", "Timer for {}ms already started.", self.time_limit.as_millis());
+        }
     }
 }
 
@@ -90,12 +95,12 @@ impl CancelTokenTimer {
         if !is_started {
             let thread_copy = self.clone();
             std::thread::spawn(move || {
-                info!(target: "cancellation", "Timer for {}ms started.", duration.as_millis());
                 std::thread::sleep(duration);
                 thread_copy.cancelled.store(true, SeqCst);
                 info!(target: "cancellation", "Timer for {}ms elapsed. Operation cancelled.", duration.as_millis());
             });
         }
+
         !is_started
     }
 }

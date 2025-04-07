@@ -290,6 +290,7 @@ impl FixedPoints {
 
                 // TODO: discuss - if i change this to trace or disable logging, cancellation does
                 // not happen
+                // TODO: discuss - python does not have a TRACE level, so mbe use debug everywhere?
                 debug!(
                     target: target,
                     " > Created initial set for {:?} using {} BDD nodes.",
@@ -401,6 +402,7 @@ impl FixedPoints {
 
             // This may be true in the last iteration if the only thing left to do
             // are projections.
+            // TODO: discuss - changed this to guard condition
             if best_result_size == usize::MAX {
                 continue;
             }
