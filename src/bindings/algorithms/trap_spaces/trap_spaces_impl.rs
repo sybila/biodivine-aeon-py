@@ -3,21 +3,50 @@ use biodivine_lib_param_bn::{
     fixed_points::FixedPoints,
     symbolic_async_graph::SymbolicAsyncGraph,
     trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
+    BooleanNetwork,
 };
 use pyo3::prelude::*;
 use std::collections::HashSet;
 
 use crate::{
-    bindings::lib_param_bn::symbolic::{
-        asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
-        symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextPython,
+    bindings::{
+        algorithms::{
+            cancellation::CancellationHandler, trap_spaces::trap_spaces_config::TrapSpacesConfig,
+        },
+        lib_param_bn::symbolic::{
+            asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
+            symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextPython,
+        },
     },
     AsNative,
 };
 
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct TrapSpaces {
-    _dummy: (),
+#[derive(Clone)]
+pub struct TrapSpaces(TrapSpacesConfig);
+
+impl TrapSpaces {
+    /// Create a new "default" [TrapSpaces] for the given [BooleanNetwork].
+    pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, String> {
+        let config = TrapSpacesConfig::from_boolean_network(bn)?;
+
+        Ok(TrapSpaces(config))
+    }
+
+    /// Retrieve the internal [TrapSpacesConfig] of this instance.
+    pub fn config(&self) -> &TrapSpacesConfig {
+        &self.0
+    }
+}
+
+impl CancellationHandler for TrapSpaces {
+    fn is_cancelled(&self) -> bool {
+        self.config().cancellation.is_cancelled()
+    }
+
+    fn start_timer(&self) {
+        self.config().cancellation.start_timer();
+    }
 }
 
 impl TrapSpaces {
