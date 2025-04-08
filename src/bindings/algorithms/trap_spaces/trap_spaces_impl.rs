@@ -5,6 +5,7 @@ use biodivine_lib_param_bn::{
     trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
     BooleanNetwork,
 };
+use log::{debug, info};
 use pyo3::prelude::*;
 use std::collections::HashSet;
 
@@ -21,7 +22,7 @@ use crate::{
             symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextPython,
         },
     },
-    AsNative,
+    is_cancelled, AsNative,
 };
 
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -55,20 +56,16 @@ impl TrapSpaces {
     ///
     /// A trap space is essential if it cannot be reduced through percolation. In general, every
     /// minimal trap space is always essential.
-    pub fn _essential_symbolic<E, F: Fn() -> Result<(), E>>(
-        ctx: &SymbolicSpaceContext,
-        graph: &SymbolicAsyncGraph,
-        restriction: &NetworkColoredSpaces,
-        log_level: usize,
-        interrupt: &F,
-    ) -> Result<NetworkColoredSpaces, E> {
-        if should_log(log_level) {
-            println!(
-                "Start symbolic essential trap space search with {}[nodes:{}] candidates.",
-                restriction.approx_cardinality(),
-                restriction.symbolic_size()
-            );
-        }
+    pub fn essential_symbolic(&self) -> Result<NetworkColoredSpaces, TrapSpacesError> {
+        let ctx = &self.config().ctx;
+        let graph = &self.config().graph;
+        let restriction = &self.config().restriction;
+
+        info!(
+            "Start symbolic essential trap space search with {}[nodes:{}] candidates.",
+            restriction.approx_cardinality(),
+            restriction.symbolic_size()
+        );
 
         let bdd_ctx = ctx.bdd_variable_set();
 
@@ -78,14 +75,15 @@ impl TrapSpaces {
         for var in graph.variables() {
             let update_bdd = graph.get_symbolic_fn_update(var);
             let not_update_bdd = update_bdd.not();
-            interrupt()?;
+            is_cancelled!(self)?;
 
-            let has_up_transition = ctx._mk_can_go_to_true(update_bdd, log_level, interrupt)?;
-            interrupt()?;
+            // TODO: discuss - how to rewrite _mk_can_go_to_true?
+            let has_up_transition = ctx.mk_can_go_to_true(update_bdd);
+            is_cancelled!(self)?;
 
-            let has_down_transition =
-                ctx._mk_can_go_to_true(&not_update_bdd, log_level, interrupt)?;
-            interrupt()?;
+            // TODO: discuss - how to rewrite _mk_can_go_to_true?
+            let has_down_transition = ctx.mk_can_go_to_true(&not_update_bdd);
+            is_cancelled!(self)?;
 
             let true_var = ctx.get_positive_variable(var);
             let false_var = ctx.get_negative_variable(var);
@@ -93,47 +91,39 @@ impl TrapSpaces {
             let is_trap_1 = has_up_transition.imp(&bdd_ctx.mk_var(true_var));
             let is_trap_2 = has_down_transition.imp(&bdd_ctx.mk_var(false_var));
             let is_trap = is_trap_1.and(&is_trap_2);
-            interrupt()?;
+            is_cancelled!(self)?;
 
             let is_essential_1 = bdd_ctx.mk_var(true_var).and(&bdd_ctx.mk_var(false_var));
             let is_essential_2 = has_up_transition.and(&has_down_transition);
             let is_essential = is_essential_1.imp(&is_essential_2);
-            interrupt()?;
+            is_cancelled!(self)?;
 
+            // TODO: discuss - ask about this
             // This will work in next version of lib-bdd:
             // let is_trap = bdd!(bdd_ctx, (has_up_transition => true_var) & (has_down_transition => false_var));
             // let is_essential = bdd!(bdd_ctx, (true_var & false_var) => (has_up_transition & has_down_transition));
 
-            if log_essential(log_level, is_trap.size() + is_essential.size()) {
-                println!(
-                    " > Created initial sets for {:?} using {}+{} BDD nodes.",
-                    var,
-                    is_trap.size(),
-                    is_essential.size(),
-                );
-            }
+            debug!(
+                " > Created initial sets for {:?} using {}+{} BDD nodes.",
+                var,
+                is_trap.size(),
+                is_essential.size(),
+            );
 
             to_merge.push(is_trap.and(&is_essential));
         }
 
-        let trap_spaces = FixedPoints::_symbolic_merge(
-            bdd_ctx,
-            to_merge,
-            HashSet::default(),
-            log_level,
-            interrupt,
-        )?;
+        // TODO: discuss - use the new version here, create struct?
+        let trap_spaces = FixedPoints::symbolic_merge(bdd_ctx, to_merge, HashSet::default());
         let trap_spaces = NetworkColoredSpaces::new(trap_spaces, ctx);
-        interrupt()?;
+        is_cancelled!(self)?;
 
-        if should_log(log_level) {
-            println!(
-                "Found {}x{}[nodes:{}] essential trap spaces.",
-                trap_spaces.colors().approx_cardinality(),
-                trap_spaces.spaces().approx_cardinality(),
-                trap_spaces.symbolic_size(),
-            );
-        }
+        info!(
+            "Found {}x{}[nodes:{}] essential trap spaces.",
+            trap_spaces.colors().approx_cardinality(),
+            trap_spaces.spaces().approx_cardinality(),
+            trap_spaces.symbolic_size(),
+        );
 
         Ok(trap_spaces)
     }
@@ -301,7 +291,7 @@ impl TrapSpaces {
     /// minimal trap space is always essential.
     #[staticmethod]
     #[pyo3(signature = (ctx, graph, restriction = None))]
-    pub fn essential_symbolic(
+    pub fn essential_symbolic_py(
         py: Python,
         ctx: Py<SymbolicSpaceContextPython>,
         graph: &AsynchronousGraph,
@@ -329,7 +319,7 @@ impl TrapSpaces {
     /// the essential set.
     #[staticmethod]
     #[pyo3(signature = (ctx, graph, restriction = None))]
-    pub fn minimal_symbolic(
+    pub fn minimal_symbolic_py(
         py: Python,
         ctx: Py<SymbolicSpaceContextPython>,
         graph: &AsynchronousGraph,
@@ -352,7 +342,7 @@ impl TrapSpaces {
 
     /// Compute the inclusion-minimal spaces within a particular subset.
     #[staticmethod]
-    pub fn minimize(
+    pub fn minimize_py(
         py: Python,
         ctx: Py<SymbolicSpaceContextPython>,
         set: &ColoredSpaceSet,
@@ -368,7 +358,7 @@ impl TrapSpaces {
 
     /// Compute the inclusion-maximal spaces within a particular subset.
     #[staticmethod]
-    pub fn maximize(
+    pub fn maximize_py(
         py: Python,
         ctx: Py<SymbolicSpaceContextPython>,
         set: &ColoredSpaceSet,
