@@ -3,7 +3,7 @@ use biodivine_lib_param_bn::{
     trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
     BooleanNetwork,
 };
-use pyo3::pyclass;
+use pyo3::{pyclass, pymethods};
 
 use crate::bindings::algorithms::{
     cancellation::CancellationHandler, trap_spaces::trap_spaces_error::TrapSpacesError,
@@ -26,7 +26,7 @@ pub struct TrapSpacesConfig {
 impl TrapSpacesConfig {
     // TODO: discuss - add this for everything?
     pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, TrapSpacesError> {
-        let graph = SymbolicAsyncGraph::new(&bn).map_err(|e| TrapSpacesError::CreationFailed(e))?;
+        let graph = SymbolicAsyncGraph::new(&bn).map_err(TrapSpacesError::CreationFailed)?;
         let ctx = SymbolicSpaceContext::new(&bn);
 
         Ok(TrapSpacesConfig {
@@ -67,4 +67,9 @@ impl TrapSpacesConfig {
         self.cancellation = Box::new(cancellation);
         self
     }
+}
+
+#[pymethods]
+impl TrapSpacesConfig {
+    // TODO: ohtenkay
 }

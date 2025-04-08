@@ -15,14 +15,19 @@ use crate::{
                 trap_spaces_config::TrapSpacesConfig, trap_spaces_error::TrapSpacesError,
             },
         },
-        lib_param_bn::symbolic::{
-            asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
-            symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextPython,
+        lib_param_bn::{
+            boolean_network::BooleanNetwork as BooleanNetworkPython,
+            symbolic::{
+                set_colored_space::ColoredSpaceSet, symbolic_context::SymbolicContext,
+                symbolic_space_context::SymbolicSpaceContext,
+            },
         },
     },
     is_cancelled, AsNative,
 };
 
+// TODO: discuss - this whole thing could be separated into a new cargo project, pyo3 and biodivine
+// lib param bn as dependencies only if python is enabled
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct TrapSpaces(TrapSpacesConfig);
@@ -39,6 +44,7 @@ impl TrapSpaces {
     }
 }
 
+// TODO: dicuss - ohtenkay - create a trait Configurable (has inner config) that implements this
 impl CancellationHandler for TrapSpaces {
     fn is_cancelled(&self) -> bool {
         self.config().cancellation.is_cancelled()
@@ -112,6 +118,7 @@ impl TrapSpaces {
         }
 
         // TODO: discuss - use the new version here, create struct?
+        // what to do with cancellation? will timer clone?
         let trap_spaces = FixedPoints::symbolic_merge(bdd_ctx, to_merge, HashSet::default());
         let trap_spaces = NetworkColoredSpaces::new(trap_spaces, ctx);
         is_cancelled!(self)?;
@@ -260,31 +267,32 @@ impl TrapSpaces {
 
 #[pymethods]
 impl TrapSpaces {
+    // TODO: ohtenkay - creation methods
+
     /// Computes the coloured set of "essential" trap spaces of a Boolean network.
     ///
     /// A trap space is essential if it cannot be further reduced through percolation. In general, every
     /// minimal trap space is always essential.
-    #[staticmethod]
-    #[pyo3(signature = (ctx, graph, restriction = None))]
+    #[pyo3(name = "essential_symbolic")]
     pub fn essential_symbolic_py(
+        &self,
         py: Python,
-        ctx: Py<SymbolicSpaceContextPython>,
-        graph: &AsynchronousGraph,
-        restriction: Option<&ColoredSpaceSet>,
+        // TODO: discuss - in order to create the result, this has to be passed into the function,
+        // could be solved by creating double structs like in `FixedPointsConfigPython`.
+        // is there another way to create ColoredSpaceSet?
+        // if we go with the double struct, use SymbolicSpaceContext instead of BooleanNetworkPython
+        bn: Py<BooleanNetworkPython>,
     ) -> PyResult<ColoredSpaceSet> {
-        let unit = ctx
-            .get()
-            .as_native()
-            .mk_unit_colored_spaces(graph.as_native());
-        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_essential_symbolic(
-            ctx.get().as_native(),
-            graph.as_native(),
-            restriction,
-            global_log_level(py)?,
-            &|| py.check_signals(),
+        let result = self.essential_symbolic()?;
+        let ctx = Py::new(
+            py,
+            (
+                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicContext::new(py, bn, None)?,
+            ),
         )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+
+        Ok(ColoredSpaceSet::wrap_native(ctx, result))
     }
 
     /// Computes the minimal coloured trap spaces of the provided `network` within the specified
@@ -292,58 +300,62 @@ impl TrapSpaces {
     ///
     /// Currently, this method always slower than [Self::essential_symbolic], because it first has to compute
     /// the essential set.
-    #[staticmethod]
-    #[pyo3(signature = (ctx, graph, restriction = None))]
+    #[pyo3(name = "minimal_symbolic")]
     pub fn minimal_symbolic_py(
+        &self,
         py: Python,
-        ctx: Py<SymbolicSpaceContextPython>,
-        graph: &AsynchronousGraph,
-        restriction: Option<&ColoredSpaceSet>,
+        bn: Py<BooleanNetworkPython>,
     ) -> PyResult<ColoredSpaceSet> {
-        let unit = ctx
-            .get()
-            .as_native()
-            .mk_unit_colored_spaces(graph.as_native());
-        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
-            ctx.get().as_native(),
-            graph.as_native(),
-            restriction,
-            global_log_level(py)?,
-            &|| py.check_signals(),
+        let result = self.minimal_symbolic()?;
+        let ctx = Py::new(
+            py,
+            (
+                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicContext::new(py, bn, None)?,
+            ),
         )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+
+        Ok(ColoredSpaceSet::wrap_native(ctx, result))
     }
 
     /// Compute the inclusion-minimal spaces within a particular subset.
-    #[staticmethod]
+    #[pyo3(name = "minimize")]
     pub fn minimize_py(
+        &self,
         py: Python,
-        ctx: Py<SymbolicSpaceContextPython>,
+        bn: Py<BooleanNetworkPython>,
+        // TODO: discuss - how come this can be passed in as a reference?
         set: &ColoredSpaceSet,
     ) -> PyResult<ColoredSpaceSet> {
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimize(
-            ctx.get().as_native(),
-            set.as_native(),
-            global_log_level(py)?,
-            &|| py.check_signals(),
+        let result = self.minimize(set.as_native())?;
+        let ctx = Py::new(
+            py,
+            (
+                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicContext::new(py, bn, None)?,
+            ),
         )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+
+        Ok(ColoredSpaceSet::wrap_native(ctx, result))
     }
 
     /// Compute the inclusion-maximal spaces within a particular subset.
-    #[staticmethod]
+    #[pyo3(name = "maximize")]
     pub fn maximize_py(
+        &self,
         py: Python,
-        ctx: Py<SymbolicSpaceContextPython>,
+        bn: Py<BooleanNetworkPython>,
         set: &ColoredSpaceSet,
     ) -> PyResult<ColoredSpaceSet> {
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_maximize(
-            ctx.get().as_native(),
-            set.as_native(),
-            global_log_level(py)?,
-            &|| py.check_signals(),
+        let result = self.maximize(set.as_native())?;
+        let ctx = Py::new(
+            py,
+            (
+                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicContext::new(py, bn, None)?,
+            ),
         )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+
+        Ok(ColoredSpaceSet::wrap_native(ctx, result))
     }
 }
