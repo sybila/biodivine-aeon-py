@@ -1,13 +1,11 @@
+use std::collections::HashSet;
+
 use biodivine_lib_param_bn::{
-    biodivine_std::traits::Set,
-    fixed_points::FixedPoints,
-    symbolic_async_graph::SymbolicAsyncGraph,
-    trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
+    biodivine_std::traits::Set, fixed_points::FixedPoints, trap_spaces::NetworkColoredSpaces,
     BooleanNetwork,
 };
 use log::{debug, info};
 use pyo3::prelude::*;
-use std::collections::HashSet;
 
 use crate::{
     bindings::{
@@ -133,35 +131,27 @@ impl TrapSpaces {
     ///
     /// This method currently uses [Self::essential_symbolic], hence is always slower than
     /// this method.
-    pub fn _minimal_symbolic<E, F: Fn() -> Result<(), E>>(
-        ctx: &SymbolicSpaceContext,
-        graph: &SymbolicAsyncGraph,
-        restriction: &NetworkColoredSpaces,
-        log_level: usize,
-        interrupt: &F,
-    ) -> Result<NetworkColoredSpaces, E> {
-        let essential = Self::_essential_symbolic(ctx, graph, restriction, log_level, interrupt)?;
-        Self::_minimize(ctx, &essential, log_level, interrupt)
+    pub fn minimal_symbolic(&self) -> Result<NetworkColoredSpaces, TrapSpacesError> {
+        self.essential_symbolic()
+            .and_then(|essential| self.minimize(&essential))
     }
 
     /// Compute the minimal spaces within a particular subset.
-    pub fn _minimize<E, F: Fn() -> Result<(), E>>(
-        ctx: &SymbolicSpaceContext,
+    pub fn minimize(
+        &self,
         spaces: &NetworkColoredSpaces,
-        log_level: usize,
-        interrupt: &F,
-    ) -> Result<NetworkColoredSpaces, E> {
+    ) -> Result<NetworkColoredSpaces, TrapSpacesError> {
+        let ctx = &self.config().ctx;
+
         let mut original = spaces.clone();
         let mut minimal = ctx.mk_empty_colored_spaces();
 
-        if should_log(log_level) {
-            println!(
-                "Start minimal subspace search with {}x{}[nodes:{}] candidates.",
-                original.colors().approx_cardinality(),
-                original.spaces().approx_cardinality(),
-                original.symbolic_size()
-            );
-        }
+        info!(
+            "Start minimal subspace search with {}x{}[nodes:{}] candidates.",
+            original.colors().approx_cardinality(),
+            original.spaces().approx_cardinality(),
+            original.symbolic_size()
+        );
 
         while !original.is_empty() {
             // TODO:
@@ -178,7 +168,7 @@ impl TrapSpaces {
             //  "greedy" method using pick is good enough. Initial tests indicate that the
             //  greedy approach is enough.
             let minimum_candidate = original.pick_space();
-            interrupt()?;
+            is_cancelled!(self)?;
 
             // Compute the set of strict super spaces.
             // TODO:
@@ -187,97 +177,82 @@ impl TrapSpaces {
             //  find a way to get rid of fixed points and any related super-spaces first,
             //  as these are clearly minimal. The other option would be to tune the super
             //  space enumeration to avoid spaces that are clearly irrelevant anyway.
-            let super_spaces =
-                ctx._mk_super_spaces(minimum_candidate.as_bdd(), log_level, interrupt)?;
+            // TODO: discuss - rewrite _mk_super_spaces?
+            let super_spaces = ctx.mk_super_spaces(minimum_candidate.as_bdd());
             let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
-            interrupt()?;
+            is_cancelled!(self)?;
 
             original = original.minus(&super_spaces);
             minimal = minimal.minus(&super_spaces).union(&minimum_candidate);
-            interrupt()?;
+            is_cancelled!(self)?;
 
-            if log_essential(
-                log_level,
-                original.symbolic_size() + minimal.symbolic_size(),
-            ) {
-                println!(
-                    "Minimization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
-                    original.colors().approx_cardinality(),
-                    original.spaces().approx_cardinality(),
-                    original.symbolic_size(),
-                    minimal.colors().approx_cardinality(),
-                    minimal.spaces().approx_cardinality(),
-                    minimal.symbolic_size(),
-                );
-            }
-        }
-
-        if should_log(log_level) {
-            println!(
-                "Found {}[nodes:{}] minimal spaces.",
-                minimal.approx_cardinality(),
+            debug!(
+                "Minimization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
+                original.colors().approx_cardinality(),
+                original.spaces().approx_cardinality(),
+                original.symbolic_size(),
+                minimal.colors().approx_cardinality(),
+                minimal.spaces().approx_cardinality(),
                 minimal.symbolic_size(),
             );
         }
+
+        info!(
+            "Found {}[nodes:{}] minimal spaces.",
+            minimal.approx_cardinality(),
+            minimal.symbolic_size(),
+        );
 
         Ok(minimal)
     }
 
     /// The same as [Self::minimize], but searches for maximal spaces within `spaces`.
-    pub fn _maximize<E, F: Fn() -> Result<(), E>>(
-        ctx: &SymbolicSpaceContext,
+    pub fn maximize(
+        &self,
         spaces: &NetworkColoredSpaces,
-        log_level: usize,
-        interrupt: &F,
-    ) -> Result<NetworkColoredSpaces, E> {
+    ) -> Result<NetworkColoredSpaces, TrapSpacesError> {
+        let ctx = &self.config().ctx;
+
         let mut original = spaces.clone();
         let mut maximal = ctx.mk_empty_colored_spaces();
 
-        if should_log(log_level) {
-            println!(
-                "Start maximal subspace search with {}x{}[nodes:{}] candidates.",
-                original.colors().approx_cardinality(),
-                original.spaces().approx_cardinality(),
-                original.symbolic_size()
-            );
-        }
+        info!(
+            "Start maximal subspace search with {}x{}[nodes:{}] candidates.",
+            original.colors().approx_cardinality(),
+            original.spaces().approx_cardinality(),
+            original.symbolic_size()
+        );
 
         while !original.is_empty() {
             let maximum_candidate = original.pick_space();
-            interrupt()?;
+            is_cancelled!(self)?;
 
             // Compute the set of strict sub spaces.
             let super_spaces = ctx.mk_sub_spaces(maximum_candidate.as_bdd());
             let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
-            interrupt()?;
+            is_cancelled!(self)?;
 
             original = original.minus(&super_spaces);
             maximal = maximal.minus(&super_spaces).union(&maximum_candidate);
-            interrupt()?;
+            is_cancelled!(self)?;
 
-            if log_essential(
-                log_level,
-                original.symbolic_size() + maximal.symbolic_size(),
-            ) {
-                println!(
-                    "Maximization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
-                    original.colors().approx_cardinality(),
-                    original.spaces().approx_cardinality(),
-                    original.symbolic_size(),
-                    maximal.colors().approx_cardinality(),
-                    maximal.spaces().approx_cardinality(),
-                    maximal.symbolic_size(),
-                );
-            }
-        }
-
-        if should_log(log_level) {
-            println!(
-                "Found {}[nodes:{}] maximal spaces.",
-                maximal.approx_cardinality(),
+            // TODO: discuss - implement debug with size limit?
+            debug!(
+                "Maximization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
+                original.colors().approx_cardinality(),
+                original.spaces().approx_cardinality(),
+                original.symbolic_size(),
+                maximal.colors().approx_cardinality(),
+                maximal.spaces().approx_cardinality(),
                 maximal.symbolic_size(),
             );
         }
+
+        info!(
+            "Found {}[nodes:{}] maximal spaces.",
+            maximal.approx_cardinality(),
+            maximal.symbolic_size(),
+        );
 
         Ok(maximal)
     }
