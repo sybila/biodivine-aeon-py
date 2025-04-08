@@ -5,7 +5,9 @@ use pyo3::{
 use trap_spaces_config::TrapSpacesConfig;
 use trap_spaces_impl::TrapSpaces;
 
+mod _impl_pyerr;
 mod trap_spaces_config;
+mod trap_spaces_error;
 mod trap_spaces_impl;
 
 pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {

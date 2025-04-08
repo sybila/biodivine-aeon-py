@@ -11,7 +11,10 @@ use std::collections::HashSet;
 use crate::{
     bindings::{
         algorithms::{
-            cancellation::CancellationHandler, trap_spaces::trap_spaces_config::TrapSpacesConfig,
+            cancellation::CancellationHandler,
+            trap_spaces::{
+                trap_spaces_config::TrapSpacesConfig, trap_spaces_error::TrapSpacesError,
+            },
         },
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
@@ -27,10 +30,8 @@ pub struct TrapSpaces(TrapSpacesConfig);
 
 impl TrapSpaces {
     /// Create a new "default" [TrapSpaces] for the given [BooleanNetwork].
-    pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, String> {
-        let config = TrapSpacesConfig::from_boolean_network(bn)?;
-
-        Ok(TrapSpaces(config))
+    pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, TrapSpacesError> {
+        TrapSpacesConfig::from_boolean_network(bn).map(TrapSpaces)
     }
 
     /// Retrieve the internal [TrapSpacesConfig] of this instance.

@@ -5,7 +5,9 @@ use biodivine_lib_param_bn::{
 };
 use pyo3::pyclass;
 
-use crate::bindings::algorithms::cancellation::CancellationHandler;
+use crate::bindings::algorithms::{
+    cancellation::CancellationHandler, trap_spaces::trap_spaces_error::TrapSpacesError,
+};
 
 /// A configuration struct for the [TrapSpaces] algorithms.
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -23,8 +25,8 @@ pub struct TrapSpacesConfig {
 
 impl TrapSpacesConfig {
     // TODO: discuss - add this for everything?
-    pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, String> {
-        let graph = SymbolicAsyncGraph::new(&bn)?;
+    pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, TrapSpacesError> {
+        let graph = SymbolicAsyncGraph::new(&bn).map_err(|e| TrapSpacesError::CreationFailed(e))?;
         let ctx = SymbolicSpaceContext::new(&bn);
 
         Ok(TrapSpacesConfig {
