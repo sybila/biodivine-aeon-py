@@ -12,8 +12,8 @@ pub enum FixedPointsError {
     CancelledEmpty,
     // #[error("operation cancelled")]
     // Cancelled(GraphColoredVertices),
-    // TODO: discuss - Errors can only contain GraphColoredVertices, but algoritms can return also
-    // only Colors or only Vertices
+    // TODO: oktenkay - Errors can only contain GraphColoredVertices, but algoritms can return also
+    // only Colors or only Vertices, change this to work with bdds
     #[error("BDD size limit exceeded")]
     BddSizeLimitExceeded(GraphColoredVertices),
 }

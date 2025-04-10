@@ -77,7 +77,6 @@ impl FixedPoints {
             restriction.symbolic_size()
         );
 
-        // TODO: discuss - is this correct
         let mut combined_bdd_size = 0;
         let mut to_merge: Vec<GraphColoredVertices> = stg
             .variables()
@@ -115,7 +114,7 @@ impl FixedPoints {
                 to_merge.iter().map(|it| it.symbolic_size()).sum::<usize>(),
             );
 
-            // TODO: ohtenkay - is there a partial result in any of the algorithms?
+            // TODO: ohtenkay - is there a partial result in any of the algorithms? restriction is
             is_cancelled!(self)?;
 
             let x = to_merge.pop().unwrap();
@@ -288,10 +287,7 @@ impl FixedPoints {
 
                 is_cancelled!(self)?;
 
-                // TODO: discuss - if i change this to trace or disable logging, cancellation does
-                // not happen
-                // TODO: discuss - python does not have a TRACE level, so mbe use debug everywhere?
-                debug!(
+                trace!(
                     target: target,
                     " > Created initial set for {:?} using {} BDD nodes.",
                     var,
@@ -337,6 +333,7 @@ impl FixedPoints {
             .collect();
 
         let universe = self.config().graph.symbolic_context().bdd_variable_set();
+        // TODO: ohtenkay - use this as partial result
         let mut result = universe.mk_true();
         let mut merged = HashSet::new();
 
@@ -402,7 +399,6 @@ impl FixedPoints {
 
             // This may be true in the last iteration if the only thing left to do
             // are projections.
-            // TODO: discuss - changed this to guard condition
             if best_result_size == usize::MAX {
                 continue;
             }

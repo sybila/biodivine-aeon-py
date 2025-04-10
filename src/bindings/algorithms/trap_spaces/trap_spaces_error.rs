@@ -13,7 +13,8 @@ pub enum TrapSpacesError {
     CreationFailed(String),
     // #[error("operation cancelled")]
     // Cancelled(GraphColoredVertices),
-    // TODO: discuss - is there a partial result?
+    // TODO: ohtenkay - is there a partial result? yes, also bdd as in fixed points. similar for the
+    // limit
     // #[error("BDD size limit exceeded")]
     // BddSizeLimitExceeded(GraphColoredVertices),
 }

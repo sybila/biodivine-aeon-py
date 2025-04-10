@@ -143,6 +143,7 @@ impl ReachabilityConfig {
         py: Python,
         graph: Py<AsynchronousGraph>,
         subgraph: Option<Py<ColoredVertexSet>>,
+        // TODO: check this
         variables: Option<Py<PySet>>,
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,

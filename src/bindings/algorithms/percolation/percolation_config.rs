@@ -7,8 +7,8 @@ use crate::bindings::algorithms::cancellation::CancellationHandler;
 #[derive(Clone)]
 pub struct PercolationConfig {
     pub graph: SymbolicAsyncGraph,
-    // TODO: discuss - is there a default value for this? if not create an empty vector and check
-    // for empty?
+    // TODO: ohtenkay - is there a default value for this? if not create an empty vector and check
+    // for empty? no default value, this will be a parameter to the algorithm, remove from here
     pub subspace: Vec<(VariableId, bool)>,
 
     /// A `CancellationHandler` that can be used to stop the algorithm externally.

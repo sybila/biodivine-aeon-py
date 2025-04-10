@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use biodivine_lib_bdd::bdd;
 use biodivine_lib_param_bn::{
     biodivine_std::traits::Set, fixed_points::FixedPoints, trap_spaces::NetworkColoredSpaces,
     BooleanNetwork,
@@ -26,8 +27,6 @@ use crate::{
     is_cancelled, AsNative,
 };
 
-// TODO: discuss - this whole thing could be separated into a new cargo project, pyo3 and biodivine
-// lib param bn as dependencies only if python is enabled
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct TrapSpaces(TrapSpacesConfig);
@@ -44,7 +43,7 @@ impl TrapSpaces {
     }
 }
 
-// TODO: dicuss - ohtenkay - create a trait Configurable (has inner config) that implements this
+// TODO: ohtenkay - create a trait Configurable (has inner config) that implements this
 impl CancellationHandler for TrapSpaces {
     fn is_cancelled(&self) -> bool {
         self.config().cancellation.is_cancelled()
@@ -81,31 +80,24 @@ impl TrapSpaces {
             let not_update_bdd = update_bdd.not();
             is_cancelled!(self)?;
 
-            // TODO: discuss - how to rewrite _mk_can_go_to_true?
-            let has_up_transition = ctx.mk_can_go_to_true(update_bdd);
+            // TODO: ohtenkay - rewrite _mk_can_go_to_true
+            let has_up_transition = &ctx.mk_can_go_to_true(update_bdd);
             is_cancelled!(self)?;
 
-            // TODO: discuss - how to rewrite _mk_can_go_to_true?
-            let has_down_transition = ctx.mk_can_go_to_true(&not_update_bdd);
+            // TODO: ohtenkay - rewrite _mk_can_go_to_true
+            let has_down_transition = &ctx.mk_can_go_to_true(&not_update_bdd);
             is_cancelled!(self)?;
 
             let true_var = ctx.get_positive_variable(var);
             let false_var = ctx.get_negative_variable(var);
 
-            let is_trap_1 = has_up_transition.imp(&bdd_ctx.mk_var(true_var));
-            let is_trap_2 = has_down_transition.imp(&bdd_ctx.mk_var(false_var));
-            let is_trap = is_trap_1.and(&is_trap_2);
+            let is_trap =
+                bdd!(bdd_ctx, (has_up_transition => true_var) & (has_down_transition => false_var));
             is_cancelled!(self)?;
 
-            let is_essential_1 = bdd_ctx.mk_var(true_var).and(&bdd_ctx.mk_var(false_var));
-            let is_essential_2 = has_up_transition.and(&has_down_transition);
-            let is_essential = is_essential_1.imp(&is_essential_2);
+            let is_essential =
+                bdd!(bdd_ctx, (true_var & false_var) => (has_up_transition & has_down_transition));
             is_cancelled!(self)?;
-
-            // TODO: discuss - ask about this
-            // This will work in next version of lib-bdd:
-            // let is_trap = bdd!(bdd_ctx, (has_up_transition => true_var) & (has_down_transition => false_var));
-            // let is_essential = bdd!(bdd_ctx, (true_var & false_var) => (has_up_transition & has_down_transition));
 
             debug!(
                 " > Created initial sets for {:?} using {}+{} BDD nodes.",
@@ -117,8 +109,7 @@ impl TrapSpaces {
             to_merge.push(is_trap.and(&is_essential));
         }
 
-        // TODO: discuss - use the new version here, create struct?
-        // what to do with cancellation? will timer clone?
+        // TODO: ohtenkay - use the new version here, clone cancellation and bdd size limit
         let trap_spaces = FixedPoints::symbolic_merge(bdd_ctx, to_merge, HashSet::default());
         let trap_spaces = NetworkColoredSpaces::new(trap_spaces, ctx);
         is_cancelled!(self)?;
@@ -184,7 +175,7 @@ impl TrapSpaces {
             //  find a way to get rid of fixed points and any related super-spaces first,
             //  as these are clearly minimal. The other option would be to tune the super
             //  space enumeration to avoid spaces that are clearly irrelevant anyway.
-            // TODO: discuss - rewrite _mk_super_spaces?
+            // TODO: ohtenkay - rewrite _mk_super_spaces, _impl_symbolic_space_context
             let super_spaces = ctx.mk_super_spaces(minimum_candidate.as_bdd());
             let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
             is_cancelled!(self)?;
@@ -243,7 +234,8 @@ impl TrapSpaces {
             maximal = maximal.minus(&super_spaces).union(&maximum_candidate);
             is_cancelled!(self)?;
 
-            // TODO: discuss - implement debug with size limit?
+            // TODO: ohtenkay - implement debug with size limit, new macro, use log!(), check for
+            // usages
             debug!(
                 "Maximization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
                 original.colors().approx_cardinality(),
@@ -277,10 +269,7 @@ impl TrapSpaces {
     pub fn essential_symbolic_py(
         &self,
         py: Python,
-        // TODO: discuss - in order to create the result, this has to be passed into the function,
-        // could be solved by creating double structs like in `FixedPointsConfigPython`.
-        // is there another way to create ColoredSpaceSet?
-        // if we go with the double struct, use SymbolicSpaceContext instead of BooleanNetworkPython
+        // TODO: ohtenkay - double struct this
         bn: Py<BooleanNetworkPython>,
     ) -> PyResult<ColoredSpaceSet> {
         let result = self.essential_symbolic()?;
@@ -324,7 +313,7 @@ impl TrapSpaces {
         &self,
         py: Python,
         bn: Py<BooleanNetworkPython>,
-        // TODO: discuss - how come this can be passed in as a reference?
+        // TODO: ohtenkay - check where this can be used instead if Py<>
         set: &ColoredSpaceSet,
     ) -> PyResult<ColoredSpaceSet> {
         let result = self.minimize(set.as_native())?;

@@ -24,7 +24,7 @@ pub struct TrapSpacesConfig {
 }
 
 impl TrapSpacesConfig {
-    // TODO: discuss - add this for everything?
+    // TODO: ohtenkay - add this for everything
     pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, TrapSpacesError> {
         let graph = SymbolicAsyncGraph::new(&bn).map_err(TrapSpacesError::CreationFailed)?;
         let ctx = SymbolicSpaceContext::new(&bn);
@@ -37,8 +37,7 @@ impl TrapSpacesConfig {
         })
     }
 
-    // TODO: discuss - is it possible to create this config using only the graph? mbe some default
-    // values, possibly doing impl From<SymbolicContext> for SymbolicSpaceContext?
+    // TODO: ohtenkay - implement as in notes, with creation failed error
     // /// Create a new "default" [TrapSpacesConfig] for the given [SymbolicAsyncGraph].
     // pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
     //     TrapSpacesConfig {

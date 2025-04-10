@@ -12,8 +12,6 @@ use pyo3::Python;
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
-// TODO: nice to have - consider trying this with an enum
-
 /* Never - Start */
 
 /// An implementation of [CancellationHandler] that cannot be cancelled.

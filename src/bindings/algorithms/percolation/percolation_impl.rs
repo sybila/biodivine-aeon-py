@@ -47,9 +47,10 @@ impl Percolation {
     /// This method should technically work on parametrized networks as well, but the constant
     /// check is performed across all interpretations, hence a lot of sub-spaces will not
     /// percolate meaningfully. We recommend using other symbolic methods for such systems.
-    // TODO: discuss - what should be the result of this function?
+    // TODO: ohtenkay - what should be the result of this function? the subspace property of the
+    // current config struct, Vec<(VariableId, bool)>
     pub fn percolate_subspace(&self) -> Result<Vec<Option<bool>>, PercolationError> {
-        // TODO: discuss - logging, what makes sense to log?
+        // TODO: ohtenkay - logging, take inspiration from Reachability
         self.start_timer();
 
         let graph = &self.config().graph;
