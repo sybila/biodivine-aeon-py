@@ -4,11 +4,12 @@ use pyo3::{pyclass, pymethods};
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
+#[derive(Clone)]
 pub struct PercolationConfig {
-    graph: SymbolicAsyncGraph,
+    pub graph: SymbolicAsyncGraph,
     // TODO: discuss - is there a default value for this? if not create an empty vector and check
     // for empty?
-    subspace: Vec<(VariableId, bool)>,
+    pub subspace: Vec<(VariableId, bool)>,
 
     /// A `CancellationHandler` that can be used to stop the algorithm externally.
     ///
