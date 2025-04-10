@@ -50,6 +50,7 @@ impl Percolation {
     /// This method should technically work on parametrized networks as well, but the constant
     /// check is performed across all interpretations, hence a lot of sub-spaces will not
     /// percolate meaningfully. We recommend using other symbolic methods for such systems.
+    // TODO: discuss - what should be the result of this function?
     pub fn percolate_subspace(&self) -> Result<Vec<Option<bool>>, PercolationError> {
         // TODO: ohtenkay - logging
 
@@ -66,8 +67,6 @@ impl Percolation {
             let bdd_var = state_variables[var.to_index()];
             network_variables[bdd_var.to_index()] = var;
         }
-
-        // let initial_space = graphpy.resolve_subspace_valuation(space)?;
 
         // Variables that have a known fixed value.
         let mut fixed: Vec<Option<bool>> = vec![None; graph.num_vars()];
@@ -97,38 +96,36 @@ impl Percolation {
 
                 let fn_bdd = fns[i].as_mut().unwrap();
 
-                let value = if fn_bdd.is_false() {
-                    false
-                } else if fn_bdd.is_true() {
-                    true
-                } else {
-                    if fn_inputs[i].is_none() {
-                        let inputs = fn_bdd.support_set();
-                        fn_inputs[i] = Some(inputs);
-                    }
-
-                    let inputs = fn_inputs[i].as_mut().unwrap();
-
-                    restriction.clear();
-                    for input in inputs.clone() {
-                        let var = network_variables[input.to_index()];
-                        if let Some(value) = fixed[var.to_index()] {
-                            restriction.push((input, value));
-                            inputs.remove(&input);
+                let value = match (fn_bdd.is_true(), fn_bdd.is_false()) {
+                    (true, _) => true,
+                    (_, true) => false,
+                    _ => {
+                        if fn_inputs[i].is_none() {
+                            let inputs = fn_bdd.support_set();
+                            fn_inputs[i] = Some(inputs);
                         }
-                    }
 
-                    if restriction.is_empty() {
-                        continue;
-                    }
+                        let inputs = fn_inputs[i].as_mut().unwrap();
 
-                    *fn_bdd = fn_bdd.restrict(&restriction);
-                    if fn_bdd.is_true() {
-                        true
-                    } else if fn_bdd.is_false() {
-                        false
-                    } else {
-                        continue;
+                        restriction.clear();
+                        for input in inputs.clone() {
+                            let var = network_variables[input.to_index()];
+                            if let Some(value) = fixed[var.to_index()] {
+                                restriction.push((input, value));
+                                inputs.remove(&input);
+                            }
+                        }
+
+                        if restriction.is_empty() {
+                            continue;
+                        }
+
+                        *fn_bdd = fn_bdd.restrict(&restriction);
+                        match (fn_bdd.is_true(), fn_bdd.is_false()) {
+                            (true, _) => true,
+                            (_, true) => false,
+                            _ => continue,
+                        }
                     }
                 };
 
