@@ -47,8 +47,8 @@ impl Debug for ReachabilityError {
 }
 
 impl From<CancellationError<GraphColoredVertices>> for ReachabilityError {
-    fn from(value: CancellationError<GraphColoredVertices>) -> Self {
-        ReachabilityError::Cancelled(value.into_partial_data())
+    fn from(error_value: CancellationError<GraphColoredVertices>) -> Self {
+        ReachabilityError::Cancelled(error_value.into_partial_data())
     }
 }
 

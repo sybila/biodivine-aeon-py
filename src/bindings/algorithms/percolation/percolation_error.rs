@@ -8,16 +8,11 @@ use crate::bindings::algorithms::cancellation::CancellationError;
 #[derive(Error, Debug)]
 pub enum PercolationError {
     #[error("operation cancelled")]
-    CancelledEmpty,
-    // #[error("operation cancelled")]
-    // Cancelled(GraphColoredVertices),
+    Cancelled(Vec<Option<bool>>),
 }
 
-impl<T> From<CancellationError<T>> for PercolationError
-where
-    T: Sized + Debug + 'static,
-{
-    fn from(_: CancellationError<T>) -> Self {
-        PercolationError::CancelledEmpty
+impl From<CancellationError<Vec<Option<bool>>>> for PercolationError {
+    fn from(error_value: CancellationError<Vec<Option<bool>>>) -> Self {
+        PercolationError::Cancelled(error_value.into_partial_data())
     }
 }
