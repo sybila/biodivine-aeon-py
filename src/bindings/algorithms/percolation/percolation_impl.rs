@@ -4,17 +4,24 @@ use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
 
-use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
-use crate::bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding;
-use crate::AsNative;
+use crate::{
+    bindings::{
+        algorithms::percolation::percolation_config::PercolationConfig,
+        lib_param_bn::{
+            symbolic::asynchronous_graph::AsynchronousGraph,
+            variable_id::VariableId as VariableIdBinding,
+        },
+    },
+    AsNative,
+};
 
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct Percolation {
-    _dummy: (),
-}
+pub struct Percolation(PercolationConfig);
 
 #[pymethods]
 impl Percolation {
+    // TODO: ohtenkay - creation methods
+
     /// Performs a percolation of a single subspace.
     ///
     /// Percolation propagates the values of variables that are guaranteed to be constant in the
