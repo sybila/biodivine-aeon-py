@@ -1,20 +1,15 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::VariableId;
-use pyo3::prelude::*;
+use pyo3::{pyclass, pymethods, PyResult};
 
-use crate::{
-    bindings::{
-        algorithms::{
-            cancellation::CancellationHandler,
-            percolation::{
-                percolation_config::PercolationConfig, percolation_error::PercolationError,
-            },
-        },
-        lib_param_bn::variable_id::VariableId as VariableIdBinding,
+use crate::bindings::algorithms::{
+    cancellation::CancellationHandler,
+    percolation::{
+        percolation_config::PercolationConfig, percolation_error::PercolationError,
+        subspace_representation::SubspaceRepresentation,
     },
-    AsNative,
 };
 
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -160,21 +155,10 @@ impl Percolation {
     #[pyo3(name = "percolate_subspace")]
     pub fn percolate_subspace_py(
         &self,
-        // TODO: ohtenkay - maybe use HashMap instead of Vec
-        subspace: Vec<(VariableIdBinding, bool)>,
-    ) -> PyResult<HashMap<VariableIdBinding, bool>> {
-        let subspace = subspace
-            .into_iter()
-            .map(|(var, value)| (*var.as_native(), value))
-            .collect();
+        subspace: SubspaceRepresentation,
+    ) -> PyResult<SubspaceRepresentation> {
+        let percolated_subspace = self.percolate_subspace(subspace.into())?;
 
-        let percolated_subspace = self.percolate_subspace(subspace)?;
-
-        let result = percolated_subspace
-            .into_iter()
-            .map(|(var, value)| (VariableIdBinding::from(var), value))
-            .collect();
-
-        Ok(result)
+        Ok(SubspaceRepresentation::from(percolated_subspace))
     }
 }
