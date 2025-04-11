@@ -7,14 +7,15 @@ use pyo3::prelude::*;
 use crate::{
     bindings::{
         algorithms::{
-            cancellation::CancellationHandler, percolation::percolation_config::PercolationConfig,
+            cancellation::CancellationHandler,
+            percolation::{
+                percolation_config::PercolationConfig, percolation_error::PercolationError,
+            },
         },
         lib_param_bn::variable_id::VariableId as VariableIdBinding,
     },
-    is_cancelled,
+    AsNative,
 };
-
-use super::percolation_error::PercolationError;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -47,9 +48,10 @@ impl Percolation {
     /// This method should technically work on parametrized networks as well, but the constant
     /// check is performed across all interpretations, hence a lot of sub-spaces will not
     /// percolate meaningfully. We recommend using other symbolic methods for such systems.
-    // TODO: ohtenkay - what should be the result of this function? the subspace property of the
-    // current config struct, Vec<(VariableId, bool)>
-    pub fn percolate_subspace(&self) -> Result<Vec<Option<bool>>, PercolationError> {
+    pub fn percolate_subspace(
+        &self,
+        subspace: Vec<(VariableId, bool)>,
+    ) -> Result<Vec<(VariableId, bool)>, PercolationError> {
         // TODO: ohtenkay - logging, take inspiration from Reachability
         self.start_timer();
 
@@ -69,7 +71,7 @@ impl Percolation {
 
         // Variables that have a known fixed value.
         let mut fixed: Vec<Option<bool>> = vec![None; graph.num_vars()];
-        for (var, v) in &self.config().subspace {
+        for (var, v) in &subspace {
             fixed[var.to_index()] = Some(*v);
         }
 
@@ -86,7 +88,8 @@ impl Percolation {
                     continue;
                 }
 
-                fixed = is_cancelled!(self, fixed)?;
+                // TODO: ohtenkay - fix
+                // fixed = is_cancelled!(self, fixed)?;
 
                 if fns[i].is_none() {
                     let fn_bdd = graph.get_symbolic_fn_update(VariableId::from_index(i));
@@ -133,7 +136,20 @@ impl Percolation {
             }
         }
 
-        Ok(fixed)
+        let result = fixed
+            .iter()
+            .enumerate()
+            .filter_map(|(i, v)| {
+                if let Some(v) = v.as_ref() {
+                    let var = VariableId::from_index(i);
+                    Some((var, *v))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        Ok(result)
     }
 }
 
@@ -142,16 +158,22 @@ impl Percolation {
     // TODO: ohtenkay - creation methods
 
     #[pyo3(name = "percolate_subspace")]
-    pub fn percolate_subspace_py(&self) -> PyResult<HashMap<VariableIdBinding, bool>> {
-        let fixed = self.percolate_subspace()?;
+    pub fn percolate_subspace_py(
+        &self,
+        // TODO: ohtenkay - maybe use HashMap instead of Vec
+        subspace: Vec<(VariableIdBinding, bool)>,
+    ) -> PyResult<HashMap<VariableIdBinding, bool>> {
+        let subspace = subspace
+            .into_iter()
+            .map(|(var, value)| (*var.as_native(), value))
+            .collect();
 
-        let mut result = HashMap::new();
-        for (i, v) in fixed.iter().enumerate() {
-            if let Some(v) = v.as_ref() {
-                let var = VariableIdBinding::new(i);
-                result.insert(var, *v);
-            }
-        }
+        let percolated_subspace = self.percolate_subspace(subspace)?;
+
+        let result = percolated_subspace
+            .into_iter()
+            .map(|(var, value)| (VariableIdBinding::from(var), value))
+            .collect();
 
         Ok(result)
     }

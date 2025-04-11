@@ -1,4 +1,4 @@
-use biodivine_lib_param_bn::{symbolic_async_graph::SymbolicAsyncGraph, VariableId};
+use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;
 use pyo3::{pyclass, pymethods};
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
@@ -7,9 +7,6 @@ use crate::bindings::algorithms::cancellation::CancellationHandler;
 #[derive(Clone)]
 pub struct PercolationConfig {
     pub graph: SymbolicAsyncGraph,
-    // TODO: ohtenkay - is there a default value for this? if not create an empty vector and check
-    // for empty? no default value, this will be a parameter to the algorithm, remove from here
-    pub subspace: Vec<(VariableId, bool)>,
 
     /// A `CancellationHandler` that can be used to stop the algorithm externally.
     ///
@@ -22,15 +19,8 @@ impl PercolationConfig {
     pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
         PercolationConfig {
             graph,
-            subspace: vec![],
             cancellation: Default::default(),
         }
-    }
-
-    /// Update the `subspace` property
-    pub fn with_subspace(mut self, subspace: Vec<(VariableId, bool)>) -> Self {
-        self.subspace = subspace;
-        self
     }
 
     /// Update the `cancellation` property
