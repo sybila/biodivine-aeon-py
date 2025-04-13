@@ -89,7 +89,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self, result)?;
+                is_cancelled!(self, || { result.clone() })?;
 
                 let mut successors = graph.var_post_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
@@ -151,7 +151,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self, result)?;
+                is_cancelled!(self, || { result.clone() })?;
 
                 let mut predecessors = graph.var_pre_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
@@ -214,7 +214,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self, result)?;
+                is_cancelled!(self, || { result.clone() })?;
 
                 let mut can_go_out = graph.var_can_post_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {
@@ -281,7 +281,7 @@ impl Reachability {
 
         'reach: loop {
             for var in variables.iter().rev() {
-                result = is_cancelled!(self, result)?;
+                is_cancelled!(self, || { result.clone() })?;
 
                 let mut has_predecessor_outside = graph.var_can_pre_out(*var, &result);
                 if let Some(subgraph) = self.config().subgraph.as_ref() {

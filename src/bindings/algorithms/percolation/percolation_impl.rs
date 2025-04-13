@@ -105,8 +105,7 @@ impl Percolation {
                     continue;
                 }
 
-                // TODO: ohtenkay - fix
-                fixed = is_cancelled!(self, fixed)?;
+                is_cancelled!(self, || { fixed.clone() })?;
 
                 if fns[i].is_none() {
                     let fn_bdd = graph.get_symbolic_fn_update(VariableId::from_index(i));
