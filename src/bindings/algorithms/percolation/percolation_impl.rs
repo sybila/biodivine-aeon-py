@@ -4,6 +4,7 @@ use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::{
     symbolic_async_graph::SymbolicAsyncGraph, BooleanNetwork, VariableId,
 };
+use log::{debug, info, trace};
 use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
@@ -23,6 +24,8 @@ use crate::{
     },
     is_cancelled,
 };
+
+const TARGET_PERCOLATE_SUBSPACE: &str = "Percolation::percolate_subspace";
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -69,8 +72,12 @@ impl Percolation {
         &self,
         subspace: Vec<(VariableId, bool)>,
     ) -> Result<Vec<(VariableId, bool)>, PercolationError> {
-        // TODO: ohtenkay - logging, take inspiration from Reachability
         self.start_timer();
+        info!(
+            target: TARGET_PERCOLATE_SUBSPACE,
+            "Started with {} variables in the subspace.",
+            subspace.len()
+        );
 
         let graph = &self.config().graph;
 
@@ -99,6 +106,12 @@ impl Percolation {
 
         let mut done = false;
         while !done {
+            debug!(
+                target: TARGET_PERCOLATE_SUBSPACE,
+                "Currently found {} fixed variables.",
+                fixed.iter().filter(|v| v.is_some()).count()
+            );
+
             done = true;
             for i in 0..graph.num_vars() {
                 if fixed[i].is_some() {
@@ -113,6 +126,12 @@ impl Percolation {
                 }
 
                 let fn_bdd = fns[i].as_mut().unwrap();
+
+                trace!(
+                    target: TARGET_PERCOLATE_SUBSPACE,
+                    "Checking fn_bdd with index {} and value: ",
+                    i,
+                );
 
                 let value = match (fn_bdd.is_true(), fn_bdd.is_false()) {
                     (true, _) => true,
@@ -135,6 +154,7 @@ impl Percolation {
                         }
 
                         if restriction.is_empty() {
+                            trace!(target: TARGET_PERCOLATE_SUBSPACE, " > skipped");
                             continue;
                         }
 
@@ -142,17 +162,22 @@ impl Percolation {
                         match (fn_bdd.is_true(), fn_bdd.is_false()) {
                             (true, _) => true,
                             (_, true) => false,
-                            _ => continue,
+                            _ => {
+                                trace!(target: TARGET_PERCOLATE_SUBSPACE, " > skipped");
+                                continue;
+                            }
                         }
                     }
                 };
+
+                trace!(target: TARGET_PERCOLATE_SUBSPACE, " > {}", value);
 
                 done = false;
                 fixed[i] = Some(value);
             }
         }
 
-        let result = fixed
+        let result: Vec<_> = fixed
             .iter()
             .enumerate()
             .filter_map(|(i, v)| {
@@ -165,6 +190,7 @@ impl Percolation {
             })
             .collect();
 
+        info!(target: TARGET_PERCOLATE_SUBSPACE, "Done. Result: {} fixed variables.", result.len());
         Ok(result)
     }
 }
