@@ -13,7 +13,8 @@ pub use reachability_error::ReachabilityError;
 pub use reachability_impl::Reachability;
 
 pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add_class::<ReachabilityConfig>()?;
     module.add_class::<Reachability>()?;
+    module.add_class::<ReachabilityConfig>()?;
+
     Ok(())
 }

@@ -34,16 +34,20 @@ pub struct Percolation(PercolationConfig);
 impl Configurable for Percolation {
     type ConfigType = PercolationConfig;
 
+    /// Retrieve the internal [PercolationConfig] of this instance.
     fn config(&self) -> &Self::ConfigType {
         &self.0
     }
 
+    /// Create a new [Percolation] instance with the given [PercolationConfig].
     fn with_config(config: Self::ConfigType) -> Self {
         Percolation(config)
     }
 }
 
 impl From<SymbolicAsyncGraph> for Percolation {
+    /// Create a new [Percolation] instance with the given [SymbolicAsyncGraph]
+    /// and otherwise default configuration.
     fn from(graph: SymbolicAsyncGraph) -> Self {
         Percolation(PercolationConfig::from(graph))
     }

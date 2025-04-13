@@ -1,14 +1,16 @@
 use biodivine_lib_param_bn::{
     biodivine_std::traits::Set,
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
+    BooleanNetwork,
 };
 use log::{debug, info, trace};
-use pyo3::{pyclass, pymethods, Py, PyResult};
+use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
     bindings::{
         algorithms::{
             cancellation::CancellationHandler,
+            configurable::Configurable,
             reachability::{ReachabilityConfig, ReachabilityError},
         },
         lib_param_bn::symbolic::{
@@ -33,31 +35,35 @@ const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 #[derive(Clone)]
 pub struct Reachability(ReachabilityConfig);
 
-impl Reachability {
-    /// Create a new [Reachability] instance with the given [SymbolicAsyncGraph]
-    /// and otherwise default configuration.
-    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
-        Reachability(ReachabilityConfig::from(graph))
+impl Configurable for Reachability {
+    type ConfigType = ReachabilityConfig;
+
+    /// Retrieve the internal [ReachabilityConfig] of this instance.
+    fn config(&self) -> &Self::ConfigType {
+        &self.0
     }
 
     /// Create a new [Reachability] instance with the given [ReachabilityConfig].
-    pub fn with_config(config: ReachabilityConfig) -> Self {
+    fn with_config(config: Self::ConfigType) -> Self {
         Reachability(config)
-    }
-
-    /// Retrieve the internal [ReachabilityConfig] of this instance.
-    pub fn config(&self) -> &ReachabilityConfig {
-        &self.0
     }
 }
 
-impl CancellationHandler for Reachability {
-    fn is_cancelled(&self) -> bool {
-        self.config().cancellation.is_cancelled()
+impl From<SymbolicAsyncGraph> for Reachability {
+    /// Create a new [Reachability] instance from the given [SymbolicAsyncGraph]
+    /// with otherwise default configuration.
+    fn from(graph: SymbolicAsyncGraph) -> Self {
+        Reachability(ReachabilityConfig::from(graph))
     }
+}
 
-    fn start_timer(&self) {
-        self.config().cancellation.start_timer();
+impl TryFrom<&BooleanNetwork> for Reachability {
+    type Error = ReachabilityError;
+
+    /// Create a new [Reachability] instance from the given [BooleanNetwork]
+    /// with otherwise default configuration.
+    fn try_from(boolean_network: &BooleanNetwork) -> Result<Self, Self::Error> {
+        Ok(Reachability(ReachabilityConfig::try_from(boolean_network)?))
     }
 }
 
@@ -323,23 +329,20 @@ impl Reachability {
 // TODO: finalize - make this optional with a feature flag
 #[pymethods]
 impl Reachability {
-    /// Create a new [Reachability] instance with the given [AsynchronousGraph]
-    /// and otherwise default configuration.
     #[staticmethod]
-    #[pyo3(name = "with_graph")]
-    pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
-        Reachability(ReachabilityConfig::with_graph_py(graph))
+    #[pyo3(name = "from_graph")]
+    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
+        Reachability(ReachabilityConfig::python_from_graph(graph))
     }
 
-    /// Create a new [Reachability] instance with the given [ReachabilityConfig].
     #[staticmethod]
     #[pyo3(name = "with_config")]
-    pub fn with_config_py(config: Py<ReachabilityConfig>) -> Self {
-        Reachability(config.get().clone())
+    pub fn python_with_config(config: ReachabilityConfig) -> Self {
+        Reachability(config)
     }
 
     #[pyo3(name = "forward_closed_superset")]
-    pub fn forward_closed_superset_py(
+    pub fn python_forward_closed_superset(
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
@@ -348,7 +351,7 @@ impl Reachability {
     }
 
     #[pyo3(name = "backward_closed_superset")]
-    pub fn backward_closed_superset_py(
+    pub fn python_backward_closed_superset(
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
@@ -357,7 +360,7 @@ impl Reachability {
     }
 
     #[pyo3(name = "forward_closed_subset")]
-    pub fn forward_closed_subset_py(
+    pub fn python_forward_closed_subset(
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
@@ -366,7 +369,7 @@ impl Reachability {
     }
 
     #[pyo3(name = "backward_closed_subset")]
-    pub fn backward_closed_subset_py(
+    pub fn python_backward_closed_subset(
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {

@@ -69,6 +69,7 @@ impl TryFrom<&BooleanNetwork> for PercolationConfig {
 impl PercolationConfig {
     #[new]
     #[pyo3(signature = (graph, time_limit_millis = None))]
+    // TODO: discuss - create something simiral to SubspaceRepresentation for graph/boolean_network
     pub fn python_new(graph: &AsynchronousGraph, time_limit_millis: Option<u64>) -> Self {
         let mut config = PercolationConfig::from(graph.as_native().clone());
 
@@ -76,6 +77,8 @@ impl PercolationConfig {
             config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(millis),
             )))
+        } else {
+            config = config.with_cancellation(CancelTokenPython::default());
         }
 
         config
@@ -84,13 +87,15 @@ impl PercolationConfig {
     #[staticmethod]
     #[pyo3(name = "from_boolean_network")]
     pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
-        Ok(PercolationConfig::try_from(boolean_network.as_native())?)
+        Ok(PercolationConfig::try_from(boolean_network.as_native())?
+            .with_cancellation(CancelTokenPython::default()))
     }
 
     #[staticmethod]
     #[pyo3(name = "from_graph")]
     pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
         PercolationConfig::from(graph.as_native().clone())
+            .with_cancellation(CancelTokenPython::default())
     }
 
     #[pyo3(name = "with_time_limit")]

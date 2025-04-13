@@ -4,11 +4,7 @@ use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     BooleanNetwork, VariableId,
 };
-use pyo3::{
-    pyclass, pymethods,
-    types::{PyAnyMethods, PySet, PySetMethods},
-    Py, Python,
-};
+use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
     bindings::{
@@ -21,6 +17,7 @@ use crate::{
             reachability::ReachabilityError,
         },
         lib_param_bn::{
+            boolean_network::BooleanNetwork as BooleanNetworkBinding,
             symbolic::{
                 asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
             },
@@ -160,37 +157,30 @@ impl ReachabilityConfig {
 impl ReachabilityConfig {
     #[new]
     #[pyo3(signature = (graph, subgraph = None, variables = None, time_limit_millis = None, bdd_size_limit = None, steps_limit = None))]
-    pub fn new_py(
-        py: Python,
-        graph: Py<AsynchronousGraph>,
-        subgraph: Option<Py<ColoredVertexSet>>,
-        // TODO: check this
-        variables: Option<Py<PySet>>,
+    pub fn python_new(
+        graph: &AsynchronousGraph,
+        subgraph: Option<&ColoredVertexSet>,
+        variables: Option<HashSet<VariableIdBinding>>,
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
         steps_limit: Option<usize>,
     ) -> Self {
-        let mut config = ReachabilityConfig::from(graph.get().as_native().clone());
+        let mut config = ReachabilityConfig::from(graph.as_native().clone());
 
         if let Some(subgraph) = subgraph {
-            config = config.with_subgraph(subgraph.get().as_native().clone())
+            config = config.with_subgraph(subgraph.as_native().clone())
         }
 
         if let Some(variables) = variables {
-            config = config.with_variables(
-                variables
-                    .into_bound(py)
-                    .iter()
-                    .flat_map(|item| item.extract::<VariableIdBinding>().ok())
-                    .map(Into::into)
-                    .collect(),
-            )
+            config = config.with_variables(variables.iter().map(|var| *var.as_native()).collect())
         }
 
         if let Some(millis) = time_limit_millis {
             config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(millis),
             )))
+        } else {
+            config = config.with_cancellation(CancelTokenPython::default());
         }
 
         if let Some(limit) = bdd_size_limit {
@@ -205,33 +195,33 @@ impl ReachabilityConfig {
     }
 
     #[staticmethod]
-    #[pyo3(name = "with_graph")]
-    pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
-        ReachabilityConfig::from(graph.get().as_native().clone())
+    #[pyo3(name = "from_boolean_network")]
+    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
+        Ok(ReachabilityConfig::try_from(boolean_network.as_native())?
+            .with_cancellation(CancelTokenPython::default()))
+    }
+
+    #[staticmethod]
+    #[pyo3(name = "from_graph")]
+    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
+        ReachabilityConfig::from(graph.as_native().clone())
             .with_cancellation(CancelTokenPython::default())
     }
 
     #[pyo3(name = "with_subgraph")]
-    pub fn with_subgraph_py(&self, subgraph: Py<ColoredVertexSet>) -> Self {
-        self.clone()
-            .with_subgraph(subgraph.get().as_native().clone())
+    pub fn python_with_subgraph(&self, subgraph: &ColoredVertexSet) -> Self {
+        self.clone().with_subgraph(subgraph.as_native().clone())
     }
 
     #[pyo3(name = "with_variables")]
-    pub fn with_variables_py(&self, py: Python, variables: Py<PySet>) -> Self {
-        self.clone().with_variables(
-            variables
-                .into_bound(py)
-                .iter()
-                .flat_map(|item| item.extract::<VariableIdBinding>().ok())
-                .map(Into::into)
-                .collect(),
-        )
+    pub fn python_with_variables(&self, variables: HashSet<VariableIdBinding>) -> Self {
+        self.clone()
+            .with_variables(variables.iter().map(|var| *var.as_native()).collect())
     }
 
     // TODO: if we ever move away from abi3-py37, use Duration as an argument
     #[pyo3(name = "with_time_limit")]
-    pub fn with_time_limit_py(&self, duration_in_millis: u64) -> Self {
+    pub fn python_with_time_limit(&self, duration_in_millis: u64) -> Self {
         self.clone()
             .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(duration_in_millis),
@@ -239,12 +229,12 @@ impl ReachabilityConfig {
     }
 
     #[pyo3(name = "with_bdd_size_limit")]
-    pub fn with_bdd_size_limit_py(&self, bdd_size_limit: usize) -> Self {
+    pub fn python_with_bdd_size_limit(&self, bdd_size_limit: usize) -> Self {
         self.clone().with_bdd_size_limit(bdd_size_limit)
     }
 
     #[pyo3(name = "with_steps_limit")]
-    pub fn with_steps_limit_py(&self, steps_limit: usize) -> Self {
+    pub fn python_with_steps_limit(&self, steps_limit: usize) -> Self {
         self.clone().with_steps_limit(steps_limit)
     }
 }
