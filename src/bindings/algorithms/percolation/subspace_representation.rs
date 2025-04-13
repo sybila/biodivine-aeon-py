@@ -28,8 +28,9 @@ impl From<SubspaceRepresentation> for Vec<(VariableId, bool)> {
     }
 }
 
-// TODO: discuss - dict is default
 impl From<Vec<(VariableId, bool)>> for SubspaceRepresentation {
+    /// Create a new [SubspaceRepresentation] from the given list of variable-value pairs.
+    /// Dict is chosen as default for backwards compatibility reasons.
     fn from(subspace: Vec<(VariableId, bool)>) -> Self {
         SubspaceRepresentation::Dict(
             subspace

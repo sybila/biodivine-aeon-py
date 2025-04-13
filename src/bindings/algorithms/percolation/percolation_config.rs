@@ -43,19 +43,9 @@ impl Config for PercolationConfig {
     }
 }
 
-impl PercolationConfig {
-    /// Create a new "default" [PercolationConfig] from the given [BooleanNetwork].
-    pub fn from_boolean_network(bn: &BooleanNetwork) -> Result<Self, PercolationError> {
-        let graph = SymbolicAsyncGraph::new(bn).map_err(PercolationError::CreationFailed)?;
-
-        Ok(PercolationConfig {
-            graph,
-            cancellation: Default::default(),
-        })
-    }
-
-    /// Create a new "default" [PercolationConfig] for the given [SymbolicAsyncGraph].
-    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
+impl From<SymbolicAsyncGraph> for PercolationConfig {
+    /// Create a new "default" [PercolationConfig] from the given [SymbolicAsyncGraph].
+    fn from(graph: SymbolicAsyncGraph) -> Self {
         PercolationConfig {
             graph,
             cancellation: Default::default(),
@@ -63,12 +53,27 @@ impl PercolationConfig {
     }
 }
 
+impl TryFrom<&BooleanNetwork> for PercolationConfig {
+    type Error = PercolationError;
+
+    /// Create a new "default" [PercolationConfig] from the given [BooleanNetwork].
+    fn try_from(boolean_network: &BooleanNetwork) -> Result<Self, Self::Error> {
+        let graph =
+            SymbolicAsyncGraph::new(boolean_network).map_err(PercolationError::CreationFailed)?;
+
+        Ok(PercolationConfig {
+            graph,
+            cancellation: Default::default(),
+        })
+    }
+}
+
 #[pymethods]
 impl PercolationConfig {
     #[new]
     #[pyo3(signature = (graph, time_limit_millis = None))]
-    pub fn new_py(graph: &AsynchronousGraph, time_limit_millis: Option<u64>) -> Self {
-        let mut config = PercolationConfig::with_graph(graph.as_native().clone());
+    pub fn python_new(graph: &AsynchronousGraph, time_limit_millis: Option<u64>) -> Self {
+        let mut config = PercolationConfig::from(graph.as_native().clone());
 
         if let Some(millis) = time_limit_millis {
             config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
@@ -81,18 +86,18 @@ impl PercolationConfig {
 
     #[staticmethod]
     #[pyo3(name = "from_boolean_network")]
-    pub fn from_boolean_network_py(bn: &BooleanNetworkBinding) -> PyResult<Self> {
-        Ok(PercolationConfig::from_boolean_network(bn.as_native())?)
+    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
+        Ok(PercolationConfig::try_from(boolean_network.as_native())?)
     }
 
     #[staticmethod]
-    #[pyo3(name = "with_graph")]
-    pub fn with_graph_py(graph: &AsynchronousGraph) -> Self {
-        PercolationConfig::with_graph(graph.as_native().clone())
+    #[pyo3(name = "from_graph")]
+    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
+        PercolationConfig::from(graph.as_native().clone())
     }
 
     #[pyo3(name = "with_time_limit")]
-    pub fn with_time_limit_py(&self, millis: u64) -> Self {
+    pub fn python_with_time_limit(&self, millis: u64) -> Self {
         self.clone()
             .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(millis),

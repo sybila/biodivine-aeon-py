@@ -17,5 +17,6 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<Percolation>()?;
     module.add_class::<PercolationConfig>()?;
     module.add_class::<SubspaceRepresentation>()?;
+
     Ok(())
 }

@@ -35,18 +35,22 @@ impl Configurable for Percolation {
         &self.0
     }
 
-    fn with_config(config: PercolationConfig) -> Self {
+    fn with_config(config: Self::ConfigType) -> Self {
         Percolation(config)
     }
 }
 
-impl Percolation {
-    pub fn from_boolean_network(bn: &BooleanNetwork) -> Result<Self, PercolationError> {
-        Ok(Percolation(PercolationConfig::from_boolean_network(bn)?))
+impl From<SymbolicAsyncGraph> for Percolation {
+    fn from(graph: SymbolicAsyncGraph) -> Self {
+        Percolation(PercolationConfig::from(graph))
     }
+}
 
-    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
-        Percolation(PercolationConfig::with_graph(graph))
+impl TryFrom<&BooleanNetwork> for Percolation {
+    type Error = PercolationError;
+
+    fn try_from(boolean_network: &BooleanNetwork) -> Result<Self, Self::Error> {
+        Ok(Percolation(PercolationConfig::try_from(boolean_network)?))
     }
 }
 
@@ -170,24 +174,28 @@ impl Percolation {
 impl Percolation {
     #[staticmethod]
     #[pyo3(name = "from_boolean_network")]
-    pub fn from_boolean_network_py(bn: &BooleanNetworkBinding) -> PyResult<Self> {
-        Ok(Percolation(PercolationConfig::from_boolean_network_py(bn)?))
+    pub fn python_from_boolean_network_py(
+        boolean_network: &BooleanNetworkBinding,
+    ) -> PyResult<Self> {
+        Ok(Percolation(PercolationConfig::python_from_boolean_network(
+            boolean_network,
+        )?))
     }
 
     #[staticmethod]
-    #[pyo3(name = "with_graph")]
-    pub fn with_graph_py(graph: &AsynchronousGraph) -> Self {
-        Percolation(PercolationConfig::with_graph_py(graph))
+    #[pyo3(name = "from_graph")]
+    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
+        Percolation(PercolationConfig::python_from_graph(graph))
     }
 
     #[staticmethod]
     #[pyo3(name = "with_config")]
-    pub fn with_config_py(config: PercolationConfig) -> Self {
+    pub fn python_with_config(config: PercolationConfig) -> Self {
         Percolation(config)
     }
 
     #[pyo3(name = "percolate_subspace")]
-    pub fn percolate_subspace_py(
+    pub fn python_percolate_subspace(
         &self,
         subspace: SubspaceRepresentation,
     ) -> PyResult<SubspaceRepresentation> {
