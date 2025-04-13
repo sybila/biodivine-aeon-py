@@ -37,6 +37,10 @@ impl Config for PercolationConfig {
     fn cancellation(&self) -> &dyn CancellationHandler {
         self.cancellation.as_ref()
     }
+
+    fn set_cancellation(&mut self, cancellation: Box<dyn CancellationHandler>) {
+        self.cancellation = cancellation;
+    }
 }
 
 impl PercolationConfig {
@@ -56,13 +60,6 @@ impl PercolationConfig {
             graph,
             cancellation: Default::default(),
         }
-    }
-
-    /// Update the `cancellation` property, automatically wrapping the [CancellationHandler]
-    /// in a `Box`.
-    pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
-        self.cancellation = Box::new(cancellation);
-        self
     }
 }
 

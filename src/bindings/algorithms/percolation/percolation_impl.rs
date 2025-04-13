@@ -34,19 +34,19 @@ impl Configurable for Percolation {
     fn config(&self) -> &Self::ConfigType {
         &self.0
     }
+
+    fn with_config(config: PercolationConfig) -> Self {
+        Percolation(config)
+    }
 }
 
 impl Percolation {
-    pub fn from_boolean_network(bn: &BooleanNetwork) -> PyResult<Self> {
+    pub fn from_boolean_network(bn: &BooleanNetwork) -> Result<Self, PercolationError> {
         Ok(Percolation(PercolationConfig::from_boolean_network(bn)?))
     }
 
     pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
         Percolation(PercolationConfig::with_graph(graph))
-    }
-
-    pub fn with_config(config: PercolationConfig) -> Self {
-        Percolation(config)
     }
 }
 
