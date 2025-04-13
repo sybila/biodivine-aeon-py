@@ -4,11 +4,13 @@ use thiserror::Error;
 
 use crate::bindings::algorithms::cancellation::CancellationError;
 
-/// An error returned by a [FixedPoints] procedure.
+/// An error returned by a [Percolation] procedure.
 #[derive(Error, Debug)]
 pub enum PercolationError {
     #[error("operation cancelled")]
     Cancelled(Vec<Option<bool>>),
+    #[error("config creation failed")]
+    CreationFailed(String),
 }
 
 impl From<CancellationError<Vec<Option<bool>>>> for PercolationError {

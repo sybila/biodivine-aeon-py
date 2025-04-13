@@ -1,14 +1,22 @@
 use std::collections::HashSet;
 
 use biodivine_lib_bdd::{Bdd, BddVariable};
-use biodivine_lib_param_bn::VariableId;
+use biodivine_lib_param_bn::{
+    symbolic_async_graph::SymbolicAsyncGraph, BooleanNetwork, VariableId,
+};
 use pyo3::{pyclass, pymethods, PyResult};
 
-use crate::bindings::algorithms::{
-    cancellation::CancellationHandler,
-    percolation::{
-        percolation_config::PercolationConfig, percolation_error::PercolationError,
-        subspace_representation::SubspaceRepresentation,
+use crate::bindings::{
+    algorithms::{
+        cancellation::CancellationHandler,
+        percolation::{
+            percolation_config::PercolationConfig, percolation_error::PercolationError,
+            subspace_representation::SubspaceRepresentation,
+        },
+    },
+    lib_param_bn::{
+        boolean_network::BooleanNetwork as BooleanNetworkBinding,
+        symbolic::asynchronous_graph::AsynchronousGraph,
     },
 };
 
@@ -29,6 +37,20 @@ impl CancellationHandler for Percolation {
 
     fn start_timer(&self) {
         self.0.cancellation.start_timer()
+    }
+}
+
+impl Percolation {
+    pub fn from_boolean_network(bn: &BooleanNetwork) -> PyResult<Self> {
+        Ok(Percolation(PercolationConfig::from_boolean_network(bn)?))
+    }
+
+    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
+        Percolation(PercolationConfig::with_graph(graph))
+    }
+
+    pub fn with_config(config: PercolationConfig) -> Self {
+        Percolation(config)
     }
 }
 
@@ -150,7 +172,23 @@ impl Percolation {
 
 #[pymethods]
 impl Percolation {
-    // TODO: ohtenkay - creation methods
+    #[staticmethod]
+    #[pyo3(name = "from_boolean_network")]
+    pub fn from_boolean_network_py(bn: &BooleanNetworkBinding) -> PyResult<Self> {
+        Ok(Percolation(PercolationConfig::from_boolean_network_py(bn)?))
+    }
+
+    #[staticmethod]
+    #[pyo3(name = "with_graph")]
+    pub fn with_graph_py(graph: &AsynchronousGraph) -> Self {
+        Percolation(PercolationConfig::with_graph_py(graph))
+    }
+
+    #[staticmethod]
+    #[pyo3(name = "with_config")]
+    pub fn with_config_py(config: PercolationConfig) -> Self {
+        Percolation(config)
+    }
 
     #[pyo3(name = "percolate_subspace")]
     pub fn percolate_subspace_py(

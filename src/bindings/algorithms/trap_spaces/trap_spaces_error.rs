@@ -9,7 +9,7 @@ use crate::bindings::algorithms::cancellation::CancellationError;
 pub enum TrapSpacesError {
     #[error("operation cancelled")]
     CancelledEmpty,
-    #[error("Config creation failed")]
+    #[error("config creation failed")]
     CreationFailed(String),
     // #[error("operation cancelled")]
     // Cancelled(GraphColoredVertices),

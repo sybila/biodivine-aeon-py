@@ -1,7 +1,8 @@
-use pyo3::{create_exception, exceptions::PyException, PyErr};
+use pyo3::PyErr;
 
 use crate::bindings::algorithms::{
-    cancellation::CancelledError, trap_spaces::trap_spaces_error::TrapSpacesError,
+    cancellation::CancelledError, configurable::CreationFailedError,
+    trap_spaces::trap_spaces_error::TrapSpacesError,
 };
 
 impl From<TrapSpacesError> for PyErr {
@@ -23,4 +24,3 @@ impl From<TrapSpacesError> for PyErr {
 
 // TODO: docs - add fourth argument, documentation
 // create_exception!(trap_spaces, BddSizeLimitExceededError, PyException);
-create_exception!(trap_spaces, CreationFailedError, PyException);
