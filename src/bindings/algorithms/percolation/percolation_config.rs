@@ -61,10 +61,7 @@ impl TryFrom<&BooleanNetwork> for PercolationConfig {
         let graph =
             SymbolicAsyncGraph::new(boolean_network).map_err(PercolationError::CreationFailed)?;
 
-        Ok(PercolationConfig {
-            graph,
-            cancellation: Default::default(),
-        })
+        Ok(PercolationConfig::from(graph))
     }
 }
 

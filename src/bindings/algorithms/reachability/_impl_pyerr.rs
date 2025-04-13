@@ -1,6 +1,9 @@
 use pyo3::{create_exception, exceptions::PyException, PyErr};
 
-use crate::bindings::algorithms::{cancellation::CancelledError, reachability::ReachabilityError};
+use crate::bindings::algorithms::{
+    cancellation::CancelledError, configurable::CreationFailedError,
+    reachability::ReachabilityError,
+};
 
 // TODO: nice to have - convert x to native Python object, also for fixed points
 impl From<ReachabilityError> for PyErr {
@@ -10,6 +13,9 @@ impl From<ReachabilityError> for PyErr {
                 "Cancelled(partial_result={})",
                 x.exact_cardinality()
             )),
+            ReachabilityError::CreationFailed(x) => {
+                PyErr::new::<CreationFailedError, _>(format!("Config creation failed: {}", x))
+            }
             ReachabilityError::StepsLimitExceeded(x) => {
                 PyErr::new::<StepsLimitExceededError, _>(format!(
                     "StepsLimitExceeded(partial_result={})",

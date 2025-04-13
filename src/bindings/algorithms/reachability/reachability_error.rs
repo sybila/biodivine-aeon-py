@@ -10,6 +10,8 @@ use crate::bindings::algorithms::cancellation::CancellationError;
 pub enum ReachabilityError {
     #[error("operation cancelled")]
     Cancelled(GraphColoredVertices),
+    #[error("config creation failed")]
+    CreationFailed(String),
     #[error("steps limit exceeded")]
     StepsLimitExceeded(GraphColoredVertices),
     #[error("BDD size limit exceeded")]
@@ -24,6 +26,9 @@ impl Debug for ReachabilityError {
         match self {
             ReachabilityError::Cancelled(x) => {
                 write!(f, "Cancelled(partial_result={})", x.exact_cardinality())
+            }
+            ReachabilityError::CreationFailed(x) => {
+                write!(f, "CreationFailed({})", x)
             }
             ReachabilityError::StepsLimitExceeded(x) => {
                 write!(

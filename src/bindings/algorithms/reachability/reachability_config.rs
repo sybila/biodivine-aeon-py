@@ -2,7 +2,7 @@ use std::{collections::HashSet, time::Duration};
 
 use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
-    VariableId,
+    BooleanNetwork, VariableId,
 };
 use pyo3::{
     pyclass, pymethods,
@@ -18,6 +18,7 @@ use crate::{
                 CancellationHandler,
             },
             configurable::Config,
+            reachability::ReachabilityError,
         },
         lib_param_bn::{
             symbolic::{
@@ -100,6 +101,18 @@ impl From<SymbolicAsyncGraph> for ReachabilityConfig {
             steps_limit: usize::MAX,
             graph,
         }
+    }
+}
+
+impl TryFrom<&BooleanNetwork> for ReachabilityConfig {
+    type Error = ReachabilityError;
+
+    /// Create a new "default" [ReachabilityConfig] from the given [BooleanNetwork].
+    fn try_from(boolean_network: &BooleanNetwork) -> Result<Self, Self::Error> {
+        let graph =
+            SymbolicAsyncGraph::new(boolean_network).map_err(ReachabilityError::CreationFailed)?;
+
+        Ok(Self::from(graph))
     }
 }
 
