@@ -6,37 +6,33 @@ use biodivine_lib_param_bn::{
 };
 use pyo3::{pyclass, pymethods, PyResult};
 
-use crate::bindings::{
-    algorithms::{
-        cancellation::CancellationHandler,
-        percolation::{
-            percolation_config::PercolationConfig, percolation_error::PercolationError,
-            subspace_representation::SubspaceRepresentation,
+use crate::{
+    bindings::{
+        algorithms::{
+            cancellation::CancellationHandler,
+            configurable::Configurable,
+            percolation::{
+                percolation_config::PercolationConfig, percolation_error::PercolationError,
+                subspace_representation::SubspaceRepresentation,
+            },
+        },
+        lib_param_bn::{
+            boolean_network::BooleanNetwork as BooleanNetworkBinding,
+            symbolic::asynchronous_graph::AsynchronousGraph,
         },
     },
-    lib_param_bn::{
-        boolean_network::BooleanNetwork as BooleanNetworkBinding,
-        symbolic::asynchronous_graph::AsynchronousGraph,
-    },
+    is_cancelled,
 };
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct Percolation(PercolationConfig);
 
-impl Percolation {
-    pub fn config(&self) -> &PercolationConfig {
+impl Configurable for Percolation {
+    type ConfigType = PercolationConfig;
+
+    fn config(&self) -> &Self::ConfigType {
         &self.0
-    }
-}
-
-impl CancellationHandler for Percolation {
-    fn is_cancelled(&self) -> bool {
-        self.0.cancellation.is_cancelled()
-    }
-
-    fn start_timer(&self) {
-        self.0.cancellation.start_timer()
     }
 }
 
@@ -106,7 +102,7 @@ impl Percolation {
                 }
 
                 // TODO: ohtenkay - fix
-                // fixed = is_cancelled!(self, fixed)?;
+                fixed = is_cancelled!(self, fixed)?;
 
                 if fns[i].is_none() {
                     let fn_bdd = graph.get_symbolic_fn_update(VariableId::from_index(i));

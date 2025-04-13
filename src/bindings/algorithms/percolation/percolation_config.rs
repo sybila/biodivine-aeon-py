@@ -10,6 +10,7 @@ use crate::{
                 tokens::{CancelTokenPython, CancelTokenTimer},
                 CancellationHandler,
             },
+            configurable::Config,
             percolation::percolation_error::PercolationError,
         },
         lib_param_bn::{
@@ -30,6 +31,12 @@ pub struct PercolationConfig {
     ///
     /// Default: [CancelTokenNever].
     pub cancellation: Box<dyn CancellationHandler>,
+}
+
+impl Config for PercolationConfig {
+    fn cancellation(&self) -> &dyn CancellationHandler {
+        self.cancellation.as_ref()
+    }
 }
 
 impl PercolationConfig {
