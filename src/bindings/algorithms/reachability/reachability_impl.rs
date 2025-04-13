@@ -37,7 +37,7 @@ impl Reachability {
     /// Create a new [Reachability] instance with the given [SymbolicAsyncGraph]
     /// and otherwise default configuration.
     pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
-        Reachability(ReachabilityConfig::with_graph(graph))
+        Reachability(ReachabilityConfig::from(graph))
     }
 
     /// Create a new [Reachability] instance with the given [ReachabilityConfig].

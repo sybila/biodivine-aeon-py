@@ -12,15 +12,18 @@ use pyo3::{
 
 use crate::{
     bindings::{
-        algorithms::cancellation::{
-            tokens::{CancelTokenPython, CancelTokenTimer},
-            CancellationHandler,
+        algorithms::{
+            cancellation::{
+                tokens::{CancelTokenPython, CancelTokenTimer},
+                CancellationHandler,
+            },
+            configurable::Config,
         },
         lib_param_bn::{
             symbolic::{
                 asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
             },
-            variable_id::VariableId as VariableIdWithBindings,
+            variable_id::VariableId as VariableIdBinding,
         },
     },
     AsNative,
@@ -76,9 +79,19 @@ pub struct ReachabilityConfig {
     pub steps_limit: usize,
 }
 
-impl ReachabilityConfig {
-    /// Create a new "default" [ReachabilityConfig] for the given [SymbolicAsyncGraph].
-    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
+impl Config for ReachabilityConfig {
+    fn cancellation(&self) -> &dyn CancellationHandler {
+        self.cancellation.as_ref()
+    }
+
+    fn set_cancellation(&mut self, cancellation: Box<dyn CancellationHandler>) {
+        self.cancellation = cancellation;
+    }
+}
+
+impl From<SymbolicAsyncGraph> for ReachabilityConfig {
+    /// Create a new "default" [ReachabilityConfig] from the given [SymbolicAsyncGraph].
+    fn from(graph: SymbolicAsyncGraph) -> Self {
         ReachabilityConfig {
             variables: HashSet::from_iter(graph.variables()),
             subgraph: None,
@@ -88,7 +101,9 @@ impl ReachabilityConfig {
             graph,
         }
     }
+}
 
+impl ReachabilityConfig {
     /// Update the `subgraph` property, automatically wrapping the [GraphColoredVertices] in
     /// `Some`.
     pub fn with_subgraph(mut self, subgraph: GraphColoredVertices) -> Self {
@@ -99,13 +114,6 @@ impl ReachabilityConfig {
     /// Update the `variables` property.
     pub fn with_variables(mut self, variables: HashSet<VariableId>) -> Self {
         self.variables = variables;
-        self
-    }
-
-    /// Update the `cancellation` property, automatically wrapping the [CancellationHandler]
-    /// in a `Box`.
-    pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
-        self.cancellation = Box::new(cancellation);
         self
     }
 
@@ -149,7 +157,7 @@ impl ReachabilityConfig {
         bdd_size_limit: Option<usize>,
         steps_limit: Option<usize>,
     ) -> Self {
-        let mut config = ReachabilityConfig::with_graph(graph.get().as_native().clone());
+        let mut config = ReachabilityConfig::from(graph.get().as_native().clone());
 
         if let Some(subgraph) = subgraph {
             config = config.with_subgraph(subgraph.get().as_native().clone())
@@ -160,7 +168,7 @@ impl ReachabilityConfig {
                 variables
                     .into_bound(py)
                     .iter()
-                    .flat_map(|item| item.extract::<VariableIdWithBindings>().ok())
+                    .flat_map(|item| item.extract::<VariableIdBinding>().ok())
                     .map(Into::into)
                     .collect(),
             )
@@ -186,7 +194,7 @@ impl ReachabilityConfig {
     #[staticmethod]
     #[pyo3(name = "with_graph")]
     pub fn with_graph_py(graph: Py<AsynchronousGraph>) -> Self {
-        ReachabilityConfig::with_graph(graph.get().as_native().clone())
+        ReachabilityConfig::from(graph.get().as_native().clone())
             .with_cancellation(CancelTokenPython::default())
     }
 
@@ -202,7 +210,7 @@ impl ReachabilityConfig {
             variables
                 .into_bound(py)
                 .iter()
-                .flat_map(|item| item.extract::<VariableIdWithBindings>().ok())
+                .flat_map(|item| item.extract::<VariableIdBinding>().ok())
                 .map(Into::into)
                 .collect(),
         )
