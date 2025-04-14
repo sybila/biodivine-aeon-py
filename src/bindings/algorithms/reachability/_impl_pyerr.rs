@@ -9,23 +9,23 @@ use crate::bindings::algorithms::{
 impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {
         match err {
-            ReachabilityError::Cancelled(x) => PyErr::new::<CancelledError, _>(format!(
-                "Cancelled: partial_result={}",
-                x.exact_cardinality()
-            )),
-            ReachabilityError::CreationFailed(x) => {
-                PyErr::new::<CreationFailedError, _>(format!("Config creation failed: {}", x))
+            ReachabilityError::CreationFailed(error) => {
+                PyErr::new::<CreationFailedError, _>(format!("Config creation failed: {}", error))
             }
-            ReachabilityError::StepsLimitExceeded(x) => {
+            ReachabilityError::Cancelled(gcv) => PyErr::new::<CancelledError, _>(format!(
+                "Cancelled: partial_result={}",
+                gcv.exact_cardinality()
+            )),
+            ReachabilityError::StepsLimitExceeded(gcv) => {
                 PyErr::new::<StepsLimitExceededError, _>(format!(
                     "Steps limit exceeded: partial_result={}",
-                    x.exact_cardinality()
+                    gcv.exact_cardinality()
                 ))
             }
-            ReachabilityError::BddSizeLimitExceeded(x) => {
+            ReachabilityError::BddSizeLimitExceeded(gcv) => {
                 PyErr::new::<BddSizeLimitExceededError, _>(format!(
                     "BDD size limit exceeded: partial_result={}",
-                    x.exact_cardinality()
+                    gcv.exact_cardinality()
                 ))
             }
             ReachabilityError::InvalidSubgraph => {

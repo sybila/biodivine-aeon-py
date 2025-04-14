@@ -8,10 +8,10 @@ use crate::bindings::algorithms::cancellation::CancellationError;
 /// An error returned by a [Reachability] procedure.
 #[derive(Error)]
 pub enum ReachabilityError {
-    #[error("operation cancelled")]
-    Cancelled(GraphColoredVertices),
     #[error("config creation failed")]
     CreationFailed(String),
+    #[error("operation cancelled")]
+    Cancelled(GraphColoredVertices),
     #[error("steps limit exceeded")]
     StepsLimitExceeded(GraphColoredVertices),
     #[error("BDD size limit exceeded")]
@@ -24,24 +24,24 @@ pub enum ReachabilityError {
 impl Debug for ReachabilityError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            ReachabilityError::Cancelled(x) => {
-                write!(f, "Cancelled(partial_result={})", x.exact_cardinality())
+            ReachabilityError::CreationFailed(error) => {
+                write!(f, "CreationFailed({})", error)
             }
-            ReachabilityError::CreationFailed(x) => {
-                write!(f, "CreationFailed({})", x)
+            ReachabilityError::Cancelled(gcv) => {
+                write!(f, "Cancelled(partial_result={})", gcv.exact_cardinality())
             }
-            ReachabilityError::StepsLimitExceeded(x) => {
+            ReachabilityError::StepsLimitExceeded(gcv) => {
                 write!(
                     f,
                     "StepsLimitExceeded(partial_result={})",
-                    x.exact_cardinality()
+                    gcv.exact_cardinality()
                 )
             }
-            ReachabilityError::BddSizeLimitExceeded(x) => {
+            ReachabilityError::BddSizeLimitExceeded(gcv) => {
                 write!(
                     f,
                     "BddSizeLimitExceeded(partial_result={})",
-                    x.exact_cardinality()
+                    gcv.exact_cardinality()
                 )
             }
             ReachabilityError::InvalidSubgraph => {
