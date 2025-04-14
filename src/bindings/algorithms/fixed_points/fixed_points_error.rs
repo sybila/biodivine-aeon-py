@@ -9,8 +9,6 @@ use crate::bindings::algorithms::cancellation::CancellationError;
 #[derive(Error)]
 pub enum FixedPointsError {
     #[error("operation cancelled")]
-    CancelledEmpty,
-    #[error("operation cancelled")]
     Cancelled(Bdd),
     #[error("BDD size limit exceeded")]
     BddSizeLimitExceeded(Bdd),
@@ -20,9 +18,6 @@ pub enum FixedPointsError {
 impl Debug for FixedPointsError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            FixedPointsError::CancelledEmpty => {
-                write!(f, "Cancelled")
-            }
             FixedPointsError::Cancelled(bdd) => {
                 write!(f, "Cancelled(partial_result={})", bdd.exact_cardinality())
             }
@@ -37,11 +32,8 @@ impl Debug for FixedPointsError {
     }
 }
 
-impl<T> From<CancellationError<T>> for FixedPointsError
-where
-    T: Sized + Debug + 'static,
-{
-    fn from(_: CancellationError<T>) -> Self {
-        FixedPointsError::CancelledEmpty
+impl From<CancellationError<Bdd>> for FixedPointsError {
+    fn from(error_value: CancellationError<Bdd>) -> Self {
+        FixedPointsError::Cancelled(error_value.into_partial_data())
     }
 }

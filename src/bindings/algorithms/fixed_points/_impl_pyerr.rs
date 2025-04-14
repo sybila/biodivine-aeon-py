@@ -7,7 +7,6 @@ use crate::bindings::algorithms::{
 impl From<FixedPointsError> for PyErr {
     fn from(err: FixedPointsError) -> Self {
         match err {
-            FixedPointsError::CancelledEmpty => PyErr::new::<CancelledError, _>("Cancelled"),
             FixedPointsError::Cancelled(bdd) => PyErr::new::<CancelledError, _>(format!(
                 "Cancelled: partial_result={}",
                 bdd.exact_cardinality()

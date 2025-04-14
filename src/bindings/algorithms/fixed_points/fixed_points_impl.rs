@@ -90,7 +90,7 @@ impl FixedPoints {
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = restriction.minus(&can_step);
 
-                is_cancelled!(self)?;
+                is_cancelled!(self, || { restriction.as_bdd().clone() })?;
 
                 trace!(
                     target: TARGET_NAIVE_SYMBOLIC,
@@ -114,8 +114,9 @@ impl FixedPoints {
                 to_merge.iter().map(|it| it.symbolic_size()).sum::<usize>(),
             );
 
-            // TODO: ohtenkay - is there a partial result in any of the algorithms? restriction is
-            is_cancelled!(self)?;
+            // TODO: discuss - is the partial result correct?
+            // TODO: discuss - implement From<GraphColoredVertices> for FixedPointsError?
+            is_cancelled!(self, || { to_merge.pop().unwrap().as_bdd().clone() })?;
 
             let x = to_merge.pop().unwrap();
             let y = to_merge.pop().unwrap();
@@ -162,11 +163,11 @@ impl FixedPoints {
             to_merge.push(restriction.as_bdd().clone());
         }
 
-        is_cancelled!(self)?;
+        is_cancelled!(self, || { to_merge.pop().unwrap().clone() })?;
 
         let fixed_points = self.symbolic_merge(to_merge, HashSet::default(), TARGET_SYMBOLIC)?;
 
-        is_cancelled!(self)?;
+        is_cancelled!(self, || { fixed_points.clone() })?;
 
         let fixed_points = stg.unit_colored_vertices().copy(fixed_points);
 
@@ -206,13 +207,13 @@ impl FixedPoints {
             .cloned()
             .collect();
 
-        is_cancelled!(self)?;
+        is_cancelled!(self, || { to_merge.pop().unwrap().clone() })?;
 
         let bdd = self.symbolic_merge(to_merge, projections, TARGET_SYMBOLIC_VERTICES)?;
 
-        let vertices = stg.empty_colored_vertices().vertices().copy(bdd);
+        is_cancelled!(self, || { bdd.clone() })?;
 
-        is_cancelled!(self)?;
+        let vertices = stg.empty_colored_vertices().vertices().copy(bdd);
 
         info!(
             target: TARGET_SYMBOLIC_VERTICES,
@@ -249,13 +250,13 @@ impl FixedPoints {
             .cloned()
             .collect();
 
-        is_cancelled!(self)?;
+        is_cancelled!(self, || { to_merge.pop().unwrap().clone() })?;
 
         let bdd = self.symbolic_merge(to_merge, projections, TARGET_SYMBOLIC_COLORS)?;
 
-        let colors = stg.empty_colored_vertices().colors().copy(bdd);
+        is_cancelled!(self, || { bdd.clone() })?;
 
-        is_cancelled!(self)?;
+        let colors = stg.empty_colored_vertices().colors().copy(bdd);
 
         info!(
             target: TARGET_SYMBOLIC_COLORS,
@@ -271,6 +272,7 @@ impl FixedPoints {
 impl FixedPoints {
     fn prepare_to_merge(&self, target: &str) -> Result<Vec<Bdd>, FixedPointsError> {
         let stg = &self.config().graph;
+        let restriction = &self.config().restriction;
 
         let mut combined_bdd_size = 0;
         let result = stg
@@ -278,14 +280,14 @@ impl FixedPoints {
             .map(|var| {
                 if combined_bdd_size > self.config().bdd_size_limit {
                     return Err(FixedPointsError::BddSizeLimitExceeded(
-                        self.config().restriction.as_bdd().clone(),
+                        restriction.as_bdd().clone(),
                     ));
                 }
 
                 let can_step = stg.var_can_post(var, stg.unit_colored_vertices());
                 let is_stable = stg.unit_colored_vertices().minus(&can_step);
 
-                is_cancelled!(self)?;
+                is_cancelled!(self, || { restriction.as_bdd().clone() })?;
 
                 trace!(
                     target: target,
@@ -333,11 +335,10 @@ impl FixedPoints {
             .collect();
 
         let universe = self.config().graph.symbolic_context().bdd_variable_set();
-        // TODO: ohtenkay - use this as partial result
         let mut result = universe.mk_true();
         let mut merged = HashSet::new();
 
-        is_cancelled!(self)?;
+        is_cancelled!(self, || { result.clone() })?;
 
         /*
            Note to self: It seems that not all projections are always beneficial to the BDD size.
@@ -356,7 +357,7 @@ impl FixedPoints {
                     result = result.var_exists(p_var);
                     projections.remove(&p_var);
 
-                    is_cancelled!(self)?;
+                    is_cancelled!(self, || { result.clone() })?;
 
                     trace!(
                         target: target,
@@ -385,7 +386,7 @@ impl FixedPoints {
                     biodivine_lib_bdd::op_function::and,
                 );
 
-                is_cancelled!(self)?;
+                is_cancelled!(self, || { result.clone() })?;
 
                 if let Some(bdd) = bdd {
                     // At this point, the size of the BDD should be smaller or equal to the
@@ -431,7 +432,7 @@ impl FixedPoints {
             );
         }
 
-        is_cancelled!(self)?;
+        is_cancelled!(self, || { result.clone() })?;
 
         info!(target: target, "Merge finished with {} BDD nodes.", result.size());
 
