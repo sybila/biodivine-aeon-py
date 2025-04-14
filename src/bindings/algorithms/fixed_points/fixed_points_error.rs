@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Formatter, Result};
 
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
+use biodivine_lib_bdd::Bdd;
 use thiserror::Error;
 
 use crate::bindings::algorithms::cancellation::CancellationError;
@@ -10,12 +10,10 @@ use crate::bindings::algorithms::cancellation::CancellationError;
 pub enum FixedPointsError {
     #[error("operation cancelled")]
     CancelledEmpty,
-    // #[error("operation cancelled")]
-    // Cancelled(GraphColoredVertices),
-    // TODO: oktenkay - Errors can only contain GraphColoredVertices, but algoritms can return also
-    // only Colors or only Vertices, change this to work with bdds
+    #[error("operation cancelled")]
+    Cancelled(Bdd),
     #[error("BDD size limit exceeded")]
-    BddSizeLimitExceeded(GraphColoredVertices),
+    BddSizeLimitExceeded(Bdd),
 }
 
 /// The default implementation will print the whole BDD, which can be quite large.
@@ -25,11 +23,14 @@ impl Debug for FixedPointsError {
             FixedPointsError::CancelledEmpty => {
                 write!(f, "Cancelled")
             }
-            FixedPointsError::BddSizeLimitExceeded(x) => {
+            FixedPointsError::Cancelled(bdd) => {
+                write!(f, "Cancelled(partial_result={})", bdd.exact_cardinality())
+            }
+            FixedPointsError::BddSizeLimitExceeded(bdd) => {
                 write!(
                     f,
                     "BddSizeLimitExceeded(partial_result={})",
-                    x.exact_cardinality()
+                    bdd.exact_cardinality()
                 )
             }
         }

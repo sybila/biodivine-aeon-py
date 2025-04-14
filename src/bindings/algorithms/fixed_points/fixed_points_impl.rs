@@ -83,7 +83,7 @@ impl FixedPoints {
             .map(|var| {
                 if combined_bdd_size > self.config().bdd_size_limit {
                     return Err(FixedPointsError::BddSizeLimitExceeded(
-                        self.config().restriction.clone(),
+                        self.config().restriction.as_bdd().clone(),
                     ));
                 }
 
@@ -278,7 +278,7 @@ impl FixedPoints {
             .map(|var| {
                 if combined_bdd_size > self.config().bdd_size_limit {
                     return Err(FixedPointsError::BddSizeLimitExceeded(
-                        self.config().restriction.clone(),
+                        self.config().restriction.as_bdd().clone(),
                     ));
                 }
 
@@ -410,7 +410,12 @@ impl FixedPoints {
             let sum_to_merge_bdd_sizes = to_merge.values().map(|set| set.size()).sum::<usize>();
             if sum_to_merge_bdd_sizes + best_result_size > self.config().bdd_size_limit {
                 return Err(FixedPointsError::BddSizeLimitExceeded(
-                    self.config().graph.unit_colored_vertices().copy(result),
+                    self.config()
+                        .graph
+                        .unit_colored_vertices()
+                        .copy(result)
+                        .as_bdd()
+                        .clone(),
                 ));
             }
 

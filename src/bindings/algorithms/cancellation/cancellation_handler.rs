@@ -16,8 +16,6 @@ pub trait CancellationHandler: Send + Sync + DynClone {
     fn start_timer(&self) {}
 }
 
-clone_trait_object!(CancellationHandler);
-
 impl Default for Box<dyn CancellationHandler> {
     fn default() -> Self {
         Box::new(CancelTokenNever)
@@ -31,3 +29,5 @@ impl Debug for Box<dyn CancellationHandler> {
             .finish()
     }
 }
+
+clone_trait_object!(CancellationHandler);

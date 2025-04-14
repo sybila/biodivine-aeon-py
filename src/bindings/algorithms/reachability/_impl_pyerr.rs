@@ -10,7 +10,7 @@ impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {
         match err {
             ReachabilityError::Cancelled(x) => PyErr::new::<CancelledError, _>(format!(
-                "Cancelled(partial_result={})",
+                "Cancelled: partial_result={}",
                 x.exact_cardinality()
             )),
             ReachabilityError::CreationFailed(x) => {
@@ -18,18 +18,18 @@ impl From<ReachabilityError> for PyErr {
             }
             ReachabilityError::StepsLimitExceeded(x) => {
                 PyErr::new::<StepsLimitExceededError, _>(format!(
-                    "StepsLimitExceeded(partial_result={})",
+                    "Steps limit exceeded: partial_result={}",
                     x.exact_cardinality()
                 ))
             }
             ReachabilityError::BddSizeLimitExceeded(x) => {
                 PyErr::new::<BddSizeLimitExceededError, _>(format!(
-                    "BddSizeLimitExceeded(partial_result={})",
+                    "BDD size limit exceeded: partial_result={}",
                     x.exact_cardinality()
                 ))
             }
             ReachabilityError::InvalidSubgraph => {
-                PyErr::new::<InvalidSubgraphError, _>("InvalidSubgraph")
+                PyErr::new::<InvalidSubgraphError, _>("Invalid subgraph")
             }
         }
     }

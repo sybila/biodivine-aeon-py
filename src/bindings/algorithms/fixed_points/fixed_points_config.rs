@@ -5,9 +5,12 @@ use pyo3::{pyclass, pymethods, Py};
 
 use crate::{
     bindings::{
-        algorithms::cancellation::{
-            tokens::{CancelTokenPython, CancelTokenTimer},
-            CancellationHandler,
+        algorithms::{
+            cancellation::{
+                tokens::{CancelTokenPython, CancelTokenTimer},
+                CancellationHandler,
+            },
+            configurable::Config,
         },
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
@@ -25,6 +28,16 @@ pub struct FixedPointsConfig {
     pub bdd_size_limit: usize,
 }
 
+impl Config for FixedPointsConfig {
+    fn cancellation(&self) -> &dyn CancellationHandler {
+        self.cancellation.as_ref()
+    }
+
+    fn set_cancellation(&mut self, cancellation: Box<dyn CancellationHandler>) {
+        self.cancellation = cancellation;
+    }
+}
+
 impl FixedPointsConfig {
     /// Create a new "default" [FixedPointsCongfig] for the given [SymbolicAsyncGraph].
     pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
@@ -39,13 +52,6 @@ impl FixedPointsConfig {
     /// Update the `restriction` property
     pub fn with_restriction(mut self, restriction: GraphColoredVertices) -> Self {
         self.restriction = restriction;
-        self
-    }
-
-    /// Update the `cancellation` property, automatically wrapping the [CancellationHandler]
-    /// in a `Box`.
-    pub fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self {
-        self.cancellation = Box::new(cancellation);
         self
     }
 

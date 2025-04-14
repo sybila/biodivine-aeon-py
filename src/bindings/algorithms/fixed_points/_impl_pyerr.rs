@@ -8,10 +8,14 @@ impl From<FixedPointsError> for PyErr {
     fn from(err: FixedPointsError) -> Self {
         match err {
             FixedPointsError::CancelledEmpty => PyErr::new::<CancelledError, _>("Cancelled"),
-            FixedPointsError::BddSizeLimitExceeded(x) => {
+            FixedPointsError::Cancelled(bdd) => PyErr::new::<CancelledError, _>(format!(
+                "Cancelled: partial_result={}",
+                bdd.exact_cardinality()
+            )),
+            FixedPointsError::BddSizeLimitExceeded(bdd) => {
                 PyErr::new::<BddSizeLimitExceededError, _>(format!(
                     "BDD size limit exceeded: {}",
-                    x.exact_cardinality()
+                    bdd.exact_cardinality()
                 ))
             }
         }
