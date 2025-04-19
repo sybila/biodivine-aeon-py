@@ -21,6 +21,10 @@ use pyo3::{PyErrArguments, PyResult, Python};
 ///
 pub mod bindings;
 
+/// A module with functionality for manipulating the Biodivine Boolean Models database.
+///
+pub mod bbm;
+
 /// In this module, we have copied some of the internal AEON algorithms that we cannot include
 /// directly since they are not part of a public crate. Try to keep this module as small as
 /// possible -- ideally, the stuff in here should be eventually published to crates.io and turned
@@ -90,6 +94,7 @@ fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     bindings::lib_hctl_model_checker::register(module)?;
     bindings::bn_classifier::register(module)?;
     bindings::pbn_control::register(module)?;
+    bbm::register(module)?;
     Ok(())
 }
 

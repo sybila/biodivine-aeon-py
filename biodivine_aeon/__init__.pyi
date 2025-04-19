@@ -1816,6 +1816,12 @@ class Control:
                             stop_when_found: bool = False,
                             initial_states: VertexSet | None = None) -> ColoredPerturbationSet: ...
 
+class BiodivineBooleanModels:
+    @staticmethod
+    def fetch_network(id: str) -> BooleanNetwork: ...
+    @staticmethod
+    def fetch_ids() -> list[str]: ...
+
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]
 ParameterIdType = Union[ParameterId, str]
