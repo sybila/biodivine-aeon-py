@@ -1,4 +1,4 @@
-use fixed_points_config::FixedPointsConfigPython;
+use fixed_points_config::PyFixedPointsConfig;
 use fixed_points_impl::FixedPointsPython;
 use pyo3::{
     types::{PyModule, PyModuleMethods},
@@ -11,7 +11,7 @@ mod fixed_points_error;
 mod fixed_points_impl;
 
 pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add_class::<FixedPointsConfigPython>()?;
+    module.add_class::<PyFixedPointsConfig>()?;
     module.add_class::<FixedPointsPython>()?;
     Ok(())
 }

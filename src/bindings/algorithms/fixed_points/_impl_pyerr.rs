@@ -1,12 +1,16 @@
 use pyo3::{create_exception, exceptions::PyException, PyErr};
 
 use crate::bindings::algorithms::{
-    cancellation::CancelledError, fixed_points::fixed_points_error::FixedPointsError,
+    cancellation::CancelledError, configurable::CreationFailedError,
+    fixed_points::fixed_points_error::FixedPointsError,
 };
 
 impl From<FixedPointsError> for PyErr {
     fn from(err: FixedPointsError) -> Self {
         match err {
+            FixedPointsError::CreationFailed(error) => {
+                PyErr::new::<CreationFailedError, _>(format!("Config creation failed: {}", error))
+            }
             FixedPointsError::Cancelled(bdd) => PyErr::new::<CancelledError, _>(format!(
                 "Cancelled: partial_result={}",
                 bdd.exact_cardinality()

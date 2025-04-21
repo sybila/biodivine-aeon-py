@@ -8,6 +8,8 @@ use crate::bindings::algorithms::cancellation::CancellationError;
 /// An error returned by a [FixedPoints] procedure.
 #[derive(Error)]
 pub enum FixedPointsError {
+    #[error("config creation failed")]
+    CreationFailed(String),
     #[error("operation cancelled")]
     Cancelled(Bdd),
     #[error("BDD size limit exceeded")]
@@ -18,6 +20,9 @@ pub enum FixedPointsError {
 impl Debug for FixedPointsError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
+            FixedPointsError::CreationFailed(error) => {
+                write!(f, "CreationFailed({})", error)
+            }
             FixedPointsError::Cancelled(bdd) => {
                 write!(f, "Cancelled(partial_result={})", bdd.exact_cardinality())
             }

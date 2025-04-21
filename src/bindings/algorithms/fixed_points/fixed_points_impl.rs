@@ -13,7 +13,7 @@ use crate::{
         algorithms::{
             cancellation::CancellationHandler,
             fixed_points::{
-                fixed_points_config::{FixedPointsConfig, FixedPointsConfigPython},
+                fixed_points_config::{FixedPointsConfig, PyFixedPointsConfig},
                 fixed_points_error::FixedPointsError,
             },
         },
@@ -37,9 +37,8 @@ pub struct FixedPoints(FixedPointsConfig);
 impl FixedPoints {
     /// Create a new [FixedPoints] instance with the given [SymbolicAsyncGraph]
     /// and otherwise default configuration.
-    #[allow(dead_code)]
-    pub fn with_graph(graph: SymbolicAsyncGraph) -> Self {
-        FixedPoints(FixedPointsConfig::with_graph(graph))
+    pub fn from_graph(graph: SymbolicAsyncGraph) -> Self {
+        FixedPoints(FixedPointsConfig::from(graph))
     }
 
     /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
@@ -458,8 +457,8 @@ impl FixedPointsPython {
     /// Create a new [FixedPoints] instance with the given [AsynchronousGraph]
     /// and otherwise default configuration.
     #[staticmethod]
-    pub fn with_graph(graph: Py<AsynchronousGraph>) -> Self {
-        let config = FixedPointsConfigPython::with_graph(graph);
+    pub fn from_graph(graph: &AsynchronousGraph) -> Self {
+        let config = PyFixedPointsConfig::from_graph(graph);
 
         FixedPointsPython {
             inner: FixedPoints(config.inner()),
@@ -469,10 +468,10 @@ impl FixedPointsPython {
 
     /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
     #[staticmethod]
-    pub fn with_config(config: Py<FixedPointsConfigPython>) -> Self {
+    pub fn with_config(config: &PyFixedPointsConfig) -> Self {
         FixedPointsPython {
-            inner: FixedPoints::with_config(config.get().inner()),
-            symbolic_context: config.get().symbolic_context(),
+            inner: FixedPoints::with_config(config.inner()),
+            symbolic_context: config.symbolic_context(),
         }
     }
 
