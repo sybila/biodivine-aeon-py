@@ -46,7 +46,7 @@ impl Configurable for Percolation {
 }
 
 impl From<SymbolicAsyncGraph> for Percolation {
-    /// Create a new [Percolation] instance with the given [SymbolicAsyncGraph]
+    /// Create a new [Percolation] instance from the given [SymbolicAsyncGraph]
     /// and otherwise default configuration.
     fn from(graph: SymbolicAsyncGraph) -> Self {
         Percolation(PercolationConfig::from(graph))
@@ -56,6 +56,8 @@ impl From<SymbolicAsyncGraph> for Percolation {
 impl TryFrom<&BooleanNetwork> for Percolation {
     type Error = PercolationError;
 
+    /// Create a new [Percolation] instance from the given [BooleanNetwork]
+    /// and otherwise default configuration.
     fn try_from(boolean_network: &BooleanNetwork) -> Result<Self, Self::Error> {
         Ok(Percolation(PercolationConfig::try_from(boolean_network)?))
     }
@@ -203,9 +205,7 @@ impl Percolation {
 impl Percolation {
     #[staticmethod]
     #[pyo3(name = "from_boolean_network")]
-    pub fn python_from_boolean_network_py(
-        boolean_network: &BooleanNetworkBinding,
-    ) -> PyResult<Self> {
+    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
         Ok(Percolation(PercolationConfig::python_from_boolean_network(
             boolean_network,
         )?))

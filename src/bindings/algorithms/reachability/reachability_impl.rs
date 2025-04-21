@@ -13,8 +13,11 @@ use crate::{
             configurable::Configurable,
             reachability::{ReachabilityConfig, ReachabilityError},
         },
-        lib_param_bn::symbolic::{
-            asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
+        lib_param_bn::{
+            boolean_network::BooleanNetwork as BooleanNetworkBinding,
+            symbolic::{
+                asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
+            },
         },
     },
     is_cancelled, AsNative,
@@ -329,6 +332,14 @@ impl Reachability {
 // TODO: finalize - make this optional with a feature flag
 #[pymethods]
 impl Reachability {
+    #[staticmethod]
+    #[pyo3(name = "from_boolean_network")]
+    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
+        Ok(Reachability(
+            ReachabilityConfig::python_from_boolean_network(boolean_network)?,
+        ))
+    }
+
     #[staticmethod]
     #[pyo3(name = "from_graph")]
     pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
