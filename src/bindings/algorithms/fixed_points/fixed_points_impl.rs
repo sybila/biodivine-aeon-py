@@ -4,23 +4,28 @@ use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::{
     biodivine_std::traits::Set,
     symbolic_async_graph::{GraphColoredVertices, GraphColors, GraphVertices, SymbolicAsyncGraph},
+    BooleanNetwork,
 };
 use log::{debug, info, trace};
-use pyo3::{pyclass, pymethods, Py, PyResult};
+use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 
 use crate::{
     bindings::{
         algorithms::{
             cancellation::CancellationHandler,
+            configurable::Configurable,
             fixed_points::{
                 fixed_points_config::{FixedPointsConfig, PyFixedPointsConfig},
                 fixed_points_error::FixedPointsError,
             },
         },
-        lib_param_bn::symbolic::{
-            asynchronous_graph::AsynchronousGraph, set_color::ColorSet,
-            set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
-            symbolic_context::SymbolicContext,
+        lib_param_bn::{
+            boolean_network::BooleanNetwork as BooleanNetworkBinding,
+            symbolic::{
+                asynchronous_graph::AsynchronousGraph, set_color::ColorSet,
+                set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
+                symbolic_context::SymbolicContext,
+            },
         },
     },
     is_cancelled,
@@ -34,31 +39,35 @@ const TARGET_SYMBOLIC_COLORS: &str = "FixedPoints::symbolic_colors";
 #[derive(Clone)]
 pub struct FixedPoints(FixedPointsConfig);
 
-impl FixedPoints {
-    /// Create a new [FixedPoints] instance with the given [SymbolicAsyncGraph]
-    /// and otherwise default configuration.
-    pub fn from_graph(graph: SymbolicAsyncGraph) -> Self {
-        FixedPoints(FixedPointsConfig::from(graph))
+impl Configurable for FixedPoints {
+    type ConfigType = FixedPointsConfig;
+
+    /// Retrieve the internal [FixedPointsConfig] of this instance.
+    fn config(&self) -> &Self::ConfigType {
+        &self.0
     }
 
     /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
-    pub fn with_config(config: FixedPointsConfig) -> Self {
+    fn with_config(config: Self::ConfigType) -> Self {
         FixedPoints(config)
-    }
-
-    /// Retrieve the internal [FixedPointsConfig] of this instance.
-    pub fn config(&self) -> &FixedPointsConfig {
-        &self.0
     }
 }
 
-impl CancellationHandler for FixedPoints {
-    fn is_cancelled(&self) -> bool {
-        self.config().cancellation.is_cancelled()
+impl From<SymbolicAsyncGraph> for FixedPoints {
+    /// Create a new [FixedPoints] instance with the given [SymbolicAsyncGraph]
+    /// and otherwise default configuration.
+    fn from(graph: SymbolicAsyncGraph) -> Self {
+        FixedPoints(FixedPointsConfig::from(graph))
     }
+}
 
-    fn start_timer(&self) {
-        self.config().cancellation.start_timer()
+impl TryFrom<&BooleanNetwork> for FixedPoints {
+    type Error = FixedPointsError;
+
+    /// Create a new [FixedPoints] instance with the given [BooleanNetwork]
+    /// and otherwise default configuration.
+    fn try_from(boolean_network: &BooleanNetwork) -> Result<Self, Self::Error> {
+        Ok(FixedPoints(FixedPointsConfig::try_from(boolean_network)?))
     }
 }
 
@@ -454,6 +463,21 @@ pub struct FixedPointsPython {
 
 #[pymethods]
 impl FixedPointsPython {
+    /// Create a new [FixedPoints] instance with the given [BooleanNetwork]
+    /// and otherwise default configuration.
+    #[staticmethod]
+    pub fn from_boolean_network(
+        py: Python,
+        boolean_network: Py<BooleanNetworkBinding>,
+    ) -> PyResult<Self> {
+        let config = PyFixedPointsConfig::from_boolean_network(py, boolean_network)?;
+
+        Ok(FixedPointsPython {
+            inner: FixedPoints(config.inner()),
+            symbolic_context: config.symbolic_context(),
+        })
+    }
+
     /// Create a new [FixedPoints] instance with the given [AsynchronousGraph]
     /// and otherwise default configuration.
     #[staticmethod]
