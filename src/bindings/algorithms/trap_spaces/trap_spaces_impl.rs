@@ -2,16 +2,19 @@ use std::collections::HashSet;
 
 use biodivine_lib_bdd::bdd;
 use biodivine_lib_param_bn::{
-    biodivine_std::traits::Set, fixed_points::FixedPoints, trap_spaces::NetworkColoredSpaces,
+    biodivine_std::traits::Set,
+    fixed_points::FixedPoints,
+    symbolic_async_graph::SymbolicAsyncGraph,
+    trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
     BooleanNetwork,
 };
 use log::{debug, info};
-use pyo3::prelude::*;
+use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 
 use crate::{
     bindings::{
         algorithms::{
-            cancellation::CancellationHandler,
+            configurable::Configurable,
             trap_spaces::{
                 trap_spaces_config::TrapSpacesConfig, trap_spaces_error::TrapSpacesError,
             },
@@ -20,7 +23,7 @@ use crate::{
             boolean_network::BooleanNetwork as BooleanNetworkPython,
             symbolic::{
                 set_colored_space::ColoredSpaceSet, symbolic_context::SymbolicContext,
-                symbolic_space_context::SymbolicSpaceContext,
+                symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextBinding,
             },
         },
     },
@@ -31,26 +34,34 @@ use crate::{
 #[derive(Clone)]
 pub struct TrapSpaces(TrapSpacesConfig);
 
-impl TrapSpaces {
-    /// Create a new "default" [TrapSpaces] for the given [BooleanNetwork].
-    pub fn from_boolean_network(bn: BooleanNetwork) -> Result<Self, TrapSpacesError> {
-        TrapSpacesConfig::from_boolean_network(bn).map(TrapSpaces)
-    }
+impl Configurable for TrapSpaces {
+    type ConfigType = TrapSpacesConfig;
 
     /// Retrieve the internal [TrapSpacesConfig] of this instance.
-    pub fn config(&self) -> &TrapSpacesConfig {
+    fn config(&self) -> &Self::ConfigType {
         &self.0
+    }
+
+    /// Create a new [TrapSpaces] instance with the given [TrapSpacesConfig].
+    fn with_config(config: Self::ConfigType) -> Self {
+        TrapSpaces(config)
     }
 }
 
-// TODO: ohtenkay - create a trait Configurable (has inner config) that implements this
-impl CancellationHandler for TrapSpaces {
-    fn is_cancelled(&self) -> bool {
-        self.config().cancellation.is_cancelled()
+impl From<(SymbolicAsyncGraph, SymbolicSpaceContext)> for TrapSpaces {
+    /// Create a new "default" [TrapSpaces] from the given [SymbolicAsyncGraph] and
+    /// [SymbolicSpaceContext].
+    fn from((graph, ctx): (SymbolicAsyncGraph, SymbolicSpaceContext)) -> Self {
+        TrapSpaces(TrapSpacesConfig::from((graph, ctx)))
     }
+}
 
-    fn start_timer(&self) {
-        self.config().cancellation.start_timer();
+impl TryFrom<&BooleanNetwork> for TrapSpaces {
+    type Error = TrapSpacesError;
+
+    /// Create a new "default" [TrapSpaces] for the given [BooleanNetwork].
+    fn try_from(boolean_network: &BooleanNetwork) -> Result<Self, Self::Error> {
+        Ok(TrapSpaces(TrapSpacesConfig::try_from(boolean_network)?))
     }
 }
 
@@ -276,7 +287,7 @@ impl TrapSpaces {
         let ctx = Py::new(
             py,
             (
-                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicSpaceContextBinding::new(self.config().ctx.clone()),
                 SymbolicContext::new(py, bn, None)?,
             ),
         )?;
@@ -299,7 +310,7 @@ impl TrapSpaces {
         let ctx = Py::new(
             py,
             (
-                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicSpaceContextBinding::new(self.config().ctx.clone()),
                 SymbolicContext::new(py, bn, None)?,
             ),
         )?;
@@ -320,7 +331,7 @@ impl TrapSpaces {
         let ctx = Py::new(
             py,
             (
-                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicSpaceContextBinding::new(self.config().ctx.clone()),
                 SymbolicContext::new(py, bn, None)?,
             ),
         )?;
@@ -340,7 +351,7 @@ impl TrapSpaces {
         let ctx = Py::new(
             py,
             (
-                SymbolicSpaceContext::new(self.config().ctx.clone()),
+                SymbolicSpaceContextBinding::new(self.config().ctx.clone()),
                 SymbolicContext::new(py, bn, None)?,
             ),
         )?;

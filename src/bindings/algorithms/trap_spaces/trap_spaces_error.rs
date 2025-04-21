@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::bindings::algorithms::cancellation::CancellationError;
 
-/// An error returned by a [FixedPoints] procedure.
+/// An error returned by a [TrapSpaces] procedure.
 #[derive(Error)]
 pub enum TrapSpacesError {
     #[error("operation cancelled")]
