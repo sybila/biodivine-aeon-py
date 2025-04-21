@@ -36,7 +36,7 @@ impl BbmFilterConfig {
 
     /// Get a configuration value by key (Python-style indexing).
     pub fn __getitem__(&self, key: &str) -> PyResult<Option<Py<PyAny>>> {
-        Python::with_gil(|py| match key {
+        Python::with_gil(|py: Python<'_>| match key {
             "min_variables" => Ok(self.min_variables.map(|v| v.into_py_any(py).unwrap())),
             "max_variables" => Ok(self.max_variables.map(|v| v.into_py_any(py).unwrap())),
             "min_inputs" => Ok(self.min_inputs.map(|v| v.into_py_any(py).unwrap())),

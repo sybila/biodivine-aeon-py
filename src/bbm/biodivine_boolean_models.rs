@@ -43,7 +43,7 @@ impl BiodivineBooleanModels {
         Ok(models_json)
     }
 
-    /// Fetch a Boolean network from the Biodivine Boolean Models database
+    /// Retrieve a Boolean network model from the Biodivine Boolean Models database
     /// using the provided model ID.
     ///
     /// At the moment, the model ID is a string ID used by the endpoint, which
@@ -51,21 +51,33 @@ impl BiodivineBooleanModels {
     /// This is a temporary solution until the BBM endpoint is updated to provide
     /// the numerical id as well.
     #[staticmethod]
-    pub fn fetch_network(py: Python, id: &str) -> PyResult<Py<BooleanNetwork>> {
+    #[pyo3(signature = (id, inline_inputs=false))]
+    pub fn fetch_network(
+        py: Python,
+        id: &str,
+        inline_inputs: bool,
+    ) -> PyResult<Py<BooleanNetwork>> {
         let models_list = Self::fetch_all_model_data()?;
         let model = models_list
             .into_iter()
             .find(|m| m.id == id)
             .ok_or(runtime_error("Model not found in BBM database."))?;
 
-        let bn = BooleanNetwork::from_aeon(py, &model.model_data).map_err(runtime_error)?;
-        Ok(bn)
+        let py_bn = BooleanNetwork::from_aeon(py, &model.model_data).map_err(runtime_error)?;
+
+        let py_bn = match inline_inputs {
+            true => py_bn.borrow_mut(py).inline_inputs(py, true, true)?,
+            false => py_bn,
+        };
+        Ok(py_bn)
     }
 
     /// Fetch a list of IDs of BBM database models that satisfy given conditions.
-    /// These IDs can be used to fetch the models using the `fetch_network` method.
+    /// These IDs can be used to retrieve the models using the `fetch_network` method.
     ///
     /// See the [BbmFilterConfig] class for how to prepare the filtering options.
+    /// If no filtering config is provided, all model IDs are retrieved. This is
+    /// the same as providing an empty config.
     ///
     /// At the moment, the model ID is a string ID used by the endpoint, which
     /// is not the same as the numerical id clasically used in the BBM database.
