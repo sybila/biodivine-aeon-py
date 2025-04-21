@@ -1,9 +1,13 @@
+use std::convert::TryFrom;
+
+use biodivine_lib_param_bn::BooleanNetwork;
 use dyn_clone::DynClone;
 use pyo3::{create_exception, exceptions::PyException};
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
-pub trait Config {
+// TODO: discuss - enforces try_from, but not from, due to needing SymbolicSpaceContext in TrapSpacesConfig
+pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
     fn cancellation(&self) -> &dyn CancellationHandler;
 
     fn set_cancellation(&mut self, cancellation: Box<dyn CancellationHandler>);

@@ -4,6 +4,7 @@ use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     BooleanNetwork,
 };
+use macros::Config;
 use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 
 use crate::{
@@ -27,22 +28,12 @@ use crate::{
     AsNative,
 };
 
-#[derive(Clone)]
+#[derive(Clone, Config)]
 pub struct FixedPointsConfig {
     pub graph: SymbolicAsyncGraph,
     pub restriction: GraphColoredVertices,
     pub cancellation: Box<dyn CancellationHandler>,
     pub bdd_size_limit: usize,
-}
-
-impl Config for FixedPointsConfig {
-    fn cancellation(&self) -> &dyn CancellationHandler {
-        self.cancellation.as_ref()
-    }
-
-    fn set_cancellation(&mut self, cancellation: Box<dyn CancellationHandler>) {
-        self.cancellation = cancellation;
-    }
 }
 
 impl From<SymbolicAsyncGraph> for FixedPointsConfig {

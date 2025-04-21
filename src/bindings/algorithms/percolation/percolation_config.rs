@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use biodivine_lib_param_bn::{symbolic_async_graph::SymbolicAsyncGraph, BooleanNetwork};
+use macros::Config;
 use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
@@ -22,7 +23,7 @@ use crate::{
 };
 
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[derive(Clone)]
+#[derive(Clone, Config)]
 pub struct PercolationConfig {
     /// The symbolic graph whose variables will be used for subspace percolation.
     pub graph: SymbolicAsyncGraph,
@@ -31,16 +32,6 @@ pub struct PercolationConfig {
     ///
     /// Default: [CancelTokenNever].
     pub cancellation: Box<dyn CancellationHandler>,
-}
-
-impl Config for PercolationConfig {
-    fn cancellation(&self) -> &dyn CancellationHandler {
-        self.cancellation.as_ref()
-    }
-
-    fn set_cancellation(&mut self, cancellation: Box<dyn CancellationHandler>) {
-        self.cancellation = cancellation;
-    }
 }
 
 impl From<SymbolicAsyncGraph> for PercolationConfig {

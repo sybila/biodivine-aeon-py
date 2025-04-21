@@ -4,6 +4,7 @@ use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     BooleanNetwork, VariableId,
 };
+use macros::Config;
 use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
@@ -29,7 +30,7 @@ use crate::{
 
 /// A configuration struct for the [Reachability] algorithms.
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[derive(Clone)]
+#[derive(Clone, Config)]
 pub struct ReachabilityConfig {
     /// The symbolic graph that will be used to compute the successors and predecessors of
     /// individual states.
@@ -75,16 +76,6 @@ pub struct ReachabilityConfig {
     ///
     /// Default: `usize::MAX`.
     pub steps_limit: usize,
-}
-
-impl Config for ReachabilityConfig {
-    fn cancellation(&self) -> &dyn CancellationHandler {
-        self.cancellation.as_ref()
-    }
-
-    fn set_cancellation(&mut self, cancellation: Box<dyn CancellationHandler>) {
-        self.cancellation = cancellation;
-    }
 }
 
 impl From<SymbolicAsyncGraph> for ReachabilityConfig {
