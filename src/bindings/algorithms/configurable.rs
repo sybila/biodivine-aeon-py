@@ -23,6 +23,7 @@ pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
     }
 }
 
+// TODO: discuss - also create a macro for this?
 pub trait Configurable {
     type ConfigType: Config;
 

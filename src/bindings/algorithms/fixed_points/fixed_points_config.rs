@@ -25,7 +25,7 @@ use crate::{
             },
         },
     },
-    AsNative,
+    AsNative as _,
 };
 
 #[derive(Clone, Config)]

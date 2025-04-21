@@ -25,7 +25,7 @@ use crate::{
             variable_id::VariableId as VariableIdBinding,
         },
     },
-    AsNative,
+    AsNative as _,
 };
 
 /// A configuration struct for the [Reachability] algorithms.

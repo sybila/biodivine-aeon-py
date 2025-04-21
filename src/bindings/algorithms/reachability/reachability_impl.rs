@@ -20,7 +20,7 @@ use crate::{
             },
         },
     },
-    is_cancelled, AsNative,
+    is_cancelled, AsNative as _,
 };
 
 const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";

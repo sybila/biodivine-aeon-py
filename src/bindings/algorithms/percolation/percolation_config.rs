@@ -19,7 +19,7 @@ use crate::{
             symbolic::asynchronous_graph::AsynchronousGraph,
         },
     },
-    AsNative,
+    AsNative as _,
 };
 
 #[pyclass(module = "biodivine_aeon", frozen)]
