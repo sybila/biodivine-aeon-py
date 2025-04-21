@@ -1,4 +1,4 @@
-use pyo3::pyclass;
+use pyo3::{pyclass, pymethods, Bound, PyAny};
 use serde::de::{self, Deserializer};
 use serde::{Deserialize, Serialize};
 
@@ -22,7 +22,7 @@ pub struct BbmModel {
     pub regulations: u32,
     pub notes: Option<String>,
     pub bib: Option<String>,
-    #[serde(rename = "modelData", deserialize_with = "deserialize_model_data")]
+    #[serde(deserialize_with = "deserialize_model_data")]
     pub model_data: String, // Deserialize directly into a String
 }
 
@@ -42,4 +42,29 @@ where
     let raw: RawModelData = RawModelData::deserialize(deserializer)?;
     String::from_utf8(raw.data)
         .map_err(|e| de::Error::custom(format!("Failed to convert model data to string: {}", e)))
+}
+
+#[pymethods]
+impl BbmModel {
+    fn __str__(&self) -> String {
+        format!(
+            "BbmModel(id={}, name={}, variables={}, inputs={}, regulations={})",
+            self.id, self.name, self.variables, self.inputs, self.regulations
+        )
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "BbmModel(id={}, name={}, variables={}, inputs={}, regulations={}, network={:?})",
+            self.id, self.name, self.variables, self.inputs, self.regulations, self.model_data,
+        )
+    }
+
+    fn __copy__(&self) -> BbmModel {
+        self.clone()
+    }
+
+    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> BbmModel {
+        self.__copy__()
+    }
 }

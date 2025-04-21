@@ -6,6 +6,7 @@ use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::runtime_error;
 
 use super::bbm_model::BbmModel;
+use super::filter_config::BbmFilterConfig;
 
 /// Class to represent the Biodivine Boolean Models database and provide
 /// all the functionality that can be performed on it.
@@ -61,17 +62,38 @@ impl BiodivineBooleanModels {
         Ok(bn)
     }
 
-    /// Fetch a list of all model IDs currently provided by the BBM database
-    /// endpoint. These IDs can be used to fetch the models using the `fetch_network`
-    /// method.
+    /// Fetch a list of IDs of BBM database models that satisfy given conditions.
+    /// These IDs can be used to fetch the models using the `fetch_network` method.
+    ///
+    /// See the [BbmFilterConfig] class for how to prepare the filtering options.
     ///
     /// At the moment, the model ID is a string ID used by the endpoint, which
     /// is not the same as the numerical id clasically used in the BBM database.
     /// This is a temporary solution until the BBM endpoint is updated to provide
     /// the numerical id as well.
     #[staticmethod]
-    pub fn fetch_ids() -> PyResult<Vec<String>> {
+    #[pyo3(signature = (config=None))]
+    pub fn fetch_ids(config: Option<BbmFilterConfig>) -> PyResult<Vec<String>> {
         let models_list = Self::fetch_all_model_data()?;
+
+        // Filter the models based on the provided configuration
+        let models_list = match config {
+            Some(cfg) => models_list
+                .into_iter()
+                .filter(|m| {
+                    cfg.min_variables.is_none_or(|v| m.variables >= v)
+                        && cfg.max_variables.is_none_or(|v| m.variables <= v)
+                        && cfg.min_inputs.is_none_or(|v| m.inputs >= v)
+                        && cfg.max_inputs.is_none_or(|v| m.inputs <= v)
+                        && cfg.min_regulations.is_none_or(|v| m.regulations >= v)
+                        && cfg.max_regulations.is_none_or(|v| m.regulations <= v)
+                        && cfg.keywords.iter().all(|k| m.keywords.contains(k))
+                })
+                .collect::<Vec<BbmModel>>(),
+            None => models_list,
+        };
+
+        // Extract the IDs from the filtered models
         let ids = models_list
             .into_iter()
             .map(|m| m.id)
