@@ -9,4 +9,7 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-syn = "1.0.107"
+# TODO: finalize - check dependencies
+syn = { version = "1.0.107", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"

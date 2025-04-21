@@ -1,4 +1,7 @@
 extern crate proc_macro;
+
+mod derive_config;
+
 use proc_macro::TokenStream;
 use std::io::Write;
 use syn::__private::ToTokens;
@@ -56,4 +59,21 @@ pub fn derive_wrapper(item: TokenStream) -> TokenStream {
 
     let result = String::from_utf8(result).unwrap();
     result.parse().unwrap()
+}
+
+/// A derive macro that automatically implements the `Config` trait for structs
+/// that have a `cancellation` field of type `Box<dyn CancellationHandler>`.
+///
+/// # Example
+///
+/// ```
+/// #[derive(Config)]
+/// struct MyConfig {
+///     pub cancellation: Box<dyn CancellationHandler>,
+///     // other fields...
+/// }
+/// ```
+#[proc_macro_derive(Config)]
+pub fn derive_config(input: TokenStream) -> TokenStream {
+    derive_config::derive_config_impl(input)
 }
