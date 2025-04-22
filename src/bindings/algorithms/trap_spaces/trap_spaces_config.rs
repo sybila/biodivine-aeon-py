@@ -92,6 +92,16 @@ pub struct PyTrapSpacesConfig {
     ctx: Py<SymbolicSpaceContextBinding>,
 }
 
+impl PyTrapSpacesConfig {
+    pub fn inner(&self) -> &TrapSpaces {
+        &self.inner
+    }
+
+    pub fn symbolic_space_context(&self) -> Py<SymbolicSpaceContextBinding> {
+        self.ctx.clone()
+    }
+}
+
 #[pymethods]
 impl PyTrapSpacesConfig {
     #[new]
