@@ -33,6 +33,12 @@ use crate::{
     is_cancelled, AsNative as _,
 };
 
+const TARGET_ESSENTIAL_SYMBOLIC: &str = "TrapSpaces::essential_symbolic";
+// TODO: discuss - is it OK to use the other three targets even with minimal_symbolic?
+// const TARGET_MINIMAL_SYMBOLIC: &str = "TrapSpaces::minimal_symbolic";
+const TARGET_MINIMIZE: &str = "TrapSpaces::minimize";
+const TARGET_MAXIMIZE: &str = "TrapSpaces::maximize";
+
 #[derive(Clone)]
 pub struct TrapSpaces(TrapSpacesConfig);
 
@@ -78,6 +84,7 @@ impl TrapSpaces {
         let restriction = &self.config().restriction;
 
         info!(
+            target: TARGET_ESSENTIAL_SYMBOLIC,
             "Start symbolic essential trap space search with {}[nodes:{}] candidates.",
             restriction.approx_cardinality(),
             restriction.symbolic_size()
@@ -115,6 +122,7 @@ impl TrapSpaces {
             // is_cancelled!(self)?;
 
             debug!(
+                target: TARGET_ESSENTIAL_SYMBOLIC,
                 " > Created initial sets for {:?} using {}+{} BDD nodes.",
                 var,
                 is_trap.size(),
@@ -127,17 +135,18 @@ impl TrapSpaces {
         // TODO: discuss - this is the new version, does it have to use symbolic merge directly?
         let trap_spaces = FixedPoints::with_config(
             FixedPointsConfig::from(graph.clone())
+                // TODO: discuss - is this OK?
                 .with_cancellation_nowrap(self.config().cancellation.clone())
-                // TODO: ohtenkay - adjust the limit
                 .with_bdd_size_limit(self.config().bdd_size_limit),
         )
         // TODO: discuss - this is where the bdd_ctx is used
-        .symbolic_merge(to_merge, HashSet::new(), "TODO")?;
+        .symbolic_merge(to_merge, HashSet::new(), TARGET_ESSENTIAL_SYMBOLIC)?;
 
         let trap_spaces = NetworkColoredSpaces::new(trap_spaces, ctx);
         // is_cancelled!(self)?;
 
         info!(
+            target: TARGET_ESSENTIAL_SYMBOLIC,
             "Found {}x{}[nodes:{}] essential trap spaces.",
             trap_spaces.colors().approx_cardinality(),
             trap_spaces.spaces().approx_cardinality(),
@@ -168,6 +177,7 @@ impl TrapSpaces {
         let mut minimal = ctx.mk_empty_colored_spaces();
 
         info!(
+            target: TARGET_MINIMIZE,
             "Start minimal subspace search with {}x{}[nodes:{}] candidates.",
             original.colors().approx_cardinality(),
             original.spaces().approx_cardinality(),
@@ -208,6 +218,7 @@ impl TrapSpaces {
             // is_cancelled!(self)?;
 
             debug!(
+                target: TARGET_MINIMIZE,
                 "Minimization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
                 original.colors().approx_cardinality(),
                 original.spaces().approx_cardinality(),
@@ -219,6 +230,7 @@ impl TrapSpaces {
         }
 
         info!(
+            target: TARGET_MINIMIZE,
             "Found {}[nodes:{}] minimal spaces.",
             minimal.approx_cardinality(),
             minimal.symbolic_size(),
@@ -238,6 +250,7 @@ impl TrapSpaces {
         let mut maximal = ctx.mk_empty_colored_spaces();
 
         info!(
+            target: TARGET_MAXIMIZE,
             "Start maximal subspace search with {}x{}[nodes:{}] candidates.",
             original.colors().approx_cardinality(),
             original.spaces().approx_cardinality(),
@@ -260,6 +273,7 @@ impl TrapSpaces {
             // TODO: ohtenkay - implement debug with size limit, new macro, use log!(), check for
             // usages
             debug!(
+                target: TARGET_MAXIMIZE,
                 "Maximization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
                 original.colors().approx_cardinality(),
                 original.spaces().approx_cardinality(),
@@ -271,6 +285,7 @@ impl TrapSpaces {
         }
 
         info!(
+            target: TARGET_MAXIMIZE,
             "Found {}[nodes:{}] maximal spaces.",
             maximal.approx_cardinality(),
             maximal.symbolic_size(),
