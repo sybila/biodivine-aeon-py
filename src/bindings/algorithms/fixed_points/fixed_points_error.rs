@@ -6,7 +6,7 @@ use thiserror::Error;
 use crate::bindings::algorithms::cancellation::CancellationError;
 
 /// An error returned by a [FixedPoints] procedure.
-#[derive(Error)]
+#[derive(Error, Clone)]
 pub enum FixedPointsError {
     #[error("config creation failed")]
     CreationFailed(String),

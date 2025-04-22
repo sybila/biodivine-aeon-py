@@ -312,7 +312,7 @@ impl FixedPoints {
         Ok(result)
     }
 
-    fn symbolic_merge(
+    pub fn symbolic_merge(
         &self,
         to_merge: Vec<Bdd>,
         // The set of variables that will be eliminated from the result.
@@ -456,13 +456,13 @@ impl FixedPoints {
 // TODO: finalize - make this optional with a feature flag
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[pyo3(name = "FixedPoints")]
-pub struct FixedPointsPython {
+pub struct PyFixedPoints {
     inner: FixedPoints,
     symbolic_context: Py<SymbolicContext>,
 }
 
 #[pymethods]
-impl FixedPointsPython {
+impl PyFixedPoints {
     /// Create a new [FixedPoints] instance with the given [BooleanNetwork]
     /// and otherwise default configuration.
     #[staticmethod]
@@ -472,7 +472,7 @@ impl FixedPointsPython {
     ) -> PyResult<Self> {
         let config = PyFixedPointsConfig::from_boolean_network(py, boolean_network)?;
 
-        Ok(FixedPointsPython {
+        Ok(PyFixedPoints {
             inner: FixedPoints(config.inner()),
             symbolic_context: config.symbolic_context(),
         })
@@ -484,7 +484,7 @@ impl FixedPointsPython {
     pub fn from_graph(graph: &AsynchronousGraph) -> Self {
         let config = PyFixedPointsConfig::from_graph(graph);
 
-        FixedPointsPython {
+        PyFixedPoints {
             inner: FixedPoints(config.inner()),
             symbolic_context: config.symbolic_context(),
         }
@@ -493,43 +493,37 @@ impl FixedPointsPython {
     /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
     #[staticmethod]
     pub fn with_config(config: &PyFixedPointsConfig) -> Self {
-        FixedPointsPython {
+        PyFixedPoints {
             inner: FixedPoints::with_config(config.inner()),
             symbolic_context: config.symbolic_context(),
         }
     }
 
     pub fn naive_symbolic(&self) -> PyResult<ColoredVertexSet> {
-        let result_set = self.inner.naive_symbolic()?;
-
         Ok(ColoredVertexSet::mk_native(
             self.symbolic_context.clone(),
-            result_set,
+            self.inner.naive_symbolic()?,
         ))
     }
 
     pub fn symbolic(&self) -> PyResult<ColoredVertexSet> {
-        let result_set = self.inner.symbolic()?;
-
         Ok(ColoredVertexSet::mk_native(
             self.symbolic_context.clone(),
-            result_set,
+            self.inner.symbolic()?,
         ))
     }
 
     pub fn symbolic_vertices(&self) -> PyResult<VertexSet> {
-        let result_set = self.inner.symbolic_vertices()?;
         Ok(VertexSet::mk_native(
             self.symbolic_context.clone(),
-            result_set,
+            self.inner.symbolic_vertices()?,
         ))
     }
 
     pub fn symbolic_colors(&self) -> PyResult<ColorSet> {
-        let result_set = self.inner.symbolic_colors()?;
         Ok(ColorSet::mk_native(
             self.symbolic_context.clone(),
-            result_set,
+            self.inner.symbolic_colors()?,
         ))
     }
 }
