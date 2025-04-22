@@ -41,6 +41,7 @@ pub struct TrapSpacesConfig {
     ///
     /// Default: [CancelTokenNever].
     pub cancellation: Box<dyn CancellationHandler>,
+    pub bdd_size_limit: usize,
 }
 
 // TODO: discuss - is this OK?
@@ -56,6 +57,7 @@ impl From<(SymbolicAsyncGraph, SymbolicSpaceContext)> for TrapSpacesConfig {
         TrapSpacesConfig {
             restriction: ctx.mk_unit_colored_spaces(&graph),
             cancellation: Default::default(),
+            bdd_size_limit: usize::MAX,
             graph,
             ctx,
         }
@@ -72,6 +74,7 @@ impl TryFrom<&BooleanNetwork> for TrapSpacesConfig {
         Ok(TrapSpacesConfig {
             restriction: ctx.mk_unit_colored_spaces(&graph),
             cancellation: Default::default(),
+            bdd_size_limit: usize::MAX,
             graph,
             ctx,
         })
@@ -84,9 +87,17 @@ impl TrapSpacesConfig {
         self.restriction = restriction;
         self
     }
+
+    /// Update the `bdd_size_limit` property.
+    pub fn with_bdd_size_limit(mut self, bdd_size_limit: usize) -> Self {
+        self.bdd_size_limit = bdd_size_limit;
+        self
+    }
 }
 
 #[pyclass(module = "biodivine_aeon", frozen)]
+#[pyo3(name = "TrapSpacesConfig")]
+#[derive(Clone)]
 pub struct PyTrapSpacesConfig {
     inner: TrapSpaces,
     ctx: Py<SymbolicSpaceContextBinding>,
@@ -136,11 +147,7 @@ impl PyTrapSpacesConfig {
     }
 
     #[staticmethod]
-    #[pyo3(name = "from_boolean_network")]
-    pub fn python_from_boolean_network(
-        py: Python,
-        bn: Py<BooleanNetworkBinding>,
-    ) -> PyResult<Self> {
+    pub fn from_boolean_network(py: Python, bn: Py<BooleanNetworkBinding>) -> PyResult<Self> {
         let config = TrapSpacesConfig::try_from(bn.borrow(py).as_native())?;
 
         // TODO: discuss - how does this work?
@@ -160,8 +167,7 @@ impl PyTrapSpacesConfig {
 
     // TODO: discuss - is this OK?
     #[staticmethod]
-    #[pyo3(name = "from_graph_with_context")]
-    pub fn python_from_graph_with_context(
+    pub fn from_graph_with_context(
         graph: &AsynchronousGraph,
         ctx: Py<SymbolicSpaceContextBinding>,
     ) -> Self {
@@ -174,13 +180,25 @@ impl PyTrapSpacesConfig {
         }
     }
 
-    #[pyo3(name = "with_restriction")]
-    pub fn python_with_restriction(&self, restriction: &ColoredSpaceSet) -> Self {
+    pub fn with_restriction(&self, restriction: &ColoredSpaceSet) -> Self {
         let config = self
             .inner
             .config()
             .clone()
             .with_restriction(restriction.as_native().clone());
+
+        PyTrapSpacesConfig {
+            inner: TrapSpaces::with_config(config),
+            ctx: self.ctx.clone(),
+        }
+    }
+
+    pub fn with_bdd_size_limit(&self, bdd_size_limit: usize) -> Self {
+        let config = self
+            .inner
+            .config()
+            .clone()
+            .with_bdd_size_limit(bdd_size_limit);
 
         PyTrapSpacesConfig {
             inner: TrapSpaces::with_config(config),
