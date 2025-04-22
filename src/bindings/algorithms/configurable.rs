@@ -21,6 +21,13 @@ pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
         self.set_cancellation(Box::new(cancellation));
         self
     }
+
+    /// Update the `cancellation` property, without wrapping the [CancellationHandler]
+    /// in a `Box`.
+    fn with_cancellation_nowrap(mut self, cancellation: Box<dyn CancellationHandler>) -> Self {
+        self.set_cancellation(cancellation);
+        self
+    }
 }
 
 // TODO: discuss - also create a macro for this?
