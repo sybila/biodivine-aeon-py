@@ -90,8 +90,6 @@ impl TrapSpaces {
             restriction.symbolic_size()
         );
 
-        // TODO: discuss - what to do with this, it has to be passed to symbolic merge, but it was
-        // removed from the arguments
         let bdd_ctx = ctx.bdd_variable_set();
 
         // We always start with the restriction set, because it should carry the information
@@ -135,11 +133,11 @@ impl TrapSpaces {
         // TODO: discuss - this is the new version, does it have to use symbolic merge directly?
         let trap_spaces = FixedPoints::with_config(
             FixedPointsConfig::from(graph.clone())
+                .with_universe(bdd_ctx.clone())
                 // TODO: discuss - is this OK?
                 .with_cancellation_nowrap(self.config().cancellation.clone())
                 .with_bdd_size_limit(self.config().bdd_size_limit),
         )
-        // TODO: discuss - this is where the bdd_ctx is used
         .symbolic_merge(to_merge, HashSet::new(), TARGET_ESSENTIAL_SYMBOLIC)?;
 
         let trap_spaces = NetworkColoredSpaces::new(trap_spaces, ctx);
