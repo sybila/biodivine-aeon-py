@@ -72,6 +72,24 @@ impl BiodivineBooleanModels {
         Ok(py_bn)
     }
 
+    /// Retrieve a model from the Biodivine Boolean Models database using the
+    /// provided model ID.
+    ///
+    /// At the moment, the model ID is a string ID used by the endpoint, which
+    /// is not the same as the numerical id clasically used in the BBM database.
+    /// This is a temporary solution until the BBM endpoint is updated to provide
+    /// the numerical id as well.
+    #[staticmethod]
+    pub fn fetch_model(id: &str) -> PyResult<BbmModel> {
+        let models_list = Self::fetch_all_model_data()?;
+        let model = models_list
+            .into_iter()
+            .find(|m| m.id == id)
+            .ok_or(runtime_error("Model not found in BBM database."))?;
+
+        Ok(model)
+    }
+
     /// Fetch a list of IDs of BBM database models that satisfy given conditions.
     /// These IDs can be used to retrieve the models using the `fetch_network` method.
     ///

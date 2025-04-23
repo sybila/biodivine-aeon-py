@@ -88,7 +88,7 @@ impl BbmFilterConfig {
         Ok(())
     }
 
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!(
             "BbmFilterConfig(variables=<{},{}>, inputs=<{},{}>, regulations=<{},{}>, keywords={:?})",
             self.min_variables
@@ -107,15 +107,15 @@ impl BbmFilterConfig {
         )
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         self.__str__()
     }
 
-    fn __copy__(&self) -> BbmFilterConfig {
+    pub fn __copy__(&self) -> BbmFilterConfig {
         self.clone()
     }
 
-    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> BbmFilterConfig {
+    pub fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> BbmFilterConfig {
         self.__copy__()
     }
 

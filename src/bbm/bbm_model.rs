@@ -1,6 +1,9 @@
-use pyo3::{pyclass, pymethods, Bound, PyAny};
+use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
 use serde::de::{self, Deserializer};
 use serde::{Deserialize, Serialize};
+
+use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
+use crate::{runtime_error, AsNative};
 
 /// A representation for model data provided by the Biodivine Boolean Models
 /// database endpoint. It is used to deserialize the model data from the JSON
@@ -46,25 +49,57 @@ where
 
 #[pymethods]
 impl BbmModel {
-    fn __str__(&self) -> String {
+    pub fn __str__(&self) -> String {
         format!(
             "BbmModel(id={}, name={}, variables={}, inputs={}, regulations={})",
             self.id, self.name, self.variables, self.inputs, self.regulations
         )
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "BbmModel(id={}, name={}, variables={}, inputs={}, regulations={}, network={:?})",
             self.id, self.name, self.variables, self.inputs, self.regulations, self.model_data,
         )
     }
 
-    fn __copy__(&self) -> BbmModel {
+    pub fn __copy__(&self) -> BbmModel {
         self.clone()
     }
 
-    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> BbmModel {
+    pub fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> BbmModel {
         self.__copy__()
+    }
+
+    /// Extract a `BooleanNetwork` instance from this model.
+    /// Leave the inputs as they are (free if not set in the model).
+    pub fn to_bn_default(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        BooleanNetwork::from_aeon(py, &self.model_data).map_err(runtime_error)
+    }
+
+    /// Extract a `BooleanNetwork` instance from this model, setting all inputs
+    /// to a given constant value `const_value`.
+    fn to_bn_inputs_const(&self, py: Python, const_value: bool) -> PyResult<Py<BooleanNetwork>> {
+        let py_bn = BooleanNetwork::from_aeon(py, &self.model_data).map_err(runtime_error)?;
+        let mut bn = py_bn.borrow_mut(py).clone();
+        for variable in bn.as_native().inputs(const_value) {
+            let update_fn = biodivine_lib_param_bn::FnUpdate::mk_true();
+            bn.as_native_mut()
+                .set_update_function(variable, Some(update_fn))
+                .map_err(runtime_error)?;
+        }
+        bn.export_to_python(py)
+    }
+
+    /// Extract a `BooleanNetwork` instance from this model, setting all inputs
+    /// to `true`.
+    pub fn to_bn_inputs_true(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        self.to_bn_inputs_const(py, true)
+    }
+
+    /// Extract a `BooleanNetwork` instance from this model, setting all inputs
+    /// to `false`.
+    pub fn to_bn_inputs_false(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        self.to_bn_inputs_const(py, false)
     }
 }
