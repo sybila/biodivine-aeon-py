@@ -18,9 +18,9 @@ def checkStability(graph: AsynchronousGraph, attractor: ColoredVertexSet, variab
     stable_false = attractor.intersect(var_false).colors()
 
     return {
-        'oscillation': oscillation,
-        'stable_true': stable_true,
-        'stable_false': stable_false
+        Class('oscillation'): oscillation,
+        Class('true'): stable_true,
+        Class('false'): stable_false
     }
 
 bn = BooleanNetwork.from_file(sys.argv[1])
@@ -31,9 +31,15 @@ print(f"Model color count: {graph.mk_unit_colors().cardinality()}")
 attractors = Attractors.attractors(graph)
 print(f"Found {len(attractors)} attractor set(s).")
 
-for attractor in attractors:
-    print(f"Attractor subspace: {attractor.vertices().enclosing_named_subspace()}")
-    for var in bn.variables():
+for var in bn.variables():
+    # Initially, all colors belong to an empty class, but as we go through the attractors,
+    # they should be re-assigned to the correct class.
+    classification = { Class([]) : graph.mk_unit_colors() }
+    for attractor in attractors:
         stability = checkStability(graph, attractor, var)
-        print(f"\tVariable: {bn.get_variable_name(var)}")
-        print(f"\t\toscillation: {stability['oscillation'].cardinality()}\ttrue: {stability['stable_true'].cardinality()}\tfalse: {stability['stable_false'].cardinality()}")
+        for cls, colors in stability.items():
+            classification = Classification.ensure(classification, cls, colors)
+
+    print(f"\tVariable: {bn.get_variable_name(var)}")
+    for cls, colors in classification.items():
+        print(f"\t\t{cls}: {colors.cardinality()}")
