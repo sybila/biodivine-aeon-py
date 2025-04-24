@@ -4,7 +4,7 @@ import sys
 # This file provides functionality that is equivalent to the `stability_analysis` feature in the AEON
 # online interface
 
-def checkStability(graph: AsynchronousGraph, attractor: ColoredVertexSet, variable: VariableIdType):
+def checkStability(graph: AsynchronousGraph, attractor: ColoredVertexSet, variable: VariableId):
 
     # Colors where variable oscillates
     oscillation = graph.var_can_post_within(variable, attractor).colors()
