@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use biodivine_lib_bdd::BddVariableSet;
 use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     BooleanNetwork,
@@ -32,9 +31,6 @@ use crate::{
 #[derive(Clone, Config)]
 pub struct FixedPointsConfig {
     pub graph: SymbolicAsyncGraph,
-    // TODO: discuss - allow this to be specified from python? should be unnecessary to even save
-    // this
-    pub universe: BddVariableSet,
     pub restriction: GraphColoredVertices,
     pub cancellation: Box<dyn CancellationHandler>,
     pub bdd_size_limit: usize,
@@ -45,7 +41,6 @@ impl From<SymbolicAsyncGraph> for FixedPointsConfig {
     fn from(graph: SymbolicAsyncGraph) -> Self {
         FixedPointsConfig {
             restriction: graph.mk_unit_colored_vertices(),
-            universe: graph.symbolic_context().bdd_variable_set().clone(),
             cancellation: Default::default(),
             bdd_size_limit: usize::MAX,
             graph,
@@ -66,12 +61,6 @@ impl TryFrom<&BooleanNetwork> for FixedPointsConfig {
 }
 
 impl FixedPointsConfig {
-    /// Update the `universe` property
-    pub fn with_universe(mut self, universe: BddVariableSet) -> Self {
-        self.universe = universe;
-        self
-    }
-
     /// Update the `restriction` property
     pub fn with_restriction(mut self, restriction: GraphColoredVertices) -> Self {
         self.restriction = restriction;
@@ -113,7 +102,6 @@ impl PyFixedPointsConfig {
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
     ) -> Self {
-        // TODO: discuss - mbe something like into_native() would be nice
         let mut config = FixedPointsConfig::from(graph.as_native().clone());
 
         if let Some(restriction) = restriction {

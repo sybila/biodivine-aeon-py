@@ -6,7 +6,8 @@ use pyo3::{create_exception, exceptions::PyException};
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
-// TODO: discuss - enforces try_from, but not from, due to needing SymbolicSpaceContext in TrapSpacesConfig
+// TODO: ohtenkay - enforces try_from, but not from, due to needing SymbolicSpaceContext
+// in TrapSpacesConfig - implement "GraphRepresentation"
 pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
     fn cancellation(&self) -> &dyn CancellationHandler;
 
@@ -14,8 +15,9 @@ pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
 
     /// Update the `cancellation` property, automatically wrapping the [CancellationHandler]
     /// in a `Box`.
-    fn with_cancellation<C: CancellationHandler + 'static>(mut self, cancellation: C) -> Self
+    fn with_cancellation<C>(mut self, cancellation: C) -> Self
     where
+        C: CancellationHandler + 'static,
         Self: Sized,
     {
         self.set_cancellation(Box::new(cancellation));
@@ -30,7 +32,7 @@ pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
     }
 }
 
-// TODO: discuss - also create a macro for this?
+// TODO: ohtenkay - also create a macro for this? yes
 pub trait Configurable {
     type ConfigType: Config;
 
@@ -39,7 +41,10 @@ pub trait Configurable {
     fn with_config(config: Self::ConfigType) -> Self;
 }
 
-impl<T: Configurable + Send + Sync + DynClone> CancellationHandler for T {
+impl<T> CancellationHandler for T
+where
+    T: Configurable + Send + Sync + DynClone,
+{
     fn is_cancelled(&self) -> bool {
         self.config().cancellation().is_cancelled()
     }

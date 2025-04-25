@@ -4,6 +4,8 @@ use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpa
 use crate::{global_log_level, AsNative};
 use pyo3::prelude::*;
 
+// TODO: finalize - deprecate this file
+
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct TrapSpaces {
     _dummy: (),

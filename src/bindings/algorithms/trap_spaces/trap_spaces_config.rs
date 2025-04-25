@@ -164,7 +164,6 @@ impl PyTrapSpacesConfig {
         })
     }
 
-    // TODO: discuss - is this OK?
     #[staticmethod]
     pub fn from_graph_with_context(
         graph: &AsynchronousGraph,

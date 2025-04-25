@@ -60,7 +60,7 @@ impl TryFrom<&BooleanNetwork> for PercolationConfig {
 impl PercolationConfig {
     #[new]
     #[pyo3(signature = (graph, time_limit_millis = None))]
-    // TODO: discuss - create something simiral to SubspaceRepresentation for graph/boolean_network
+    // TODO: ohtenkay - create something simiral to SubspaceRepresentation for graph/boolean_network? yes
     pub fn python_new(graph: &AsynchronousGraph, time_limit_millis: Option<u64>) -> Self {
         let mut config = PercolationConfig::from(graph.as_native().clone());
 

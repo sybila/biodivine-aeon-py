@@ -5,6 +5,8 @@ use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::{global_log_level, AsNative};
 use pyo3::prelude::*;
 
+// TODO: finalize - deprecate this file
+
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct FixedPointsOld {
     _dummy: (),

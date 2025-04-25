@@ -8,6 +8,8 @@ use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGra
 use crate::bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding;
 use crate::AsNative;
 
+// TODO: finalize - deprecate this file
+
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct Percolation {
     _dummy: (),

@@ -141,8 +141,6 @@ impl TrapSpaces {
 
         let trap_spaces = FixedPoints::with_config(
             FixedPointsConfig::from(graph.clone())
-                // TODO: test - should not be necessary, graph.universe() is the same as ctx.universe()
-                .with_universe(bdd_ctx.clone())
                 .with_cancellation_nowrap(self.config().cancellation.clone())
                 .with_bdd_size_limit(self.config().bdd_size_limit),
         )

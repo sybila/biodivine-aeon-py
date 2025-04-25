@@ -341,7 +341,7 @@ impl FixedPoints {
             })
             .collect();
 
-        let universe = &self.config().universe;
+        let universe = self.config().graph.symbolic_context().bdd_variable_set();
         let mut result = universe.mk_true();
         let mut merged = HashSet::new();
 
