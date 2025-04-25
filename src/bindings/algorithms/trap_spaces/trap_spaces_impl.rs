@@ -34,7 +34,6 @@ use crate::{
 };
 
 const TARGET_ESSENTIAL_SYMBOLIC: &str = "TrapSpaces::essential_symbolic";
-// TODO: discuss - is it OK to use the other three targets even with minimal_symbolic?
 const TARGET_MINIMAL_SYMBOLIC: &str = "TrapSpaces::minimal_symbolic";
 const TARGET_MINIMIZE: &str = "TrapSpaces::minimize";
 const TARGET_MAXIMIZE: &str = "TrapSpaces::maximize";
@@ -98,26 +97,26 @@ impl TrapSpaces {
         for var in graph.variables() {
             let update_bdd = graph.get_symbolic_fn_update(var);
             let not_update_bdd = update_bdd.not();
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || restriction.as_bdd().clone())?;
 
             // TODO: ohtenkay - rewrite _mk_can_go_to_true
             let has_up_transition = &ctx.mk_can_go_to_true(update_bdd);
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || restriction.as_bdd().clone())?;
 
             // TODO: ohtenkay - rewrite _mk_can_go_to_true
             let has_down_transition = &ctx.mk_can_go_to_true(&not_update_bdd);
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || restriction.as_bdd().clone())?;
 
             let true_var = ctx.get_positive_variable(var);
             let false_var = ctx.get_negative_variable(var);
 
             let is_trap =
                 bdd!(bdd_ctx, (has_up_transition => true_var) & (has_down_transition => false_var));
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || restriction.as_bdd().clone())?;
 
             let is_essential =
                 bdd!(bdd_ctx, (true_var & false_var) => (has_up_transition & has_down_transition));
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || restriction.as_bdd().clone())?;
 
             debug!(
                 target: TARGET_ESSENTIAL_SYMBOLIC,
@@ -140,7 +139,7 @@ impl TrapSpaces {
         .symbolic_merge(to_merge, HashSet::new(), TARGET_ESSENTIAL_SYMBOLIC)?;
 
         let trap_spaces = NetworkColoredSpaces::new(trap_spaces, ctx);
-        // is_cancelled!(self)?;
+        is_cancelled!(self, || trap_spaces.as_bdd().clone())?;
 
         info!(
             target: TARGET_ESSENTIAL_SYMBOLIC,
@@ -159,7 +158,11 @@ impl TrapSpaces {
     /// This method currently uses [Self::essential_symbolic], hence is always slower than
     /// this method.
     pub fn minimal_symbolic(&self) -> Result<NetworkColoredSpaces, TrapSpacesError> {
-        // TODO: ohtenkay - print info that this function is called
+        info!(
+            target: TARGET_MINIMAL_SYMBOLIC,
+            "Start symbolic minimal trap space search."
+        );
+
         self.essential_symbolic()
             .and_then(|essential| self.minimize(&essential))
     }
@@ -197,7 +200,7 @@ impl TrapSpaces {
             //  "greedy" method using pick is good enough. Initial tests indicate that the
             //  greedy approach is enough.
             let minimum_candidate = original.pick_space();
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || minimal.as_bdd().clone())?;
 
             // Compute the set of strict super spaces.
             // TODO:
@@ -209,11 +212,11 @@ impl TrapSpaces {
             // TODO: ohtenkay - rewrite _mk_super_spaces, _impl_symbolic_space_context
             let super_spaces = ctx.mk_super_spaces(minimum_candidate.as_bdd());
             let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || minimal.as_bdd().clone())?;
 
             original = original.minus(&super_spaces);
             minimal = minimal.minus(&super_spaces).union(&minimum_candidate);
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || minimal.as_bdd().clone())?;
 
             debug!(
                 target: TARGET_MINIMIZE,
@@ -257,16 +260,16 @@ impl TrapSpaces {
 
         while !original.is_empty() {
             let maximum_candidate = original.pick_space();
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || maximal.as_bdd().clone())?;
 
             // Compute the set of strict sub spaces.
             let super_spaces = ctx.mk_sub_spaces(maximum_candidate.as_bdd());
             let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || maximal.as_bdd().clone())?;
 
             original = original.minus(&super_spaces);
             maximal = maximal.minus(&super_spaces).union(&maximum_candidate);
-            // is_cancelled!(self)?;
+            is_cancelled!(self, || maximal.as_bdd().clone())?;
 
             // TODO: ohtenkay - implement debug with size limit, new macro, use log!(), check for
             // usages
