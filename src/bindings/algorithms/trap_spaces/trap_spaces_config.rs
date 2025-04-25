@@ -44,15 +44,15 @@ pub struct TrapSpacesConfig {
     pub bdd_size_limit: usize,
 }
 
-// TODO: discuss - is this OK?
+// TODO: the current API does not allow creation straight from SymbolicAsyncGraph, this is a
+// temporary workaround
 impl From<(SymbolicAsyncGraph, SymbolicSpaceContext)> for TrapSpacesConfig {
     /// Create a new "default" [TrapSpacesConfig] from the given [SymbolicAsyncGraph] and
     /// [SymbolicSpaceContext].
     fn from((graph, ctx): (SymbolicAsyncGraph, SymbolicSpaceContext)) -> Self {
-        // TODO: ohtenkay - rewrite this to use var names
         assert_eq!(
-            graph.symbolic_context().bdd_variable_set().num_vars(),
-            ctx.bdd_variable_set().num_vars()
+            graph.symbolic_context().bdd_variable_set().variable_names(),
+            ctx.bdd_variable_set().variable_names()
         );
         TrapSpacesConfig {
             restriction: ctx.mk_unit_colored_spaces(&graph),
@@ -150,7 +150,6 @@ impl PyTrapSpacesConfig {
     pub fn from_boolean_network(py: Python, bn: Py<BooleanNetworkBinding>) -> PyResult<Self> {
         let config = TrapSpacesConfig::try_from(bn.borrow(py).as_native())?;
 
-        // TODO: discuss - how does this work?
         let ctx = Py::new(
             py,
             (
