@@ -14,8 +14,6 @@ pub enum TrapSpacesError {
     CreationFailed(String),
     #[error("operation cancelled")]
     Cancelled(Bdd),
-    // TODO: ohtenkay - is there a partial result? yes, also bdd as in fixed points. similar for the
-    // limit
     #[error("BDD size limit exceeded")]
     BddSizeLimitExceeded(Bdd),
 }

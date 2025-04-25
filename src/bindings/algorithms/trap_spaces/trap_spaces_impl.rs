@@ -94,7 +94,14 @@ impl TrapSpaces {
         // We always start with the restriction set, because it should carry the information
         // about valid encoding of spaces.
         let mut to_merge = vec![restriction.as_bdd().clone()];
+        let mut combined_bdd_size = restriction.as_bdd().size();
         for var in graph.variables() {
+            if combined_bdd_size >= self.config().bdd_size_limit {
+                return Err(TrapSpacesError::BddSizeLimitExceeded(
+                    restriction.as_bdd().clone(),
+                ));
+            }
+
             let update_bdd = graph.get_symbolic_fn_update(var);
             let not_update_bdd = update_bdd.not();
             is_cancelled!(self, || restriction.as_bdd().clone())?;
@@ -126,7 +133,10 @@ impl TrapSpaces {
                 is_essential.size(),
             );
 
-            to_merge.push(is_trap.and(&is_essential));
+            let to_push = is_trap.and(&is_essential);
+            combined_bdd_size += to_push.size();
+
+            to_merge.push(to_push);
         }
 
         let trap_spaces = FixedPoints::with_config(
@@ -163,6 +173,7 @@ impl TrapSpaces {
             "Start symbolic minimal trap space search."
         );
 
+        // TODO: discuss - bdd_size_limit gets "reset" with each method call
         self.essential_symbolic()
             .and_then(|essential| self.minimize(&essential))
     }
@@ -186,6 +197,12 @@ impl TrapSpaces {
         );
 
         while !original.is_empty() {
+            if minimal.as_bdd().exact_cardinality() >= self.config().bdd_size_limit.into() {
+                return Err(TrapSpacesError::BddSizeLimitExceeded(
+                    minimal.as_bdd().clone(),
+                ));
+            }
+
             // TODO:
             //  The pick-space process could probably be optimized somewhat to prioritize
             //  the most specific trap spaces (most "false" dual variables) instead of any
@@ -259,10 +276,18 @@ impl TrapSpaces {
         );
 
         while !original.is_empty() {
+            if maximal.as_bdd().exact_cardinality() >= self.config().bdd_size_limit.into() {
+                return Err(TrapSpacesError::BddSizeLimitExceeded(
+                    maximal.as_bdd().clone(),
+                ));
+            }
+
             let maximum_candidate = original.pick_space();
             is_cancelled!(self, || maximal.as_bdd().clone())?;
 
             // Compute the set of strict sub spaces.
+            // TODO: discuss - rename this to sub_spaces?
+            // TODO: ohtenkay - rewrite _mk_sub_spaces, _impl_symbolic_space_context
             let super_spaces = ctx.mk_sub_spaces(maximum_candidate.as_bdd());
             let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
             is_cancelled!(self, || maximal.as_bdd().clone())?;
