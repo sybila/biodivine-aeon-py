@@ -32,7 +32,8 @@ use crate::{
 #[derive(Clone, Config)]
 pub struct FixedPointsConfig {
     pub graph: SymbolicAsyncGraph,
-    // TODO: discuss - allow this to be specified from python?
+    // TODO: discuss - allow this to be specified from python? should be unnecessary to even save
+    // this
     pub universe: BddVariableSet,
     pub restriction: GraphColoredVertices,
     pub cancellation: Box<dyn CancellationHandler>,

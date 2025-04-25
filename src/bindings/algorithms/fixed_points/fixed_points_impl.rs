@@ -122,8 +122,6 @@ impl FixedPoints {
                 to_merge.iter().map(|it| it.symbolic_size()).sum::<usize>(),
             );
 
-            // TODO: discuss - is the partial result correct?
-            // TODO: discuss - implement From<GraphColoredVertices> for FixedPointsError?
             is_cancelled!(self, || { to_merge.pop().unwrap().as_bdd().clone() })?;
 
             let x = to_merge.pop().unwrap();
@@ -312,7 +310,8 @@ impl FixedPoints {
         Ok(result)
     }
 
-    pub fn symbolic_merge(
+    // TODO: finalize - think about the visibility of methods
+    pub(crate) fn symbolic_merge(
         &self,
         to_merge: Vec<Bdd>,
         // The set of variables that will be eliminated from the result.

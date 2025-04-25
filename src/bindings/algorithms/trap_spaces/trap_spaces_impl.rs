@@ -35,7 +35,7 @@ use crate::{
 
 const TARGET_ESSENTIAL_SYMBOLIC: &str = "TrapSpaces::essential_symbolic";
 // TODO: discuss - is it OK to use the other three targets even with minimal_symbolic?
-// const TARGET_MINIMAL_SYMBOLIC: &str = "TrapSpaces::minimal_symbolic";
+const TARGET_MINIMAL_SYMBOLIC: &str = "TrapSpaces::minimal_symbolic";
 const TARGET_MINIMIZE: &str = "TrapSpaces::minimize";
 const TARGET_MAXIMIZE: &str = "TrapSpaces::maximize";
 
@@ -130,11 +130,10 @@ impl TrapSpaces {
             to_merge.push(is_trap.and(&is_essential));
         }
 
-        // TODO: discuss - this is the new version, does it have to use symbolic merge directly?
         let trap_spaces = FixedPoints::with_config(
             FixedPointsConfig::from(graph.clone())
+                // TODO: test - should not be necessary, graph.universe() is the same as ctx.universe()
                 .with_universe(bdd_ctx.clone())
-                // TODO: discuss - is this OK?
                 .with_cancellation_nowrap(self.config().cancellation.clone())
                 .with_bdd_size_limit(self.config().bdd_size_limit),
         )
@@ -160,6 +159,7 @@ impl TrapSpaces {
     /// This method currently uses [Self::essential_symbolic], hence is always slower than
     /// this method.
     pub fn minimal_symbolic(&self) -> Result<NetworkColoredSpaces, TrapSpacesError> {
+        // TODO: ohtenkay - print info that this function is called
         self.essential_symbolic()
             .and_then(|essential| self.minimize(&essential))
     }
