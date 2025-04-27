@@ -1,6 +1,7 @@
 extern crate proc_macro;
 
 mod derive_config;
+mod derive_configurable;
 
 use proc_macro::TokenStream;
 use std::io::Write;
@@ -76,4 +77,17 @@ pub fn derive_wrapper(item: TokenStream) -> TokenStream {
 #[proc_macro_derive(Config)]
 pub fn derive_config(input: TokenStream) -> TokenStream {
     derive_config::derive_config_impl(input)
+}
+
+/// A derive macro that automatically implements the `Configurable` trait for structs
+/// that have a `config` field of type `Config` or contain a single unnamed field of type `Config`.
+///
+/// # Example
+/// ```
+/// #[derive(Configurable)]
+/// struct MyConfigurable(MyConfig);
+/// ```
+#[proc_macro_derive(Configurable)]
+pub fn derive_configurable(input: TokenStream) -> TokenStream {
+    derive_configurable::derive_configurable_impl(input)
 }

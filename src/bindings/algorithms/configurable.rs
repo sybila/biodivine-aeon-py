@@ -31,12 +31,13 @@ pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
     }
 }
 
-// TODO: ohtenkay - also create a macro for this? yes
 pub trait Configurable {
     type ConfigType: Config;
 
+    /// Retrieve the internal configuration struct of this instance.
     fn config(&self) -> &Self::ConfigType;
 
+    /// Create a new instance with the given configuration struct.
     fn with_config(config: Self::ConfigType) -> Self;
 }
 

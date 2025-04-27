@@ -5,6 +5,7 @@ use biodivine_lib_param_bn::{
     symbolic_async_graph::SymbolicAsyncGraph, BooleanNetwork, VariableId,
 };
 use log::{debug, info, trace};
+use macros::Configurable;
 use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
@@ -28,22 +29,8 @@ use crate::{
 const TARGET_PERCOLATE_SUBSPACE: &str = "Percolation::percolate_subspace";
 
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[derive(Clone)]
+#[derive(Clone, Configurable)]
 pub struct Percolation(PercolationConfig);
-
-impl Configurable for Percolation {
-    type ConfigType = PercolationConfig;
-
-    /// Retrieve the internal [PercolationConfig] of this instance.
-    fn config(&self) -> &Self::ConfigType {
-        &self.0
-    }
-
-    /// Create a new [Percolation] instance with the given [PercolationConfig].
-    fn with_config(config: Self::ConfigType) -> Self {
-        Percolation(config)
-    }
-}
 
 impl From<SymbolicAsyncGraph> for Percolation {
     /// Create a new [Percolation] instance from the given [SymbolicAsyncGraph]

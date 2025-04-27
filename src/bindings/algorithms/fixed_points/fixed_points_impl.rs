@@ -7,6 +7,7 @@ use biodivine_lib_param_bn::{
     BooleanNetwork,
 };
 use log::{debug, info, trace};
+use macros::Configurable;
 use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 
 use crate::{
@@ -36,22 +37,8 @@ const TARGET_SYMBOLIC: &str = "FixedPoints::symbolic";
 const TARGET_SYMBOLIC_VERTICES: &str = "FixedPoints::symbolic_vertices";
 const TARGET_SYMBOLIC_COLORS: &str = "FixedPoints::symbolic_colors";
 
-#[derive(Clone)]
+#[derive(Clone, Configurable)]
 pub struct FixedPoints(FixedPointsConfig);
-
-impl Configurable for FixedPoints {
-    type ConfigType = FixedPointsConfig;
-
-    /// Retrieve the internal [FixedPointsConfig] of this instance.
-    fn config(&self) -> &Self::ConfigType {
-        &self.0
-    }
-
-    /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
-    fn with_config(config: Self::ConfigType) -> Self {
-        FixedPoints(config)
-    }
-}
 
 impl From<SymbolicAsyncGraph> for FixedPoints {
     /// Create a new [FixedPoints] instance with the given [SymbolicAsyncGraph]

@@ -4,6 +4,7 @@ use biodivine_lib_param_bn::{
     BooleanNetwork,
 };
 use log::{debug, info, trace};
+use macros::Configurable;
 use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
@@ -35,22 +36,8 @@ const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 /// which restricts the set of relevant vertices, as well as a BDD size limit and steps limit.
 /// See [ReachabilityConfig] and [ReachabilityError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[derive(Clone)]
+#[derive(Clone, Configurable)]
 pub struct Reachability(ReachabilityConfig);
-
-impl Configurable for Reachability {
-    type ConfigType = ReachabilityConfig;
-
-    /// Retrieve the internal [ReachabilityConfig] of this instance.
-    fn config(&self) -> &Self::ConfigType {
-        &self.0
-    }
-
-    /// Create a new [Reachability] instance with the given [ReachabilityConfig].
-    fn with_config(config: Self::ConfigType) -> Self {
-        Reachability(config)
-    }
-}
 
 impl From<SymbolicAsyncGraph> for Reachability {
     /// Create a new [Reachability] instance from the given [SymbolicAsyncGraph]

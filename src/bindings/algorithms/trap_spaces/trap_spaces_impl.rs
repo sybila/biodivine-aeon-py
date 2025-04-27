@@ -8,6 +8,7 @@ use biodivine_lib_param_bn::{
     BooleanNetwork,
 };
 use log::{debug, info};
+use macros::Configurable;
 use pyo3::{pyclass, pymethods, Py, PyResult, Python};
 
 use crate::{
@@ -39,22 +40,8 @@ const TARGET_MINIMAL_SYMBOLIC: &str = "TrapSpaces::minimal_symbolic";
 const TARGET_MINIMIZE: &str = "TrapSpaces::minimize";
 const TARGET_MAXIMIZE: &str = "TrapSpaces::maximize";
 
-#[derive(Clone)]
+#[derive(Clone, Configurable)]
 pub struct TrapSpaces(TrapSpacesConfig);
-
-impl Configurable for TrapSpaces {
-    type ConfigType = TrapSpacesConfig;
-
-    /// Retrieve the internal [TrapSpacesConfig] of this instance.
-    fn config(&self) -> &Self::ConfigType {
-        &self.0
-    }
-
-    /// Create a new [TrapSpaces] instance with the given [TrapSpacesConfig].
-    fn with_config(config: Self::ConfigType) -> Self {
-        TrapSpaces(config)
-    }
-}
 
 impl From<(SymbolicAsyncGraph, SymbolicSpaceContext)> for TrapSpaces {
     /// Create a new "default" [TrapSpaces] from the given [SymbolicAsyncGraph] and
