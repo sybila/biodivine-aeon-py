@@ -18,6 +18,7 @@ use crate::{
                 fixed_points_config::FixedPointsConfig, fixed_points_impl::FixedPoints,
             },
             trap_spaces::{
+                _impl_symbolic_space_context::SymbolicSpaceContextExt as _,
                 trap_spaces_config::{PyTrapSpacesConfig, TrapSpacesConfig},
                 trap_spaces_error::TrapSpacesError,
             },
@@ -106,12 +107,10 @@ impl TrapSpaces {
             let not_update_bdd = update_bdd.not();
             is_cancelled!(self, || restriction.as_bdd().clone())?;
 
-            // TODO: ohtenkay - rewrite _mk_can_go_to_true
-            let has_up_transition = &ctx.mk_can_go_to_true(update_bdd);
+            let has_up_transition = &ctx.mk_can_go_to_true_ext(update_bdd, self)?;
             is_cancelled!(self, || restriction.as_bdd().clone())?;
 
-            // TODO: ohtenkay - rewrite _mk_can_go_to_true
-            let has_down_transition = &ctx.mk_can_go_to_true(&not_update_bdd);
+            let has_down_transition = &ctx.mk_can_go_to_true_ext(&not_update_bdd, self)?;
             is_cancelled!(self, || restriction.as_bdd().clone())?;
 
             let true_var = ctx.get_positive_variable(var);
@@ -224,8 +223,7 @@ impl TrapSpaces {
             //  find a way to get rid of fixed points and any related super-spaces first,
             //  as these are clearly minimal. The other option would be to tune the super
             //  space enumeration to avoid spaces that are clearly irrelevant anyway.
-            // TODO: ohtenkay - rewrite _mk_super_spaces, _impl_symbolic_space_context
-            let super_spaces = ctx.mk_super_spaces(minimum_candidate.as_bdd());
+            let super_spaces = ctx.mk_super_spaces_ext(minimum_candidate.as_bdd(), self)?;
             let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
             is_cancelled!(self, || minimal.as_bdd().clone())?;
 
@@ -284,14 +282,13 @@ impl TrapSpaces {
             is_cancelled!(self, || maximal.as_bdd().clone())?;
 
             // Compute the set of strict sub spaces.
-            // TODO: discuss - rename this to sub_spaces?
-            // TODO: ohtenkay - rewrite _mk_sub_spaces, _impl_symbolic_space_context
-            let super_spaces = ctx.mk_sub_spaces(maximum_candidate.as_bdd());
-            let super_spaces = NetworkColoredSpaces::new(super_spaces, ctx);
+            // TODO: discuss - renamed this to sub_spaces
+            let sub_spaces = ctx.mk_sub_spaces_ext(maximum_candidate.as_bdd(), self)?;
+            let sub_spaces = NetworkColoredSpaces::new(sub_spaces, ctx);
             is_cancelled!(self, || maximal.as_bdd().clone())?;
 
-            original = original.minus(&super_spaces);
-            maximal = maximal.minus(&super_spaces).union(&maximum_candidate);
+            original = original.minus(&sub_spaces);
+            maximal = maximal.minus(&sub_spaces).union(&maximum_candidate);
             is_cancelled!(self, || maximal.as_bdd().clone())?;
 
             // TODO: ohtenkay - implement debug with size limit, new macro, use log!(), check for

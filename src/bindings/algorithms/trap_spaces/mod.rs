@@ -6,6 +6,7 @@ use trap_spaces_config::PyTrapSpacesConfig;
 use trap_spaces_impl::PyTrapSpaces;
 
 mod _impl_pyerr;
+mod _impl_symbolic_space_context;
 mod trap_spaces_config;
 mod trap_spaces_error;
 mod trap_spaces_impl;
