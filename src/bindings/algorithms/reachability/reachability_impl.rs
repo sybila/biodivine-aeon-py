@@ -12,14 +12,10 @@ use crate::{
         algorithms::{
             cancellation::CancellationHandler,
             configurable::Configurable,
+            graph_representation::GraphRepresentation,
             reachability::{ReachabilityConfig, ReachabilityError},
         },
-        lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::{
-                asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
-            },
-        },
+        lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet,
     },
     is_cancelled, AsNative as _,
 };
@@ -320,17 +316,11 @@ impl Reachability {
 #[pymethods]
 impl Reachability {
     #[staticmethod]
-    #[pyo3(name = "from_boolean_network")]
-    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
-        Ok(Reachability(
-            ReachabilityConfig::python_from_boolean_network(boolean_network)?,
-        ))
-    }
-
-    #[staticmethod]
-    #[pyo3(name = "from_graph")]
-    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
-        Reachability(ReachabilityConfig::python_from_graph(graph))
+    #[pyo3(name = "from")]
+    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+        Ok(Reachability(ReachabilityConfig::python_from(
+            graph_representation,
+        )?))
     }
 
     #[staticmethod]
@@ -344,8 +334,10 @@ impl Reachability {
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        let result_set = self.forward_closed_superset(initial.as_native())?;
-        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+        Ok(ColoredVertexSet::mk_native(
+            initial.ctx(),
+            self.forward_closed_superset(initial.as_native())?,
+        ))
     }
 
     #[pyo3(name = "backward_closed_superset")]
@@ -353,8 +345,10 @@ impl Reachability {
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        let result_set = self.backward_closed_superset(initial.as_native())?;
-        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+        Ok(ColoredVertexSet::mk_native(
+            initial.ctx(),
+            self.backward_closed_superset(initial.as_native())?,
+        ))
     }
 
     #[pyo3(name = "forward_closed_subset")]
@@ -362,8 +356,10 @@ impl Reachability {
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        let result_set = self.forward_closed_subset(initial.as_native())?;
-        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+        Ok(ColoredVertexSet::mk_native(
+            initial.ctx(),
+            self.forward_closed_subset(initial.as_native())?,
+        ))
     }
 
     #[pyo3(name = "backward_closed_subset")]
@@ -371,7 +367,9 @@ impl Reachability {
         &self,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        let result_set = self.backward_closed_subset(initial.as_native())?;
-        Ok(ColoredVertexSet::mk_native(initial.ctx(), result_set))
+        Ok(ColoredVertexSet::mk_native(
+            initial.ctx(),
+            self.backward_closed_subset(initial.as_native())?,
+        ))
     }
 }

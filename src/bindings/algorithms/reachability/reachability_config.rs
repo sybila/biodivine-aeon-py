@@ -15,13 +15,11 @@ use crate::{
                 CancellationHandler,
             },
             configurable::Config,
+            graph_representation::GraphRepresentation,
             reachability::ReachabilityError,
         },
         lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::{
-                asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
-            },
+            symbolic::set_colored_vertex::ColoredVertexSet,
             variable_id::VariableId as VariableIdBinding,
         },
     },
@@ -142,21 +140,21 @@ impl ReachabilityConfig {
 
 // TODO: finalize - make this optional with a feature flag
 /// These methods are Python facing wrappers of native mehtods and thus should not be used from
-/// within Rust. When working with [ReachibilityConfig] from Rust, use methods without the _py
-/// suffix.
+/// within Rust. When working with [ReachibilityConfig] from Rust, use methods without the python_
+/// prefix.
 #[pymethods]
 impl ReachabilityConfig {
     #[new]
-    #[pyo3(signature = (graph, subgraph = None, variables = None, time_limit_millis = None, bdd_size_limit = None, steps_limit = None))]
+    #[pyo3(signature = (graph_representation, subgraph = None, variables = None, time_limit_millis = None, bdd_size_limit = None, steps_limit = None))]
     pub fn python_new(
-        graph: &AsynchronousGraph,
+        graph_representation: GraphRepresentation,
         subgraph: Option<&ColoredVertexSet>,
         variables: Option<HashSet<VariableIdBinding>>,
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
         steps_limit: Option<usize>,
-    ) -> Self {
-        let mut config = ReachabilityConfig::from(graph.as_native().clone());
+    ) -> PyResult<Self> {
+        let mut config = ReachabilityConfig::try_from(graph_representation)?;
 
         if let Some(subgraph) = subgraph {
             config = config.with_subgraph(subgraph.as_native().clone())
@@ -170,8 +168,6 @@ impl ReachabilityConfig {
             config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(millis),
             )))
-        } else {
-            config = config.with_cancellation(CancelTokenPython::default());
         }
 
         if let Some(limit) = bdd_size_limit {
@@ -182,21 +178,13 @@ impl ReachabilityConfig {
             config = config.with_steps_limit(limit)
         }
 
-        config
+        Ok(config)
     }
 
     #[staticmethod]
-    #[pyo3(name = "from_boolean_network")]
-    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
-        Ok(ReachabilityConfig::try_from(boolean_network.as_native())?
-            .with_cancellation(CancelTokenPython::default()))
-    }
-
-    #[staticmethod]
-    #[pyo3(name = "from_graph")]
-    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
-        ReachabilityConfig::from(graph.as_native().clone())
-            .with_cancellation(CancelTokenPython::default())
+    #[pyo3(name = "from")]
+    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+        Ok(ReachabilityConfig::try_from(graph_representation)?)
     }
 
     #[pyo3(name = "with_subgraph")]

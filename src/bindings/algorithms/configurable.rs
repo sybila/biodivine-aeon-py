@@ -6,8 +6,8 @@ use pyo3::{create_exception, exceptions::PyException};
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
-// TODO: ohtenkay - enforces try_from, but not from, due to needing SymbolicSpaceContext
-// in TrapSpacesConfig - implement "GraphRepresentation"
+// TODO: once we are able to create symbolic space context from a graph, add a trait bound
+// for From<SymbolicSpaceContext>, also add to Configurable
 pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
     fn cancellation(&self) -> &dyn CancellationHandler;
 
@@ -31,7 +31,7 @@ pub trait Config: for<'a> TryFrom<&'a BooleanNetwork> {
     }
 }
 
-pub trait Configurable {
+pub trait Configurable: for<'a> TryFrom<&'a BooleanNetwork> {
     type ConfigType: Config;
 
     /// Retrieve the internal configuration struct of this instance.

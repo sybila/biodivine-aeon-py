@@ -433,6 +433,7 @@ impl FixedPoints {
 }
 
 // TODO: finalize - make this optional with a feature flag
+// TODO: ohtenkay - use the other way of wrapping just like in trap spaces
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[pyo3(name = "FixedPoints")]
 pub struct PyFixedPoints {

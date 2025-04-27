@@ -3,6 +3,7 @@ use pyo3::{types::PyModule, Bound, PyResult};
 pub mod cancellation;
 pub mod configurable;
 pub mod fixed_points;
+pub mod graph_representation;
 pub mod percolation;
 pub mod reachability;
 pub mod trap_spaces;
