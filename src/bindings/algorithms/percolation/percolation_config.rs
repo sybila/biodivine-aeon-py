@@ -4,22 +4,14 @@ use biodivine_lib_param_bn::{symbolic_async_graph::SymbolicAsyncGraph, BooleanNe
 use macros::Config;
 use pyo3::{pyclass, pymethods, PyResult};
 
-use crate::{
-    bindings::{
-        algorithms::{
-            cancellation::{
-                tokens::{CancelTokenPython, CancelTokenTimer},
-                CancellationHandler,
-            },
-            configurable::Config,
-            percolation::percolation_error::PercolationError,
-        },
-        lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::asynchronous_graph::AsynchronousGraph,
-        },
+use crate::bindings::algorithms::{
+    cancellation::{
+        tokens::{CancelTokenPython, CancelTokenTimer},
+        CancellationHandler,
     },
-    AsNative as _,
+    configurable::Config,
+    graph_representation::GraphRepresentation,
+    percolation::percolation_error::PercolationError,
 };
 
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -59,10 +51,12 @@ impl TryFrom<&BooleanNetwork> for PercolationConfig {
 #[pymethods]
 impl PercolationConfig {
     #[new]
-    #[pyo3(signature = (graph, time_limit_millis = None))]
-    // TODO: ohtenkay - create something simiral to SubspaceRepresentation for graph/boolean_network? yes
-    pub fn python_new(graph: &AsynchronousGraph, time_limit_millis: Option<u64>) -> Self {
-        let mut config = PercolationConfig::from(graph.as_native().clone());
+    #[pyo3(signature = (graph_representation, time_limit_millis = None))]
+    pub fn python_new(
+        graph_representation: GraphRepresentation,
+        time_limit_millis: Option<u64>,
+    ) -> PyResult<Self> {
+        let mut config = PercolationConfig::try_from(graph_representation)?;
 
         if let Some(millis) = time_limit_millis {
             config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
@@ -72,21 +66,13 @@ impl PercolationConfig {
             config = config.with_cancellation(CancelTokenPython::default());
         }
 
-        config
+        Ok(config)
     }
 
     #[staticmethod]
-    #[pyo3(name = "from_boolean_network")]
-    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
-        Ok(PercolationConfig::try_from(boolean_network.as_native())?
-            .with_cancellation(CancelTokenPython::default()))
-    }
-
-    #[staticmethod]
-    #[pyo3(name = "from_graph")]
-    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
-        PercolationConfig::from(graph.as_native().clone())
-            .with_cancellation(CancelTokenPython::default())
+    #[pyo3(name = "from")]
+    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+        Ok(PercolationConfig::try_from(graph_representation)?)
     }
 
     #[pyo3(name = "with_time_limit")]

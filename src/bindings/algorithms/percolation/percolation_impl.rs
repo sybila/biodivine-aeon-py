@@ -9,18 +9,13 @@ use macros::Configurable;
 use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
-    bindings::{
-        algorithms::{
-            cancellation::CancellationHandler,
-            configurable::Configurable,
-            percolation::{
-                percolation_config::PercolationConfig, percolation_error::PercolationError,
-                subspace_representation::SubspaceRepresentation,
-            },
-        },
-        lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::asynchronous_graph::AsynchronousGraph,
+    bindings::algorithms::{
+        cancellation::CancellationHandler,
+        configurable::Configurable,
+        graph_representation::GraphRepresentation,
+        percolation::{
+            percolation_config::PercolationConfig, percolation_error::PercolationError,
+            subspace_representation::SubspaceRepresentation,
         },
     },
     is_cancelled,
@@ -191,17 +186,11 @@ impl Percolation {
 #[pymethods]
 impl Percolation {
     #[staticmethod]
-    #[pyo3(name = "from_boolean_network")]
-    pub fn python_from_boolean_network(boolean_network: &BooleanNetworkBinding) -> PyResult<Self> {
-        Ok(Percolation(PercolationConfig::python_from_boolean_network(
-            boolean_network,
+    #[pyo3(name = "from")]
+    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+        Ok(Percolation(PercolationConfig::python_from(
+            graph_representation,
         )?))
-    }
-
-    #[staticmethod]
-    #[pyo3(name = "from_graph")]
-    pub fn python_from_graph(graph: &AsynchronousGraph) -> Self {
-        Percolation(PercolationConfig::python_from_graph(graph))
     }
 
     #[staticmethod]
