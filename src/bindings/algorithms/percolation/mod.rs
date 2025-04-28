@@ -8,8 +8,8 @@ use percolation_impl::Percolation;
 use subspace_representation::SubspaceRepresentation;
 
 mod _impl_pyerr;
-mod percolation_config;
-mod percolation_error;
+pub mod percolation_config;
+pub mod percolation_error;
 mod percolation_impl;
 mod subspace_representation;
 
