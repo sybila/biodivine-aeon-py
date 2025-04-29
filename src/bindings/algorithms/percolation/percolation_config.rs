@@ -10,7 +10,7 @@ use crate::bindings::algorithms::{
         CancellationHandler,
     },
     configurable::Config,
-    graph_representation::GraphRepresentation,
+    graph_representation::PyGraphRepresentation,
     percolation::percolation_error::PercolationError,
 };
 
@@ -53,7 +53,7 @@ impl PercolationConfig {
     #[new]
     #[pyo3(signature = (graph_representation, time_limit_millis = None))]
     pub fn python_new(
-        graph_representation: GraphRepresentation,
+        graph_representation: PyGraphRepresentation,
         time_limit_millis: Option<u64>,
     ) -> PyResult<Self> {
         let mut config = PercolationConfig::try_from(graph_representation)?;
@@ -71,10 +71,11 @@ impl PercolationConfig {
 
     #[staticmethod]
     #[pyo3(name = "from")]
-    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+    pub fn python_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         Ok(PercolationConfig::try_from(graph_representation)?)
     }
 
+    // TODO: if we ever move away from abi3-py37, use Duration as an argument
     #[pyo3(name = "with_time_limit")]
     pub fn python_with_time_limit(&self, millis: u64) -> Self {
         self.clone()

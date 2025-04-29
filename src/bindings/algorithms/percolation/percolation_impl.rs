@@ -12,7 +12,7 @@ use crate::{
     bindings::algorithms::{
         cancellation::CancellationHandler,
         configurable::Configurable,
-        graph_representation::GraphRepresentation,
+        graph_representation::PyGraphRepresentation,
         percolation::{
             percolation_config::PercolationConfig, percolation_error::PercolationError,
             subspace_representation::SubspaceRepresentation,
@@ -187,7 +187,7 @@ impl Percolation {
 impl Percolation {
     #[staticmethod]
     #[pyo3(name = "from")]
-    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+    pub fn python_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         Ok(Percolation(PercolationConfig::python_from(
             graph_representation,
         )?))

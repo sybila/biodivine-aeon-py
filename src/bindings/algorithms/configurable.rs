@@ -37,6 +37,9 @@ pub trait Configurable: for<'a> TryFrom<&'a BooleanNetwork> {
     /// Retrieve the internal configuration struct of this instance.
     fn config(&self) -> &Self::ConfigType;
 
+    /// Retrieve the internal configuration struct of this instance by transfering ownership.
+    fn into_config(self) -> Self::ConfigType;
+
     /// Create a new instance with the given configuration struct.
     fn with_config(config: Self::ConfigType) -> Self;
 }

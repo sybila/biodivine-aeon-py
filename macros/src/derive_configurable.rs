@@ -89,6 +89,13 @@ pub(crate) fn derive_configurable_impl(input: TokenStream) -> TokenStream {
         _ => unreachable!(),
     };
 
+    // Generate the `into_config` method
+    let into_config_method = match fields {
+        Fields::Unnamed(_) => quote! { self.0 },
+        Fields::Named(_) => quote! { self.config },
+        _ => unreachable!(),
+    };
+
     // Generate appropriate constructor based on field type
     let constructor = match fields {
         Fields::Unnamed(_) => quote! { Self(config) },
@@ -107,6 +114,10 @@ pub(crate) fn derive_configurable_impl(input: TokenStream) -> TokenStream {
 
             fn config(&self) -> &Self::ConfigType {
                 #config_accessor
+            }
+
+            fn into_config(self) -> Self::ConfigType {
+                #into_config_method
             }
 
             fn with_config(config: Self::ConfigType) -> Self {

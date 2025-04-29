@@ -9,7 +9,7 @@ use biodivine_lib_param_bn::{
 };
 use log::{debug, info};
 use macros::Configurable;
-use pyo3::{pyclass, pymethods, Py, PyResult, Python};
+use pyo3::{pyclass, pymethods, Py, PyResult};
 
 use crate::{
     bindings::{
@@ -18,18 +18,16 @@ use crate::{
             fixed_points::{
                 fixed_points_config::FixedPointsConfig, fixed_points_impl::FixedPoints,
             },
+            graph_representation::PyGraphRepresentation,
             trap_spaces::{
                 _impl_symbolic_space_context::SymbolicSpaceContextExt as _,
                 trap_spaces_config::{PyTrapSpacesConfig, TrapSpacesConfig},
                 trap_spaces_error::TrapSpacesError,
             },
         },
-        lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::{
-                asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
-                symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextBinding,
-            },
+        lib_param_bn::symbolic::{
+            asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
+            symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextBinding,
         },
     },
     is_cancelled, AsNative as _,
@@ -310,9 +308,9 @@ pub struct PyTrapSpaces(PyTrapSpacesConfig);
 #[pymethods]
 impl PyTrapSpaces {
     #[staticmethod]
-    pub fn from_boolean_network(py: Python, bn: Py<BooleanNetworkBinding>) -> PyResult<Self> {
-        Ok(PyTrapSpaces(PyTrapSpacesConfig::from_boolean_network(
-            py, bn,
+    pub fn from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+        Ok(PyTrapSpaces(PyTrapSpacesConfig::try_from(
+            graph_representation,
         )?))
     }
 
@@ -324,7 +322,6 @@ impl PyTrapSpaces {
         PyTrapSpaces(PyTrapSpacesConfig::from_graph_with_context(graph, ctx))
     }
 
-    /// Create a new [TrapSpaces] instance with the given [TrapSpacesConfig].
     #[staticmethod]
     pub fn with_config(config: PyTrapSpacesConfig) -> Self {
         PyTrapSpaces(config)

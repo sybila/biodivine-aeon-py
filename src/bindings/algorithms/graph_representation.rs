@@ -1,10 +1,10 @@
-use pyo3::{pyclass, FromPyObject, Py, Python};
+use pyo3::{pyclass, FromPyObject, Py, PyErr, Python};
 
 use crate::{
     bindings::{
         algorithms::{
             cancellation::tokens::CancelTokenPython,
-            configurable::Config as _,
+            configurable::{Config as _, Configurable as _},
             fixed_points::{
                 fixed_points_config::FixedPointsConfig, fixed_points_error::FixedPointsError,
             },
@@ -14,33 +14,40 @@ use crate::{
             reachability::{ReachabilityConfig, ReachabilityError},
             trap_spaces::{
                 trap_spaces_config::TrapSpacesConfig, trap_spaces_error::TrapSpacesError,
+                trap_spaces_impl::TrapSpaces,
             },
         },
         lib_param_bn::{
-            boolean_network::BooleanNetwork, symbolic::asynchronous_graph::AsynchronousGraph,
+            boolean_network::BooleanNetwork,
+            symbolic::{
+                asynchronous_graph::AsynchronousGraph, symbolic_context::SymbolicContext,
+                symbolic_space_context::SymbolicSpaceContext,
+            },
         },
     },
     AsNative as _,
 };
 
+use super::trap_spaces::trap_spaces_config::PyTrapSpacesConfig;
+
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(FromPyObject)]
-pub enum GraphRepresentation {
+pub enum PyGraphRepresentation {
     Graph(Py<AsynchronousGraph>),
     Network(Py<BooleanNetwork>),
 }
 
-impl TryFrom<GraphRepresentation> for ReachabilityConfig {
+impl TryFrom<PyGraphRepresentation> for ReachabilityConfig {
     type Error = ReachabilityError;
 
     /// Create a new "default" [ReachabilityConfig] from the given [GraphRepresentation].
-    fn try_from(representation: GraphRepresentation) -> Result<Self, Self::Error> {
+    fn try_from(representation: PyGraphRepresentation) -> Result<Self, Self::Error> {
         match representation {
-            GraphRepresentation::Graph(graph) => {
+            PyGraphRepresentation::Graph(graph) => {
                 Ok(ReachabilityConfig::from(graph.get().as_native().clone())
                     .with_cancellation(CancelTokenPython::default()))
             }
-            GraphRepresentation::Network(network) => Python::with_gil(|py| {
+            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
                 ReachabilityConfig::try_from(network.borrow(py).as_native())
                     .map(|config| config.with_cancellation(CancelTokenPython::default()))
             }),
@@ -48,17 +55,17 @@ impl TryFrom<GraphRepresentation> for ReachabilityConfig {
     }
 }
 
-impl TryFrom<GraphRepresentation> for PercolationConfig {
+impl TryFrom<PyGraphRepresentation> for PercolationConfig {
     type Error = PercolationError;
 
     /// Create a new "default" [PercolationConfig] from the given [GraphRepresentation].
-    fn try_from(representation: GraphRepresentation) -> Result<Self, Self::Error> {
+    fn try_from(representation: PyGraphRepresentation) -> Result<Self, Self::Error> {
         match representation {
-            GraphRepresentation::Graph(graph) => {
+            PyGraphRepresentation::Graph(graph) => {
                 Ok(PercolationConfig::from(graph.get().as_native().clone())
                     .with_cancellation(CancelTokenPython::default()))
             }
-            GraphRepresentation::Network(network) => Python::with_gil(|py| {
+            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
                 PercolationConfig::try_from(network.borrow(py).as_native())
                     .map(|config| config.with_cancellation(CancelTokenPython::default()))
             }),
@@ -66,17 +73,17 @@ impl TryFrom<GraphRepresentation> for PercolationConfig {
     }
 }
 
-impl TryFrom<GraphRepresentation> for FixedPointsConfig {
+impl TryFrom<PyGraphRepresentation> for FixedPointsConfig {
     type Error = FixedPointsError;
 
     /// Create a new "default" [FixedPointsConfig] from the given [GraphRepresentation].
-    fn try_from(representation: GraphRepresentation) -> Result<Self, Self::Error> {
+    fn try_from(representation: PyGraphRepresentation) -> Result<Self, Self::Error> {
         match representation {
-            GraphRepresentation::Graph(graph) => {
+            PyGraphRepresentation::Graph(graph) => {
                 Ok(FixedPointsConfig::from(graph.get().as_native().clone())
                     .with_cancellation(CancelTokenPython::default()))
             }
-            GraphRepresentation::Network(network) => Python::with_gil(|py| {
+            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
                 FixedPointsConfig::try_from(network.borrow(py).as_native())
                     .map(|config| config.with_cancellation(CancelTokenPython::default()))
             }),
@@ -84,20 +91,35 @@ impl TryFrom<GraphRepresentation> for FixedPointsConfig {
     }
 }
 
-impl TryFrom<GraphRepresentation> for TrapSpacesConfig {
-    type Error = TrapSpacesError;
+impl TryFrom<PyGraphRepresentation> for PyTrapSpacesConfig {
+    type Error = PyErr;
 
-    /// Create a new "default" [TrapSpacesConfig] from the given [GraphRepresentation].
-    fn try_from(representation: GraphRepresentation) -> Result<Self, Self::Error> {
+    /// Create a new "default" [PyTrapSpacesConfig] from the given [PyGraphRepresentation].
+    fn try_from(representation: PyGraphRepresentation) -> Result<Self, Self::Error> {
         match representation {
-            GraphRepresentation::Graph(_graph) => {
+            PyGraphRepresentation::Graph(_graph) => {
                 Err(TrapSpacesError::CreationFailed(
                     "Currently, trap spaces cannot be created from just a graph. Use a boolean network or from_graph_with_context() instead."
-                        .to_string()))
+                        .to_string()).into())
             },
-            GraphRepresentation::Network(network) => Python::with_gil(|py| {
-                TrapSpacesConfig::try_from(network.borrow(py).as_native())
-                    .map(|config| config.with_cancellation(CancelTokenPython::default()))
+            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
+                let config = TrapSpacesConfig::try_from(network.borrow(py).as_native())?
+                    .with_cancellation(
+                        CancelTokenPython::default(),
+                    );
+
+                let ctx = Py::new(
+                    py,
+                    (
+                        SymbolicSpaceContext::new(config.ctx.clone()),
+                        SymbolicContext::new(py, network, None)?,
+                    ),
+                )?;
+
+                Ok(PyTrapSpacesConfig::new(
+                    TrapSpaces::with_config(config),
+                    ctx,
+                ))
             }),
         }
     }

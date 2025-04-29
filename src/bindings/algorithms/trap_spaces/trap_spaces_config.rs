@@ -6,7 +6,7 @@ use biodivine_lib_param_bn::{
     BooleanNetwork,
 };
 use macros::Config;
-use pyo3::{pyclass, pymethods, Py, PyResult, Python};
+use pyo3::{pyclass, pymethods, Py, PyResult};
 
 use crate::{
     bindings::{
@@ -16,15 +16,12 @@ use crate::{
                 CancellationHandler,
             },
             configurable::{Config, Configurable},
+            graph_representation::PyGraphRepresentation,
             trap_spaces::{trap_spaces_error::TrapSpacesError, trap_spaces_impl::TrapSpaces},
         },
-        lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::{
-                asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
-                symbolic_context::SymbolicContext,
-                symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextBinding,
-            },
+        lib_param_bn::symbolic::{
+            asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
+            symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextBinding,
         },
     },
     AsNative as _,
@@ -104,8 +101,16 @@ pub struct PyTrapSpacesConfig {
 }
 
 impl PyTrapSpacesConfig {
+    pub fn new(inner: TrapSpaces, ctx: Py<SymbolicSpaceContextBinding>) -> Self {
+        PyTrapSpacesConfig { inner, ctx }
+    }
+
     pub fn inner(&self) -> &TrapSpaces {
         &self.inner
+    }
+
+    pub fn extract_inner(self) -> (TrapSpacesConfig, Py<SymbolicSpaceContextBinding>) {
+        (self.inner.into_config(), self.ctx)
     }
 
     pub fn symbolic_space_context(&self) -> Py<SymbolicSpaceContextBinding> {
@@ -116,28 +121,22 @@ impl PyTrapSpacesConfig {
 #[pymethods]
 impl PyTrapSpacesConfig {
     #[new]
-    #[pyo3(signature = (graph, ctx, restriction = None, time_limit_millis = None))]
+    #[pyo3(signature = (graph_representation, restriction = None, time_limit_millis = None))]
     pub fn python_new(
-        graph: &AsynchronousGraph,
-        ctx: Py<SymbolicSpaceContextBinding>,
+        graph_representation: PyGraphRepresentation,
         restriction: Option<&ColoredSpaceSet>,
         time_limit_millis: Option<u64>,
     ) -> PyResult<Self> {
-        let ctx_native = ctx.get().as_native();
-        let mut config = TrapSpacesConfig::from((graph.as_native().clone(), ctx_native.clone()));
+        let (mut config, ctx) = PyTrapSpacesConfig::try_from(graph_representation)?.extract_inner();
 
         if let Some(restriction) = restriction {
             config = config.with_restriction(restriction.as_native().clone())
-        } else {
-            config = config.with_restriction(ctx_native.mk_unit_colored_spaces(graph.as_native()));
-        };
+        }
 
         if let Some(millis) = time_limit_millis {
             config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(millis),
             )))
-        } else {
-            config = config.with_cancellation(CancelTokenPython::default());
         }
 
         Ok(PyTrapSpacesConfig {
@@ -147,21 +146,8 @@ impl PyTrapSpacesConfig {
     }
 
     #[staticmethod]
-    pub fn from_boolean_network(py: Python, bn: Py<BooleanNetworkBinding>) -> PyResult<Self> {
-        let config = TrapSpacesConfig::try_from(bn.borrow(py).as_native())?;
-
-        let ctx = Py::new(
-            py,
-            (
-                SymbolicSpaceContextBinding::new(config.ctx.clone()),
-                SymbolicContext::new(py, bn, None)?,
-            ),
-        )?;
-
-        Ok(PyTrapSpacesConfig {
-            inner: TrapSpaces::with_config(config),
-            ctx,
-        })
+    pub fn from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+        PyTrapSpacesConfig::try_from(graph_representation)
     }
 
     #[staticmethod]
@@ -184,6 +170,22 @@ impl PyTrapSpacesConfig {
             .config()
             .clone()
             .with_restriction(restriction.as_native().clone());
+
+        PyTrapSpacesConfig {
+            inner: TrapSpaces::with_config(config),
+            ctx: self.ctx.clone(),
+        }
+    }
+
+    // TODO: if we ever move away from abi3-py37, use Duration as an argument
+    pub fn with_time_limit(&self, duration_in_millis: u64) -> Self {
+        let config = self
+            .inner
+            .config()
+            .clone()
+            .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
+                Duration::from_millis(duration_in_millis),
+            )));
 
         PyTrapSpacesConfig {
             inner: TrapSpaces::with_config(config),

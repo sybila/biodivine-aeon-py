@@ -12,7 +12,7 @@ use crate::{
         algorithms::{
             cancellation::CancellationHandler,
             configurable::Configurable,
-            graph_representation::GraphRepresentation,
+            graph_representation::PyGraphRepresentation,
             reachability::{ReachabilityConfig, ReachabilityError},
         },
         lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet,
@@ -317,7 +317,7 @@ impl Reachability {
 impl Reachability {
     #[staticmethod]
     #[pyo3(name = "from")]
-    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+    pub fn python_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         Ok(Reachability(ReachabilityConfig::python_from(
             graph_representation,
         )?))

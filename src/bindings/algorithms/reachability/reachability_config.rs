@@ -15,7 +15,7 @@ use crate::{
                 CancellationHandler,
             },
             configurable::Config,
-            graph_representation::GraphRepresentation,
+            graph_representation::PyGraphRepresentation,
             reachability::ReachabilityError,
         },
         lib_param_bn::{
@@ -147,7 +147,7 @@ impl ReachabilityConfig {
     #[new]
     #[pyo3(signature = (graph_representation, subgraph = None, variables = None, time_limit_millis = None, bdd_size_limit = None, steps_limit = None))]
     pub fn python_new(
-        graph_representation: GraphRepresentation,
+        graph_representation: PyGraphRepresentation,
         subgraph: Option<&ColoredVertexSet>,
         variables: Option<HashSet<VariableIdBinding>>,
         time_limit_millis: Option<u64>,
@@ -183,7 +183,7 @@ impl ReachabilityConfig {
 
     #[staticmethod]
     #[pyo3(name = "from")]
-    pub fn python_from(graph_representation: GraphRepresentation) -> PyResult<Self> {
+    pub fn python_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         Ok(ReachabilityConfig::try_from(graph_representation)?)
     }
 
