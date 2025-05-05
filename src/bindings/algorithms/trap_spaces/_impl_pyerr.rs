@@ -24,5 +24,4 @@ impl From<TrapSpacesError> for PyErr {
     }
 }
 
-// TODO: docs - add fourth argument, documentation
 create_exception!(trap_spaces, BddSizeLimitExceededError, PyException);

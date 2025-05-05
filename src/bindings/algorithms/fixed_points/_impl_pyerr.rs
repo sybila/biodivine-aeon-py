@@ -25,5 +25,4 @@ impl From<FixedPointsError> for PyErr {
     }
 }
 
-// TODO: docs - add fourth argument, documentation
 create_exception!(fixed_points, BddSizeLimitExceededError, PyException);

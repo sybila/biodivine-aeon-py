@@ -57,5 +57,4 @@ where
     }
 }
 
-// TODO: docs - add fourth argument, documentation
 create_exception!(configurable, CreationFailedError, PyException);

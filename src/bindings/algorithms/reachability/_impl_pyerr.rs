@@ -5,7 +5,6 @@ use crate::bindings::algorithms::{
     reachability::ReachabilityError,
 };
 
-// TODO: nice to have - convert x to native Python object, also for fixed points
 impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {
         match err {
@@ -35,7 +34,6 @@ impl From<ReachabilityError> for PyErr {
     }
 }
 
-// TODO: docs - add fourth argument, documentation
 create_exception!(reachability, StepsLimitExceededError, PyException);
 create_exception!(reachability, BddSizeLimitExceededError, PyException);
 create_exception!(reachability, InvalidSubgraphError, PyException);
