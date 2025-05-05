@@ -204,8 +204,8 @@ impl Percolation {
         &self,
         subspace: SubspaceRepresentation,
     ) -> PyResult<SubspaceRepresentation> {
-        let percolated_subspace = self.percolate_subspace(subspace.into())?;
-
-        Ok(SubspaceRepresentation::from(percolated_subspace))
+        Ok(SubspaceRepresentation::from(
+            self.percolate_subspace(subspace.into())?,
+        ))
     }
 }

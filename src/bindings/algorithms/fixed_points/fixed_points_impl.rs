@@ -25,7 +25,7 @@ use crate::{
             set_color::ColorSet, set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
         },
     },
-    is_cancelled,
+    debug_with_limit, is_cancelled,
 };
 
 const TARGET_NAIVE_SYMBOLIC: &str = "FixedPoints::naive_symbolic";
@@ -278,8 +278,9 @@ impl FixedPoints {
 
                 is_cancelled!(self, || { restriction.as_bdd().clone() })?;
 
-                trace!(
+                debug_with_limit!(
                     target: target,
+                    size: is_stable.symbolic_size(),
                     " > Created initial set for {:?} using {} BDD nodes.",
                     var,
                     is_stable.symbolic_size()
@@ -349,8 +350,9 @@ impl FixedPoints {
 
                     is_cancelled!(self, || { result.clone() })?;
 
-                    trace!(
+                    debug_with_limit!(
                         target: target,
+                        size: result.size(),
                         " > Projection. New result has {} BDD nodes. Remaining projections: {}.",
                         result.size(),
                         projections.len()
@@ -407,8 +409,9 @@ impl FixedPoints {
                 return Ok(universe.mk_false());
             }
 
-            trace!(
+            debug_with_limit!(
                 target: target,
+                size: result.size(),
                 " > Merge. New result has {} BDD nodes. Remaining constraints: {}.",
                 result.size(),
                 to_merge.len(),

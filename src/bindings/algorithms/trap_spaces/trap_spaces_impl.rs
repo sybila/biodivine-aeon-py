@@ -7,7 +7,7 @@ use biodivine_lib_param_bn::{
     trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
     BooleanNetwork,
 };
-use log::{debug, info};
+use log::info;
 use macros::Configurable;
 use pyo3::{pyclass, pymethods, Py, PyResult};
 
@@ -30,7 +30,7 @@ use crate::{
             symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextBinding,
         },
     },
-    is_cancelled, AsNative as _,
+    debug_with_limit, is_cancelled, AsNative as _,
 };
 
 const TARGET_ESSENTIAL_SYMBOLIC: &str = "TrapSpaces::essential_symbolic";
@@ -109,8 +109,9 @@ impl TrapSpaces {
                 bdd!(bdd_ctx, (true_var & false_var) => (has_up_transition & has_down_transition));
             is_cancelled!(self, || restriction.as_bdd().clone())?;
 
-            debug!(
+            debug_with_limit!(
                 target: TARGET_ESSENTIAL_SYMBOLIC,
+                size: is_trap.size() + is_essential.size(),
                 " > Created initial sets for {:?} using {}+{} BDD nodes.",
                 var,
                 is_trap.size(),
@@ -216,8 +217,9 @@ impl TrapSpaces {
             minimal = minimal.minus(&super_spaces).union(&minimum_candidate);
             is_cancelled!(self, || minimal.as_bdd().clone())?;
 
-            debug!(
+            debug_with_limit!(
                 target: TARGET_MINIMIZE,
+                size: original.symbolic_size() + minimal.symbolic_size(),
                 "Minimization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
                 original.colors().approx_cardinality(),
                 original.spaces().approx_cardinality(),
@@ -276,10 +278,9 @@ impl TrapSpaces {
             maximal = maximal.minus(&sub_spaces).union(&maximum_candidate);
             is_cancelled!(self, || maximal.as_bdd().clone())?;
 
-            // TODO: ohtenkay - implement debug with size limit, new macro, use log!(), check for
-            // usages
-            debug!(
+            debug_with_limit!(
                 target: TARGET_MAXIMIZE,
+                size: original.symbolic_size() + maximal.symbolic_size(),
                 "Maximization in progress: {}x{}[nodes:{}] unprocessed, {}x{}[nodes:{}] candidates.",
                 original.colors().approx_cardinality(),
                 original.spaces().approx_cardinality(),
