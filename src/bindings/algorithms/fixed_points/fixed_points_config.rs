@@ -5,7 +5,7 @@ use biodivine_lib_param_bn::{
     BooleanNetwork,
 };
 use macros::Config;
-use pyo3::{pyclass, pymethods, Py, PyResult, Python};
+use pyo3::{pyclass, pymethods, Py, PyResult};
 
 use crate::{
     bindings::{
@@ -16,13 +16,10 @@ use crate::{
             },
             configurable::{Config, Configurable as _},
             fixed_points::{fixed_points_error::FixedPointsError, fixed_points_impl::FixedPoints},
+            graph_representation::PyGraphRepresentation,
         },
-        lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::{
-                asynchronous_graph::AsynchronousGraph, set_colored_vertex::ColoredVertexSet,
-                symbolic_context::SymbolicContext as SymbolicContextBinding,
-            },
+        lib_param_bn::symbolic::{
+            set_colored_vertex::ColoredVertexSet, symbolic_context::SymbolicContext,
         },
     },
     AsNative as _,
@@ -79,11 +76,11 @@ impl FixedPointsConfig {
 #[derive(Clone)]
 pub struct PyFixedPointsConfig {
     inner: FixedPoints,
-    ctx: Py<SymbolicContextBinding>,
+    ctx: Py<SymbolicContext>,
 }
 
 impl PyFixedPointsConfig {
-    pub fn new(inner: FixedPoints, ctx: Py<SymbolicContextBinding>) -> Self {
+    pub fn new(inner: FixedPoints, ctx: Py<SymbolicContext>) -> Self {
         PyFixedPointsConfig { inner, ctx }
     }
 
@@ -91,7 +88,11 @@ impl PyFixedPointsConfig {
         &self.inner
     }
 
-    pub fn symbolic_context(&self) -> Py<SymbolicContextBinding> {
+    pub fn extract_inner(self) -> (FixedPointsConfig, Py<SymbolicContext>) {
+        (self.inner.into_config(), self.ctx)
+    }
+
+    pub fn symbolic_context(&self) -> Py<SymbolicContext> {
         self.ctx.clone()
     }
 }
@@ -99,14 +100,15 @@ impl PyFixedPointsConfig {
 #[pymethods]
 impl PyFixedPointsConfig {
     #[new]
-    #[pyo3(signature = (graph, restriction = None, time_limit_millis = None, bdd_size_limit = None))]
+    #[pyo3(signature = (graph_representation, restriction = None, time_limit_millis = None, bdd_size_limit = None))]
     pub fn new_py(
-        graph: &AsynchronousGraph,
+        graph_representation: PyGraphRepresentation,
         restriction: Option<&ColoredVertexSet>,
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
-    ) -> Self {
-        let mut config = FixedPointsConfig::from(graph.as_native().clone());
+    ) -> PyResult<Self> {
+        let (mut config, ctx) =
+            PyFixedPointsConfig::try_from(graph_representation)?.extract_inner();
 
         if let Some(restriction) = restriction {
             config = config.with_restriction(restriction.as_native().clone())
@@ -116,44 +118,21 @@ impl PyFixedPointsConfig {
             config = config.with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(millis),
             )))
-        } else {
-            config = config.with_cancellation(CancelTokenPython::default());
         }
 
         if let Some(size_limit) = bdd_size_limit {
             config = config.with_bdd_size_limit(size_limit)
         }
 
-        PyFixedPointsConfig {
-            inner: FixedPoints::with_config(config),
-            ctx: graph.symbolic_context().clone(),
-        }
-    }
-
-    #[staticmethod]
-    pub fn from_boolean_network(
-        py: Python,
-        boolean_network: Py<BooleanNetworkBinding>,
-    ) -> PyResult<Self> {
-        let stg = AsynchronousGraph::new(py, boolean_network, None, None)?;
-        let config = FixedPointsConfig::from(stg.as_native().clone())
-            .with_cancellation(CancelTokenPython::default());
-
         Ok(PyFixedPointsConfig {
             inner: FixedPoints::with_config(config),
-            ctx: stg.symbolic_context().clone(),
+            ctx,
         })
     }
 
     #[staticmethod]
-    pub fn from_graph(graph: &AsynchronousGraph) -> Self {
-        let config = FixedPointsConfig::from(graph.as_native().clone())
-            .with_cancellation(CancelTokenPython::default());
-
-        PyFixedPointsConfig {
-            inner: FixedPoints::with_config(config),
-            ctx: graph.symbolic_context().clone(),
-        }
+    pub fn from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+        PyFixedPointsConfig::try_from(graph_representation)
     }
 
     pub fn with_restriction(&self, restriction: &ColoredVertexSet) -> Self {

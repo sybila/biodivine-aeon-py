@@ -8,7 +8,7 @@ use biodivine_lib_param_bn::{
 };
 use log::{debug, info, trace};
 use macros::Configurable;
-use pyo3::{pyclass, pymethods, Py, PyResult, Python};
+use pyo3::{pyclass, pymethods, PyResult};
 
 use crate::{
     bindings::{
@@ -19,13 +19,10 @@ use crate::{
                 fixed_points_config::{FixedPointsConfig, PyFixedPointsConfig},
                 fixed_points_error::FixedPointsError,
             },
+            graph_representation::PyGraphRepresentation,
         },
-        lib_param_bn::{
-            boolean_network::BooleanNetwork as BooleanNetworkBinding,
-            symbolic::{
-                asynchronous_graph::AsynchronousGraph, set_color::ColorSet,
-                set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
-            },
+        lib_param_bn::symbolic::{
+            set_color::ColorSet, set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
         },
     },
     is_cancelled,
@@ -438,27 +435,13 @@ pub struct PyFixedPoints(PyFixedPointsConfig);
 
 #[pymethods]
 impl PyFixedPoints {
-    /// Create a new [FixedPoints] instance with the given [BooleanNetwork]
-    /// and otherwise default configuration.
     #[staticmethod]
-    pub fn from_boolean_network(
-        py: Python,
-        boolean_network: Py<BooleanNetworkBinding>,
-    ) -> PyResult<Self> {
-        Ok(PyFixedPoints(PyFixedPointsConfig::from_boolean_network(
-            py,
-            boolean_network,
+    pub fn from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+        Ok(PyFixedPoints(PyFixedPointsConfig::try_from(
+            graph_representation,
         )?))
     }
 
-    /// Create a new [FixedPoints] instance with the given [AsynchronousGraph]
-    /// and otherwise default configuration.
-    #[staticmethod]
-    pub fn from_graph(graph: &AsynchronousGraph) -> Self {
-        PyFixedPoints(PyFixedPointsConfig::from_graph(graph))
-    }
-
-    /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
     #[staticmethod]
     pub fn with_config(config: PyFixedPointsConfig) -> Self {
         PyFixedPoints(config)
