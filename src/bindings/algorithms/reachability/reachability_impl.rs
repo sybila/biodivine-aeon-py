@@ -3,7 +3,7 @@ use biodivine_lib_param_bn::{
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     BooleanNetwork,
 };
-use log::{debug, info, trace};
+use log::{info, trace};
 use macros::Configurable;
 use pyo3::{pyclass, pymethods, PyResult};
 
@@ -17,7 +17,7 @@ use crate::{
         },
         lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet,
     },
-    is_cancelled, AsNative as _,
+    debug_with_limit, is_cancelled, AsNative as _,
 };
 
 const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
@@ -94,7 +94,13 @@ impl Reachability {
                     result = result.union(&successors);
                     steps += 1;
 
-                    debug!(target: TARGET_FORWARD_SUPERSET, "Expanded result to {}[bdd_nodes:{}].", result.approx_cardinality(), result.symbolic_size());
+                    debug_with_limit!(
+                        target: TARGET_FORWARD_SUPERSET,
+                        size: result.symbolic_size(),
+                        "Expanded result to {}[bdd_nodes:{}].",
+                        result.approx_cardinality(),
+                        result.symbolic_size()
+                    );
 
                     if result.as_bdd().size() > self.config().bdd_size_limit {
                         info!(target: TARGET_FORWARD_SUPERSET, "Exceeded BDD size limit.");
@@ -156,7 +162,13 @@ impl Reachability {
                     result = result.union(&predecessors);
                     steps += 1;
 
-                    debug!(target: TARGET_BACKWARD_SUPERSET, "Expanded result to {}[bdd_nodes:{}].", result.approx_cardinality(), result.symbolic_size());
+                    debug_with_limit!(
+                        target: TARGET_BACKWARD_SUPERSET,
+                        size: result.symbolic_size(),
+                        "Expanded result to {}[bdd_nodes:{}].",
+                        result.approx_cardinality(),
+                        result.symbolic_size()
+                    );
 
                     if result.as_bdd().size() > self.config().bdd_size_limit {
                         info!(target: TARGET_BACKWARD_SUPERSET, "Exceeded BDD size limit.");
@@ -223,7 +235,13 @@ impl Reachability {
                     result = result.minus(&can_go_out);
                     steps += 1;
 
-                    debug!(target: TARGET_FORWARD_SUBSET, "Reduced result to {}[bdd_nodes:{}].", result.approx_cardinality(), result.symbolic_size());
+                    debug_with_limit!(
+                        target: TARGET_FORWARD_SUBSET,
+                        size: result.symbolic_size(),
+                        "Reduced result to {}[bdd_nodes:{}].",
+                        result.approx_cardinality(),
+                        result.symbolic_size()
+                    );
 
                     if result.as_bdd().size() > self.config().bdd_size_limit {
                         info!(target: TARGET_FORWARD_SUBSET, "Exceeded BDD size limit.");
@@ -289,7 +307,13 @@ impl Reachability {
                     result = result.minus(&has_predecessor_outside);
                     steps += 1;
 
-                    debug!(target: TARGET_BACKWARD_SUBSET, "Reduced result to {}[bdd_nodes:{}].", result.approx_cardinality(), result.symbolic_size());
+                    debug_with_limit!(
+                        target: TARGET_BACKWARD_SUBSET,
+                        size: result.symbolic_size(),
+                        "Reduced result to {}[bdd_nodes:{}].",
+                        result.approx_cardinality(),
+                        result.symbolic_size()
+                    );
 
                     if result.as_bdd().size() > self.config().bdd_size_limit {
                         info!(target: TARGET_BACKWARD_SUBSET, "Exceeded BDD size limit.");
