@@ -25,7 +25,6 @@ use crate::{
             symbolic::{
                 asynchronous_graph::AsynchronousGraph, set_color::ColorSet,
                 set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
-                symbolic_context::SymbolicContext,
             },
         },
     },
@@ -433,13 +432,9 @@ impl FixedPoints {
 }
 
 // TODO: finalize - make this optional with a feature flag
-// TODO: ohtenkay - use the other way of wrapping just like in trap spaces
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[pyo3(name = "FixedPoints")]
-pub struct PyFixedPoints {
-    inner: FixedPoints,
-    symbolic_context: Py<SymbolicContext>,
-}
+pub struct PyFixedPoints(PyFixedPointsConfig);
 
 #[pymethods]
 impl PyFixedPoints {
@@ -450,60 +445,50 @@ impl PyFixedPoints {
         py: Python,
         boolean_network: Py<BooleanNetworkBinding>,
     ) -> PyResult<Self> {
-        let config = PyFixedPointsConfig::from_boolean_network(py, boolean_network)?;
-
-        Ok(PyFixedPoints {
-            inner: FixedPoints(config.inner()),
-            symbolic_context: config.symbolic_context(),
-        })
+        Ok(PyFixedPoints(PyFixedPointsConfig::from_boolean_network(
+            py,
+            boolean_network,
+        )?))
     }
 
     /// Create a new [FixedPoints] instance with the given [AsynchronousGraph]
     /// and otherwise default configuration.
     #[staticmethod]
     pub fn from_graph(graph: &AsynchronousGraph) -> Self {
-        let config = PyFixedPointsConfig::from_graph(graph);
-
-        PyFixedPoints {
-            inner: FixedPoints(config.inner()),
-            symbolic_context: config.symbolic_context(),
-        }
+        PyFixedPoints(PyFixedPointsConfig::from_graph(graph))
     }
 
     /// Create a new [FixedPoints] instance with the given [FixedPointsConfig].
     #[staticmethod]
-    pub fn with_config(config: &PyFixedPointsConfig) -> Self {
-        PyFixedPoints {
-            inner: FixedPoints::with_config(config.inner()),
-            symbolic_context: config.symbolic_context(),
-        }
+    pub fn with_config(config: PyFixedPointsConfig) -> Self {
+        PyFixedPoints(config)
     }
 
     pub fn naive_symbolic(&self) -> PyResult<ColoredVertexSet> {
         Ok(ColoredVertexSet::mk_native(
-            self.symbolic_context.clone(),
-            self.inner.naive_symbolic()?,
+            self.0.symbolic_context(),
+            self.0.inner().naive_symbolic()?,
         ))
     }
 
     pub fn symbolic(&self) -> PyResult<ColoredVertexSet> {
         Ok(ColoredVertexSet::mk_native(
-            self.symbolic_context.clone(),
-            self.inner.symbolic()?,
+            self.0.symbolic_context(),
+            self.0.inner().symbolic()?,
         ))
     }
 
     pub fn symbolic_vertices(&self) -> PyResult<VertexSet> {
         Ok(VertexSet::mk_native(
-            self.symbolic_context.clone(),
-            self.inner.symbolic_vertices()?,
+            self.0.symbolic_context(),
+            self.0.inner().symbolic_vertices()?,
         ))
     }
 
     pub fn symbolic_colors(&self) -> PyResult<ColorSet> {
         Ok(ColorSet::mk_native(
-            self.symbolic_context.clone(),
-            self.inner.symbolic_colors()?,
+            self.0.symbolic_context(),
+            self.0.inner().symbolic_colors()?,
         ))
     }
 }

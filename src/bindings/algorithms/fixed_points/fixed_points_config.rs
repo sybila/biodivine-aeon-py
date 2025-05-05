@@ -14,8 +14,8 @@ use crate::{
                 tokens::{CancelTokenPython, CancelTokenTimer},
                 CancellationHandler,
             },
-            configurable::Config,
-            fixed_points::fixed_points_error::FixedPointsError,
+            configurable::{Config, Configurable as _},
+            fixed_points::{fixed_points_error::FixedPointsError, fixed_points_impl::FixedPoints},
         },
         lib_param_bn::{
             boolean_network::BooleanNetwork as BooleanNetworkBinding,
@@ -78,17 +78,17 @@ impl FixedPointsConfig {
 #[pyo3(name = "FixedPointsConfig")]
 #[derive(Clone)]
 pub struct PyFixedPointsConfig {
-    inner: FixedPointsConfig,
-    symbolic_context: Py<SymbolicContextBinding>,
+    inner: FixedPoints,
+    ctx: Py<SymbolicContextBinding>,
 }
 
 impl PyFixedPointsConfig {
-    pub fn inner(&self) -> FixedPointsConfig {
-        self.inner.clone()
+    pub fn inner(&self) -> &FixedPoints {
+        &self.inner
     }
 
     pub fn symbolic_context(&self) -> Py<SymbolicContextBinding> {
-        self.symbolic_context.clone()
+        self.ctx.clone()
     }
 }
 
@@ -121,8 +121,8 @@ impl PyFixedPointsConfig {
         }
 
         PyFixedPointsConfig {
-            inner: config,
-            symbolic_context: graph.symbolic_context().clone(),
+            inner: FixedPoints::with_config(config),
+            ctx: graph.symbolic_context().clone(),
         }
     }
 
@@ -136,8 +136,8 @@ impl PyFixedPointsConfig {
             .with_cancellation(CancelTokenPython::default());
 
         Ok(PyFixedPointsConfig {
-            inner: config,
-            symbolic_context: stg.symbolic_context().clone(),
+            inner: FixedPoints::with_config(config),
+            ctx: stg.symbolic_context().clone(),
         })
     }
 
@@ -147,20 +147,21 @@ impl PyFixedPointsConfig {
             .with_cancellation(CancelTokenPython::default());
 
         PyFixedPointsConfig {
-            inner: config,
-            symbolic_context: graph.symbolic_context().clone(),
+            inner: FixedPoints::with_config(config),
+            ctx: graph.symbolic_context().clone(),
         }
     }
 
     pub fn with_restriction(&self, restriction: &ColoredVertexSet) -> Self {
         let config = self
             .inner
+            .config()
             .clone()
             .with_restriction(restriction.as_native().clone());
 
         PyFixedPointsConfig {
-            inner: config,
-            symbolic_context: self.symbolic_context(),
+            inner: FixedPoints::with_config(config),
+            ctx: self.symbolic_context(),
         }
     }
 
@@ -168,23 +169,28 @@ impl PyFixedPointsConfig {
     pub fn with_time_limit(&self, duration_in_millis: u64) -> Self {
         let config = self
             .inner
+            .config()
             .clone()
             .with_cancellation(CancelTokenPython::with_inner(CancelTokenTimer::new(
                 Duration::from_millis(duration_in_millis),
             )));
 
         PyFixedPointsConfig {
-            inner: config,
-            symbolic_context: self.symbolic_context(),
+            inner: FixedPoints::with_config(config),
+            ctx: self.symbolic_context(),
         }
     }
 
     pub fn with_bdd_size_limit(&self, bdd_size_limit: usize) -> Self {
-        let config = self.inner.clone().with_bdd_size_limit(bdd_size_limit);
+        let config = self
+            .inner
+            .config()
+            .clone()
+            .with_bdd_size_limit(bdd_size_limit);
 
         PyFixedPointsConfig {
-            inner: config,
-            symbolic_context: self.symbolic_context(),
+            inner: FixedPoints::with_config(config),
+            ctx: self.symbolic_context(),
         }
     }
 }
