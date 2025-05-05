@@ -15,7 +15,6 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     trap_spaces::register(module)?;
     percolation::register(module)?;
     reachability::register(module)?;
-    trap_spaces::register(module)?;
 
     Ok(())
 }

@@ -6,14 +6,16 @@ use crate::{
             cancellation::tokens::CancelTokenPython,
             configurable::{Config as _, Configurable as _},
             fixed_points::{
-                fixed_points_config::FixedPointsConfig, fixed_points_error::FixedPointsError,
+                fixed_points_config::{FixedPointsConfig, PyFixedPointsConfig},
+                fixed_points_impl::FixedPoints,
             },
             percolation::{
                 percolation_config::PercolationConfig, percolation_error::PercolationError,
             },
             reachability::{ReachabilityConfig, ReachabilityError},
             trap_spaces::{
-                trap_spaces_config::TrapSpacesConfig, trap_spaces_error::TrapSpacesError,
+                trap_spaces_config::{PyTrapSpacesConfig, TrapSpacesConfig},
+                trap_spaces_error::TrapSpacesError,
                 trap_spaces_impl::TrapSpaces,
             },
         },
@@ -28,8 +30,6 @@ use crate::{
     AsNative as _,
 };
 
-use super::trap_spaces::trap_spaces_config::PyTrapSpacesConfig;
-
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(FromPyObject)]
 pub enum PyGraphRepresentation {
@@ -40,7 +40,7 @@ pub enum PyGraphRepresentation {
 impl TryFrom<PyGraphRepresentation> for ReachabilityConfig {
     type Error = ReachabilityError;
 
-    /// Create a new "default" [ReachabilityConfig] from the given [GraphRepresentation].
+    /// Create a new "default" [ReachabilityConfig] from the given [PyGraphRepresentation].
     fn try_from(representation: PyGraphRepresentation) -> Result<Self, Self::Error> {
         match representation {
             PyGraphRepresentation::Graph(graph) => {
@@ -58,7 +58,7 @@ impl TryFrom<PyGraphRepresentation> for ReachabilityConfig {
 impl TryFrom<PyGraphRepresentation> for PercolationConfig {
     type Error = PercolationError;
 
-    /// Create a new "default" [PercolationConfig] from the given [GraphRepresentation].
+    /// Create a new "default" [PercolationConfig] from the given [PyGraphRepresentation].
     fn try_from(representation: PyGraphRepresentation) -> Result<Self, Self::Error> {
         match representation {
             PyGraphRepresentation::Graph(graph) => {
@@ -73,19 +73,31 @@ impl TryFrom<PyGraphRepresentation> for PercolationConfig {
     }
 }
 
-impl TryFrom<PyGraphRepresentation> for FixedPointsConfig {
-    type Error = FixedPointsError;
+impl TryFrom<PyGraphRepresentation> for PyFixedPointsConfig {
+    type Error = PyErr;
 
-    /// Create a new "default" [FixedPointsConfig] from the given [GraphRepresentation].
+    /// Create a new "default" [PyFixedPointsConfig] from the given [PyGraphRepresentation].
     fn try_from(representation: PyGraphRepresentation) -> Result<Self, Self::Error> {
         match representation {
             PyGraphRepresentation::Graph(graph) => {
-                Ok(FixedPointsConfig::from(graph.get().as_native().clone())
-                    .with_cancellation(CancelTokenPython::default()))
+                let config = FixedPointsConfig::from(graph.get().as_native().clone())
+                    .with_cancellation(CancelTokenPython::default());
+                let ctx = graph.get().symbolic_context().clone();
+
+                Ok(PyFixedPointsConfig::new(
+                    FixedPoints::with_config(config),
+                    ctx,
+                ))
             }
             PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
-                FixedPointsConfig::try_from(network.borrow(py).as_native())
-                    .map(|config| config.with_cancellation(CancelTokenPython::default()))
+                let stg = AsynchronousGraph::new(py, network, None, None)?;
+                let config = FixedPointsConfig::from(stg.as_native().clone())
+                    .with_cancellation(CancelTokenPython::default());
+
+                Ok(PyFixedPointsConfig::new(
+                    FixedPoints::with_config(config),
+                    stg.symbolic_context().clone(),
+                ))
             }),
         }
     }

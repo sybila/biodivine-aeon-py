@@ -83,6 +83,10 @@ pub struct PyFixedPointsConfig {
 }
 
 impl PyFixedPointsConfig {
+    pub fn new(inner: FixedPoints, ctx: Py<SymbolicContextBinding>) -> Self {
+        PyFixedPointsConfig { inner, ctx }
+    }
+
     pub fn inner(&self) -> &FixedPoints {
         &self.inner
     }
