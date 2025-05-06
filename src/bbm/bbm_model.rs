@@ -1,9 +1,11 @@
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyErr, PyResult, Python};
 use serde::de::{self, Deserializer};
 use serde::{Deserialize, Serialize};
 
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::{runtime_error, AsNative};
+
+use super::sampling_utils::pick_random_instances;
 
 /// A representation for model data provided by the Biodivine Boolean Models
 /// database endpoint. It is used to deserialize the model data from the JSON
@@ -101,5 +103,28 @@ impl BbmModel {
     /// to `false`.
     pub fn to_bn_inputs_false(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         self.to_bn_inputs_const(py, false)
+    }
+
+    /// Extract a given number of unique `BooleanNetwork` instances from this model,
+    /// setting all input values randomly.
+    #[pyo3(signature = (instance_count=1, random_seed=42))]
+    pub fn to_bn_inputs_random(
+        &self,
+        py: Python,
+        instance_count: usize,
+        random_seed: u64,
+    ) -> PyResult<Vec<Py<BooleanNetwork>>> {
+        let py_bn_inputs_free = self.to_bn_default(py)?;
+        let bn = py_bn_inputs_free.borrow_mut(py).clone();
+        let instantiated_bns: Vec<Py<BooleanNetwork>> =
+            pick_random_instances(bn.as_native(), instance_count, random_seed)
+                .map_err(runtime_error)?
+                .into_iter()
+                .map(|bn: biodivine_lib_param_bn::BooleanNetwork| {
+                    BooleanNetwork::from(bn).export_to_python(py)
+                })
+                .collect::<Result<Vec<Py<BooleanNetwork>>, PyErr>>()
+                .map_err(runtime_error)?;
+        Ok(instantiated_bns)
     }
 }

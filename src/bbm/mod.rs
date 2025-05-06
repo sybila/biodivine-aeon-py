@@ -1,6 +1,7 @@
 mod bbm_model;
 mod biodivine_boolean_models;
 mod filter_config;
+mod sampling_utils;
 
 use pyo3::prelude::{PyModule, PyModuleMethods};
 use pyo3::{Bound, PyResult};
