@@ -5,6 +5,7 @@ use pyo3::{
 
 mod _impl_pyerr;
 mod reachability_config;
+mod reachability_config_python;
 mod reachability_error;
 mod reachability_impl;
 
