@@ -15,7 +15,6 @@ pub trait SymbolicSpaceContextExt {
     fn mk_can_go_to_true_ext<C: CancellationHandler>(
         &self,
         function: &Bdd,
-        // TODO: discuss - this has to be passed in as of right now, is there a better way?
         cancellation_handler: &C,
     ) -> Result<Bdd, TrapSpacesError>;
 

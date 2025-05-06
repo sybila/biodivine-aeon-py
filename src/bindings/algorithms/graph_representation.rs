@@ -1,4 +1,4 @@
-use pyo3::{pyclass, FromPyObject, Py, PyErr, Python};
+use pyo3::{FromPyObject, Py, PyErr, Python};
 
 use crate::{
     bindings::{
@@ -30,7 +30,6 @@ use crate::{
     AsNative as _,
 };
 
-#[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(FromPyObject)]
 pub enum PyGraphRepresentation {
     Graph(Py<AsynchronousGraph>),

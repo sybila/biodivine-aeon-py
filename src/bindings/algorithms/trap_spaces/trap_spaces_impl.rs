@@ -156,7 +156,6 @@ impl TrapSpaces {
             "Start symbolic minimal trap space search."
         );
 
-        // TODO: discuss - bdd_size_limit gets "reset" with each method call
         self.essential_symbolic()
             .and_then(|essential| self.minimize(&essential))
     }
@@ -269,7 +268,6 @@ impl TrapSpaces {
             is_cancelled!(self, || maximal.as_bdd().clone())?;
 
             // Compute the set of strict sub spaces.
-            // TODO: discuss - renamed this to sub_spaces
             let sub_spaces = ctx.mk_sub_spaces_ext(maximum_candidate.as_bdd(), self)?;
             let sub_spaces = NetworkColoredSpaces::new(sub_spaces, ctx);
             is_cancelled!(self, || maximal.as_bdd().clone())?;
