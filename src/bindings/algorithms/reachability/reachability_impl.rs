@@ -340,9 +340,9 @@ impl Reachability {
 #[pymethods]
 impl Reachability {
     #[staticmethod]
-    #[pyo3(name = "from")]
-    pub fn python_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
-        Ok(Reachability(ReachabilityConfig::python_from(
+    #[pyo3(name = "create_from")]
+    pub fn python_create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+        Ok(Reachability(ReachabilityConfig::python_create_from(
             graph_representation,
         )?))
     }

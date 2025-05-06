@@ -186,9 +186,9 @@ impl Percolation {
 #[pymethods]
 impl Percolation {
     #[staticmethod]
-    #[pyo3(name = "from")]
-    pub fn python_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
-        Ok(Percolation(PercolationConfig::python_from(
+    #[pyo3(name = "create_from")]
+    pub fn python_create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+        Ok(Percolation(PercolationConfig::python_create_from(
             graph_representation,
         )?))
     }

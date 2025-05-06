@@ -439,7 +439,7 @@ pub struct PyFixedPoints(PyFixedPointsConfig);
 #[pymethods]
 impl PyFixedPoints {
     #[staticmethod]
-    pub fn from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         Ok(PyFixedPoints(PyFixedPointsConfig::try_from(
             graph_representation,
         )?))

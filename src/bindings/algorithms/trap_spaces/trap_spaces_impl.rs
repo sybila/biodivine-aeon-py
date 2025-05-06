@@ -307,7 +307,7 @@ pub struct PyTrapSpaces(PyTrapSpacesConfig);
 #[pymethods]
 impl PyTrapSpaces {
     #[staticmethod]
-    pub fn from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         Ok(PyTrapSpaces(PyTrapSpacesConfig::try_from(
             graph_representation,
         )?))

@@ -131,7 +131,7 @@ impl PyFixedPointsConfig {
     }
 
     #[staticmethod]
-    pub fn from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         PyFixedPointsConfig::try_from(graph_representation)
     }
 
