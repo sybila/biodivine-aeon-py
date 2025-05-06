@@ -17,7 +17,7 @@ crate-type = ["cdylib", "rlib"]
 static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
-pyo3 = { version = "0.23.2", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
+pyo3 = { version = "0.23.5", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
 biodivine-lib-param-bn = { version="0.5.14", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.24"
 #biodivine-pbn-control = "0.3.1"
