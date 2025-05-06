@@ -11,7 +11,7 @@ use crate::bindings::algorithms::{cancellation::CancellationHandler, configurabl
 
 use super::ReachabilityError;
 
-/// A configuration struct for the [`Reachability`] algorithms.
+/// A configuration struct for the [Reachability] algorithms.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Config)]
 pub struct ReachabilityConfig {

@@ -10,6 +10,8 @@ use crate::{
 
 use super::{Reachability, ReachabilityConfig};
 
+/// These methods are Python facing wrappers of native methods and thus should not be used from
+/// within Rust.
 #[pymethods]
 impl Reachability {
     /// Create a new `Reachability` instance from the given `AsynchronousGraph` or `BooleanNetwork`,

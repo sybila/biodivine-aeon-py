@@ -1334,7 +1334,7 @@ class AsynchronousGraph:
         A new `AsynchronousGraph` is constructed from a `BooleanNetwork`. Optionally, you can also provide
         a `SymbolicContext` (that is compatible with said network), or a `unit_bdd` which restricts the set
         of vertices and colors of the `AsynchronousGraph`.
-    
+
         Note that the graph structure is immutable: if you change the original network, you have to create
         a new `AsynchronousGraph`.
         """
@@ -1842,17 +1842,36 @@ class NamedRegulation(TypedDict):
 Regulation = Union[IdRegulation, NamedRegulation]
 
 class ReachabilityConfig:
+    """
+    A configuration class for the `Reachability` class. It allows you to specify various
+    parameters for the reachability analysis, such as the graph representation, a subgraph,
+    a set of variables, a time limit, a BDD size limit, and a steps limit. The configuration
+    can be created using a Python constructor or the `create_from` method, and you can modify it using the
+    `with_*` methods. The configuration is immutable, meaning that each `with_*` method
+    returns a new instance of `ReachabilityConfig` with the specified modifications.
+    This API design means the method calls can be chained together.
+    """
+
     def __init__(
         self,
-        graph: AsynchronousGraph,
+        graph_representation: Union[AsynchronousGraph, BooleanNetwork],
         subgraph: Optional[ColoredVertexSet] = None,
         variables: Optional[Set[VariableId]] = None,
         time_limit_millis: Optional[int] = None,
         bdd_size_limit: Optional[int] = None,
         steps_limit: Optional[int] = None,
-    ) -> None: ...
+    ) -> None:
+        """
+        Create a new `ReachabilityConfig` object. The `graph_representation` parameter
+        can be either an `AsynchronousGraph` or a `BooleanNetwork`. The other parameters
+        are optional and can be used to specify a subgraph, a set of variables, a time limit,
+        a BDD size limit, and a steps limit for the reachability analysis.
+
+        For the meaning of the parameters, see the documentation of their respective with_
+        methods (e.g. `with_subgraph`, `with_variables`, etc.).
+        """
     @staticmethod
-    def with_graph(graph: AsynchronousGraph) -> ReachabilityConfig: ...
+    def create_from(grap_representation: Union[AsynchronousGraph, BooleanNetwork]) -> ReachabilityConfig: ...
     def with_subgraph(self, subgraph: ColoredVertexSet) -> ReachabilityConfig: ...
     def with_variables(self, variables: Set[VariableId]) -> ReachabilityConfig: ...
     def with_time_limit(self, duration_in_millis: int) -> ReachabilityConfig: ...
@@ -1860,16 +1879,17 @@ class ReachabilityConfig:
     def with_steps_limit(self, steps_limit: int) -> ReachabilityConfig: ...
 
 class Reachability:
+    """
+    Implements symbolic reachability operations over an `AsynchronousGraph`. This means the
+    computation of both largets and smallest forward- or backward-closed sets of states.
+    """
+
     @staticmethod
-    def with_graph(graph: AsynchronousGraph) -> Reachability: ...
+    def create_from(graph_represenatation: Union[AsynchronousGraph, BooleanNetwork]) -> Reachability: ...
     @staticmethod
     def with_config(config: ReachabilityConfig) -> Reachability: ...
-    def forward_closed_superset(
-        self, initial: ColoredVertexSet
-    ) -> ColoredVertexSet: ...
-    def backward_closed_superset(
-        self, initial: ColoredVertexSet
-    ) -> ColoredVertexSet: ...
+    def forward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    def backward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
     def forward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
     def backward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
 

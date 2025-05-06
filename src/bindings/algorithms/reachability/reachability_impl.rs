@@ -8,24 +8,20 @@ use macros::Configurable;
 use pyo3::pyclass;
 
 use crate::{
-    bindings::algorithms::{
-        cancellation::CancellationHandler,
-        configurable::Configurable,
-        reachability::{ReachabilityConfig, ReachabilityError},
-    },
+    bindings::algorithms::{cancellation::CancellationHandler, configurable::Configurable},
     debug_with_limit, is_cancelled,
 };
+
+use super::{ReachabilityConfig, ReachabilityError};
 
 const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
 const TARGET_FORWARD_SUBSET: &str = "Reachability::forward_closed_subset";
 const TARGET_BACKWARD_SUPERSET: &str = "Reachability::backward_closed_superset";
 const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 
-/// Implements symbolic reachability operations over a `SymbolicAsyncGraph`. This means the
+/// Implements symbolic reachability operations over a [SymbolicAsyncGraph]. This means the
 /// computation of both largets and smallest forward- or backward-closed sets of states.
 ///
-/// Aside from the initial set of states, each algorithm can take a `subgraph` argument
-/// which restricts the set of relevant vertices, as well as a BDD size limit and steps limit.
 /// See [ReachabilityConfig] and [ReachabilityError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Configurable)]
