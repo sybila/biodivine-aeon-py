@@ -2,8 +2,9 @@ use pyo3::PyErr;
 
 use crate::bindings::algorithms::{
     cancellation::CancelledError, configurable::CreationFailedError,
-    percolation::percolation_error::PercolationError,
 };
+
+use super::PercolationError;
 
 impl From<PercolationError> for PyErr {
     fn from(err: PercolationError) -> Self {

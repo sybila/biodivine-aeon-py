@@ -1421,9 +1421,9 @@ class Attractors:
     @staticmethod
     def xie_beerel(graph: AsynchronousGraph, restriction: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
 
-class Percolation:
-    @staticmethod
-    def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
+# class Percolation:
+#     @staticmethod
+#     def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
 
 class RegulationConstraint:
     @staticmethod
@@ -1844,7 +1844,7 @@ Regulation = Union[IdRegulation, NamedRegulation]
 class ReachabilityConfig:
     """
     A configuration class for the `Reachability` class. It allows you to specify various
-    parameters for the reachability analysis, such as the graph representation, a subgraph,
+    parameters for the reachability analysis, such as the underlying `AsynchronousGraph`, a subgraph,
     a set of variables, a time limit, a BDD size limit, and a steps limit. The configuration
     can be created using a Python constructor or the `create_from` method, and you can modify it using the
     `with_*` methods. The configuration is immutable, meaning that each `with_*` method
@@ -1892,6 +1892,47 @@ class Reachability:
     def backward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
     def forward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
     def backward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+
+class PercolationConfig:
+    """
+    A configuration class for the `Percolation` class. It allows you to specify various
+    parameters for subspace percolation, such as the underlying `AsynchronousGraph`,
+    and a time limit. The configuration can be created using a Python
+    constructor or the `create_from` method, and you can modify it using the `with_*`
+    methods. The configuration is immutable, meaning that each `with_*` method
+    returns a new instance of `PercolationConfig` with the specified modifications.
+    This API design means the method calls can be chained together.
+    """
+
+    def __init__(
+        self,
+        graph_representation: Union[AsynchronousGraph, BooleanNetwork],
+        time_limit_millis: Optional[int] = None,
+    ) -> None:
+        """
+        Create a new `PercolationConfig` object. The `graph_representation` parameter
+        can be either an `AsynchronousGraph` or a `BooleanNetwork`. The other parameters
+        are optional and can be used to specify a time limit for the subspace percolation algorithm.
+
+        For the meaning of the parameters, see the documentation of their respective with_
+        methods (e.g. `with_time_limit`, etc.).
+        """
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> PercolationConfig: ...
+    def with_time_limit(self, duration_in_millis: int) -> PercolationConfig: ...
+
+class Percolation:
+    """
+    Implements subspace percolation over an `AsynchronousGraph`.
+    """
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> Percolation: ...
+    @staticmethod
+    def with_config(config: PercolationConfig) -> Percolation: ...
+    def percolate_subspace(
+        self,
+        subspace: Union[list[tuple[VariableId, bool]], dict[VariableId, bool]]
+    ) -> dict[VariableId, bool]: ...
 
 class FixedPointsConfig:
     def __init__(

@@ -6,26 +6,23 @@ use biodivine_lib_param_bn::{
 };
 use log::{debug, info, trace};
 use macros::Configurable;
-use pyo3::{pyclass, pymethods, PyResult};
+use pyo3::pyclass;
 
 use crate::{
-    bindings::algorithms::{
-        cancellation::CancellationHandler,
-        configurable::Configurable,
-        graph_representation::PyGraphRepresentation,
-        percolation::{
-            percolation_config::PercolationConfig, percolation_error::PercolationError,
-            subspace_representation::SubspaceRepresentation,
-        },
-    },
+    bindings::algorithms::{cancellation::CancellationHandler, configurable::Configurable},
     is_cancelled,
 };
 
+use super::{PercolationConfig, PercolationError};
+
 const TARGET_PERCOLATE_SUBSPACE: &str = "Percolation::percolate_subspace";
 
+/// Implements subspace percolation over a [SymbolicAsyncGraph].
+///
+/// See [PercolationConfig] and [PercolationError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Configurable)]
-pub struct Percolation(PercolationConfig);
+pub struct Percolation(pub PercolationConfig);
 
 impl From<SymbolicAsyncGraph> for Percolation {
     /// Create a new [Percolation] instance from the given [SymbolicAsyncGraph]
@@ -180,32 +177,5 @@ impl Percolation {
 
         info!(target: TARGET_PERCOLATE_SUBSPACE, "Done. Result: {} fixed variables.", result.len());
         Ok(result)
-    }
-}
-
-#[pymethods]
-impl Percolation {
-    #[staticmethod]
-    #[pyo3(name = "create_from")]
-    pub fn python_create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
-        Ok(Percolation(PercolationConfig::python_create_from(
-            graph_representation,
-        )?))
-    }
-
-    #[staticmethod]
-    #[pyo3(name = "with_config")]
-    pub fn python_with_config(config: PercolationConfig) -> Self {
-        Percolation(config)
-    }
-
-    #[pyo3(name = "percolate_subspace")]
-    pub fn python_percolate_subspace(
-        &self,
-        subspace: SubspaceRepresentation,
-    ) -> PyResult<SubspaceRepresentation> {
-        Ok(SubspaceRepresentation::from(
-            self.percolate_subspace(subspace.into())?,
-        ))
     }
 }

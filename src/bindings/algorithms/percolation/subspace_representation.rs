@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
 use biodivine_lib_param_bn::VariableId;
-use pyo3::{pyclass, FromPyObject};
+use pyo3::FromPyObject;
 
-use crate::{bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding, AsNative};
+use crate::{bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding, AsNative as _};
 
-#[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(FromPyObject)]
 pub enum SubspaceRepresentation {
     List(Vec<(VariableIdBinding, bool)>),
@@ -38,5 +37,17 @@ impl From<Vec<(VariableId, bool)>> for SubspaceRepresentation {
                 .map(|(var, value)| (VariableIdBinding::from(var), value))
                 .collect(),
         )
+    }
+}
+
+impl From<SubspaceRepresentation> for HashMap<VariableIdBinding, bool> {
+    /// This is used to convert a [SubspaceRepresentation] to a HashMap, that is then returned as a
+    /// python dictionary.
+    /// This is necessary because the we want to avoid exposing the enum to Python.
+    fn from(subspace: SubspaceRepresentation) -> Self {
+        match subspace {
+            SubspaceRepresentation::List(vec) => vec.into_iter().collect(),
+            SubspaceRepresentation::Dict(map) => map,
+        }
     }
 }
