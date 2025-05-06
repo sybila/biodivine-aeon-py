@@ -2,8 +2,9 @@ use pyo3::{create_exception, exceptions::PyException, PyErr};
 
 use crate::bindings::algorithms::{
     cancellation::CancelledError, configurable::CreationFailedError,
-    reachability::ReachabilityError,
 };
+
+use super::ReachabilityError;
 
 impl From<ReachabilityError> for PyErr {
     fn from(err: ReachabilityError) -> Self {

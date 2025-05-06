@@ -5,19 +5,15 @@ use biodivine_lib_param_bn::{
 };
 use log::{info, trace};
 use macros::Configurable;
-use pyo3::{pyclass, pymethods, PyResult};
+use pyo3::pyclass;
 
 use crate::{
-    bindings::{
-        algorithms::{
-            cancellation::CancellationHandler,
-            configurable::Configurable,
-            graph_representation::PyGraphRepresentation,
-            reachability::{ReachabilityConfig, ReachabilityError},
-        },
-        lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet,
+    bindings::algorithms::{
+        cancellation::CancellationHandler,
+        configurable::Configurable,
+        reachability::{ReachabilityConfig, ReachabilityError},
     },
-    debug_with_limit, is_cancelled, AsNative as _,
+    debug_with_limit, is_cancelled,
 };
 
 const TARGET_FORWARD_SUPERSET: &str = "Reachability::forward_closed_superset";
@@ -33,7 +29,7 @@ const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 /// See [ReachabilityConfig] and [ReachabilityError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Configurable)]
-pub struct Reachability(ReachabilityConfig);
+pub struct Reachability(pub ReachabilityConfig);
 
 impl From<SymbolicAsyncGraph> for Reachability {
     /// Create a new [Reachability] instance from the given [SymbolicAsyncGraph]
@@ -333,67 +329,5 @@ impl Reachability {
             info!(target: TARGET_BACKWARD_SUBSET, "Done. Result: {} states.", result.exact_cardinality());
             return Ok(result);
         }
-    }
-}
-
-// TODO: finalize - make this optional with a feature flag
-#[pymethods]
-impl Reachability {
-    #[staticmethod]
-    #[pyo3(name = "create_from")]
-    pub fn python_create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
-        Ok(Reachability(ReachabilityConfig::python_create_from(
-            graph_representation,
-        )?))
-    }
-
-    #[staticmethod]
-    #[pyo3(name = "with_config")]
-    pub fn python_with_config(config: ReachabilityConfig) -> Self {
-        Reachability(config)
-    }
-
-    #[pyo3(name = "forward_closed_superset")]
-    pub fn python_forward_closed_superset(
-        &self,
-        initial: &ColoredVertexSet,
-    ) -> PyResult<ColoredVertexSet> {
-        Ok(ColoredVertexSet::mk_native(
-            initial.ctx(),
-            self.forward_closed_superset(initial.as_native())?,
-        ))
-    }
-
-    #[pyo3(name = "backward_closed_superset")]
-    pub fn python_backward_closed_superset(
-        &self,
-        initial: &ColoredVertexSet,
-    ) -> PyResult<ColoredVertexSet> {
-        Ok(ColoredVertexSet::mk_native(
-            initial.ctx(),
-            self.backward_closed_superset(initial.as_native())?,
-        ))
-    }
-
-    #[pyo3(name = "forward_closed_subset")]
-    pub fn python_forward_closed_subset(
-        &self,
-        initial: &ColoredVertexSet,
-    ) -> PyResult<ColoredVertexSet> {
-        Ok(ColoredVertexSet::mk_native(
-            initial.ctx(),
-            self.forward_closed_subset(initial.as_native())?,
-        ))
-    }
-
-    #[pyo3(name = "backward_closed_subset")]
-    pub fn python_backward_closed_subset(
-        &self,
-        initial: &ColoredVertexSet,
-    ) -> PyResult<ColoredVertexSet> {
-        Ok(ColoredVertexSet::mk_native(
-            initial.ctx(),
-            self.backward_closed_subset(initial.as_native())?,
-        ))
     }
 }
