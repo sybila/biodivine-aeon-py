@@ -15,7 +15,7 @@ use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
 use crate::bindings::bn_classifier::class::{extend_map, Class};
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::algorithms::attractors::Attractors;
-use crate::bindings::lib_param_bn::algorithms::reachability::Reachability;
+use crate::bindings::lib_param_bn::algorithms::reachability::ReachabilityOld;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::model_annotation::ModelAnnotation;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
@@ -554,7 +554,7 @@ impl Classification {
                     // remove them, and take all colors that still appear in the set (there
                     // exists at least one attractor that is fully contained in the phenotype).
                     let not_phenotype = unit.minus(&phenotype);
-                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let not_phenotype = ReachabilityOld::reach_bwd(py, graph, &not_phenotype)?;
                     let always_phenotype = phenotype.minus(&not_phenotype);
                     always_phenotype.colors()
                 }
@@ -567,14 +567,14 @@ impl Classification {
                     // that is fully outside, we get a trap set with all attractors that intersect
                     // the `phenotype` set but are not contained in it.
                     let not_phenotype = unit.minus(&phenotype);
-                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let not_phenotype = ReachabilityOld::reach_bwd(py, graph, &not_phenotype)?;
                     let always_phenotype = phenotype.minus(&not_phenotype);
                     let is_phenotype = unit.intersect(&phenotype);
-                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let is_phenotype = ReachabilityOld::reach_bwd(py, graph, &is_phenotype)?;
                     let never_phenotype = unit.minus(&is_phenotype);
                     let can_be_never_or_always = always_phenotype.union(&never_phenotype);
                     let can_be_never_or_always =
-                        Reachability::reach_bwd(py, graph, &can_be_never_or_always)?;
+                        ReachabilityOld::reach_bwd(py, graph, &can_be_never_or_always)?;
                     let always_mixed = unit.minus(&can_be_never_or_always);
                     always_mixed.colors()
                 }
@@ -586,10 +586,10 @@ impl Classification {
                     // that fully reside in the negated set (forbidden oscillation) and
                     // disregarding them.
                     let is_phenotype = unit.intersect(&phenotype);
-                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let is_phenotype = ReachabilityOld::reach_bwd(py, graph, &is_phenotype)?;
                     let never_phenotype = unit.minus(&is_phenotype);
                     let can_reach_never_phenotype =
-                        Reachability::reach_bwd(py, graph, &never_phenotype)?;
+                        ReachabilityOld::reach_bwd(py, graph, &never_phenotype)?;
                     let allowed_phenotype = unit.minus(&can_reach_never_phenotype);
                     allowed_phenotype.colors()
                 }

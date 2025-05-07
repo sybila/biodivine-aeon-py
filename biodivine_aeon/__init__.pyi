@@ -1421,15 +1421,15 @@ class Attractors:
     @staticmethod
     def xie_beerel(graph: AsynchronousGraph, restriction: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
 
-# class Reachability:
-#     @staticmethod
-#     def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-#     @staticmethod
-#     def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-#
-# class Percolation:
-#     @staticmethod
-#     def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
+class ReachabilityOld:
+    @staticmethod
+    def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+
+class PercolationOld:
+    @staticmethod
+    def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
 
 class RegulationConstraint:
     @staticmethod

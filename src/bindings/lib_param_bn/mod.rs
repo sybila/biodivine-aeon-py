@@ -37,8 +37,8 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<algorithms::trap_spaces::TrapSpaces>()?;
     module.add_class::<algorithms::fixed_points::FixedPointsOld>()?;
     module.add_class::<algorithms::attractors::Attractors>()?;
-    module.add_class::<algorithms::percolation::Percolation>()?;
-    module.add_class::<algorithms::reachability::Reachability>()?;
+    module.add_class::<algorithms::percolation::PercolationOld>()?;
+    module.add_class::<algorithms::reachability::ReachabilityOld>()?;
     module.add_class::<algorithms::regulation_constraint::RegulationConstraint>()?;
     Ok(())
 }

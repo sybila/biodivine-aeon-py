@@ -8,15 +8,14 @@ use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGra
 use crate::bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding;
 use crate::AsNative;
 
-// TODO: finalize - deprecate this file
-
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct Percolation {
+pub struct PercolationOld {
     _dummy: (),
 }
 
 #[pymethods]
-impl Percolation {
+impl PercolationOld {
+    /// **Deprecated**: Use `Pecolation.percolate_subspace()` instead.
     /// Performs a percolation of a single subspace.
     ///
     /// Percolation propagates the values of variables that are guaranteed to be constant in the
