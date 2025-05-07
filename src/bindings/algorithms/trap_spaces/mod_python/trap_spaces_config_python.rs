@@ -5,37 +5,40 @@ use pyo3::{pyclass, pymethods, Py, PyResult};
 use crate::{
     bindings::{
         algorithms::{
-            cancellation::tokens::{CancelTokenPython, CancelTokenTimer},
+            cancellation::{CancelTokenPython, CancelTokenTimer},
             configurable::{Config as _, Configurable as _},
             graph_representation::PyGraphRepresentation,
         },
         lib_param_bn::symbolic::{
-            set_colored_vertex::ColoredVertexSet, symbolic_context::SymbolicContext,
+            asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
+            symbolic_space_context::SymbolicSpaceContext,
         },
     },
     AsNative as _,
 };
 
-use super::{FixedPoints, FixedPointsConfig};
+use super::{TrapSpaces, TrapSpacesConfig};
 
-/// A configuration class for the `FixedPointsComp` class. It allows you to specify various
-/// parameters for the fixed points computation, such as the underlying `AsynchronousGraph`,
-/// a restriction set for the vertices, a time limit, and a BDD size limit. The configuration
+/// A configuration class for the `TrapSpacesComp` class. It allows you to specify various
+/// parameters for the trap spaces computation, such as the underlying `AsynchronousGraph`,
+/// a restriction set for the spaces, a time limit, and a BDD size limit. The configuration
 /// can be created using a Python constructor or the `create_from` method, and you can modify it using the
 /// `with_*` methods.
+/// Currently, the only supported graph representation is `BooleanNetwork`. For creation from
+/// `AsynchronousGraph`, use `create_from_graph_with_context`.
 /// The configuration is immutable, meaning that each `with_*` method
-/// returns a new instance of `FixedPointsConfig` with the specified modifications.
+/// returns a new instance of `TrapSpacesConfig` with the specified modifications.
 /// This API design means the method calls can be chained together.
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "FixedPointsConfig")]
+#[pyo3(name = "TrapSpacesConfig")]
 #[derive(Clone)]
-pub struct PyFixedPointsConfig {
-    pub inner: FixedPoints,
-    pub ctx: Py<SymbolicContext>,
+pub struct PyTrapSpacesConfig {
+    pub inner: TrapSpaces,
+    pub ctx: Py<SymbolicSpaceContext>,
 }
 
-impl PyFixedPointsConfig {
-    fn extract_inner(self) -> (FixedPointsConfig, Py<SymbolicContext>) {
+impl PyTrapSpacesConfig {
+    pub fn extract_inner(self) -> (TrapSpacesConfig, Py<SymbolicSpaceContext>) {
         (self.inner.into_config(), self.ctx)
     }
 }
@@ -43,17 +46,16 @@ impl PyFixedPointsConfig {
 /// These methods are Python facing wrappers of native methods and thus should not be used from
 /// within Rust.
 #[pymethods]
-impl PyFixedPointsConfig {
+impl PyTrapSpacesConfig {
     #[new]
     #[pyo3(signature = (graph_representation, restriction = None, time_limit_millis = None, bdd_size_limit = None))]
-    pub fn new_py(
+    pub fn python_new(
         graph_representation: PyGraphRepresentation,
-        restriction: Option<&ColoredVertexSet>,
+        restriction: Option<&ColoredSpaceSet>,
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
     ) -> PyResult<Self> {
-        let (mut config, ctx) =
-            PyFixedPointsConfig::try_from(graph_representation)?.extract_inner();
+        let (mut config, ctx) = PyTrapSpacesConfig::try_from(graph_representation)?.extract_inner();
 
         if let Some(restriction) = restriction {
             config = config.with_restriction(restriction.as_native().clone())
@@ -69,36 +71,53 @@ impl PyFixedPointsConfig {
             config = config.with_bdd_size_limit(size_limit)
         }
 
-        Ok(PyFixedPointsConfig {
-            inner: FixedPoints::with_config(config),
+        Ok(PyTrapSpacesConfig {
+            inner: TrapSpaces::with_config(config),
             ctx,
         })
     }
 
-    /// Create a new `FixedPointsConfig` from the given `AsynchronousGraph` or `BooleanNetwork`,
+    /// Create a new `TrapSpacesConfig` from the given `BooleanNetwork`,
     /// with otherwise default configuration.
+    /// `AsynchronousGraph` is currently not supported, use `from_graph_with_context` instead.
     #[staticmethod]
     pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
-        PyFixedPointsConfig::try_from(graph_representation)
+        PyTrapSpacesConfig::try_from(graph_representation)
     }
 
-    /// Restricts result to the given set of vertices.
+    /// Create a new `TrapSpacesConfig` from the given `AsynchronousGraph` and
+    /// `SymbolicSpaceContext`, with otherwise default configuration.
+    #[staticmethod]
+    pub fn create_from_graph_with_context(
+        graph: &AsynchronousGraph,
+        ctx: Py<SymbolicSpaceContext>,
+    ) -> Self {
+        let config =
+            TrapSpacesConfig::from((graph.as_native().clone(), ctx.get().as_native().clone()));
+
+        PyTrapSpacesConfig {
+            inner: TrapSpaces::with_config(config),
+            ctx,
+        }
+    }
+
+    /// Restricts result to the given set of spaces.
     ///
-    /// Default: `graph.unit_colored_vertices()`.
-    pub fn with_restriction(&self, restriction: &ColoredVertexSet) -> Self {
+    /// Default: `ctx.mk_unit_colored_spaces(&graph)`.
+    pub fn with_restriction(&self, restriction: &ColoredSpaceSet) -> Self {
         let config = self
             .inner
             .config()
             .clone()
             .with_restriction(restriction.as_native().clone());
 
-        PyFixedPointsConfig {
-            inner: FixedPoints::with_config(config),
+        PyTrapSpacesConfig {
+            inner: TrapSpaces::with_config(config),
             ctx: self.ctx.clone(),
         }
     }
 
-    /// Sets a time limit for the fixed points computation, in milliseconds.
+    /// Sets a time limit for the trap spaces computation, in milliseconds.
     ///
     /// Default: no time limit.
     // TODO: if we ever move away from abi3-py37, use Duration as an argument
@@ -111,15 +130,15 @@ impl PyFixedPointsConfig {
                 Duration::from_millis(duration_in_millis),
             )));
 
-        PyFixedPointsConfig {
-            inner: FixedPoints::with_config(config),
+        PyTrapSpacesConfig {
+            inner: TrapSpaces::with_config(config),
             ctx: self.ctx.clone(),
         }
     }
 
-    /// The maximum size of the BDD used in the merging process.
+    /// Sets a limit on the size of the BDD used in the merging process.
     ///
-    /// Note that the algorithms can use other auxiliary BDDs that do not
+    /// Note that the algorithm can use other auxiliary BDDs that do not
     /// count towards this limit.
     ///
     /// Default: `usize::MAX`.
@@ -130,8 +149,8 @@ impl PyFixedPointsConfig {
             .clone()
             .with_bdd_size_limit(bdd_size_limit);
 
-        PyFixedPointsConfig {
-            inner: FixedPoints::with_config(config),
+        PyTrapSpacesConfig {
+            inner: TrapSpaces::with_config(config),
             ctx: self.ctx.clone(),
         }
     }

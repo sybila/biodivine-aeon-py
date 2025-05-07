@@ -90,6 +90,7 @@ fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     bindings::lib_hctl_model_checker::register(module)?;
     bindings::bn_classifier::register(module)?;
     bindings::pbn_control::register(module)?;
+    #[cfg(feature = "algorithms_pyo3_bindings")]
     bindings::algorithms::register(module)?;
     Ok(())
 }

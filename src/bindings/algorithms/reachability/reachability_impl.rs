@@ -5,11 +5,10 @@ use biodivine_lib_param_bn::{
 };
 use log::{info, trace};
 use macros::Configurable;
-use pyo3::pyclass;
 
 use crate::{
     bindings::algorithms::{cancellation::CancellationHandler, configurable::Configurable},
-    debug_with_limit, is_cancelled,
+    debug_with_limit, is_cancelled, maybe_pyclass,
 };
 
 use super::{ReachabilityConfig, ReachabilityError};
@@ -19,14 +18,15 @@ const TARGET_FORWARD_SUBSET: &str = "Reachability::forward_closed_subset";
 const TARGET_BACKWARD_SUPERSET: &str = "Reachability::backward_closed_superset";
 const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 
-/// Implements symbolic reachability operations over a [SymbolicAsyncGraph]. This means the
-/// computation of both largets and smallest forward- or backward-closed sets of states.
-///
-/// See [ReachabilityConfig] and [ReachabilityError] for more info.
-#[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "ReachabilityComp")]
-#[derive(Clone, Configurable)]
-pub struct Reachability(pub ReachabilityConfig);
+maybe_pyclass!(
+    "ReachabilityComp",
+    /// Implements symbolic reachability operations over a [SymbolicAsyncGraph]. This means the
+    /// computation of both largets and smallest forward- or backward-closed sets of states.
+    ///
+    /// See [ReachabilityConfig] and [ReachabilityError] for more info.
+    #[derive(Clone, Configurable)]
+    pub struct Reachability(pub ReachabilityConfig);
+);
 
 impl From<SymbolicAsyncGraph> for Reachability {
     /// Create a new [Reachability] instance from the given [SymbolicAsyncGraph]

@@ -3,7 +3,7 @@ use pyo3::{FromPyObject, Py, PyErr, Python};
 use crate::{
     bindings::{
         algorithms::{
-            cancellation::tokens::CancelTokenPython,
+            cancellation::CancelTokenPython,
             configurable::{Config as _, Configurable as _},
             fixed_points::{FixedPoints, FixedPointsConfig, PyFixedPointsConfig},
             percolation::{PercolationConfig, PercolationError},

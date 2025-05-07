@@ -5,7 +5,7 @@ use pyo3::{pymethods, PyResult};
 use crate::{
     bindings::{
         algorithms::{
-            cancellation::tokens::{CancelTokenPython, CancelTokenTimer},
+            cancellation::{CancelTokenPython, CancelTokenTimer},
             configurable::Config as _,
             graph_representation::PyGraphRepresentation,
         },
