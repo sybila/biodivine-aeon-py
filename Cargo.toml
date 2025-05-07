@@ -35,7 +35,6 @@ either = "1.13.0"
 z3="^0.12.1"
 z3-sys = "^0.8.1"
 
-# TODO: finalize - added dependencies, consider removing
 thiserror = "2.0.11"
 log = "0.4.22"
 dyn-clone = "1.0.18"
