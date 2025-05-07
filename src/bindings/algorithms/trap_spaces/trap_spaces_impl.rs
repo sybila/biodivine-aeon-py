@@ -15,9 +15,7 @@ use crate::{
     bindings::{
         algorithms::{
             configurable::{Config as _, Configurable},
-            fixed_points::{
-                fixed_points_config::FixedPointsConfig, fixed_points_impl::FixedPoints,
-            },
+            fixed_points::{FixedPoints, FixedPointsConfig},
             graph_representation::PyGraphRepresentation,
             trap_spaces::{
                 _impl_symbolic_space_context::SymbolicSpaceContextExt as _,

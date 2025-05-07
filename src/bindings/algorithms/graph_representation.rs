@@ -6,8 +6,7 @@ use crate::{
             cancellation::tokens::CancelTokenPython,
             configurable::{Config as _, Configurable},
             fixed_points::{
-                fixed_points_config::{FixedPointsConfig, PyFixedPointsConfig},
-                fixed_points_impl::FixedPoints,
+                FixedPoints, {FixedPointsConfig, PyFixedPointsConfig},
             },
             percolation::{PercolationConfig, PercolationError},
             reachability::{ReachabilityConfig, ReachabilityError},

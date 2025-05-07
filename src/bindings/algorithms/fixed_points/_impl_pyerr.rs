@@ -2,8 +2,9 @@ use pyo3::{create_exception, exceptions::PyException, PyErr};
 
 use crate::bindings::algorithms::{
     cancellation::CancelledError, configurable::CreationFailedError,
-    fixed_points::fixed_points_error::FixedPointsError,
 };
+
+use super::FixedPointsError;
 
 impl From<FixedPointsError> for PyErr {
     fn from(err: FixedPointsError) -> Self {

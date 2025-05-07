@@ -4,7 +4,7 @@ use biodivine_lib_bdd::Bdd;
 use thiserror::Error;
 
 use crate::bindings::algorithms::{
-    cancellation::CancellationError, fixed_points::fixed_points_error::FixedPointsError,
+    cancellation::CancellationError, fixed_points::FixedPointsError,
 };
 
 /// An error returned by a [TrapSpaces] procedure.
