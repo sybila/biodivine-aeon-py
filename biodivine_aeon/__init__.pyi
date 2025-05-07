@@ -1421,6 +1421,12 @@ class Attractors:
     @staticmethod
     def xie_beerel(graph: AsynchronousGraph, restriction: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
 
+# class Reachability:
+#     @staticmethod
+#     def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+#     @staticmethod
+#     def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+#
 # class Percolation:
 #     @staticmethod
 #     def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
@@ -1862,7 +1868,7 @@ class ReachabilityConfig:
         steps_limit: Optional[int] = None,
     ) -> None:
         """
-        Create a new `ReachabilityConfig` object. The `graph_representation` parameter
+        Create a new `ReachabilityConfig` object. The `graph_representation` parameter is required and
         can be either an `AsynchronousGraph` or a `BooleanNetwork`. The other parameters
         are optional and can be used to specify a subgraph, a set of variables, a time limit,
         a BDD size limit, and a steps limit for the reachability analysis.
@@ -1910,7 +1916,7 @@ class PercolationConfig:
         time_limit_millis: Optional[int] = None,
     ) -> None:
         """
-        Create a new `PercolationConfig` object. The `graph_representation` parameter
+        Create a new `PercolationConfig` object. The `graph_representation` parameter is required and
         can be either an `AsynchronousGraph` or a `BooleanNetwork`. The other parameters
         are optional and can be used to specify a time limit for the subspace percolation algorithm.
 
@@ -1937,20 +1943,29 @@ class Percolation:
 class FixedPointsConfig:
     def __init__(
         self,
-        graph: AsynchronousGraph,
+        graph_representation: Union[AsynchronousGraph, BooleanNetwork],
         restriction: Optional[ColoredVertexSet] = None,
         time_limit_millis: Optional[int] = None,
         bdd_size_limit: Optional[int] = None,
-    ) -> None: ...
+    ) -> None:
+        """
+        Create a new `FixedPointsConfig` object. The `graph_representation` parameter is required and
+        specifies the underlying `AsynchronousGraph` or `BooleanNetwork`. The other parameters are optional
+        and can be used to specify a restriction, a time limit, and a BDD size limit for
+        the fixed points computation.
+
+        For the meaning of the parameters, see the documentation of their respective with_
+        methods (e.g. `with_restriction`, `with_time_limit`, etc.).
+        """
     @staticmethod
-    def with_graph(graph: AsynchronousGraph) -> FixedPointsConfig: ...
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> FixedPointsConfig: ...
     def with_restriction(self, restriction: ColoredVertexSet) -> FixedPointsConfig: ...
     def with_time_limit(self, duration_in_millis: int) -> FixedPointsConfig: ...
     def with_bdd_size_limit(self, bdd_size_limit: int) -> FixedPointsConfig: ...
 
 class FixedPoints:
     @staticmethod
-    def with_graph(graph: AsynchronousGraph) -> FixedPoints: ...
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> FixedPoints: ...
     @staticmethod
     def with_config(config: FixedPointsConfig) -> FixedPoints: ...
     def naive_symbolic(self) -> ColoredVertexSet: ...

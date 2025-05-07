@@ -33,6 +33,9 @@ const TARGET_SYMBOLIC: &str = "FixedPoints::symbolic";
 const TARGET_SYMBOLIC_VERTICES: &str = "FixedPoints::symbolic_vertices";
 const TARGET_SYMBOLIC_COLORS: &str = "FixedPoints::symbolic_colors";
 
+/// Implements fixed-point search over a [SymbolicAsyncGraph].
+///
+/// See [FixedPointsConfig] and [FixedPointsError] for more info.
 #[derive(Clone, Configurable)]
 pub struct FixedPoints(FixedPointsConfig);
 
@@ -55,7 +58,16 @@ impl TryFrom<&BooleanNetwork> for FixedPoints {
 }
 
 impl FixedPoints {
-    // TODO: docs - document these methods using the lib_param_bn docs
+    /// A naive symbolic algorithm that computes the fixed points by gradual elimination of
+    /// all states with outgoing transitions.
+    ///
+    /// Only fixed-points from the `restriction` set are returned. However, the state has to
+    /// be a *global* fixed point, not just a fixed-point within the `restriction` set.
+    ///
+    /// **Characteristics:** As the name suggests, this algorithm is not really suited for
+    /// processing complex networks. However, we provide it as a "baseline" for testing other
+    /// algorithms. In theory, due to its simplicity, it could be faster on some of the smaller
+    /// networks where the symbolic explosion is not severe.
     pub fn naive_symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
         self.start_timer();
         let stg = &self.config().graph;
@@ -126,6 +138,30 @@ impl FixedPoints {
         Ok(fixed_points)
     }
 
+    /// A better version of the [Self::naive_symbolic] algorithm that can actually scale to
+    /// reasonably sized networks (e.g. 100-200 variables + parameters).
+    ///
+    /// Only fixed-points from the `restriction` set are returned. However, the state has to
+    /// be a *global* fixed point, not just a fixed-point within the `restriction` set.
+    ///
+    /// **Characteristics:** Instead of merging individual constraints one by one, this algorithm
+    /// greedily selects the constraint that leads to the smallest intermediate BDD. This requires
+    /// more symbolic operations, but can work better as the intermediate BDDs tend to be smaller.
+    ///
+    /// In particular, this tends to work better for cases where no fixed points exist, because
+    /// the process will often quickly find a combination on constraints that prevent
+    /// the fixed point from existing (whereas for [Self::naive_symbolic], this process is much more
+    /// random).
+    ///
+    /// Also note that the algorithm can benefit from parallelization, but we do not implement
+    /// it here, as it is a bit problematic to implement in a platform-independent manner.
+    ///
+    /// You can often scale the algorithm to very large networks as well, but the hardest
+    /// bottleneck seems to be the total number of fixed points. As such, if the network is large
+    /// (e.g. 1000 variables) but has only a few fixed points, it can often still be solved by this
+    /// method. However, if there are many parameters (e.g. >50) and the number of fixed points
+    /// is proportional to the number of parameters, you will be bounded by the inherent
+    /// combinatorial complexity of the resulting set of states.
     pub fn symbolic(&self) -> Result<GraphColoredVertices, FixedPointsError> {
         self.start_timer();
         let stg = &self.config().graph;
@@ -170,6 +206,20 @@ impl FixedPoints {
         Ok(fixed_points)
     }
 
+    /// The result of the function are all vertices that can appear as fixed-points for **some**
+    /// parameter valuation. That is, for every returned vertex, there is at least one color
+    /// for which the vertex is a fixed-point.
+    ///
+    /// **Characteristics:** If the network has no parameters, the result is equivalent to the
+    /// result of [Self::symbolic]. However, if there are parameters in the network, the result
+    /// is often much smaller and can be computed much faster.
+    ///
+    /// In particular, it is possible to use the result (or subsets of the result) as `restriction`
+    /// sets for [Self::symbolic] to obtain the full information later. In some cases, this is also
+    /// faster than running [Self::symbolic] directly.
+    ///
+    /// If you are only interested in certain combinations of variables within the fixed-points,
+    /// you can also write a custom projection query using [Self::symbolic_merge].
     pub fn symbolic_vertices(&self) -> Result<GraphVertices, FixedPointsError> {
         self.start_timer();
         let stg = &self.config().graph;
@@ -214,6 +264,8 @@ impl FixedPoints {
         Ok(vertices)
     }
 
+    /// Similar to [Self::symbolic_vertices], but only returns colors for which there exists
+    /// at least one fixed-point within `restriction`.
     pub fn symbolic_colors(&self) -> Result<GraphColors, FixedPointsError> {
         let stg = &self.config().graph;
         let restriction = &self.config().restriction;
@@ -294,7 +346,15 @@ impl FixedPoints {
         Ok(result)
     }
 
-    // TODO: finalize - think about the visibility of methods
+    /// This is a helper method that is used by [Self::symbolic], [Self::symbolic_vertices] and
+    /// [Self::symbolic_colors].
+    ///
+    /// It greedily performs a conjunction of the given BDDs, but eliminates the symbolic
+    /// variables given in `projections`. Using this method, you can implement arbitrary projected
+    /// fixed-point detection. However, the method is inherently unsafe because currently
+    /// there is no way to give a type-safe result for operations other than `symbolic_vertices`
+    /// and `symbolic_colors`, so it is up to you to understand whether the result is
+    /// actually what you wanted.
     pub(crate) fn symbolic_merge(
         &self,
         to_merge: Vec<Bdd>,
@@ -431,13 +491,15 @@ impl FixedPoints {
     }
 }
 
-// TODO: finalize - make this optional with a feature flag
+/// Implements fixed point search over an `AsynchronousGraph`
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[pyo3(name = "FixedPoints")]
 pub struct PyFixedPoints(PyFixedPointsConfig);
 
 #[pymethods]
 impl PyFixedPoints {
+    /// Create a new `FixedPoints` instance with the given `AsynchronousGraph` or
+    /// `BooleanNetwork` and otherwise default configuration.
     #[staticmethod]
     pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         Ok(PyFixedPoints(PyFixedPointsConfig::try_from(
@@ -445,36 +507,67 @@ impl PyFixedPoints {
         )?))
     }
 
+    /// Create a new `FixedPoints` instance with the given `FixedPointsConfig`.
     #[staticmethod]
     pub fn with_config(config: PyFixedPointsConfig) -> Self {
         PyFixedPoints(config)
     }
 
+    /// A naive symbolic algorithm that computes the fixed points by gradual elimination of
+    /// all states with outgoing transitions.
+    ///
+    /// Only fixed-points from the `restriction` set are returned. However, the state has to
+    /// be a *global* fixed point, not just a fixed-point within the `restriction` set.
+    ///
+    /// **Characteristics:** As the name suggests, this algorithm is not really suited for
+    /// processing complex networks. However, we provide it as a "baseline" for testing other
+    /// algorithms. In theory, due to its simplicity, it could be faster on some of the smaller
+    /// networks where the symbolic explosion is not severe.
     pub fn naive_symbolic(&self) -> PyResult<ColoredVertexSet> {
         Ok(ColoredVertexSet::mk_native(
-            self.0.symbolic_context(),
-            self.0.inner().naive_symbolic()?,
+            self.0.ctx.clone(),
+            self.0.inner.naive_symbolic()?,
         ))
     }
 
+    /// Iteratively compute the colored set of fixed-points in an `AsynchronousGraph` that are the
+    /// subset of the `restriction` set.
+    ///
+    /// This is a better version of the `naive_symbolic()` algorithm that can actually scale to
+    /// reasonably sized networks (e.g. 100-200 variables + parameters).
     pub fn symbolic(&self) -> PyResult<ColoredVertexSet> {
         Ok(ColoredVertexSet::mk_native(
-            self.0.symbolic_context(),
-            self.0.inner().symbolic()?,
+            self.0.ctx.clone(),
+            self.0.inner.symbolic()?,
         ))
     }
 
+    /// Iteratively compute the set of fixed-point vertices in an `AsynchronousGraph`.
+    ///
+    /// This is equivalent to `FixedPoints.symbolic(graph, set).vertices()`, but can be
+    /// significantly faster because the projection is applied on-demand within the algorithm.
+    ///
+    /// The result of the function are all vertices that can appear as fixed-points for **some**
+    /// parameter valuation. That is, for every returned vertex, there is at least one color
+    /// for which the vertex is a fixed-point.
     pub fn symbolic_vertices(&self) -> PyResult<VertexSet> {
         Ok(VertexSet::mk_native(
-            self.0.symbolic_context(),
-            self.0.inner().symbolic_vertices()?,
+            self.0.ctx.clone(),
+            self.0.inner.symbolic_vertices()?,
         ))
     }
 
+    /// Iteratively compute the set of fixed-point colors in an `AsynchronousGraph`.
+    ///
+    /// This is equivalent to `FixedPoints.symbolic(graph, set).colors()`, but can be
+    /// significantly faster because the projection is applied on-demand within the algorithm.
+    ///
+    /// Similar to `symbolic_vertices()`, but only returns colors for which there exists
+    /// at least one fixed-point within `restriction`.
     pub fn symbolic_colors(&self) -> PyResult<ColorSet> {
         Ok(ColorSet::mk_native(
-            self.0.symbolic_context(),
-            self.0.inner().symbolic_colors()?,
+            self.0.ctx.clone(),
+            self.0.inner.symbolic_colors()?,
         ))
     }
 }

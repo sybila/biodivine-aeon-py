@@ -4,14 +4,12 @@ use crate::{
     bindings::{
         algorithms::{
             cancellation::tokens::CancelTokenPython,
-            configurable::{Config as _, Configurable as _},
+            configurable::{Config as _, Configurable},
             fixed_points::{
                 fixed_points_config::{FixedPointsConfig, PyFixedPointsConfig},
                 fixed_points_impl::FixedPoints,
             },
-            percolation::{
-                percolation_config::PercolationConfig, percolation_error::PercolationError,
-            },
+            percolation::{PercolationConfig, PercolationError},
             reachability::{ReachabilityConfig, ReachabilityError},
             trap_spaces::{
                 trap_spaces_config::{PyTrapSpacesConfig, TrapSpacesConfig},
@@ -81,22 +79,21 @@ impl TryFrom<PyGraphRepresentation> for PyFixedPointsConfig {
             PyGraphRepresentation::Graph(graph) => {
                 let config = FixedPointsConfig::from(graph.get().as_native().clone())
                     .with_cancellation(CancelTokenPython::default());
-                let ctx = graph.get().symbolic_context().clone();
 
-                Ok(PyFixedPointsConfig::new(
-                    FixedPoints::with_config(config),
-                    ctx,
-                ))
+                Ok(PyFixedPointsConfig {
+                    inner: FixedPoints::with_config(config),
+                    ctx: graph.get().symbolic_context().clone(),
+                })
             }
             PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
                 let stg = AsynchronousGraph::new(py, network, None, None)?;
                 let config = FixedPointsConfig::from(stg.as_native().clone())
                     .with_cancellation(CancelTokenPython::default());
 
-                Ok(PyFixedPointsConfig::new(
-                    FixedPoints::with_config(config),
-                    stg.symbolic_context().clone(),
-                ))
+                Ok(PyFixedPointsConfig {
+                    inner: FixedPoints::with_config(config),
+                    ctx: stg.symbolic_context().clone(),
+                })
             }),
         }
     }
