@@ -30,14 +30,28 @@ use crate::{
 /// A configuration struct for the [TrapSpaces] algorithms.
 #[derive(Clone, Config)]
 pub struct TrapSpacesConfig {
+    /// The symbolic graph that will be used to compute the trap spaces.
     pub graph: SymbolicAsyncGraph,
+
+    /// The symbolic space context that will be used to compute the trap spaces.
     pub ctx: SymbolicSpaceContext,
+
+    /// Restricts result to the given set of spaces.
+    ///
+    /// Default: `ctx.mk_unit_colored_spaces(&graph)`.
     pub restriction: NetworkColoredSpaces,
 
     /// A `CancellationHandler` that can be used to stop the algorithm externally.
     ///
     /// Default: [CancelTokenNever].
     pub cancellation: Box<dyn CancellationHandler>,
+
+    /// The maximum size of the BDD used in the merging process.
+    ///
+    /// Note that the algorithm can use other auxiliary BDDs that do not
+    /// count towards this limit.
+    ///
+    /// Default: `usize::MAX`.
     pub bdd_size_limit: usize,
 }
 
@@ -68,13 +82,7 @@ impl TryFrom<&BooleanNetwork> for TrapSpacesConfig {
         let graph = SymbolicAsyncGraph::new(bn).map_err(TrapSpacesError::CreationFailed)?;
         let ctx = SymbolicSpaceContext::new(bn);
 
-        Ok(TrapSpacesConfig {
-            restriction: ctx.mk_unit_colored_spaces(&graph),
-            cancellation: Default::default(),
-            bdd_size_limit: usize::MAX,
-            graph,
-            ctx,
-        })
+        Ok(Self::from((graph, ctx)))
     }
 }
 
@@ -92,40 +100,41 @@ impl TrapSpacesConfig {
     }
 }
 
+/// A configuration class for the `TrapSpaces` class. It allows you to specify various
+/// parameters for the trap spaces computation, such as the underlying `AsynchronousGraph`,
+/// a restriction set for the spaces, a time limit, and a BDD size limit. The configuration
+/// can be created using a Python constructor or the `create_from` method, and you can modify it using the
+/// `with_*` methods.
+/// Currently, the only supported graph representation is `BooleanNetwork`. For creation from
+/// `AsynchronousGraph`, use `create_from_graph_with_context`.
+/// The configuration is immutable, meaning that each `with_*` method
+/// returns a new instance of `TrapSpacesConfig` with the specified modifications.
+/// This API design means the method calls can be chained together.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[pyo3(name = "TrapSpacesConfig")]
 #[derive(Clone)]
 pub struct PyTrapSpacesConfig {
-    inner: TrapSpaces,
-    ctx: Py<SymbolicSpaceContextBinding>,
+    pub inner: TrapSpaces,
+    pub ctx: Py<SymbolicSpaceContextBinding>,
 }
 
 impl PyTrapSpacesConfig {
-    pub fn new(inner: TrapSpaces, ctx: Py<SymbolicSpaceContextBinding>) -> Self {
-        PyTrapSpacesConfig { inner, ctx }
-    }
-
-    pub fn inner(&self) -> &TrapSpaces {
-        &self.inner
-    }
-
     pub fn extract_inner(self) -> (TrapSpacesConfig, Py<SymbolicSpaceContextBinding>) {
         (self.inner.into_config(), self.ctx)
     }
-
-    pub fn symbolic_space_context(&self) -> Py<SymbolicSpaceContextBinding> {
-        self.ctx.clone()
-    }
 }
 
+/// These methods are Python facing wrappers of native methods and thus should not be used from
+/// within Rust.
 #[pymethods]
 impl PyTrapSpacesConfig {
     #[new]
-    #[pyo3(signature = (graph_representation, restriction = None, time_limit_millis = None))]
+    #[pyo3(signature = (graph_representation, restriction = None, time_limit_millis = None, bdd_size_limit = None))]
     pub fn python_new(
         graph_representation: PyGraphRepresentation,
         restriction: Option<&ColoredSpaceSet>,
         time_limit_millis: Option<u64>,
+        bdd_size_limit: Option<usize>,
     ) -> PyResult<Self> {
         let (mut config, ctx) = PyTrapSpacesConfig::try_from(graph_representation)?.extract_inner();
 
@@ -139,19 +148,28 @@ impl PyTrapSpacesConfig {
             )))
         }
 
+        if let Some(size_limit) = bdd_size_limit {
+            config = config.with_bdd_size_limit(size_limit)
+        }
+
         Ok(PyTrapSpacesConfig {
             inner: TrapSpaces::with_config(config),
             ctx,
         })
     }
 
+    /// Create a new `TrapSpacesConfig` from the given `BooleanNetwork`,
+    /// with otherwise default configuration.
+    /// `AsynchronousGraph` is currently not supported, use `from_graph_with_context` instead.
     #[staticmethod]
     pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         PyTrapSpacesConfig::try_from(graph_representation)
     }
 
+    /// Create a new `TrapSpacesConfig` from the given `AsynchronousGraph` and
+    /// `SymbolicSpaceContext`, with otherwise default configuration.
     #[staticmethod]
-    pub fn from_graph_with_context(
+    pub fn create_from_graph_with_context(
         graph: &AsynchronousGraph,
         ctx: Py<SymbolicSpaceContextBinding>,
     ) -> Self {
@@ -164,6 +182,9 @@ impl PyTrapSpacesConfig {
         }
     }
 
+    /// Restricts result to the given set of spaces.
+    ///
+    /// Default: `ctx.mk_unit_colored_spaces(&graph)`.
     pub fn with_restriction(&self, restriction: &ColoredSpaceSet) -> Self {
         let config = self
             .inner
@@ -177,6 +198,9 @@ impl PyTrapSpacesConfig {
         }
     }
 
+    /// Sets a time limit for the trap spaces computation, in milliseconds.
+    ///
+    /// Default: no time limit.
     // TODO: if we ever move away from abi3-py37, use Duration as an argument
     pub fn with_time_limit(&self, duration_in_millis: u64) -> Self {
         let config = self
@@ -193,6 +217,12 @@ impl PyTrapSpacesConfig {
         }
     }
 
+    /// Sets a limit on the size of the BDD used in the merging process.
+    ///
+    /// Note that the algorithm can use other auxiliary BDDs that do not
+    /// count towards this limit.
+    ///
+    /// Default: `usize::MAX`.
     pub fn with_bdd_size_limit(&self, bdd_size_limit: usize) -> Self {
         let config = self
             .inner

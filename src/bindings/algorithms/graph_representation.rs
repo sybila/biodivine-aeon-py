@@ -123,10 +123,10 @@ impl TryFrom<PyGraphRepresentation> for PyTrapSpacesConfig {
                     ),
                 )?;
 
-                Ok(PyTrapSpacesConfig::new(
-                    TrapSpaces::with_config(config),
+                Ok(PyTrapSpacesConfig {
+                    inner: TrapSpaces::with_config(config),
                     ctx,
-                ))
+                })
             }),
         }
     }
