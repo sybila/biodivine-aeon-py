@@ -34,7 +34,7 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<symbolic::set_colored_space::ColoredSpaceSet>()?;
     module.add_class::<symbolic::set_colored_space::_ColorSpaceModelIterator>()?;
     module.add_class::<symbolic::asynchronous_graph::AsynchronousGraph>()?;
-    module.add_class::<algorithms::trap_spaces::TrapSpaces>()?;
+    module.add_class::<algorithms::trap_spaces::TrapSpacesOld>()?;
     module.add_class::<algorithms::fixed_points::FixedPointsOld>()?;
     module.add_class::<algorithms::attractors::Attractors>()?;
     module.add_class::<algorithms::percolation::PercolationOld>()?;

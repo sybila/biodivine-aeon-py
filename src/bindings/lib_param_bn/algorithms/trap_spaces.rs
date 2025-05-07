@@ -4,15 +4,14 @@ use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpa
 use crate::{global_log_level, AsNative};
 use pyo3::prelude::*;
 
-// TODO: finalize - deprecate this file
-
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct TrapSpaces {
+pub struct TrapSpacesOld {
     _dummy: (),
 }
 
 #[pymethods]
-impl TrapSpaces {
+impl TrapSpacesOld {
+    /// **Deprecated**: Use `TrapSpaces.essential_symbolic()` instead.
     /// Computes the coloured set of "essential" trap spaces of a Boolean network.
     ///
     /// A trap space is essential if it cannot be further reduced through percolation. In general, every
@@ -40,6 +39,7 @@ impl TrapSpaces {
         Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
     }
 
+    /// **Deprecated**: Use `TrapSpaces.minimal_symbolic()` instead.
     /// Computes the minimal coloured trap spaces of the provided `network` within the specified
     /// `restriction` set.
     ///
@@ -68,6 +68,7 @@ impl TrapSpaces {
         Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
     }
 
+    /// **Deprecated**: Use `TrapSpaces.minimal()` instead.
     /// Compute the inclusion-minimal spaces within a particular subset.
     #[staticmethod]
     pub fn minimize(
@@ -84,6 +85,7 @@ impl TrapSpaces {
         Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
     }
 
+    /// **Deprecated**: Use `TrapSpaces.maximal()` instead.
     /// Compute the inclusion-maximal spaces within a particular subset.
     #[staticmethod]
     pub fn maximize(
