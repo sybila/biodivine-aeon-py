@@ -9,27 +9,16 @@ use biodivine_lib_param_bn::{
 };
 use log::info;
 use macros::Configurable;
-use pyo3::{pyclass, pymethods, Py, PyResult};
 
 use crate::{
-    bindings::{
-        algorithms::{
-            configurable::{Config as _, Configurable},
-            fixed_points::{FixedPoints, FixedPointsConfig},
-            graph_representation::PyGraphRepresentation,
-            trap_spaces::{
-                _impl_symbolic_space_context::SymbolicSpaceContextExt as _,
-                trap_spaces_config::{PyTrapSpacesConfig, TrapSpacesConfig},
-                trap_spaces_error::TrapSpacesError,
-            },
-        },
-        lib_param_bn::symbolic::{
-            asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
-            symbolic_space_context::SymbolicSpaceContext as SymbolicSpaceContextBinding,
-        },
+    bindings::algorithms::{
+        configurable::{Config as _, Configurable},
+        fixed_points::{FixedPoints, FixedPointsConfig},
     },
-    debug_with_limit, is_cancelled, AsNative as _,
+    debug_with_limit, is_cancelled,
 };
+
+use super::{SymbolicSpaceContextExt as _, TrapSpacesConfig, TrapSpacesError};
 
 const TARGET_ESSENTIAL_SYMBOLIC: &str = "TrapSpaces::essential_symbolic";
 const TARGET_MINIMAL_SYMBOLIC: &str = "TrapSpaces::minimal_symbolic";
@@ -295,82 +284,5 @@ impl TrapSpaces {
         );
 
         Ok(maximal)
-    }
-}
-
-/// Implments trap spaces search over an `AsynchronousGraph` and its
-/// `SymbolicSpaceContext`.
-#[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "TrapSpacesComp")]
-pub struct PyTrapSpaces(PyTrapSpacesConfig);
-
-/// These methods are Python facing wrappers of native methods and thus should not be used from
-/// within Rust.
-#[pymethods]
-impl PyTrapSpaces {
-    /// Create a new `TrapSpacesComp` instance with the given `BooleanNetwork`,
-    /// `AsynchronousGraph` is currently not supported.
-    #[staticmethod]
-    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
-        Ok(PyTrapSpaces(PyTrapSpacesConfig::try_from(
-            graph_representation,
-        )?))
-    }
-
-    /// Create a new `TrapSpacesComp` instance with the given `AsynchronousGraph` and
-    /// `SymbolicSpaceContext`.
-    #[staticmethod]
-    pub fn create_from_graph_with_context(
-        graph: &AsynchronousGraph,
-        ctx: Py<SymbolicSpaceContextBinding>,
-    ) -> Self {
-        PyTrapSpaces(PyTrapSpacesConfig::create_from_graph_with_context(
-            graph, ctx,
-        ))
-    }
-
-    /// Create a new `TrapSpacesComp` instance with the given `TrapSpacesConfig`.
-    #[staticmethod]
-    pub fn with_config(config: PyTrapSpacesConfig) -> Self {
-        PyTrapSpaces(config)
-    }
-
-    /// Computes the coloured set of "essential" trap spaces of a Boolean network.
-    ///
-    /// A trap space is essential if it cannot be further reduced through percolation. In general, every
-    /// minimal trap space is always essential.
-    pub fn essential_symbolic(&self) -> PyResult<ColoredSpaceSet> {
-        Ok(ColoredSpaceSet::wrap_native(
-            self.0.ctx.clone(),
-            self.0.inner.essential_symbolic()?,
-        ))
-    }
-
-    /// Computes the minimal coloured trap spaces of the underlying `graph` within the configured
-    /// `restriction` set.
-    ///
-    /// Currently, this method always slower than `essential_symbolic()`, because it first has to compute
-    /// the essential set.
-    pub fn minimal_symbolic(&self) -> PyResult<ColoredSpaceSet> {
-        Ok(ColoredSpaceSet::wrap_native(
-            self.0.ctx.clone(),
-            self.0.inner.minimal_symbolic()?,
-        ))
-    }
-
-    /// Compute the inclusion-minimal spaces within a particular subset.
-    pub fn minimize(&self, set: &ColoredSpaceSet) -> PyResult<ColoredSpaceSet> {
-        Ok(ColoredSpaceSet::wrap_native(
-            self.0.ctx.clone(),
-            self.0.inner.minimize(set.as_native())?,
-        ))
-    }
-
-    /// Compute the inclusion-maximal spaces within a particular subset.
-    pub fn maximize(&self, set: &ColoredSpaceSet) -> PyResult<ColoredSpaceSet> {
-        Ok(ColoredSpaceSet::wrap_native(
-            self.0.ctx.clone(),
-            self.0.inner.maximize(set.as_native())?,
-        ))
     }
 }

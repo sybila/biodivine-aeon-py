@@ -2,12 +2,9 @@ use biodivine_lib_bdd::{bdd, Bdd};
 use biodivine_lib_param_bn::{trap_spaces::SymbolicSpaceContext, VariableId};
 use log::debug;
 
-use crate::{
-    bindings::algorithms::{
-        cancellation::CancellationHandler, trap_spaces::trap_spaces_error::TrapSpacesError,
-    },
-    is_cancelled,
-};
+use crate::{bindings::algorithms::cancellation::CancellationHandler, is_cancelled};
+
+use super::TrapSpacesError;
 
 // TODO: This trait exists only because I don't have access to impl `SymbolicSpaceContext` directly, as
 // it comes from another crate. Once the lib_param_bn methods use the new approach, remove this trait

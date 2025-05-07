@@ -4,17 +4,11 @@ use crate::{
     bindings::{
         algorithms::{
             cancellation::tokens::CancelTokenPython,
-            configurable::{Config as _, Configurable},
-            fixed_points::{
-                FixedPoints, {FixedPointsConfig, PyFixedPointsConfig},
-            },
+            configurable::{Config as _, Configurable as _},
+            fixed_points::{FixedPoints, FixedPointsConfig, PyFixedPointsConfig},
             percolation::{PercolationConfig, PercolationError},
             reachability::{ReachabilityConfig, ReachabilityError},
-            trap_spaces::{
-                trap_spaces_config::{PyTrapSpacesConfig, TrapSpacesConfig},
-                trap_spaces_error::TrapSpacesError,
-                trap_spaces_impl::TrapSpaces,
-            },
+            trap_spaces::{PyTrapSpacesConfig, TrapSpaces, TrapSpacesConfig, TrapSpacesError},
         },
         lib_param_bn::{
             boolean_network::BooleanNetwork,

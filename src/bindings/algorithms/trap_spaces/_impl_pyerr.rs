@@ -2,8 +2,9 @@ use pyo3::{create_exception, exceptions::PyException, PyErr};
 
 use crate::bindings::algorithms::{
     cancellation::CancelledError, configurable::CreationFailedError,
-    trap_spaces::trap_spaces_error::TrapSpacesError,
 };
+
+use super::TrapSpacesError;
 
 impl From<TrapSpacesError> for PyErr {
     fn from(err: TrapSpacesError) -> Self {
