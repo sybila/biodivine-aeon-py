@@ -44,14 +44,14 @@ stg = AsynchronousGraph(bn)
 # Assert that the network is fully specified.
 # assert stg.mk_unit_colors().cardinality() == 1
 
-fp = FixedPoints.with_graph(stg)
+fp = FixedPointsComp.create_from(stg)
 fp_result = fp.symbolic()
 
 print(
     f"{fp_result.cardinality()} ({fp_result.vertices().cardinality()} | {fp_result.colors().cardinality()})"
 )
 
-fixed_points = FixedPointsOld.symbolic(stg)
+fixed_points = FixedPoints.symbolic(stg)
 
 if limit is None:
     print(

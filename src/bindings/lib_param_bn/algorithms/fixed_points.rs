@@ -6,13 +6,13 @@ use crate::{global_log_level, AsNative};
 use pyo3::prelude::*;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct FixedPointsOld {
+pub struct FixedPoints {
     _dummy: (),
 }
 
 #[pymethods]
-impl FixedPointsOld {
-    /// **Deprecated**: Use `FixedPoints.symbolic()` instead.
+impl FixedPoints {
+    /// **Deprecated**: Use `FixedPointsComp.symbolic()` instead.
     /// Iteratively compute the colored set of fixed-points in an `AsynchronousGraph` that are the
     /// subset of the `restriction` set.
     #[staticmethod]
@@ -34,7 +34,7 @@ impl FixedPointsOld {
         Ok(ColoredVertexSet::mk_native(stg.symbolic_context(), result))
     }
 
-    /// **Deprecated**: Use `FixedPoints.symbolilc_vertices()` instead.
+    /// **Deprecated**: Use `FixedPointsComp.symbolilc_vertices()` instead.
     /// Iteratively compute the set of fixed-point vertices in an `AsynchronousGraph`.
     ///
     /// This is equivalent to `FixedPoints.symbolic(graph, set).vertices()`, but can be
@@ -58,7 +58,7 @@ impl FixedPointsOld {
         Ok(VertexSet::mk_native(stg.symbolic_context(), result))
     }
 
-    /// **Deprecated**: Use `FixedPoints.symbolic_colors()` instead.
+    /// **Deprecated**: Use `FixedPointsComp.symbolic_colors()` instead.
     /// Iteratively compute the set of fixed-point vertices in an `AsynchronousGraph`.
     ///
     /// This is equivalent to `FixedPoints.symbolic(graph, set).colors()`, but can be

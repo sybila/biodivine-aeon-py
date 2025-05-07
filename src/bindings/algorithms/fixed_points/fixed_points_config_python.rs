@@ -18,7 +18,7 @@ use crate::{
 
 use super::{FixedPoints, FixedPointsConfig};
 
-/// A configuration class for the `FixedPoints` class. It allows you to specify various
+/// A configuration class for the `FixedPointsComp` class. It allows you to specify various
 /// parameters for the fixed points computation, such as the underlying `AsynchronousGraph`,
 /// a restriction set for the vertices, a time limit, and a BDD size limit. The configuration
 /// can be created using a Python constructor or the `create_from` method, and you can modify it using the

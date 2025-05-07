@@ -11,14 +11,14 @@ use super::PyFixedPointsConfig;
 
 /// Implements fixed point search over an `AsynchronousGraph`
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "FixedPoints")]
+#[pyo3(name = "FixedPointsComp")]
 pub struct PyFixedPoints(PyFixedPointsConfig);
 
 /// These methods are Python facing wrappers of native methods and thus should not be used from
 /// within Rust.
 #[pymethods]
 impl PyFixedPoints {
-    /// Create a new `FixedPoints` instance with the given `AsynchronousGraph` or
+    /// Create a new `FixedPointsComp` instance with the given `AsynchronousGraph` or
     /// `BooleanNetwork` and otherwise default configuration.
     #[staticmethod]
     pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
@@ -27,7 +27,7 @@ impl PyFixedPoints {
         )?))
     }
 
-    /// Create a new `FixedPoints` instance with the given `FixedPointsConfig`.
+    /// Create a new `FixedPointsComp` instance with the given `FixedPointsConfig`.
     #[staticmethod]
     pub fn with_config(config: PyFixedPointsConfig) -> Self {
         PyFixedPoints(config)
@@ -64,7 +64,7 @@ impl PyFixedPoints {
 
     /// Iteratively compute the set of fixed-point vertices in an `AsynchronousGraph`.
     ///
-    /// This is equivalent to `FixedPoints.symbolic(graph, set).vertices()`, but can be
+    /// This is equivalent to `FixedPointsComp.symbolic(graph, set).vertices()`, but can be
     /// significantly faster because the projection is applied on-demand within the algorithm.
     ///
     /// The result of the function are all vertices that can appear as fixed-points for **some**
@@ -79,7 +79,7 @@ impl PyFixedPoints {
 
     /// Iteratively compute the set of fixed-point colors in an `AsynchronousGraph`.
     ///
-    /// This is equivalent to `FixedPoints.symbolic(graph, set).colors()`, but can be
+    /// This is equivalent to `FixedPointsComp.symbolic(graph, set).colors()`, but can be
     /// significantly faster because the projection is applied on-demand within the algorithm.
     ///
     /// Similar to `symbolic_vertices()`, but only returns colors for which there exists

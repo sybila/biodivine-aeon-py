@@ -14,7 +14,7 @@ use super::{Reachability, ReachabilityConfig};
 /// within Rust.
 #[pymethods]
 impl Reachability {
-    /// Create a new `Reachability` instance from the given `AsynchronousGraph` or `BooleanNetwork`,
+    /// Create a new `ReachabilityComp` instance from the given `AsynchronousGraph` or `BooleanNetwork`,
     /// with otherwise default configuration.
     #[staticmethod]
     #[pyo3(name = "create_from")]
@@ -24,7 +24,7 @@ impl Reachability {
         )?))
     }
 
-    /// Create a new `Reachability` instance with the given `ReachabilityConfig`.
+    /// Create a new `ReachabilityComp` instance with the given `ReachabilityConfig`.
     #[staticmethod]
     #[pyo3(name = "with_config")]
     pub fn python_with_config(config: ReachabilityConfig) -> Self {

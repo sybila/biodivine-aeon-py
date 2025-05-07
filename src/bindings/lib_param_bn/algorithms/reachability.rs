@@ -6,13 +6,13 @@ use pyo3::prelude::*;
 /// An "algorithm object" that facilitates reachability procedures, i.e. iterative computation
 /// of successors (or predecessors) of a particular symbolic set.
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct ReachabilityOld {
+pub struct Reachability {
     _dummy: (),
 }
 
 #[pymethods]
-impl ReachabilityOld {
-    /// **Deprecated**: Use `Reachability.forward_closed_superset()` instead.
+impl Reachability {
+    /// **Deprecated**: Use `ReachabilityComp.forward_closed_superset()` instead.
     /// Compute the (colored) set of vertices that are forward-reachable from the given
     /// initial set.
     ///
@@ -34,7 +34,7 @@ impl ReachabilityOld {
         .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))
     }
 
-    /// **Deprecated**: Use `Reachability.backward_closed_superset()` instead.
+    /// **Deprecated**: Use `ReachabilityComp.backward_closed_superset()` instead.
     /// Compute the (colored) set of vertices that are backward-reachable from the given
     /// initial set.
     ///

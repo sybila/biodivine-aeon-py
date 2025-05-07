@@ -9,13 +9,13 @@ use crate::bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding;
 use crate::AsNative;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
-pub struct PercolationOld {
+pub struct Percolation {
     _dummy: (),
 }
 
 #[pymethods]
-impl PercolationOld {
-    /// **Deprecated**: Use `Pecolation.percolate_subspace()` instead.
+impl Percolation {
+    /// **Deprecated**: Use `PecolationComp.percolate_subspace()` instead.
     /// Performs a percolation of a single subspace.
     ///
     /// Percolation propagates the values of variables that are guaranteed to be constant in the

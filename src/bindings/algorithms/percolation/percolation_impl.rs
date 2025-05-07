@@ -21,6 +21,7 @@ const TARGET_PERCOLATE_SUBSPACE: &str = "Percolation::percolate_subspace";
 ///
 /// See [PercolationConfig] and [PercolationError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
+#[pyo3(name = "PercolationComp")]
 #[derive(Clone, Configurable)]
 pub struct Percolation(pub PercolationConfig);
 

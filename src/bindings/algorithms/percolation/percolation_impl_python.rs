@@ -12,7 +12,7 @@ use super::{Percolation, PercolationConfig, SubspaceRepresentation};
 /// within Rust.
 #[pymethods]
 impl Percolation {
-    /// Create a new `Percolation` instance from the given `AsynchronousGraph` or `BooleanNetwork`,
+    /// Create a new `PercolationComp` instance from the given `AsynchronousGraph` or `BooleanNetwork`,
     /// with otherwise default configuration.
     #[staticmethod]
     #[pyo3(name = "create_from")]
@@ -22,7 +22,7 @@ impl Percolation {
         )?))
     }
 
-    /// Create a new `Percolation` instance with the given `PercolationConfig`.
+    /// Create a new `PercolationComp` instance with the given `PercolationConfig`.
     #[staticmethod]
     #[pyo3(name = "with_config")]
     pub fn python_with_config(config: PercolationConfig) -> Self {

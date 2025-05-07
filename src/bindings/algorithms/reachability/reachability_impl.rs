@@ -24,6 +24,7 @@ const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 ///
 /// See [ReachabilityConfig] and [ReachabilityError] for more info.
 #[pyclass(module = "biodivine_aeon", frozen)]
+#[pyo3(name = "ReachabilityComp")]
 #[derive(Clone, Configurable)]
 pub struct Reachability(pub ReachabilityConfig);
 

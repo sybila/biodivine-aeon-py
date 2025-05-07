@@ -100,7 +100,7 @@ impl TrapSpacesConfig {
     }
 }
 
-/// A configuration class for the `TrapSpaces` class. It allows you to specify various
+/// A configuration class for the `TrapSpacesComp` class. It allows you to specify various
 /// parameters for the trap spaces computation, such as the underlying `AsynchronousGraph`,
 /// a restriction set for the spaces, a time limit, and a BDD size limit. The configuration
 /// can be created using a Python constructor or the `create_from` method, and you can modify it using the

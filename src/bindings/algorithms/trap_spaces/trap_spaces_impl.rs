@@ -301,14 +301,14 @@ impl TrapSpaces {
 /// Implments trap spaces search over an `AsynchronousGraph` and its
 /// `SymbolicSpaceContext`.
 #[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "TrapSpaces")]
+#[pyo3(name = "TrapSpacesComp")]
 pub struct PyTrapSpaces(PyTrapSpacesConfig);
 
 /// These methods are Python facing wrappers of native methods and thus should not be used from
 /// within Rust.
 #[pymethods]
 impl PyTrapSpaces {
-    /// Create a new `TrapSpaces` instance with the given `BooleanNetwork`,
+    /// Create a new `TrapSpacesComp` instance with the given `BooleanNetwork`,
     /// `AsynchronousGraph` is currently not supported.
     #[staticmethod]
     pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
@@ -317,7 +317,7 @@ impl PyTrapSpaces {
         )?))
     }
 
-    /// Create a new `TrapSpaces` instance with the given `AsynchronousGraph` and
+    /// Create a new `TrapSpacesComp` instance with the given `AsynchronousGraph` and
     /// `SymbolicSpaceContext`.
     #[staticmethod]
     pub fn create_from_graph_with_context(
@@ -329,7 +329,7 @@ impl PyTrapSpaces {
         ))
     }
 
-    /// Create a new `TrapSpaces` instance with the given `TrapSpacesConfig`.
+    /// Create a new `TrapSpacesComp` instance with the given `TrapSpacesConfig`.
     #[staticmethod]
     pub fn with_config(config: PyTrapSpacesConfig) -> Self {
         PyTrapSpaces(config)
