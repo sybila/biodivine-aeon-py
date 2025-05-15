@@ -233,6 +233,18 @@ impl ModelAnnotation {
     }
 
     #[setter]
+    /// Sets the string value of the annotation node at the current path.
+    ///
+    /// If `value` is `Some`, updates the annotation node's value; if `None`, removes the value, leaving the node present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// annotation.set_value(py, Some("New value".to_string()));
+    /// assert_eq!(annotation.get_value(py), Some("New value".to_string()));
+    /// annotation.set_value(py, None);
+    /// assert_eq!(annotation.get_value(py), None);
+    /// ```
     pub fn set_value(&self, py: Python, value: Option<String>) {
         let mut root_ref = self.root.borrow_mut(py);
         let value_ref = root_ref
@@ -243,12 +255,36 @@ impl ModelAnnotation {
     }
 
     #[getter]
+    /// Returns the annotation value as a vector of lines, splitting the string value at newlines.
+    ///
+    /// If the annotation node has no value, returns `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let ann = ModelAnnotation::new(Some("line1\nline2".to_string()));
+    /// let gil = Python::acquire_gil();
+    /// let py = gil.python();
+    /// assert_eq!(ann.get_lines(py), Some(vec!["line1".to_string(), "line2".to_string()]));
+    /// ```
     pub fn get_lines(&self, py: Python) -> Option<Vec<String>> {
         self.get_value(py)
             .map(|data| data.lines().map(|it| it.to_string()).collect())
     }
 
     #[setter]
+    /// Sets the annotation value as a multiline string constructed from a vector of lines.
+    ///
+    /// Joins the provided vector of strings with newline characters and sets the result as the annotation value at the current path. If `None` is provided, the annotation value is cleared.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// annotation.set_lines(py, Some(vec!["line1".to_string(), "line2".to_string()]));
+    /// assert_eq!(annotation.get_value(py), Some("line1\nline2".to_string()));
+    /// annotation.set_lines(py, None);
+    /// assert_eq!(annotation.get_value(py), None);
+    /// ```
     pub fn set_lines(&self, py: Python, value: Option<Vec<String>>) {
         let value = value.map(|it| it.join("\n"));
         self.set_value(py, value)
@@ -256,6 +292,16 @@ impl ModelAnnotation {
 
     /// Parse an annotation object from the string representing the contents of an `.aeon` file.
     #[staticmethod]
+    /// Parses annotation data from a string containing `.aeon` model contents and returns the root annotation node.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil().python();
+    /// let aeon_str = "#! model:author = John Doe";
+    /// let annotation = ModelAnnotation::from_aeon(py, aeon_str).unwrap();
+    /// assert_eq!(annotation.get_value(py), Some("John Doe".to_string()));
+    /// ```
     pub fn from_aeon(py: Python, file_contents: &str) -> PyResult<ModelAnnotation> {
         let native = biodivine_lib_param_bn::ModelAnnotation::from_model_string(file_contents);
         let root = Py::new(py, ModelAnnotationRoot::from(native))?;
@@ -314,8 +360,20 @@ impl ModelAnnotation {
     }
 
     /// Return the list key-value pairs that correspond to the direct descendants
-    /// of this annotation.
-    pub fn items(&self, py: Python) -> Vec<(String, ModelAnnotation)> {
+    /// Returns a sorted list of key-annotation pairs for all direct children of this annotation node.
+    ///
+    /// Each pair consists of the child key and a `ModelAnnotation` representing the child node.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let annotation = ModelAnnotation::new(Some("root".to_string()), py).unwrap();
+    /// let child = ModelAnnotation::new(Some("child".to_string()), py).unwrap();
+    /// annotation["child"] = child.clone();
+    /// let items = annotation.items(py);
+    /// assert_eq!(items.len(), 1);
+    /// assert_eq!(items[0].0, "child");
+    /// ```    pub fn items(&self, py: Python) -> Vec<(String, ModelAnnotation)> {
         let root_ref = self.root.borrow(py);
         let child_ref = root_ref.as_native().get_child(&self.path);
         if let Some(child_ref) = child_ref {
@@ -341,6 +399,21 @@ impl ModelAnnotation {
 }
 
 impl ModelAnnotation {
+    /// Creates a `ModelAnnotation` referencing the root of the given annotation tree.
+    ///
+    /// Returns a new `ModelAnnotation` instance at the root path, sharing the provided `ModelAnnotationRoot`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use biodivine_aeon::ModelAnnotationRoot;
+    /// # use pyo3::Python;
+    /// # Python::with_gil(|py| {
+    /// let root = ModelAnnotationRoot::from_aeon("".to_string()).unwrap();
+    /// let annotation = ModelAnnotation::from_root(py, root).unwrap();
+    /// assert_eq!(annotation.path().len(), 0);
+    /// # });
+    /// ```
     pub fn from_root(py: Python, root: ModelAnnotationRoot) -> PyResult<ModelAnnotation> {
         let root = Py::new(py, root)?;
         Ok(ModelAnnotation {
@@ -349,12 +422,29 @@ impl ModelAnnotation {
         })
     }
 
+    /// Returns the root annotation object associated with this node.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let annotation = ModelAnnotation::new(Some("value".to_string()));
+    /// let root = annotation.to_root();
+    /// ```
     pub fn to_root(&self) -> Py<ModelAnnotationRoot> {
         self.root.clone()
     }
 }
 
 impl From<Py<ModelAnnotationRoot>> for ModelAnnotation {
+    /// Creates a `ModelAnnotation` referencing the root annotation node from a given `ModelAnnotationRoot`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let root: Py<ModelAnnotationRoot> = ...; // Assume root is initialized
+    /// let annotation = ModelAnnotation::from(root);
+    /// assert!(annotation.path.is_empty());
+    /// ```
     fn from(value: Py<ModelAnnotationRoot>) -> Self {
         ModelAnnotation {
             root: value,
@@ -366,8 +456,23 @@ impl From<Py<ModelAnnotationRoot>> for ModelAnnotation {
 /// Helper methods that are used to implement annotations that are officially supported by AEON.
 impl ModelAnnotationRoot {
     /// Make a copy with all variable and regulation annotations that are associated
-    /// with one of the provided variables removed.
-    pub fn drop_variables(
+    /// Returns a new annotation root with all variable and regulation annotations for the specified variable names removed.
+    ///
+    /// Removes both variable-level and regulation-level annotations associated with each provided variable name, including regulations where the variable is a source or target.
+    ///
+    /// # Parameters
+    /// - `names`: Variable names whose annotations and regulations should be removed.
+    ///
+    /// # Returns
+    /// A new `ModelAnnotationRoot` with the specified variables and their regulations removed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let root = ModelAnnotationRoot::from_aeon("...aeon content...", py).unwrap();
+    /// let updated = root.drop_variables(&vec!["A".to_string(), "B".to_string()], py).unwrap();
+    /// // Variables "A" and "B" and their regulations are no longer present in `updated`.
+    /// ```    pub fn drop_variables(
         &self,
         names: &[String],
         py: Python,
@@ -400,8 +505,25 @@ impl ModelAnnotationRoot {
     ///
     /// This means we try to "merge" the variable data into the variables into which we
     /// are inlining. This usually just means appending whatever is available into the existing
-    /// structures.
-    pub fn inline_variable(
+    /// Returns a new annotation root with the specified variable inlined into its targets.
+    ///
+    /// This operation merges the annotation data of the given variable into all its target variables and updates regulation annotations accordingly. The original variable and its associated regulations are removed, and any overlapping regulations are merged, preferring target-specific data when conflicts occur.
+    ///
+    /// # Parameters
+    /// - `name`: The name of the variable to inline.
+    /// - `old_rg`: The regulatory graph describing variable relationships.
+    ///
+    /// # Returns
+    /// A new `ModelAnnotationRoot` with the variable inlined.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let root = ModelAnnotationRoot::from_aeon("...aeon content...").unwrap();
+    /// let rg = RegulatoryGraph::from_aeon("...aeon content...").unwrap();
+    /// let py = Python::acquire_gil().python();
+    /// let new_root = root.inline_variable("X", &rg, py).unwrap();
+    /// ```    pub fn inline_variable(
         &self,
         name: &str,
         old_rg: &biodivine_lib_param_bn::RegulatoryGraph,
@@ -477,16 +599,43 @@ impl ModelAnnotationRoot {
         Py::new(py, ModelAnnotationRoot(copy_native))
     }
 
-    /// Remove a regulation from this annotation object.
-    pub fn remove_regulation(&mut self, source: &str, target: &str) -> PyResult<()> {
+    /// Removes the annotation for a regulation from the specified source variable to the target variable.
+    ///
+    /// If the regulation annotation exists under the `REGULATION` subtree for the given source and target, it is deleted.  
+    /// Does nothing if the specified regulation does not exist.
+    ///
+    /// # Arguments
+    ///
+    /// * `source` - The name of the source variable.
+    /// * `target` - The name of the target variable.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut root = ModelAnnotationRoot::default();
+    /// root.remove_regulation("A", "B").unwrap();
+    /// ```    pub fn remove_regulation(&mut self, source: &str, target: &str) -> PyResult<()> {
         if let Some(regulations) = self.0.get_mut_child(&[REGULATION, source]) {
             regulations.children_mut().remove(target);
         }
         Ok(())
     }
 
-    /// Rename variable inside the "variable" and "regulation" annotation subtrees.
-    pub fn rename_variable(&mut self, old_name: &str, new_name: &str) -> PyResult<()> {
+    /// Renames a variable in both the "variable" and "regulation" annotation subtrees.
+    ///
+    /// This updates all annotation keys corresponding to `old_name` to use `new_name` in both the variable and regulation sections of the annotation tree.
+    ///
+    /// # Arguments
+    ///
+    /// * `old_name` - The current name of the variable to be renamed.
+    /// * `new_name` - The new name to assign to the variable.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut root = ModelAnnotationRoot::from_aeon("...aeon content...").unwrap();
+    /// root.rename_variable("old_var", "new_var").unwrap();
+    /// ```    pub fn rename_variable(&mut self, old_name: &str, new_name: &str) -> PyResult<()> {
         if let Some(variables) = self.0.get_mut_child(&[VARIABLE]) {
             let variables_map = variables.children_mut();
             let current_data = variables_map.remove(old_name);
@@ -511,8 +660,17 @@ impl ModelAnnotationRoot {
         Ok(())
     }
 
-    /// Make a copy that is a separate python object, referencing a copy of the native annotation data.
-    pub fn py_copy(&self, py: Python) -> PyResult<Py<ModelAnnotationRoot>> {
+    /// Returns a new Python object containing a deep copy of the annotation root.
+    ///
+    /// The returned object is independent of the original and contains a cloned copy of the native annotation data.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let root = ModelAnnotationRoot::from_aeon("".to_string()).unwrap();
+    /// let py_copy = root.py_copy(py).unwrap();
+    /// assert_ne!(root.as_ptr(), py_copy.as_ptr());
+    /// ```    pub fn py_copy(&self, py: Python) -> PyResult<Py<ModelAnnotationRoot>> {
         Py::new(py, ModelAnnotationRoot(self.0.clone()))
     }
 }

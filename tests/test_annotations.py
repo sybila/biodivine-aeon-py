@@ -1,6 +1,11 @@
 from biodivine_aeon import *
 
 def test_regulatory_graph_annotations():
+    """
+    Tests loading, modifying, and serializing regulatory graph annotations in a Boolean network.
+    
+    This test verifies that model-level and variable-level annotation fields (such as name, description, taxon, gene names, layout positions, references, and various biological IDs) are correctly loaded from a file, can be modified, and are preserved after serialization and deserialization.
+    """
     bn = BooleanNetwork.from_file("./tests/model-with-annotations.aeon")
     ann = bn.annotation()
 
@@ -45,6 +50,11 @@ def test_regulatory_graph_annotations():
     assert str(ann) == str(ann2)
 
 def test_drop_variable():
+    """
+    Tests that dropping a variable from a Boolean network removes its annotation and related regulations.
+    
+    Verifies that after dropping variable "a", only the annotation for variable "b" remains in the network.
+    """
     bn = BooleanNetwork.from_aeon("""
         #! variable: a: gene_name: name_1
         #! variable: b: gene_name: name_2
@@ -60,6 +70,11 @@ def test_drop_variable():
     assert expected.strip() == str(bn2.raw_annotation()).strip()
 
 def test_remove_regulation():
+    """
+    Tests that removing a regulation from a Boolean network updates the raw annotation accordingly.
+    
+    Creates a Boolean network with two variables and mutual regulations, removes one regulation, and asserts that the raw annotation reflects only the remaining regulation and variable annotations.
+    """
     bn = BooleanNetwork.from_aeon("""
         #! variable: a: gene_name: name_1
         #! variable: b: gene_name: name_2
@@ -78,6 +93,11 @@ def test_remove_regulation():
     assert set([l.strip() for l in expected.splitlines()]) == set([l.strip() for l in str(bn.raw_annotation()).splitlines()])
 
 def test_rename_variable():
+    """
+    Tests that renaming variables in a Boolean network updates all related annotations and regulations.
+    
+    Creates a Boolean network with annotated variables and regulations, renames the variables, and verifies that the resulting annotation matches the expected network with renamed variables.
+    """
     bn = BooleanNetwork.from_aeon("""
         #! variable: a: gene_name: name_1
         #! variable: b: gene_name: name_2
@@ -104,6 +124,14 @@ def test_rename_variable():
     assert set([l.strip() for l in str(bn2.raw_annotation()).splitlines()]) == set([l.strip() for l in str(bn.raw_annotation()).splitlines()])
 
 def test_variable_inline():
+    """
+    Tests that inlining a variable in a Boolean network correctly updates the network's
+    structure and annotations.
+    
+    Creates a network with five variables and multiple annotated regulations, inlines
+    variable "c", and verifies that the resulting network's raw annotation matches the
+    expected annotation after inlining.
+    """
     bn = BooleanNetwork.from_aeon("""
         #! variable: a: gene_name: name_1
         #! variable: b: gene_name: name_2

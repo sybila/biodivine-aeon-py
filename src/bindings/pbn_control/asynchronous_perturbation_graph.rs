@@ -184,8 +184,16 @@ impl AsynchronousPerturbationGraph {
     /// without additional perturbation parameters or any modification (e.g. still with all
     /// implicit parameters).
     ///
+    /// Returns the original Boolean network without perturbation parameters or modifications.
+    ///
     /// This operation does not preserve annotations from the original network.
-    pub fn base_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil().python();
+    /// let base_net = graph.base_network(py).unwrap();
+    /// ```    pub fn base_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
         // a network object.
         let bn = self
@@ -200,8 +208,17 @@ impl AsynchronousPerturbationGraph {
     /// A copy of the `BooleanNetwork` with the extra perturbation parameters, but with the
     /// update functions unaffected.
     ///
-    /// This operation does not preserve annotations from the original network.
-    pub fn unperturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    /// Returns the Boolean network with perturbation parameters included but original (unperturbed) update functions.
+    ///
+    /// The resulting network contains the perturbation parameters as variables, but the update logic remains unchanged from the original network. This operation does not preserve annotations from the original network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil().python();
+    /// let net = graph.unperturbed_network(py).unwrap();
+    /// assert!(net.is_instance_of::<BooleanNetwork>(py).unwrap());
+    /// ```    pub fn unperturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
         // a network object.
         let bn = self.as_native().as_original().as_network().unwrap().clone();
@@ -211,8 +228,17 @@ impl AsynchronousPerturbationGraph {
     /// A copy of the `BooleanNetwork` with the extra perturbation parameters and with the
     /// update functions changed to reflect the perturbations.
     ///
-    /// This operation does not preserve annotations from the original network.
-    pub fn perturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    /// Returns the Boolean network with perturbation parameters and perturbed update functions.
+    ///
+    /// The resulting network includes perturbation parameters for each perturbable variable, and its update functions are modified so that perturbed variables cannot update. This operation does not preserve annotations from the original network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil().python();
+    /// let perturbed = graph.perturbed_network(py).unwrap();
+    /// assert!(perturbed.has_perturbation_parameters());
+    /// ```    pub fn perturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
         // a network object.
         let bn = self

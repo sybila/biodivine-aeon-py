@@ -219,6 +219,27 @@ impl ColorModel {
     /// (i.e. `model["f"]`) are unique within a set, the instantiations of more complex functions
     /// that depend on them are not.*
     #[pyo3(signature = (item, args = None, infer_regulations = None))]
+    /// Instantiates uninterpreted functions or networks by applying the model's valuation.
+    ///
+    /// Depending on the type of `item`, this method performs one of the following:
+    /// - If `item` is an `UpdateFunction`, returns a new `UpdateFunction` with all explicit parameters instantiated using the current model. No `args` or `infer_regulations` should be provided.
+    /// - If `item` is a `BooleanNetwork`, returns a new `BooleanNetwork` with all retained update functions instantiated and unused parameters removed. Optionally, if `infer_regulations` is `true`, infers the regulatory graph.
+    /// - If `item` is a function identifier (`VariableId`, `ParameterId`, or string), requires `args` to specify argument functions, and returns an `UpdateFunction` instantiated with those arguments according to the model's valuation.
+    ///
+    /// Raises a type error if arguments are inconsistent with the selected mode or if the function identifier is invalid.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Instantiate all explicit parameters in an UpdateFunction
+    /// instantiated_fn = color_model.instantiate(update_function)
+    ///
+    /// # Instantiate all retained functions in a BooleanNetwork
+    /// instantiated_bn = color_model.instantiate(boolean_network)
+    ///
+    /// # Instantiate a specific function with arguments
+    /// instantiated_fn = color_model.instantiate("f", [arg1, arg2])
+    /// ```
     pub fn instantiate(
         &self,
         py: Python,

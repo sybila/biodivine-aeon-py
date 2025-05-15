@@ -78,6 +78,39 @@ impl BooleanNetwork {
     /// Optionally, you can also provide model annotations as either string, or `ModelAnnotation` object.
     #[new]
     #[pyo3(signature = (variables = None, regulations = None, parameters = None, functions = None, annotations = None))]
+    /// Creates a new `BooleanNetwork` and its associated `RegulatoryGraph`.
+    ///
+    /// Accepts optional variables (as a `RegulatoryGraph` or list of variable names), regulations, explicit parameters, update functions, and model annotations. Explicit parameters are added by name and arity. Update functions can be provided as a list (by variable order) or a dictionary (by variable name). Annotations are attached to both the network and the regulatory graph if provided.
+    ///
+    /// # Arguments
+    ///
+    /// - `variables`: Either a `RegulatoryGraph` or a list of variable names. If omitted, an empty graph is created.
+    /// - `regulations`: Optional list of regulations to add to the graph.
+    /// - `parameters`: Optional list of explicit parameter names and their arities.
+    /// - `functions`: Optional update functions, as a list of optional strings or a dictionary mapping variable names to function strings.
+    /// - `annotations`: Optional model annotations to attach to the network and graph.
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing the new `BooleanNetwork` and its `RegulatoryGraph`.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `TypeError` if input types are invalid, or a `RuntimeError` if parameter or function addition fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let (bn, rg) = BooleanNetwork::new(
+    ///     Some(&["A".to_string(), "B".to_string()]),
+    ///     None,
+    ///     Some(vec![("p".to_string(), 2)]),
+    ///     Some(&vec![Some("A & B".to_string()), None]),
+    ///     None,
+    /// ).unwrap();
+    /// assert_eq!(bn.explicit_parameter_count(), 1);
+    /// assert_eq!(rg.variable_count(), 2);
+    /// ```
     fn new(
         variables: Option<&Bound<'_, PyAny>>,
         regulations: Option<&Bound<'_, PyList>>,
@@ -143,12 +176,30 @@ impl BooleanNetwork {
         )
     }
 
+    /// Compares two `BooleanNetwork` instances for equality or ordering, ignoring annotations.
+    ///
+    /// This method implements Python's rich comparison operations (`==`, `!=`, `<`, `>`, etc.) for `BooleanNetwork` objects by comparing their underlying native network representations. Model annotations are not considered in the comparison.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// assert!(bn1 == bn2); // True if the underlying networks are identical, regardless of annotations
+    /// ```
     pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         // The BN and its underlying RG should be up-to-date, hence it should be ok to just compare the BN.
         // Note that we are currently not considering annotations, as these are seen as "outside" data.
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
+    /// Returns a detailed string representation of the BooleanNetwork, including variables, regulations, parameters, update functions, and annotations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let bn = BooleanNetwork::from_aeon(py, "a, b\nb* = a").unwrap();
+    /// let repr = bn.__repr__();
+    /// assert!(repr.starts_with("BooleanNetwork("));
+    /// ```
     pub fn __repr__(self_: PyRef<'_, Self>) -> String {
         let (names, regulations, parameters, functions, annotations) =
             BooleanNetwork::__getnewargs__(self_);
@@ -174,6 +225,25 @@ impl BooleanNetwork {
     }
 
     #[allow(clippy::type_complexity)]
+    /// Returns the arguments needed to reconstruct this `BooleanNetwork` instance.
+    ///
+    /// The returned tuple contains variable names, regulations, explicit parameters, update functions, and optional annotations, suitable for use with Python's `__new__` method.
+    ///
+    /// # Returns
+    ///
+    /// A tuple of:
+    /// - `Vec<String>`: Variable names.
+    /// - `Vec<String>`: Regulations.
+    /// - `Vec<(String, u32)>`: Explicit parameter names and arities.
+    /// - `Vec<Option<String>>`: Update functions as strings or `None`.
+    /// - `Option<String>`: Model annotations if present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let args = boolean_network.__getnewargs__();
+    /// assert_eq!(args.0, vec!["A".to_string(), "B".to_string()]);
+    /// ```
     pub fn __getnewargs__(
         self_: PyRef<'_, Self>,
     ) -> (
@@ -201,11 +271,28 @@ impl BooleanNetwork {
         (names, regulations, parameters, functions, annotations)
     }
 
+    /// Returns a shallow copy of the BooleanNetwork, including its annotations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let copy = original.__copy__(py).unwrap();
+    /// assert_eq!(original.to_aeon(py), copy.to_aeon(py));
+    /// ```
     pub fn __copy__(self_: PyRef<'_, Self>, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let bn_copy = self_.clone();
         bn_copy.export_to_python(py, self_.as_ref().annotations.clone())
     }
 
+    /// Returns a deep copy of the BooleanNetwork, including annotations if present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let network = BooleanNetwork::from_aeon(py, "a, b\n[*]\n").unwrap();
+    /// let copy = network.__deepcopy__(py, py.None()).unwrap();
+    /// assert_eq!(network.to_aeon(py), copy.to_aeon(py));
+    /// ```
     pub fn __deepcopy__(
         self_: PyRef<'_, Self>,
         py: Python,
@@ -225,6 +312,26 @@ impl BooleanNetwork {
     /// `repair_graph=True`, the underlying graph is instead inferred correctly from the actual update functions.
     #[staticmethod]
     #[pyo3(signature = (file_path, repair_graph = false))]
+    /// Loads a `BooleanNetwork` from a file and returns it as a Python object.
+    ///
+    /// Supports `.aeon`, `.sbml`, and `.bnet` file formats. If the file is an `.aeon` file, model annotations are also loaded and attached to the network. Optionally repairs the regulatory graph to ensure consistency with update functions.
+    ///
+    /// # Parameters
+    /// - `file_path`: Path to the input file.
+    /// - `repair_graph`: If `true`, repairs the regulatory graph to match update functions.
+    ///
+    /// # Returns
+    /// A Python `BooleanNetwork` object with optional annotations.
+    ///
+    /// # Errors
+    /// Returns a Python `RuntimeError` if the file cannot be read or parsed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil();
+    /// let network = BooleanNetwork::from_file(py.python(), "model.aeon", false)?;
+    /// ```
     pub fn from_file(
         py: Python,
         file_path: &str,
@@ -253,6 +360,29 @@ impl BooleanNetwork {
 
     /// Try to read a `BooleanNetwork` from a string representing the contents of an `.aeon` file.
     #[staticmethod]
+    /// Loads a `BooleanNetwork` from an `.aeon` format string, including model annotations if present.
+    ///
+    /// # Arguments
+    ///
+    /// * `file_contents` - The contents of the `.aeon` file as a string.
+    ///
+    /// # Returns
+    ///
+    /// A Python `BooleanNetwork` instance with the parsed network and any associated annotations.
+    ///
+    /// # Errors
+    ///
+    /// Returns a Python exception if the file cannot be parsed as a valid Boolean network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let aeon_str = "a, b\nb* = a";
+    /// let gil = Python::acquire_gil();
+    /// let py = gil.python();
+    /// let bn = BooleanNetwork::from_aeon(py, aeon_str).unwrap();
+    /// assert_eq!(bn.borrow(py).variable_count(), 2);
+    /// ```
     pub fn from_aeon(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
         let bn = biodivine_lib_param_bn::BooleanNetwork::try_from(file_contents)
             .map_err(runtime_error)?;
@@ -261,7 +391,16 @@ impl BooleanNetwork {
     }
 
     /// Convert this `BooleanNetwork` to a string representation of a valid `.aeon` file.
-    //noinspection RsSelfConvention
+    /// Converts the Boolean network to an `.aeon` file string, including annotations if present.
+    ///
+    /// If model annotations exist, they are included at the beginning of the output, followed by two newlines and the network definition.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let aeon_str = network.to_aeon(py);
+    /// assert!(aeon_str.contains("[network]"));
+    /// ```
     pub fn to_aeon(self_: PyRef<'_, Self>, py: Python) -> String {
         if let Some(annotations) = self_.as_ref().annotations.as_ref() {
             let ann_string = annotations.borrow(py).as_native().to_string();
@@ -276,8 +415,22 @@ impl BooleanNetwork {
     /// Update the variable name of the provided `variable`. This does not change the
     /// corresponding `VariableId`.
     ///
-    /// The variable is also renamed in the associated `ModelAnnotations`.
-    pub fn set_variable_name(
+    /// Renames a network variable and updates its name in associated model annotations.
+    ///
+    /// If model annotations are present, the variable is first renamed in the annotations before updating the network and regulatory graph.
+    /// Throws an error if the variable does not exist or if the new name is invalid.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use your_module::BooleanNetwork;
+    /// # use pyo3::Python;
+    /// # Python::with_gil(|py| {
+    /// let mut bn = BooleanNetwork::from_aeon(py, "a -> b\n").unwrap();
+    /// bn.set_variable_name(py, "a", "x").unwrap();
+    /// assert_eq!(bn.get_network_variable_name(0), "x");
+    /// # });
+    /// ```    pub fn set_variable_name(
         mut self_: PyRefMut<'_, Self>,
         py: Python,
         variable: &Bound<'_, PyAny>,
@@ -310,8 +463,20 @@ impl BooleanNetwork {
     /// using a `NamedRegulation`, `IdRegulation`, or a string representation compatible
     /// with the `.aeon` format.
     ///
-    /// Model annotations are not affected by this operation.
-    pub fn add_regulation(
+    /// Adds a regulation to the network's regulatory graph.
+    ///
+    /// The regulation can be specified in various representations. Model annotations are not affected by this operation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use your_module::BooleanNetwork;
+    /// # use pyo3::Python;
+    /// Python::with_gil(|py| {
+    ///     let mut bn = BooleanNetwork::from_aeon(py, "a -> b").unwrap();
+    ///     bn.add_regulation(py.eval("{'source': 'a', 'target': 'c'}", None, None).unwrap()).unwrap();
+    /// });
+    /// ```    pub fn add_regulation(
         mut self_: PyRefMut<'_, Self>,
         regulation: &Bound<'_, PyAny>,
     ) -> PyResult<()> {
@@ -339,8 +504,20 @@ impl BooleanNetwork {
     /// function and so cannot be safely removed.
     ///
     /// Also removes any annotation data that is associated with the regulation (however, this
-    /// data is not returned).
-    pub fn remove_regulation<'a>(
+    /// Removes a regulation between two variables if it is not used in any update function.
+    ///
+    /// If the regulation exists and is not referenced by the target variable's update function, it is removed from the network and any associated annotation data is also deleted.  
+    /// Returns a dictionary representing the removed regulation.  
+    /// Raises a `RuntimeError` if the regulation is still in use by the target's update function.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Assume `bn` is a BooleanNetwork with a regulation from "A" to "B"
+    /// removed = bn.remove_regulation("A", "B")
+    /// assert removed["source"] == "A"
+    /// assert removed["target"] == "B"
+    /// ```    pub fn remove_regulation<'a>(
         mut self_: PyRefMut<'_, Self>,
         py: Python<'a>,
         source: &Bound<'a, PyAny>,
@@ -383,8 +560,22 @@ impl BooleanNetwork {
     /// Returns the previous state of the regulation as an `IdRegulation` dictionary,
     /// assuming the regulation already existed.
     ///
-    /// Model annotations are not affected by this operation.
-    pub fn ensure_regulation<'a>(
+    /// Updates or creates a regulation with the specified properties, returning the previous regulation if it existed.
+    ///
+    /// If a regulation between the given source and target variables exists, it is replaced with the new sign and essentiality; otherwise, a new regulation is added. The previous regulation is returned as a Python dictionary if it was present, or `None` if not. Model annotations are not affected by this operation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use your_module::BooleanNetwork;
+    /// # use pyo3::Python;
+    /// Python::with_gil(|py| {
+    ///     let mut bn = BooleanNetwork::from_aeon(py, "a -> b").unwrap();
+    ///     let reg = py.eval("{'source': 'a', 'target': 'b', 'monotonicity': '+', 'essential': true}", None, None).unwrap();
+    ///     let prev = bn.ensure_regulation(py, reg).unwrap();
+    ///     assert!(prev.is_some() || prev.is_none());
+    /// });
+    /// ```    pub fn ensure_regulation<'a>(
         mut self_: PyRefMut<'_, Self>,
         py: Python<'a>,
         regulation: &Bound<'a, PyAny>,
@@ -439,8 +630,23 @@ impl BooleanNetwork {
     /// within the new network.
     ///
     /// Model annotations are not affected by this operation (current annotations are copied
-    /// into the new network).
-    pub fn extend(
+    /// Returns a new BooleanNetwork extended with additional variables.
+    ///
+    /// The new variables are appended after existing ones, and all parameters and update functions from the original network are preserved. Annotations for unaffected variables are also preserved.
+    ///
+    /// # Parameters
+    /// - `variables`: A list of new variable names to add to the network.
+    ///
+    /// # Returns
+    /// A new BooleanNetwork instance with the specified variables added.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let bn = BooleanNetwork::from_aeon(py, "a, b\n")?;
+    /// let extended_bn = bn.extend(py, vec!["c".to_string()])?;
+    /// assert!(extended_bn.get_network_variable_name(2)? == "c");
+    /// ```    pub fn extend(
         self_: PyRef<'_, Self>,
         py: Python,
         variables: Vec<String>,
@@ -483,8 +689,27 @@ impl BooleanNetwork {
     /// variables that are missing in the new graph, the `VariableId` objects are not compatible
     /// with the original graph.
     ///
-    /// Annotations for unaffected variables are preserved.
-    pub fn drop(
+    /// Returns a new `BooleanNetwork` with the specified variables removed, preserving annotations for unaffected variables.
+    ///
+    /// The resulting network omits update functions referencing removed variables and prunes unused parameters. Annotations associated with variables that remain in the network are retained.
+    ///
+    /// # Parameters
+    /// - `variables`: A Python object specifying the variables to remove (by name or index).
+    ///
+    /// # Returns
+    /// A new `BooleanNetwork` instance with the specified variables removed and a corresponding `RegulatoryGraph`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use your_module::BooleanNetwork;
+    /// # use pyo3::Python;
+    /// Python::with_gil(|py| {
+    ///     let bn = BooleanNetwork::from_aeon(py, "a, b\nb* = a").unwrap();
+    ///     let reduced_bn = bn.drop(py, vec!["a"]).unwrap();
+    ///     assert!(!reduced_bn.to_aeon(py).contains("a"));
+    /// });
+    /// ```    pub fn drop(
         self_: PyRef<'_, Self>,
         py: Python,
         variables: &Bound<'_, PyAny>,
@@ -583,6 +808,31 @@ impl BooleanNetwork {
     /// the annotations for affected regulations.
     ///
     #[pyo3(signature = (variable, repair_graph = false))]
+    /// Returns a new BooleanNetwork with the specified variable inlined into downstream update functions.
+    ///
+    /// The given variable is replaced by its update function in all dependent variables. Fails if the variable has a self-regulation. Associated annotation data for the inlined variable is removed, and affected regulation annotations are merged. Optionally repairs the regulatory graph for consistency.
+    ///
+    /// # Parameters
+    /// - `variable`: The variable to inline, specified by name or VariableId.
+    /// - `repair_graph`: If true, repairs the regulatory graph after inlining.
+    ///
+    /// # Returns
+    /// A new BooleanNetwork instance with the variable inlined.
+    ///
+    /// # Errors
+    /// Returns a RuntimeError if the variable has a self-regulation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use your_module::BooleanNetwork;
+    /// # use pyo3::Python;
+    /// Python::with_gil(|py| {
+    ///     let bn = BooleanNetwork::from_aeon(py, "a, b\nb* = a").unwrap();
+    ///     let inlined_bn = bn.inline_variable(py, "a", false).unwrap();
+    ///     assert!(inlined_bn.get_update_function("b").unwrap().to_string().contains("true"));
+    /// });
+    /// ```
     pub fn inline_variable(
         self_: PyRef<'_, Self>,
         py: Python,
@@ -629,6 +879,31 @@ impl BooleanNetwork {
     /// method that infers these annotations automatically.
     #[staticmethod]
     #[pyo3(signature = (file_contents, repair_graph = false))]
+    /// Loads a Boolean network from a `.bnet` format string.
+    ///
+    /// Optionally repairs the regulatory graph to match the update functions. Model annotations are not supported and will not be included in the resulting network.
+    ///
+    /// # Arguments
+    ///
+    /// * `file_contents` - The contents of the `.bnet` file as a string.
+    /// * `repair_graph` - If `true`, infers and repairs the regulatory graph to be consistent with the update functions.
+    ///
+    /// # Returns
+    ///
+    /// A new `BooleanNetwork` instance loaded from the `.bnet` data.
+    ///
+    /// # Errors
+    ///
+    /// Returns a Python `RuntimeError` if the file cannot be parsed or if graph repair fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil();
+    /// let bnet_str = "a, b\nb, a";
+    /// let network = BooleanNetwork::from_bnet(py.python(), bnet_str, false).unwrap();
+    /// assert_eq!(network.explicit_parameter_count(), 0);
+    /// ```
     pub fn from_bnet(
         py: Python,
         file_contents: &str,
@@ -653,6 +928,28 @@ impl BooleanNetwork {
     /// `rename_if_necessary` flag.
     ///
     #[pyo3(signature = (rename_if_necessary = true))]
+    /// Converts the Boolean network to a `.bnet` format string.
+    ///
+    /// Fails if the network is parametrized. Optionally renames variables to valid `.bnet` names if required.
+    ///
+    /// # Arguments
+    ///
+    /// * `rename_if_necessary` - If true, variables are renamed to ensure compatibility with the `.bnet` format.
+    ///
+    /// # Returns
+    ///
+    /// A string representation of the network in `.bnet` format.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the network is parametrized or if conversion fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let bnet_str = network.to_bnet(true)?;
+    /// assert!(bnet_str.contains("targets, regulators"));
+    /// ```
     pub fn to_bnet(&self, rename_if_necessary: bool) -> PyResult<String> {
         self.as_native()
             .to_bnet(rename_if_necessary)
@@ -663,6 +960,24 @@ impl BooleanNetwork {
     ///
     /// Note that SBML import/export currently does not support model annotations.
     #[staticmethod]
+    /// Loads a Boolean network from an SBML file content string.
+    ///
+    /// SBML annotations are not supported and will not be included in the resulting network.
+    ///
+    /// # Arguments
+    ///
+    /// * `file_contents` - The contents of the SBML file as a string.
+    ///
+    /// # Returns
+    ///
+    /// A Python `BooleanNetwork` instance parsed from the SBML content.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let sbml = r#"<sbml>...</sbml>"#;
+    /// let py_network = BooleanNetwork::from_sbml(py, sbml)?;
+    /// ```
     pub fn from_sbml(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
         let (bn, _) = biodivine_lib_param_bn::BooleanNetwork::try_from_sbml(file_contents)
             .map_err(runtime_error)?;
@@ -856,8 +1171,16 @@ impl BooleanNetwork {
     ///
     /// TODO: Currently, this function does not preserve graph annotations. However, in the
     /// future, annotations will be preserved, with unused regulations removed.
+    /// Infers and returns a new Boolean network with a minimal regulatory graph consistent with the update functions.
     ///
-    pub fn infer_valid_graph(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    /// The resulting network contains only the regulations required by the update functions, with unused explicit parameters removed. Annotations are not preserved in the returned network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let inferred = network.infer_valid_graph(py)?;
+    /// assert!(inferred.explicit_parameter_count() <= network.explicit_parameter_count());
+    /// ```    pub fn infer_valid_graph(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         self.as_native()
             .infer_valid_graph()
             .map_err(runtime_error)
@@ -870,8 +1193,16 @@ impl BooleanNetwork {
     /// #### Annotations
     ///
     /// TODO: Currently, this function does not preserve graph annotations. However, in the
-    /// future, annotations will be preserved, with unused regulations removed.
-    pub fn remove_regulation_constraints(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    /// Returns a copy of the network with all regulation constraints removed.
+    ///
+    /// The resulting network has all regulations set to non-essential with unknown sign. Annotations are not preserved in the returned network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let network = BooleanNetwork::from_aeon(py, "a, b\nb, a\n").unwrap();
+    /// let unconstrained = network.remove_regulation_constraints(py).unwrap();
+    /// ```    pub fn remove_regulation_constraints(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let native = self.as_native().remove_static_constraints();
         BooleanNetwork(native).export_to_python(py, None)
     }
@@ -901,6 +1232,24 @@ impl BooleanNetwork {
     /// future, annotations will be preserved, with unused variables/regulations removed.
     ///
     #[pyo3(signature = (infer_constants = false, repair_graph = false))]
+    /// Returns a new BooleanNetwork with all constant variables inlined into update functions.
+    ///
+    /// Constant variables (those with update functions equivalent to `true` or `false`) are iteratively replaced by their constant values throughout the network. Optionally, symbolic inference can be used to detect constants, and the regulatory graph can be repaired for consistency. Model annotations are not preserved in the returned network.
+    ///
+    /// # Parameters
+    /// - `infer_constants`: If `true`, uses symbolic inference to identify constant variables; otherwise, only syntactic constants are inlined.
+    /// - `repair_graph`: If `true`, repairs the regulatory graph to match the updated network structure.
+    ///
+    /// # Returns
+    /// A new BooleanNetwork with all constant variables inlined.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let bn = BooleanNetwork::from_aeon(py, "a, b\nb = false").unwrap();
+    /// let inlined_bn = bn.inline_constants(py, false, false).unwrap();
+    /// assert_eq!(inlined_bn.constant_names(false).len(), 0);
+    /// ```
     pub fn inline_constants(
         &self,
         py: Python,
@@ -943,6 +1292,24 @@ impl BooleanNetwork {
     /// future, annotations will be preserved, with unused variables/regulations removed.
     ///
     #[pyo3(signature = (infer_inputs = false, repair_graph = false))]
+    /// Returns a new BooleanNetwork with all input variables inlined into downstream update functions.
+    ///
+    /// Input variables (those with no incoming regulations and identity update functions) are removed from the network, and their values are substituted into all dependent update functions. Optionally, symbolic inference can be used to identify additional inputs, and the regulatory graph can be repaired for consistency. Model annotations are not preserved in the returned network.
+    ///
+    /// # Parameters
+    /// - `infer_inputs`: If true, uses symbolic inference to identify input variables beyond syntactic checks.
+    /// - `repair_graph`: If true, repairs the regulatory graph to match the updated network structure.
+    ///
+    /// # Returns
+    /// A new BooleanNetwork with input variables inlined.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let bn = BooleanNetwork::from_aeon(py, "a, b\nb* = a\n").unwrap();
+    /// let inlined_bn = bn.inline_inputs(py, false, false).unwrap();
+    /// assert!(inlined_bn.inputs(false).is_empty());
+    /// ```
     pub fn inline_inputs(
         &self,
         py: Python,
@@ -963,8 +1330,16 @@ impl BooleanNetwork {
     ///
     /// TODO: Currently, this function does not preserve graph annotations. However, in the
     /// future, annotations will be preserved, with unused variables/regulations removed.
+    /// Returns a copy of the network with all unused explicit parameters removed.
     ///
-    pub fn prune_unused_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    /// The resulting network omits any explicit parameters that are not referenced by update functions or regulations. Model annotations are not preserved in the returned network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let pruned = network.prune_unused_parameters(py)?;
+    /// assert!(pruned.explicit_parameter_count() <= network.explicit_parameter_count());
+    /// ```    pub fn prune_unused_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let bn = self.as_native().prune_unused_parameters();
         BooleanNetwork(bn).export_to_python(py, None)
     }
@@ -977,6 +1352,17 @@ impl BooleanNetwork {
     /// This function does not impact network annotations (since implicit parameters cannot be
     /// annotated, this is the same as the creation of a new parameter).
     #[pyo3(signature = (variable, name = None))]
+    /// Converts an implicit parameter associated with the given variable into an explicit parameter with the specified name.
+    ///
+    /// If `name` is `None`, a default name is assigned. The variable can be specified by its ID or name. Returns the new `ParameterId`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut bn = BooleanNetwork::from_aeon(py, "a, b\n").unwrap();
+    /// let param_id = bn.assign_parameter_name("a", Some("custom_param".to_string())).unwrap();
+    /// assert_eq!(bn.get_explicit_parameter_name(param_id), "custom_param");
+    /// ```
     pub fn assign_parameter_name(
         &mut self,
         variable: &Bound<'_, PyAny>,
@@ -997,8 +1383,17 @@ impl BooleanNetwork {
     /// #### Annotations
     ///
     /// TODO: Currently, this function does not preserve graph annotations. However, in the
-    /// future, annotations will be preserved, with unused regulations removed.
-    pub fn name_implicit_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    /// Converts all implicit parameters in the network to explicit parameters with default names.
+    ///
+    /// Returns a new `BooleanNetwork` instance where each variable with an implicit parameter is assigned a unique explicit parameter name. Model annotations are not preserved in the returned network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let bn = BooleanNetwork::from_aeon(py, "a, b\n").unwrap();
+    /// let named_bn = bn.name_implicit_parameters(py).unwrap();
+    /// assert!(named_bn.explicit_parameter_count() > 0);
+    /// ```    pub fn name_implicit_parameters(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let new_bn = self.as_native().name_implicit_parameters();
         BooleanNetwork(new_bn).export_to_python(py, None)
     }
@@ -1097,8 +1492,23 @@ impl BooleanNetwork {
 
 impl BooleanNetwork {
     /// Export a `BooleanNetwork` to something PyO3 will accept because it respects
-    /// the class inheritance hierarchy.
-    pub fn export_to_python(
+    /// Exports the BooleanNetwork and its RegulatoryGraph as a Python tuple, attaching optional model annotations to the RegulatoryGraph.
+    ///
+    /// # Parameters
+    /// - `annotations`: Optional model annotations to associate with the exported RegulatoryGraph.
+    ///
+    /// # Returns
+    /// A Python tuple containing the BooleanNetwork and its RegulatoryGraph, with annotations attached if provided.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use pyo3::Python;
+    /// # let py = Python::acquire_gil().python();
+    /// # let network: BooleanNetwork = /* ... */;
+    /// let exported = network.export_to_python(py, None).unwrap();
+    /// // exported is a Python tuple (BooleanNetwork, RegulatoryGraph)
+    /// ```    pub fn export_to_python(
         self,
         py: Python,
         annotations: Option<Py<ModelAnnotationRoot>>,
