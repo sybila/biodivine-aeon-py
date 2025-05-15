@@ -228,6 +228,39 @@ impl Classification {
     ///
     #[staticmethod]
     #[pyo3(signature = (path, network, classification, annotations = None))]
+    /// Saves the classification results and network to a BN Classifier-compatible `.zip` archive.
+    ///
+    /// Converts the provided classification mapping to use the symbolic encoding of the given network,
+    /// and writes both the network and classification to the specified archive path. Optionally,
+    /// additional annotations can be appended to the network's `.aeon` file content; these supplement
+    /// any annotations already present in the `BooleanNetwork` instance.
+    ///
+    /// # Arguments
+    ///
+    /// - `path`: The file path where the archive will be saved.
+    /// - `network`: The Boolean network whose classification is being saved.
+    /// - `classification`: A mapping from class labels to color sets representing the classification.
+    /// - `annotations`: Optional additional annotations to append to the `.aeon` file content.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `RuntimeError` if any class set is incompatible with the network or if writing the archive fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use biodivine_lib_param_bn::BooleanNetwork;
+    /// # use biodivine_aeon_classifier::{Classification, Class, ColorSet};
+    /// # use std::collections::HashMap;
+    /// # use pyo3::Python;
+    /// # Python::with_gil(|py| {
+    /// let network = BooleanNetwork::try_from("a -> b").unwrap();
+    /// let classification: HashMap<Class, ColorSet> = HashMap::new();
+    /// let path = "output.zip".to_string();
+    /// let py_network = PyRef::new(py, network).unwrap();
+    /// Classification::save_classification(py, path, py_network, classification, None).unwrap();
+    /// # });
+    /// ```
     pub fn save_classification(
         py: Python,
         path: String,

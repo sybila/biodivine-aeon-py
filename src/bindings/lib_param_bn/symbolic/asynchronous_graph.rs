@@ -195,8 +195,17 @@ impl AsynchronousGraph {
     /// a function expression form a partially specified function. The only exception are
     /// implicit parameters (i.e. fully erased functions) that can be reconstructed as well.
     ///
-    /// The new network does not have any annotations.
-    pub fn reconstruct_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
+    /// Attempts to reconstruct the underlying Boolean network from the symbolic graph.
+    ///
+    /// The reconstructed network will not contain any annotations. Returns an error if the symbolic graph uses complex or uninterpreted functions that prevent reconstruction.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil().python();
+    /// let reconstructed = graph.reconstruct_network(py).unwrap();
+    /// assert!(reconstructed.is_instance_of::<BooleanNetwork>(py).unwrap());
+    /// ```    pub fn reconstruct_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let Some(native) = self.native.reconstruct_network() else {
             return throw_runtime_error("Cannot reconstruct network: complex parameters found.");
         };

@@ -694,9 +694,32 @@ class RegulatoryGraph:
                        subgraph: Optional[Sequence[VariableIdType]] = None,
                        length: Optional[int] = None,
     ) -> Optional[list[VariableId]]:
-        ...
-    def raw_annotation(self) -> ModelAnnotation: ...
-    def annotation(self) -> RegulatoryGraphAnnotation: ...
+        """
+                       Finds the shortest cycle in the regulatory graph passing through a given variable.
+                       
+                       Args:
+                           pivot: The variable through which the cycle must pass.
+                           parity: If specified, restricts the cycle to positive or negative parity.
+                           subgraph: If specified, restricts the search to a subset of variables.
+                           length: If specified, only cycles of this length are considered.
+                       
+                       Returns:
+                           A list of VariableId objects representing the shortest cycle, or None if no such cycle exists.
+                       """
+                       ...
+    def raw_annotation(self) -> ModelAnnotation: """
+Returns the raw hierarchical annotation associated with the regulatory graph.
+
+Returns:
+    The ModelAnnotation object containing the unprocessed annotation data.
+"""
+...
+    def annotation(self) -> RegulatoryGraphAnnotation: """
+Returns a structured annotation interface for the regulatory graph.
+
+The returned RegulatoryGraphAnnotation object provides access to model-level metadata and structured annotations for variables and regulations.
+"""
+...
 
 class BooleanNetwork(RegulatoryGraph):
     @overload
@@ -964,19 +987,46 @@ class ModelAnnotation:
     @property
     def value(self) -> Optional[str]:
         """
-        The optional string value of the model annotation.
+        Returns the string value of the model annotation, if present.
+        
+        Returns:
+            The annotation value as a string, or None if not set.
         """
     @value.setter
-    def value(self, value: Optional[str]) -> None: ...
+    def value(self, value: Optional[str]) -> None: """
+Sets the annotation value as a string or clears it if None is provided.
+
+Args:
+	value: The new annotation value as a string, or None to remove the value.
+"""
+...
     @property
     def lines(self) -> Optional[list[str]]:
         """
-        The value of this annotation, but separated into individual lines.
+        Gets the annotation value as a list of individual lines.
+        
+        Returns:
+            A list of strings representing each line of the annotation value, or None if no value is set.
         """
     @value.setter
-    def lines(self, value: Optional[list[str]]) -> None: ...
+    def lines(self, value: Optional[list[str]]) -> None: """
+Sets the annotation value as a list of lines.
+
+Args:
+    value: A list of strings representing the annotation lines, or None to clear them.
+"""
+...
     @staticmethod
-    def from_aeon(file_contents: str) -> ModelAnnotation: ...
+    def from_aeon(file_contents: str) -> ModelAnnotation: """
+Parses AEON-formatted annotation content and returns a ModelAnnotation object.
+
+Args:
+	file_contents: The contents of an AEON annotation file as a string.
+
+Returns:
+	A ModelAnnotation instance representing the parsed annotation.
+"""
+...
     @staticmethod
     def from_file(path: str) -> ModelAnnotation: ...
     def values(self) -> list[ModelAnnotation]: ...
@@ -1820,124 +1870,282 @@ class Control:
                             phenotype: VertexSet,
                             oscillation_type: Optional[PhenotypeOscillation] = None,
                             size_limit: Optional[int] = None,
-                            stop_when_found: bool = False) -> ColoredPerturbationSet: ...
+                            stop_when_found: bool = False) -> ColoredPerturbationSet: """
+                            Computes permanent perturbations that enforce a given phenotype in an asynchronous perturbation graph.
+                            
+                            Args:
+                                graph: The asynchronous perturbation graph to analyze.
+                                phenotype: The set of vertices representing the desired phenotype.
+                                oscillation_type: If specified, restricts solutions to those exhibiting the given oscillation type.
+                                size_limit: If specified, limits the maximum size of perturbations considered.
+                                stop_when_found: If True, stops after finding the first valid perturbation.
+                            
+                            Returns:
+                                A set of colored perturbations that guarantee the system remains within the specified phenotype under all dynamics.
+                            """
+                            ...
 
 class NetworkVariableAnnotation:
     @property
     def gene_names(self) -> Optional[list[str]]:
         """
-        A list of gene names relevant to this variable, sorted by relevance.
+        A list of gene names associated with this variable, sorted by relevance.
+        
+        Returns:
+            A list of gene names if available, otherwise None.
         """
     @gene_names.setter
-    def gene_names(self, value: Optional[list[str]]) -> None: ...
+    def gene_names(self, value: Optional[list[str]]) -> None: """
+Sets the list of gene names associated with the network variable.
+
+Args:
+    value: A list of gene names, or None to clear the annotation.
+"""
+...
     @property
     def references(self) -> Optional[list[str]]:
         """
-        A list of references (publications, datasets, ...) relevant to this variable.
+        Gets the list of references associated with this variable.
+        
+        Returns:
+            A list of references such as publications or datasets, or None if not set.
         """
     @references.setter
-    def references(self, value: Optional[list[str]]) -> None: ...
+    def references(self, value: Optional[list[str]]) -> None: """
+Sets the list of references associated with this annotation.
+
+Args:
+	value: A list of reference strings, or None to clear the references.
+"""
+...
     @property
     def ids(self) -> VariableIdsAnnotation:
         """
-        A sub-object that stores various identifiers that can be associated with a variable.
+        Returns the annotation object containing identifier lists (e.g., Uniprot, GEO, NCBI) associated with the variable.
+        
+        Returns:
+            VariableIdsAnnotation: Structured access to various external and database identifiers for the variable.
         """
     @ids.setter
-    def ids(self, value: VariableIdsAnnotation) -> None: ...
+    def ids(self, value: VariableIdsAnnotation) -> None: """
+Sets the identifier annotations for the network variable.
+
+Args:
+    value: The VariableIdsAnnotation containing identifier lists such as Uniprot, GEO, and NCBI IDs.
+"""
+...
     @property
     def layout(self) -> VariableLayoutAnnotation:
         """
-        A sub-object that stores data related to graph layout of this variable.
+        Returns the layout annotation object for this variable, containing graph layout data.
         """
     @layout.setter
-    def layout(self, value: VariableLayoutAnnotation) -> None: ...
+    def layout(self, value: VariableLayoutAnnotation) -> None: """
+Sets the layout annotation for the network variable.
+
+Args:
+	value: The layout annotation specifying the variable's position.
+"""
+...
 
 class VariableIdsAnnotation:
     @property
     def uniprot(self) -> Optional[list[str]]:
         """
-        A list of Uniprot identifiers relevant to this variable, sorted by relevance.
+        Gets the list of Uniprot identifiers associated with this variable, sorted by relevance.
+        
+        Returns:
+            A list of Uniprot IDs if available, otherwise None.
         """
     @uniprot.setter
-    def uniprot(self, value: Optional[list[str]]) -> None: ...
+    def uniprot(self, value: Optional[list[str]]) -> None: """
+Sets the list of UniProt identifiers associated with the variable.
+
+Args:
+    value: A list of UniProt identifier strings, or None to clear the annotation.
+"""
+...
     @property
     def geo_cc(self) -> Optional[list[str]]:
         """
-        A list of cellular component GEO terms relevant to this variable, sorted by relevance.
+        Returns a list of GEO cellular component terms associated with this variable, sorted by relevance.
         """
     @geo_cc.setter
-    def geo_cc(self, value: Optional[list[str]]) -> None: ...
+    def geo_cc(self, value: Optional[list[str]]) -> None: """
+Sets the GEO cellular component identifiers for the variable.
+
+Args:
+    value: A list of GEO cellular component IDs, or None to clear the annotation.
+"""
+...
     @property
     def geo_mf(self) -> Optional[list[str]]:
         """
-        A list of molecular function GEO terms relevant to this variable, sorted by relevance.
+        Gets the list of GEO molecular function terms associated with this variable, sorted by relevance.
+        
+        Returns:
+            A list of GEO molecular function term strings, or None if not set.
         """
     @geo_mf.setter
-    def geo_mf(self, value: Optional[list[str]]) -> None: ...
+    def geo_mf(self, value: Optional[list[str]]) -> None: """
+Sets the list of Gene Ontology molecular function (MF) terms for the variable.
+
+Args:
+    value: A list of GO molecular function term identifiers, or None to clear.
+"""
+...
     @property
     def geo_bp(self) -> Optional[list[str]]:
         """
-        A list of biological process GEO terms relevant to this variable, sorted by relevance.
+        Gets the list of GEO biological process terms associated with this variable, sorted by relevance.
+        
+        Returns:
+            A list of GEO biological process term strings, or None if not set.
         """
     @geo_bp.setter
-    def geo_bp(self, value: Optional[list[str]]) -> None: ...
+    def geo_bp(self, value: Optional[list[str]]) -> None: """
+Sets the list of Gene Ontology biological process (GO:BP) identifiers for the variable.
+
+Args:
+    value: A list of GO:BP identifier strings, or None to clear the annotation.
+"""
+...
     @property
     def ncbi(self) -> Optional[list[str]]:
         """
-        A list of NCBI gene IDs relevant to this variable, sorted by relevance.
+        Returns a list of NCBI gene IDs associated with this variable, sorted by relevance.
+        
+        Returns:
+            A list of NCBI gene IDs, or None if not specified.
         """
     @ncbi.setter
-    def ncbi(self, value: Optional[list[str]]) -> None: ...
+    def ncbi(self, value: Optional[list[str]]) -> None: """
+Sets the list of NCBI gene identifiers associated with the variable.
+
+Args:
+    value: A list of NCBI gene ID strings, or None to clear the annotation.
+"""
+...
 
 class VariableLayoutAnnotation:
     @property
     def position(self) -> Optional[tuple[float, float]]:
         """
-        The position of a variable within model layout.
+        Gets or sets the 2D position of a variable in the model layout.
+        
+        Returns:
+            A tuple of (x, y) coordinates if the position is set, otherwise None.
         """
     @position.setter
-    def position(self, value: Optional[tuple[float, float]]) -> None: ...
+    def position(self, value: Optional[tuple[float, float]]) -> None: """
+Sets the position of the variable in the model layout.
+
+Args:
+    value: A tuple representing the (x, y) coordinates, or None to unset.
+"""
+...
 
 class NetworkRegulationAnnotation:
     @property
     def references(self) -> Optional[list[str]]:
         """
-        A list of references (publications, datasets, ...) relevant to this regulation.
+        A list of references relevant to this regulation, such as publications or datasets.
+        
+        Returns:
+            A list of reference strings, or None if not specified.
         """
     @references.setter
-    def references(self, value: Optional[list[str]]) -> None: ...
+    def references(self, value: Optional[list[str]]) -> None: """
+Sets the list of references associated with this annotation.
+
+Args:
+    value: A list of reference strings or None to clear the references.
+"""
+...
 
 class RegulatoryGraphAnnotation:
-    def variable(self, variable: VariableIdType) -> NetworkVariableAnnotation: ...
-    def regulation(self, source: VariableIdType, target: VariableIdType) -> NetworkRegulationAnnotation: ...
+    def variable(self, variable: VariableIdType) -> NetworkVariableAnnotation: """
+Returns the annotation object for a specific variable in the regulatory graph.
+
+Args:
+	variable: The identifier of the variable whose annotation is to be retrieved.
+
+Returns:
+	A NetworkVariableAnnotation instance providing access to metadata for the specified variable.
+"""
+...
+    def regulation(self, source: VariableIdType, target: VariableIdType) -> NetworkRegulationAnnotation: """
+Returns the annotation object for a specific regulation between two variables.
+
+Args:
+    source: The source variable identifier of the regulation.
+    target: The target variable identifier of the regulation.
+
+Returns:
+    The annotation associated with the regulation from source to target.
+"""
+...
     @property
     def references(self) -> Optional[list[str]]:
         """
-        A list of references (publications, datasets, ...) relevant to this model.
+        A list of references relevant to the model.
+        
+        Returns:
+            A list of publication or dataset references, or None if not set.
         """
     @references.setter
-    def references(self, value: Optional[list[str]]) -> None: ...
+    def references(self, value: Optional[list[str]]) -> None: """
+Sets the list of references associated with this annotation.
+
+Args:
+    value: A list of reference strings or None to clear the references.
+"""
+...
     @property
     def taxon(self) -> Optional[str]:
         """
-        Describes the taxon of the organism that is relevant to this model.
+        Gets the taxonomic classification of the organism relevant to this model.
+        
+        Returns:
+            The taxon as a string, or None if not specified.
         """
     @taxon.setter
-    def taxon(self, value: Optional[str]) -> None: ...
+    def taxon(self, value: Optional[str]) -> None: """
+Sets the taxon annotation for the regulatory graph.
+
+Args:
+	value: The taxonomic identifier or description to associate with the model, or None to remove it.
+"""
+...
     @property
     def name(self) -> Optional[str]:
         """
-        A descriptive name of this model.
+        Returns the descriptive name of the regulatory graph model, if available.
         """
     @name.setter
-    def name(self, value: Optional[str]) -> None: ...
+    def name(self, value: Optional[str]) -> None: """
+Sets the name of the regulatory graph annotation.
+
+Args:
+    value: The name to assign, or None to unset.
+"""
+...
     @property
     def description(self) -> Optional[str]:
         """
-        A human-readable plaintext description of this model.
+        Returns a human-readable plaintext description of the model.
+        
+        Returns:
+            The model's description as a string, or None if not set.
         """
     @description.setter
-    def description(self, value: Optional[str]) -> None: ...
+    def description(self, value: Optional[str]) -> None: """
+Sets the description of the regulatory graph annotation.
+
+Args:
+	value: The description text to assign, or None to clear it.
+"""
+...
 
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]

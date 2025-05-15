@@ -83,6 +83,21 @@ fn should_log(log_level: usize) -> bool {
 /// algorithms, you may want to look at `Attractors`, `TrapSpaces`, `FixedPoints`, `Classification`,
 /// or `Control`.
 #[pymodule]
+/// Initializes the `biodivine_aeon` Python module and registers all AEON submodules and bindings.
+///
+/// This function sets up logging configuration and exposes AEON's core Boolean network data structures and algorithms to Python by registering all relevant submodules.
+///
+/// # Examples
+///
+/// ```
+/// use pyo3::prelude::*;
+/// use pyo3::types::PyModule;
+///
+/// Python::with_gil(|py| {
+///     let module = PyModule::new(py, "biodivine_aeon").unwrap();
+///     biodivine_aeon(py, module).unwrap();
+/// });
+/// ```
 fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     set_log_level(py, module)?;
     bindings::lib_bdd::register(module)?;

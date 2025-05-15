@@ -110,6 +110,14 @@ def test_attractor_bifurcation_with_perturbations():
         assert stg.transfer_from(colors, pstg) == mapping_stg[cls]
 
 def test_property_classification():
+    """
+    Tests classification of dynamic properties in a Boolean network model.
+    
+    Loads a model with annotated properties and assertions, parses them into formulas,
+    and classifies the state space according to these properties using an asynchronous
+    graph. Verifies the classification results, saves and reloads the classification,
+    and checks for consistency with the original data.
+    """
     path = "./tests/model-with-properties.aeon"
 
     annotations = ModelAnnotation.from_file(path)

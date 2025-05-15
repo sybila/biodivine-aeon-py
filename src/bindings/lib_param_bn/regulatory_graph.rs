@@ -38,6 +38,15 @@ pub struct RegulatoryGraph {
 }
 
 impl From<biodivine_lib_param_bn::RegulatoryGraph> for RegulatoryGraph {
+    /// Converts a native `RegulatoryGraph` into a Python-exposed `RegulatoryGraph` without annotations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let native = biodivine_lib_param_bn::RegulatoryGraph::new(vec![], vec![]);
+    /// let py_graph = RegulatoryGraph::from(native);
+    /// assert!(py_graph.annotations.is_none());
+    /// ```
     fn from(value: biodivine_lib_param_bn::RegulatoryGraph) -> Self {
         RegulatoryGraph {
             native: value,
@@ -47,22 +56,62 @@ impl From<biodivine_lib_param_bn::RegulatoryGraph> for RegulatoryGraph {
 }
 
 impl From<RegulatoryGraph> for biodivine_lib_param_bn::RegulatoryGraph {
+    /// Converts a `RegulatoryGraph` into its underlying native graph, discarding any annotation data.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let native = biodivine_lib_param_bn::RegulatoryGraph::from(graph);
+    /// ```
     fn from(value: RegulatoryGraph) -> Self {
         value.native
     }
 }
 
 impl AsNative<biodivine_lib_param_bn::RegulatoryGraph> for RegulatoryGraph {
+    /// Returns a reference to the underlying native regulatory graph.
+    ///
+    /// This allows direct access to the wrapped `biodivine_lib_param_bn::RegulatoryGraph` instance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let native = graph.as_native();
+    /// assert_eq!(native.variable_count(), graph.variable_count());
+    /// ```
     fn as_native(&self) -> &biodivine_lib_param_bn::RegulatoryGraph {
         &self.native
     }
 
+    /// Returns a mutable reference to the underlying native regulatory graph.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let native = graph.as_native_mut();
+    /// native.add_variable("x");
+    /// assert_eq!(native.num_vars(), 1);
+    /// ```
     fn as_native_mut(&mut self) -> &mut biodivine_lib_param_bn::RegulatoryGraph {
         &mut self.native
     }
 }
 
 impl NetworkVariableContext for RegulatoryGraph {
+    /// Resolves a network variable from a Python object to its internal variable ID.
+    ///
+    /// Accepts either a `VariableId` or a variable name (`str`). Returns the corresponding internal variable ID if found, or raises an error if the variable does not exist or the input type is invalid.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = ...; // Assume a valid RegulatoryGraph instance
+    /// let var_id = graph.resolve_network_variable(&PyAny::from("GeneA")).unwrap();
+    /// assert_eq!(graph.get_variable_name(&var_id).unwrap(), "GeneA");
+    /// ```
     fn resolve_network_variable(
         &self,
         variable: &Bound<'_, PyAny>,
@@ -84,6 +133,16 @@ impl NetworkVariableContext for RegulatoryGraph {
         throw_type_error("Expected `VariableId` or `str`.")
     }
 
+    /// Returns the name of the specified network variable.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::from_aeon(py, "a -> b").unwrap();
+    /// let var_id = graph.variables()[0];
+    /// let name = graph.get_network_variable_name(var_id);
+    /// assert_eq!(name, "a");
+    /// ```
     fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
         self.as_native().get_variable_name(variable).to_string()
     }
@@ -102,6 +161,20 @@ impl RegulatoryGraph {
     /// Optionally, you can also provide model annotations as either string, or `ModelAnnotation` object.
     #[new]
     #[pyo3(signature = (variables = None, regulations = None, annotations = None))]
+    /// Constructs a new regulatory graph with optional variables, regulations, and annotations.
+    ///
+    /// If variable names are not provided, they are inferred from the regulations. Regulations can be specified as strings or dictionaries, and annotations can be provided as a string or a `ModelAnnotation` object. Returns an error if regulation addition fails or if input is invalid.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(
+    ///     Some(vec!["A".to_string(), "B".to_string()]),
+    ///     None,
+    ///     None,
+    /// ).unwrap();
+    /// assert_eq!(graph.variable_count(), 2);
+    /// ```
     pub fn new(
         variables: Option<Vec<String>>,
         regulations: Option<&Bound<'_, PyList>>,
@@ -153,6 +226,14 @@ impl RegulatoryGraph {
         })
     }
 
+    /// Returns a concise summary of the regulatory graph, including the number of variables and regulations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// assert_eq!(graph.__str__(), "RegulatoryGraph(variables=0, regulations=0)");
+    /// ```
     fn __str__(&self) -> String {
         format!(
             "RegulatoryGraph(variables={}, regulations={})",
@@ -161,10 +242,37 @@ impl RegulatoryGraph {
         )
     }
 
+    /// Implements rich comparison operations for `RegulatoryGraph`.
+    ///
+    /// Two graphs are considered equal if their native representations are equal. Other comparison operations are not supported.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let g1 = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let g2 = RegulatoryGraph::new(None, None, None).unwrap();
+    /// assert!(g1 == g2);
+    /// ```
     fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> Py<PyAny> {
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
+    /// Returns a string representation of the RegulatoryGraph constructor with variables, regulations, and annotations.
+    ///
+    /// The output is formatted as a valid Python constructor call, including all variables, regulations, and annotation data if present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(
+    ///     Some(vec!["A".to_string(), "B".to_string()]),
+    ///     None,
+    ///     None,
+    /// );
+    /// let py = Python::acquire_gil();
+    /// let repr = graph.__repr__(py.python());
+    /// assert!(repr.starts_with("RegulatoryGraph([\"A\", \"B\"],"));
+    /// ```
     fn __repr__(&self, py: Python) -> String {
         let (names, regulations, annotations) = self.__getnewargs__(py);
         // Rust prints Option values differently compared to Python. This way we make sure the value is either a valid string, or `None`.
@@ -177,6 +285,18 @@ impl RegulatoryGraph {
         )
     }
 
+    /// Returns the arguments needed to reconstruct this `RegulatoryGraph` instance.
+    ///
+    /// The returned tuple contains the variable names, regulation strings, and optional annotation string,
+    /// suitable for use with Python's `__new__` method for object deserialization.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let (names, regulations, annotations) = graph.__getnewargs__(py);
+    /// assert_eq!(names, graph.variable_names());
+    /// ```
     pub fn __getnewargs__(&self, py: Python) -> (Vec<String>, Vec<String>, Option<String>) {
         let names = self.variable_names();
         let regulations = self
@@ -191,6 +311,15 @@ impl RegulatoryGraph {
         (names, regulations, ann_string)
     }
 
+    /// Returns a deep copy of the regulatory graph, including its variables, regulations, and model annotations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let copy = graph.__copy__(py).unwrap();
+    /// assert_eq!(graph.variable_count(), copy.variable_count());
+    /// ```
     fn __copy__(&self, py: Python) -> PyResult<RegulatoryGraph> {
         // Note that we have to make a new "deep copy" of the model annotations.
         let ann_copy = self
@@ -204,12 +333,31 @@ impl RegulatoryGraph {
         })
     }
 
+    /// Returns a deep copy of the regulatory graph, including all variables, regulations, and annotations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let copy = graph.__deepcopy__(py, py.None()).unwrap();
+    /// assert_eq!(graph.variable_count(), copy.variable_count());
+    /// ```
     fn __deepcopy__(&self, py: Python, _memo: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
         self.__copy__(py)
     }
 
     /// Try to read the structure of a `RegulatoryGraph` from an `.aeon` file at the specified path.
     #[staticmethod]
+    /// Loads a `RegulatoryGraph` from an `.aeon` file, including any model annotations.
+    ///
+    /// Reads the specified file, parses its contents as an `.aeon` regulatory graph, and returns a new `RegulatoryGraph` instance with associated annotations if present. Raises a runtime error if the file cannot be read or parsed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::from_file(py, "model.aeon")?;
+    /// assert!(graph.variable_count() > 0);
+    /// ```
     fn from_file(py: Python, file_path: &str) -> PyResult<RegulatoryGraph> {
         match std::fs::read_to_string(file_path) {
             Err(e) => throw_runtime_error(format!("Cannot read file {}: `{}`.", file_path, e)),
@@ -221,6 +369,18 @@ impl RegulatoryGraph {
     ///
     /// If the `.aeon` file contains some annotation data, these are stored in `RegulatoryGraph.annotations()`.
     #[staticmethod]
+    /// Constructs a `RegulatoryGraph` from an `.aeon` format string, including any embedded model annotations.
+    ///
+    /// Parses the provided `.aeon` file content to create a regulatory graph and attaches any model annotations found in the input.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let aeon_str = "a -> b\n@metadata: {\"description\": \"Example\"}";
+    /// let py = Python::acquire_gil();
+    /// let graph = RegulatoryGraph::from_aeon(py.python(), aeon_str).unwrap();
+    /// assert_eq!(graph.variable_count(), 2);
+    /// ```
     fn from_aeon(py: Python, file_content: &str) -> PyResult<RegulatoryGraph> {
         let native_graph = biodivine_lib_param_bn::RegulatoryGraph::try_from(file_content)
             .map_err(runtime_error)?;
@@ -236,8 +396,17 @@ impl RegulatoryGraph {
     /// Convert this `RegulatoryGraph` to a string representation of a valid `.aeon` file.
     ///
     /// If any annotation data are present (see `RegulatoryGraph.annotations()`), the `.aeon`
-    /// file will also contain respective annotation comments.
-    fn to_aeon(&self, py: Python) -> String {
+    /// Serializes the regulatory graph and its annotations to an `.aeon` format string.
+    ///
+    /// If annotations are present, they are included as comments at the beginning of the output, followed by the regulation definitions.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::from_aeon(py, "a -> b\nb -| c").unwrap();
+    /// let aeon_str = graph.to_aeon(py);
+    /// assert!(aeon_str.contains("a -> b"));
+    /// ```    fn to_aeon(&self, py: Python) -> String {
         let (_, regulations, _) = self.__getnewargs__(py);
         if let Some(annotations) = self.annotations.as_ref() {
             let ann_string = annotations.borrow(py).as_native().to_string();
@@ -280,8 +449,19 @@ impl RegulatoryGraph {
     }
 
     /// Return a `VariableId` identifier of the requested `variable`, or `None` if the variable
-    /// does not exist in this `RegulatoryGraph`.
-    pub fn find_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<Option<VariableId>> {
+    /// Finds a variable by its ID or name.
+    ///
+    /// Returns the corresponding `VariableId` if the variable exists, or `None` if not found. Raises a type error if the input is not a valid variable ID or string.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(Some(vec!["A".to_string(), "B".to_string()]), None, None).unwrap();
+    /// let var_id = graph.find_variable(&"A".into_py(py)).unwrap();
+    /// assert!(var_id.is_some());
+    /// let missing = graph.find_variable(&"C".into_py(py)).unwrap();
+    /// assert!(missing.is_none());
+    /// ```    pub fn find_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<Option<VariableId>> {
         if let Ok(id) = variable.extract::<VariableId>() {
             return if id.__index__() < self.variable_count() {
                 Ok(Some(id))
@@ -299,8 +479,18 @@ impl RegulatoryGraph {
     }
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
-    /// such variable does not exist.
-    pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
+    /// Returns the name of the specified variable.
+    ///
+    /// Resolves the given variable (by ID or name) and returns its current name.
+    /// Raises an error if the variable does not exist.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(Some(vec!["A".to_string(), "B".to_string()]), None, None).unwrap();
+    /// let name = graph.get_variable_name(&0.into_py(py)).unwrap();
+    /// assert_eq!(name, "A");
+    /// ```    pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         let var = self.resolve_network_variable(variable)?;
         Ok(self.as_native().get_variable_name(var).clone())
     }
@@ -310,8 +500,26 @@ impl RegulatoryGraph {
     ///
     /// The variable is also renamed in the associated `ModelAnnotations`, but any existing
     /// annotation objects (i.e. `ModelAnnotation` or `NetworkVariableAnnotation`) referencing
-    /// the renamed annotation become invalid.
-    pub fn set_variable_name(
+    /// Renames a variable in the regulatory graph and updates associated annotations.
+    ///
+    /// If the variable exists, its name is changed to the specified new name. Any annotation data referencing the old name is updated to reflect the change. References to the old variable name in annotations become invalid.
+    ///
+    /// # Arguments
+    ///
+    /// - `variable`: The variable to rename, specified by ID or name.
+    /// - `name`: The new name for the variable.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the variable does not exist or if renaming fails.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut graph = RegulatoryGraph::new(Some(vec!["A".to_string()]), None, None).unwrap();
+    /// graph.set_variable_name(py, "A", "B").unwrap();
+    /// assert_eq!(graph.get_variable_name("B").unwrap(), "B");
+    /// ```    pub fn set_variable_name(
         &mut self,
         py: Python,
         variable: &Bound<'_, PyAny>,
@@ -374,8 +582,24 @@ impl RegulatoryGraph {
     /// Add a new regulation to the `RegulatoryGraph`, either using a `NamedRegulation`, `IdRegulation`, or
     /// a string representation compatible with the `.aeon` format.
     ///
-    /// Model annotations are not affected by this operation.
-    pub fn add_regulation(&mut self, regulation: &Bound<'_, PyAny>) -> PyResult<()> {
+    /// Adds a regulation to the graph from a string or dictionary specification.
+    ///
+    /// The regulation can be provided as a string or a dictionary with keys such as `source`, `target`, `essential`/`observable`, and `sign`/`monotonicity`. The sign is converted to monotonicity as needed. If the regulation already exists, it is overwritten. Model annotations are not affected by this operation.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the regulation cannot be parsed or added.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut graph = RegulatoryGraph::new(
+    ///     Some(vec!["A".to_string(), "B".to_string()]),
+    ///     None,
+    ///     None,
+    /// ).unwrap();
+    /// graph.add_regulation("A +-> B").unwrap();
+    /// ```    pub fn add_regulation(&mut self, regulation: &Bound<'_, PyAny>) -> PyResult<()> {
         let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
         let m = m.as_ref().map(|it| match it {
             Positive => Monotonicity::Activation,
@@ -391,8 +615,20 @@ impl RegulatoryGraph {
     /// does not exist.
     ///
     /// Also removes any annotation data that is associated with the regulation (however, this
-    /// data is not returned).
-    pub fn remove_regulation<'a>(
+    /// Removes a regulation between two variables and returns its details.
+    ///
+    /// Deletes the regulation from the graph and removes any associated annotation data.  
+    /// Returns a dictionary describing the removed regulation.  
+    /// Raises an error if the regulation does not exist.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut graph = RegulatoryGraph::from_aeon(py, "a -> b").unwrap();
+    /// let removed = graph.remove_regulation(py, "a", "b").unwrap();
+    /// assert_eq!(removed.get_item("source").unwrap().extract::<String>().unwrap(), "a");
+    /// assert_eq!(removed.get_item("target").unwrap().extract::<String>().unwrap(), "b");
+    /// ```    pub fn remove_regulation<'a>(
         &mut self,
         py: Python<'a>,
         source: &Bound<'a, PyAny>,
@@ -423,8 +659,22 @@ impl RegulatoryGraph {
     /// Returns the previous state of the regulation as an `IdRegulation` dictionary, assuming the regulation
     /// already existed.
     ///
-    /// Model annotations are not affected by this operation.
-    pub fn ensure_regulation<'a>(
+    /// Updates or creates a regulation between two variables with the specified sign and essential flag.
+    ///
+    /// If a regulation already exists between the given source and target, it is replaced with the new specification. If not, a new regulation is created. The previous regulation is returned as a dictionary if it existed; otherwise, `None` is returned. Model annotations are not affected by this operation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut g = RegulatoryGraph::new(
+    ///     Some(vec!["A".to_string(), "B".to_string()]),
+    ///     None,
+    ///     None,
+    /// ).unwrap();
+    /// assert!(g.ensure_regulation(py, &dict!{ "source" => "A", "target" => "B", "sign" => "+", "essential" => true }).unwrap().is_none());
+    /// let prev = g.ensure_regulation(py, &dict!{ "source" => "A", "target" => "B", "sign" => "-", "essential" => false }).unwrap();
+    /// assert!(prev.is_some());
+    /// ```    pub fn ensure_regulation<'a>(
         &mut self,
         py: Python<'a>,
         regulation: &Bound<'a, PyAny>,
@@ -450,8 +700,24 @@ impl RegulatoryGraph {
     /// are still valid. However, the added names must still be unique within the new graph.
     ///
     /// Model annotations are not affected by this operation (current annotations are copied
-    /// into the new network).
-    pub fn extend(&self, py: Python, mut variables: Vec<String>) -> PyResult<RegulatoryGraph> {
+    /// Returns a new regulatory graph with additional variables appended to the existing graph.
+    ///
+    /// The new graph contains all original variables and regulations, plus the specified variables (without regulations).
+    /// Model annotations are copied to the new graph.
+    ///
+    /// # Parameters
+    /// - `variables`: Variable names to append to the graph.
+    ///
+    /// # Returns
+    /// A new `RegulatoryGraph` with the extended set of variables.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let g = RegulatoryGraph::new(Some(vec!["A".to_string()]), None, None).unwrap();
+    /// let g2 = g.extend(py, vec!["B".to_string()]).unwrap();
+    /// assert_eq!(g2.variable_names(), vec!["A", "B"]);
+    /// ```    pub fn extend(&self, py: Python, mut variables: Vec<String>) -> PyResult<RegulatoryGraph> {
         let (mut names, regulations, _) = self.__getnewargs__(py);
         names.append(&mut variables);
         let mut result = Self::new(Some(names), None, None)?;
@@ -478,8 +744,21 @@ impl RegulatoryGraph {
     /// The new graph follows the variable ordering of the old graph, but since there are now variables that are
     /// missing in the new graph, the `VariableId` objects are not compatible with the original graph.
     ///
-    /// Annotations for unaffected variables are preserved.
-    pub fn drop(&self, py: Python, variables: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
+    /// Returns a new regulatory graph with the specified variables and their associated regulations removed.
+    ///
+    /// Variables to remove can be specified by name or ID. Annotations for variables that remain in the graph are preserved. Raises an error if any specified variable does not exist.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::new(
+    ///     Some(vec!["A".to_string(), "B".to_string(), "C".to_string()]),
+    ///     None,
+    ///     None,
+    /// ).unwrap();
+    /// let reduced = graph.drop(py, &PyList::new(py, vec!["B"])).unwrap();
+    /// assert_eq!(reduced.variable_names(), vec!["A", "C"]);
+    /// ```    pub fn drop(&self, py: Python, variables: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
         let to_remove = self
             .resolve_variables(variables)?
             .into_iter()
@@ -532,8 +811,17 @@ impl RegulatoryGraph {
     /// a result that is functionally compatible with the original regulatory graph. Of course, you can use
     /// `RegulatoryGraph.remove_regulation` to explicitly remove the self-loop before inlining the variable.
     ///
-    /// This attempts to merge the annotations of the inlined variable and associated regulations with the
-    pub fn inline_variable(
+    /// Returns a new regulatory graph with the specified variable inlined into its downstream targets.
+    ///
+    /// The inlined variable is removed from the graph, and its regulatory effects are merged into its targets. Associated annotation data is merged accordingly. Returns an error if the variable has a self-regulation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::from_aeon(py, "a -> b\nb -> c").unwrap();
+    /// let inlined = graph.inline_variable(py, "b").unwrap();
+    /// assert!(!inlined.variable_names().contains(&"b".to_string()));
+    /// ```    pub fn inline_variable(
         &self,
         py: Python,
         variable: &Bound<'_, PyAny>,
@@ -562,8 +850,17 @@ impl RegulatoryGraph {
     /// In particular, every regulation is set to non-essential with an unknown sign.
     ///
     ///
-    /// This does not affect model annotations (if present).
-    pub fn remove_regulation_constraints(&self, py: Python) -> PyResult<RegulatoryGraph> {
+    /// Returns a new regulatory graph with all regulations set to non-essential and unknown sign.
+    ///
+    /// The resulting graph preserves the structure of the original but removes all essentiality and sign constraints from regulations. Model annotations, if present, are copied unchanged.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::from_aeon(py, "a -> b").unwrap();
+    /// let unconstrained = graph.remove_regulation_constraints(py).unwrap();
+    /// assert_eq!(unconstrained.regulation_count(), graph.regulation_count());
+    /// ```    pub fn remove_regulation_constraints(&self, py: Python) -> PyResult<RegulatoryGraph> {
         let native = self.as_native();
         let bn = biodivine_lib_param_bn::BooleanNetwork::new(native.clone());
         let bn = bn.remove_static_constraints();
@@ -777,6 +1074,23 @@ impl RegulatoryGraph {
     /// the exact criterion is not documented. The result is ordered such that the first variable in the list
     /// is always the pivot vertex.
     #[pyo3(signature = (pivot, parity = None, subgraph = None, length = None))]
+    /// Finds the shortest cycle containing the specified pivot variable.
+    ///
+    /// Searches for the shortest cycle in the regulatory graph that includes the given pivot variable. The search can be restricted by cycle parity (sign), a subgraph, and a maximum cycle length. Returns the cycle as a list of variable IDs starting with the pivot, or `None` if no such cycle exists.
+    ///
+    /// # Parameters
+    /// - `pivot`: The variable (by ID or name) that must be included in the cycle.
+    ///
+    /// # Returns
+    /// An optional vector of variable IDs representing the shortest cycle containing the pivot, or `None` if no such cycle exists.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let graph = RegulatoryGraph::from_aeon(py, "a -> b\nb -> a")?;
+    /// let cycle = graph.shortest_cycle("a", None, None, None)?;
+    /// assert_eq!(cycle, Some(vec![graph.find_variable("a")?.unwrap(), graph.find_variable("b")?.unwrap()]));
+    /// ```
     pub fn shortest_cycle(
         &self,
         pivot: &Bound<'_, PyAny>,
@@ -800,8 +1114,17 @@ impl RegulatoryGraph {
 
     /// Get a reference to the underlying `ModelAnnotation` object. If the object does not exist,
     /// it is created. These annotations are preserved when the network is serialized using
-    /// the `.aeon` format.
-    pub fn raw_annotation(&mut self, py: Python) -> PyResult<ModelAnnotation> {
+    /// Returns the underlying model annotation for the regulatory graph, creating a new one if absent.
+    ///
+    /// If the graph does not already have an associated annotation, a new empty annotation is created and stored.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let annotation = graph.raw_annotation(py).unwrap();
+    /// assert!(annotation.is_empty());
+    /// ```    pub fn raw_annotation(&mut self, py: Python) -> PyResult<ModelAnnotation> {
         if let Some(ann) = self.annotations.as_ref() {
             Ok(ModelAnnotation::from(ann.clone()))
         } else {
@@ -812,8 +1135,18 @@ impl RegulatoryGraph {
     }
 
     /// Get a "typed" `RegulatoryGraphAnnotation` object containing all annotation data officially
-    /// supported by AEON.
-    pub fn annotation(
+    /// Returns a typed annotation object for the regulatory graph.
+    ///
+    /// This method constructs and returns a `RegulatoryGraphAnnotation` object that provides structured access to the model's annotation data. If no annotation exists, a new one is created.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil();
+    /// let graph = RegulatoryGraph::new(None, None, None).unwrap();
+    /// let annotation = graph.annotation(py).unwrap();
+    /// // Use `annotation` to access or modify model metadata.
+    /// ```    pub fn annotation(
         self_: Py<RegulatoryGraph>,
         py: Python,
     ) -> PyResult<Py<RegulatoryGraphAnnotation>> {
@@ -874,8 +1207,29 @@ impl RegulatoryGraph {
     ///
     /// The function has two modes: If `ctx` is `None`, the function can only read regulation objects where `source`
     /// and `target` are represented using string names. If `ctx` is specified, then these can also be `VariableId`
-    /// objects that are resolved to variable names using `ctx`.
-    pub fn resolve_regulation<T: NetworkVariableContext>(
+    /// Parses a regulation specification from a string or dictionary, resolving variable names as needed.
+    ///
+    /// Accepts either a regulation string or a dictionary with keys such as `source`, `target`, `essential`/`observable`, and `sign`/`monotonicity`. If a context is provided, variable references are resolved to their canonical names. Returns a tuple containing the source variable name, optional sign, essential flag, and target variable name.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the input is not a valid regulation string or dictionary, contains unknown keys, or references invalid variables.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biodivine_lib_param_bn::Sign;
+    /// # use pyo3::Python;
+    /// # use crate::RegulatoryGraph;
+    /// # let gil = Python::acquire_gil();
+    /// # let py = gil.python();
+    /// let reg_str = "A +> B";
+    /// let result = resolve_regulation::<RegulatoryGraph>(None, reg_str.into_py(py).as_ref(py)).unwrap();
+    /// assert_eq!(result.0, "A");
+    /// assert_eq!(result.1, Some(Sign::Positive));
+    /// assert_eq!(result.2, true);
+    /// assert_eq!(result.3, "B");
+    /// ```    pub fn resolve_regulation<T: NetworkVariableContext>(
         ctx: Option<&T>,
         regulation: &Bound<'_, PyAny>,
     ) -> PyResult<(String, Option<Sign>, bool, String)> {
@@ -949,6 +1303,18 @@ impl RegulatoryGraph {
         }
     }
 
+    /// Resolves annotation data from a Python object into a `ModelAnnotationRoot`.
+    ///
+    /// Accepts either a string containing annotation data, a `ModelAnnotationRoot` instance, or a `ModelAnnotation` instance. Returns the corresponding `ModelAnnotationRoot` object, or raises a type error if the input is invalid.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil().python();
+    /// let annotation_str = "#annotation: ...";
+    /// let root = resolve_annotations(PyString::new(py, annotation_str));
+    /// assert!(root.is_ok());
+    /// ```
     pub fn resolve_annotations(data: &Bound<'_, PyAny>) -> PyResult<Py<ModelAnnotationRoot>> {
         let py = data.py();
         if let Ok(data) = data.extract::<String>() {
@@ -963,8 +1329,19 @@ impl RegulatoryGraph {
         }
     }
 
-    /// Encode the data from a single regulation into an `IdRegulation`-compatible dictionary.
-    pub fn encode_regulation<'a>(
+    /// Converts a regulation into a Python dictionary with keys `source`, `target`, `essential`, and `sign`.
+    ///
+    /// The returned dictionary is compatible with the `IdRegulation` format, where `source` and `target` are variable IDs,
+    /// `essential` is a boolean indicating observability, and `sign` is `"+"`, `"-"`, or `None` for unknown monotonicity.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let py = Python::acquire_gil();
+    /// let reg = Regulation::new(VariableId::from(0), VariableId::from(1), Some(Monotonicity::Activation), true);
+    /// let dict = encode_regulation(py.python(), &reg).unwrap();
+    /// assert_eq!(dict.get_item("sign").unwrap().extract::<&str>().unwrap(), "+");
+    /// ```    pub fn encode_regulation<'a>(
         py: Python<'a>,
         regulation: &biodivine_lib_param_bn::Regulation,
     ) -> PyResult<Bound<'a, PyDict>> {
