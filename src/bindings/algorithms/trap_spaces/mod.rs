@@ -8,7 +8,7 @@ pub use trap_spaces_config::TrapSpacesConfig;
 pub use trap_spaces_error::TrapSpacesError;
 pub use trap_spaces_impl::TrapSpaces;
 
-#[cfg(feature = "algorithms_pyo3_bindings")]
+#[cfg(feature = "algorithms-pyo3-bindings")]
 mod mod_python;
-#[cfg(feature = "algorithms_pyo3_bindings")]
+#[cfg(feature = "algorithms-pyo3-bindings")]
 pub use mod_python::*;

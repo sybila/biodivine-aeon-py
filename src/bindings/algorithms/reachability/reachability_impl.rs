@@ -21,7 +21,7 @@ const TARGET_BACKWARD_SUBSET: &str = "Reachability::backward_closed_subset";
 maybe_pyclass!(
     "ReachabilityComp",
     /// Implements symbolic reachability operations over a [SymbolicAsyncGraph]. This means the
-    /// computation of both largets and smallest forward- or backward-closed sets of states.
+    /// computation of both the largest and the smallest forward- or backward-closed sets of states.
     ///
     /// See [ReachabilityConfig] and [ReachabilityError] for more info.
     #[derive(Clone, Configurable)]

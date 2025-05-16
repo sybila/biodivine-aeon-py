@@ -32,7 +32,6 @@ impl Percolation {
         graph: &AsynchronousGraph,
         space: &Bound<'_, PyAny>,
     ) -> PyResult<HashMap<VariableIdBinding, bool>> {
-        // TODO: Logging?
         let native_graph = graph.as_native();
         let state_variables = native_graph.symbolic_context().state_variables();
         let mut network_variables = vec![

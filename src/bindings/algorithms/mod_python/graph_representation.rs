@@ -1,4 +1,4 @@
-use pyo3::{FromPyObject, Py, PyErr, Python};
+use pyo3::{create_exception, exceptions::PyException, FromPyObject, Py, PyErr, Python};
 
 use crate::{
     bindings::{
@@ -125,3 +125,5 @@ impl TryFrom<PyGraphRepresentation> for PyTrapSpacesConfig {
         }
     }
 }
+
+create_exception!(graph_representation, CreationFailedError, PyException);

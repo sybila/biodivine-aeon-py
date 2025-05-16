@@ -6,7 +6,7 @@ pub use reachability_config::ReachabilityConfig;
 pub use reachability_error::ReachabilityError;
 pub use reachability_impl::Reachability;
 
-#[cfg(feature = "algorithms_pyo3_bindings")]
+#[cfg(feature = "algorithms-pyo3-bindings")]
 mod mod_python;
-#[cfg(feature = "algorithms_pyo3_bindings")]
+#[cfg(feature = "algorithms-pyo3-bindings")]
 pub use mod_python::*;

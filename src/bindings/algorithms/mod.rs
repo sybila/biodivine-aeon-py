@@ -6,7 +6,7 @@ pub mod percolation;
 pub mod reachability;
 pub mod trap_spaces;
 
-#[cfg(feature = "algorithms_pyo3_bindings")]
+#[cfg(feature = "algorithms-pyo3-bindings")]
 mod mod_python;
-#[cfg(feature = "algorithms_pyo3_bindings")]
+#[cfg(feature = "algorithms-pyo3-bindings")]
 pub use mod_python::*;

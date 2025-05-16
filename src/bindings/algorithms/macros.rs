@@ -12,7 +12,7 @@ pub use log::{log, log_enabled, Level};
 /// ```
 #[macro_export]
 macro_rules! debug_with_limit {
-    (target: $target:expr, size: $size:expr, $($arg:tt)*) => {{
+    (target: $target:expr, size: $size:expr, $($arg:tt)*) => {
         let level = if $size > 100_000 {
             $crate::bindings::algorithms::macros::Level::Debug
         } else {
@@ -22,38 +22,39 @@ macro_rules! debug_with_limit {
         if $crate::bindings::algorithms::macros::log_enabled!(target: $target, level) {
             $crate::bindings::algorithms::macros::log!(target: $target, level, $($arg)*);
         }
-    }};
+    };
 }
 
 /// A macro to conditionally add the `#[pyclass]` attribute with a custom name
-/// to a struct based on the `algorithms_pyo3_bindings` feature.
+/// to a struct based on the `algorithms-pyo3-bindings` feature.
 ///
 /// # Example:
 /// ```rust
-/// maybe_pyclass! {
-/// /// Implements subspace percolation over a [SymbolicAsyncGraph].
-/// #[derive(Clone, Configurable)]
-/// pub struct Percolation {
-///     ...
-/// }
-/// }
+/// maybe_pyclass!(
+///     "PercolationComp",
+///     /// Implements subspace percolation over a [SymbolicAsyncGraph].
+///     #[derive(Clone, Configurable)]
+///     pub struct Percolation {
+///         ...
+///     }
+/// )
 /// ```
 #[macro_export]
 macro_rules! maybe_pyclass {
     (
-        $name_str:literal,
+        $python_name:literal,
         $(#[$meta:meta])*
         $vis:vis struct $name:ident $($rest:tt)*
     ) => {
-        #[cfg(feature = "algorithms_pyo3_bindings")]
+        #[cfg(feature = "algorithms-pyo3-bindings")]
         use pyo3::pyclass;
 
-        #[cfg(feature = "algorithms_pyo3_bindings")]
-        #[pyclass(name = $name_str, module = "biodivine_aeon", frozen)]
+        #[cfg(feature = "algorithms-pyo3-bindings")]
+        #[pyclass(name = $python_name, module = "biodivine_aeon", frozen)]
         $(#[$meta])*
         $vis struct $name $($rest)*
 
-        #[cfg(not(feature = "algorithms_pyo3_bindings"))]
+        #[cfg(not(feature = "algorithms-pyo3-bindings"))]
         $(#[$meta])*
         $vis struct $name $($rest)*
     };

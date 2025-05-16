@@ -1,7 +1,7 @@
 use pyo3::{create_exception, exceptions::PyException, PyErr};
 
 use crate::bindings::algorithms::{
-    cancellation::CancelledError, configurable::CreationFailedError,
+    cancellation::CancelledError, graph_representation::CreationFailedError,
 };
 
 use super::FixedPointsError;

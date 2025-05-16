@@ -2,7 +2,6 @@ use std::convert::TryFrom;
 
 use biodivine_lib_param_bn::BooleanNetwork;
 use dyn_clone::DynClone;
-use pyo3::{create_exception, exceptions::PyException};
 
 use crate::bindings::algorithms::cancellation::CancellationHandler;
 
@@ -37,7 +36,7 @@ pub trait Configurable: for<'a> TryFrom<&'a BooleanNetwork> {
     /// Retrieve the internal configuration struct of this instance.
     fn config(&self) -> &Self::ConfigType;
 
-    /// Retrieve the internal configuration struct of this instance by transfering ownership.
+    /// Retrieve the internal configuration struct of this instance by transferring ownership.
     fn into_config(self) -> Self::ConfigType;
 
     /// Create a new instance with the given configuration struct.
@@ -56,5 +55,3 @@ where
         self.config().cancellation().start_timer()
     }
 }
-
-create_exception!(configurable, CreationFailedError, PyException);

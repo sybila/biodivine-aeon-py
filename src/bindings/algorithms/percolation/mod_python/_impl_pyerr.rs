@@ -1,7 +1,8 @@
 use pyo3::PyErr;
 
 use crate::bindings::algorithms::{
-    cancellation::CancelledError, configurable::CreationFailedError, percolation::PercolationError,
+    cancellation::CancelledError, graph_representation::CreationFailedError,
+    percolation::PercolationError,
 };
 
 impl From<PercolationError> for PyErr {
