@@ -13,9 +13,9 @@ graph = AsynchronousGraph(bn, ctx)
 
 limit = 1000
 for space in ctx.mk_unit_spaces():
-    space = { k: v for k, v in space.items() if v is not None }
-    p_space = Percolation.percolate_subspace(graph, space)
-    print(f"{len(space)} -> {len(p_space)}")
+    space_dict = { k: v for k, v in space.items() if v is not None }
+    p_space = Percolation.percolate_subspace(graph, space_dict)
+    print(f"{len(space_dict)} -> {len(p_space)}")
     limit -= 1
     if limit == 0:
         break
