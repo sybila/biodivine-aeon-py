@@ -1,9 +1,6 @@
-import logging
 import sys
 
 from biodivine_aeon import *
-
-logging.basicConfig(level=logging.DEBUG)
 
 bn = BooleanNetwork.from_file(sys.argv[1])
 bn = bn.infer_valid_graph()
