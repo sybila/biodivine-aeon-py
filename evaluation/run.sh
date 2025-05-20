@@ -1,15 +1,31 @@
 #!/bin/bash
 
-# TODO: download and unzip the data files
-
 if [ -z "$1" ]; then
-  echo "Usage: $0 <timeout>"
+    echo "Usage: $0 <timeout (e.g., 10s, 1m, 1h)>"
   exit 1
 fi
 
 cd "$(dirname "$0")"
 
-ulimit -v 2097152
+TARGET_DIR="edition-2022-aeon"
+ZIP_FILE="edition-2022-aeon.zip"
+URL="https://github.com/sybila/biodivine-boolean-models/releases/download/august-2022/$ZIP_FILE"
+
+if [ ! -d "$TARGET_DIR" ]; then
+  echo "Directory '$TARGET_DIR' does not exist. Downloading and extracting..."
+
+  curl -L -o "$ZIP_FILE" "$URL"
+
+  unzip "$ZIP_FILE"
+
+  rm "$ZIP_FILE"
+
+  echo "Done."
+else
+  echo "Directory '$TARGET_DIR' already exists. Skipping download."
+fi
+
+ulimit -v 8388608
 timeout_val="$1"
 
 scripts=(
@@ -21,11 +37,13 @@ scripts=(
   "reachability_bwd_new.py"
   "minimal_trap_spaces.py"
   "minimal_trap_spaces_new.py"
+  "percolation.py"
+  "percolation_new.py"
 )
 
 for script in "${scripts[@]}"; do
   echo "Running $script with timeout $timeout_val..."
-  python3 run.py "$timeout_val" edition-2022-aeon "$script"
+  python3 run.py "$timeout_val" "$TARGET_DIR" "$script"
 done
 
 echo "All scripts executed."

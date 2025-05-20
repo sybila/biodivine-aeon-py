@@ -61,8 +61,9 @@ impl TryFrom<&BooleanNetwork> for TrapSpacesConfig {
     type Error = TrapSpacesError;
 
     fn try_from(bn: &BooleanNetwork) -> Result<Self, Self::Error> {
-        let graph = SymbolicAsyncGraph::new(bn).map_err(TrapSpacesError::CreationFailed)?;
         let ctx = SymbolicSpaceContext::new(bn);
+        let graph = SymbolicAsyncGraph::with_space_context(bn, &ctx)
+            .map_err(TrapSpacesError::CreationFailed)?;
 
         Ok(Self::from((graph, ctx)))
     }

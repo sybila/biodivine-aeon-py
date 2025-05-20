@@ -1,7 +1,13 @@
 import glob
 from itertools import zip_longest
 
-script_names = ["fixed_points", "reachability_fwd", "reachability_bwd"]
+script_names = [
+    "fixed_points",
+    "reachability_fwd",
+    "reachability_bwd",
+    "minimal_trap_spaces",
+    "percolation",
+]
 
 with open("report.txt", "w") as report:
     for script_name in script_names:
@@ -16,6 +22,7 @@ with open("report.txt", "w") as report:
         try:
             with open(filepath, "r") as f1, open(filepath_new, "r") as f2:
                 old_faster, new_faster = 0, 0
+                percentage_speed = 0
                 for line1, line2 in zip_longest(f1, f2, fillvalue=""):
                     if line1 == line2:
                         continue
@@ -42,6 +49,8 @@ with open("report.txt", "w") as report:
                     else:
                         new_faster += 1
 
+                    percentage_speed += time_new / time
+
                     output = rest[0] if rest else "Empty"
                     output_new = rest[0] if rest else "Empty"
                     if output != output_new:
@@ -51,6 +60,9 @@ with open("report.txt", "w") as report:
 
                 report.write(
                     f"Results: {old_faster} models faster for the old implementation, {new_faster} models faster for the new implementation.\n"
+                )
+                report.write(
+                    f"The new time was on average {percentage_speed / (old_faster + new_faster) * 100:.2f}% of the old time.\n"
                 )
 
         except FileNotFoundError as e:

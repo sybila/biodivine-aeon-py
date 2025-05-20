@@ -166,7 +166,7 @@ impl TrapSpaces {
         );
 
         while !original.is_empty() {
-            if minimal.as_bdd().exact_cardinality() >= self.config().bdd_size_limit.into() {
+            if minimal.as_bdd().size() >= self.config().bdd_size_limit {
                 return Err(TrapSpacesError::BddSizeLimitExceeded(
                     minimal.as_bdd().clone(),
                 ));
@@ -245,7 +245,7 @@ impl TrapSpaces {
         );
 
         while !original.is_empty() {
-            if maximal.as_bdd().exact_cardinality() >= self.config().bdd_size_limit.into() {
+            if maximal.as_bdd().size() >= self.config().bdd_size_limit {
                 return Err(TrapSpacesError::BddSizeLimitExceeded(
                     maximal.as_bdd().clone(),
                 ));
