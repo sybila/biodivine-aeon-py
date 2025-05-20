@@ -1,0 +1,25 @@
+Comparing fixed_points.py with fixed_points_new.py:
+- 087: Succeeded for the old implementation but failed for the new one.
+- 112: Failed for the old implementation but succeeded for the new one.
+- 160: Failed for the old implementation but succeeded for the new one.
+Results: 63 models faster for the old implementation, 68 models faster for the new implementation.
+The new time was on average 103.68% of the old time.
+
+Comparing reachability_fwd.py with reachability_fwd_new.py:
+Results: 88 models faster for the old implementation, 71 models faster for the new implementation.
+The new time was on average 115.43% of the old time.
+
+Comparing reachability_bwd.py with reachability_bwd_new.py:
+- 060: Failed for the old implementation but succeeded for the new one.
+Results: 71 models faster for the old implementation, 43 models faster for the new implementation.
+The new time was on average 117.52% of the old time.
+
+Comparing minimal_trap_spaces.py with minimal_trap_spaces_new.py:
+Results: 63 models faster for the old implementation, 48 models faster for the new implementation.
+The new time was on average 107.64% of the old time.
+
+Comparing percolation.py with percolation_new.py:
+- 146: Succeeded for the old implementation but failed for the new one.
+Results: 171 models faster for the old implementation, 32 models faster for the new implementation.
+The new time was on average 159.46% of the old time.
+
