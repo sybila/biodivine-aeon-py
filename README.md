@@ -1,39 +1,3 @@
-# Fork information
-
-> This part of the README documents fork changes, regular documentation
-> continues below.
-
-To compile AEON.py with the newly added changes, proceed normally as bellow, but add the following
-flag to the `maturin develop` command:
-
-```
-maturin develop --features algorithms-pyo3-bindings
-```
-
-Then, you can run individual scripts from the `evaluation` folder to test the changes. To interupt
-the computation, use Ctrl + C.
-
-To run the benchmark, use the `evaluation/run.sh <timeout (e.g. 10s, 5m, 1h)>` command. The timeout is the maximum
-time in seconds for each individual run. The script will run the benchmark for all algorithms
-and all models in the `evaluation` folder. The results will be saved in the `evaluation/report.txt` file.
-
-For a quick test, it is suggested for the timepout to be set to up to 10 seconds.
-Please note that due to the short timeout, old implementations of the algorithms can fail to finish while
-the new succeed and vice versa.
-
-To interact with the new algorithms, you can use the `evaluation/evaluation.ipynb` Jupyter notebook.
-To use it, install Jupyter:
-
-```
-pip install jupyter
-```
-
-Then, run it with the command:
-
-```
-jupyter notebook evaluation/evaluation.ipynb
-```
-
 # Biodivine/AEON.py
 
  > AEON.py now finally has API documentation! You can learn more about the individual methods and classes 
@@ -151,6 +115,8 @@ in the `maturin` [tutorial](https://www.maturin.rs/tutorial):
  - Create a Python [virtual environment](https://docs.python.org/3/library/venv.html) for testing and activate it.
  - \[Dynamic linking\] Run `maturin develop` to install a local version of AEON.py into this virtual environment.
  - \[Static linking\] Run `maturin develop --features static-z3` to do the same, but with a static version of Z3.
+ - \[New algorithms implementations\] Run `maturin develop --features algorithms-pyo3-bindings` to enable the new
+    algorithms with interruptible execution and improved logging.
 
 If the build passes, you should be able to use the library on your local machine. Feel free to also install Jupyter
 notebooks and test the library in the interactive environment (or on one of the examples).
