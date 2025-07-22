@@ -55,7 +55,7 @@ impl PerturbationSet {
     /// However, in some cases you may want to create it manually from an
     /// `AsynchronousPerturbationGraph` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid set of perturbations.
     #[new]
     pub fn new(py: Python, ctx: Py<AsynchronousPerturbationGraph>, bdd: &Bdd) -> Self {
@@ -161,7 +161,7 @@ impl PerturbationSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single vertex.
+    /// True if this set is a singleton, i.e., a single vertex.
     pub fn is_singleton(&self, py: Python) -> PyResult<bool> {
         let mut it = self.__iter__(py)?;
         let fst = it.native.next();
@@ -169,7 +169,7 @@ impl PerturbationSet {
         Ok(fst.is_some() && snd.is_none())
     }
 
-    /// Deterministically pick a subset of this set that contains exactly a single vertex.
+    /// Deterministically, pick a subset of this set that contains exactly a single vertex.
     ///
     /// If this set is empty, the result is also empty.
     pub fn pick_singleton(&self, py: Python) -> PyResult<Self> {
@@ -187,7 +187,7 @@ impl PerturbationSet {
         self.as_native().symbolic_size()
     }
 
-    /// Obtain the underlying `Bdd` of this `PerturbationSet`.
+    /// Get the underlying `Bdd` of this `PerturbationSet`.
     pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py).as_ref().symbolic_context();
@@ -195,7 +195,7 @@ impl PerturbationSet {
         Bdd::new_raw_2(ctx_ref.bdd_variable_set(), rs_bdd)
     }
 
-    /// Obtain the internal representation of this `PerturbationSet`, which uses the
+    /// Get the internal representation of this `PerturbationSet`, which uses the
     /// `AsynchronousPerturbationGraph` encoding. This is a colored set of vertices, where
     /// the colors only depend on the perturbation parameters, and the vertices are only
     /// constrained in case the variable is perturbed.

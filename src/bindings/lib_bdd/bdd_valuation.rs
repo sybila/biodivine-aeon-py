@@ -346,7 +346,7 @@ impl BddPartialValuation {
             .map(|(var, value)| {
                 let name = self.ctx.get().as_native().name_of(var);
                 let value = i32::from(value);
-                format!("'{}': {}", name, value)
+                format!("'{name}': {value}")
             })
             .collect::<Vec<_>>();
         format!("{{{}}}", items.join(", "))

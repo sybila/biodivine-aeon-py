@@ -46,12 +46,12 @@ impl BddVariableSetBuilder {
 
     fn __str__(&self) -> String {
         let size = self.as_native().clone().build().num_vars();
-        format!("BddVariableSetBuilder(len = {})", size)
+        format!("BddVariableSetBuilder(len = {size})")
     }
 
     fn __repr__(&self) -> String {
         let names = self.__getstate__();
-        format!("BddVariableSetBuilder({:?})", names)
+        format!("BddVariableSetBuilder({names:?})")
     }
 
     fn __getstate__(&self) -> Vec<String> {

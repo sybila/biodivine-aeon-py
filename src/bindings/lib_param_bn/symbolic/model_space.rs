@@ -39,7 +39,7 @@ impl SpaceModel {
                 if let Some(value) = value {
                     format!("'{}': {}", name, i32::from(value))
                 } else {
-                    format!("'{}': *", name)
+                    format!("'{name}': *")
                 }
             })
             .collect::<Vec<_>>();

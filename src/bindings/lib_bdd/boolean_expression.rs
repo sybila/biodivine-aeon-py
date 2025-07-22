@@ -435,9 +435,7 @@ impl BooleanExpression {
         if let Ok(value) = value.extract::<String>() {
             return match RsBooleanExpression::try_from(value.as_str()) {
                 Ok(expression) => Ok(BooleanExpression::from_native(expression)),
-                Err(message) => {
-                    throw_runtime_error(format!("Invalid expression: \"{}\".", message))
-                }
+                Err(message) => throw_runtime_error(format!("Invalid expression: \"{message}\".")),
             };
         }
         throw_type_error("Expected `BooleanExpression` or `str`.")
@@ -453,7 +451,7 @@ fn eval(e: &RsBooleanExpression, valuation: &Bound<'_, PyDict>) -> PyResult<bool
         RsBooleanExpression::Const(x) => Ok(*x),
         Variable(name) => {
             let Some(value) = valuation.get_item(name)? else {
-                return throw_runtime_error(format!("Missing value of {}.", name));
+                return throw_runtime_error(format!("Missing value of {name}."));
             };
             value.extract::<BoolLikeValue>().map(bool::from)
         }

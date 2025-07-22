@@ -427,8 +427,7 @@ impl ColorModel {
                     Right(par) => ctx.as_native().get_network_parameter_name(par),
                 };
                 return throw_index_error(format!(
-                    "Function `{}` is not available in this projection.",
-                    name
+                    "Function `{name}` is not available in this projection."
                 ));
             }
         }

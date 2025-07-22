@@ -164,7 +164,7 @@ impl UpdateFunction {
                     .as_native()
                     .find_variable(arg_str.as_str())
                 else {
-                    return throw_runtime_error(format!("Unknown variable `{}`.", arg_str));
+                    return throw_runtime_error(format!("Unknown variable `{arg_str}`."));
                 };
                 args.push(FnUpdate::mk_var(variable));
             } else if let Ok(arg_fun) = arg.extract::<UpdateFunction>() {

@@ -129,12 +129,12 @@ impl Control {
     /// must fully reside in the `phenotype` set (`forbidden`), can only intersect the
     /// phenotype set but still be proper subsets (`allowed`), or must intersect the phenotype
     /// while not being subsets (`required`). Default behavior is `forbidden`,
-    /// i.e. each attractor fully resides in the `phenotype` set.
+    /// i.e., each attractor fully resides in the `phenotype` set.
     ///
     /// To reduce the search space (and speed up the computation), you can also specify an
     /// `size_limit` constraint (only perturbations that are smaller or equal will be considered).
     /// Furthermore, if `stop_when_found` is set, the method terminates early if a perturbation
-    /// with robustness `1.0` is discovered (i.e. a perturbation is found that is effective for
+    /// with robustness `1.0` is discovered (i.e., a perturbation is found that is effective for
     /// all network colors). When this option is active, other results that have been computed
     /// so far are still returned.
     ///
@@ -171,7 +171,7 @@ impl Control {
                 .clone(),
         };
 
-        // If size limit is not set, we consider the largest possible size.
+        // If the size limit is not set, we consider the largest possible size.
         let size_limit =
             size_limit.unwrap_or_else(|| graph.get().as_native().perturbable_variables().len());
 

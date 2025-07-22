@@ -22,7 +22,7 @@ mod _impl_scheduler;
 /// It also returns a list of system variables for which there are still
 /// transitions in the graph (other variables are effectively constant).
 ///
-/// If cancelled, the result is still valid, but not necessarily complete.
+/// If canceled, the result is still valid, but not necessarily complete.
 pub fn interleaved_transition_guided_reduction(
     graph: &SymbolicAsyncGraph,
     initial: GraphColoredVertices,
@@ -67,11 +67,11 @@ pub fn interleaved_transition_guided_reduction(
 }
 
 /// **(internal)** A process trait is a unit of work that is managed by a `Scheduler`.
-/// Process has a *weight* that approximates how symbolically hard is to work with
+/// The Process has a *weight* that approximates how symbolically hard is to work with
 /// its intermediate representation.
 trait Process {
     /// Perform one step in the process. This can perform multiple symbolic operations,
-    /// but should be fairly simple (i.e. does not need interrupting).
+    /// but should be fairly simple (i.e., does not need interrupting).
     ///
     /// If you still need to run a complex operation, you should check `GraphTaskContext`
     /// provided by `Scheduler` for cancellation.
@@ -82,7 +82,7 @@ trait Process {
     /// Approximate symbolic complexity of the process.
     fn weight(&self) -> usize;
 
-    /// Mark the given set of states as eliminated - i.e. they can be disregarded by this process.
+    /// Mark the given set of states as eliminated - i.e., they can be disregarded by this process.
     fn discard_states(&mut self, set: &GraphColoredVertices);
 }
 
@@ -110,7 +110,7 @@ struct FwdProcess {
 
 /// **(internal)** Computes the set of vertices reachable from states that can perform `var_post`.
 ///
-/// When reachable set is computed, it automatically starts the extended component process.
+/// When a reachable set is computed, it automatically starts the extended component process.
 struct ReachableProcess {
     variable: VariableId,
     fwd: FwdProcess,

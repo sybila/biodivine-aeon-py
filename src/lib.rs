@@ -95,9 +95,9 @@ fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
 
 /// This trait works similar to the `From` conversion, but it explicitly takes and returns
 /// a reference, which makes it a bit easier for type inference to figure out what is going
-/// on. As such, this can be often used to simplify some conversions.
+/// on. As such, this can often be used to simplify some conversions.
 ///
-/// Note that you don't need this for "value structs" (i.e. implementing copy), where everything
+/// Note that you don't need this for "value structs" (i.e., implementing copy), where everything
 /// is copied anyway and references aren't relevant.
 trait AsNative<T> {
     fn as_native(&self) -> &T;

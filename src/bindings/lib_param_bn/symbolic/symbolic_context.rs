@@ -78,7 +78,7 @@ impl NetworkVariableContext for SymbolicContext {
             return self
                 .as_native()
                 .find_network_variable(name.as_str())
-                .ok_or_else(|| index_error(format!("Unknown variable name `{}`.", name)));
+                .ok_or_else(|| index_error(format!("Unknown variable name `{name}`.")));
         }
         throw_type_error("Expected `VariableId`, `BddVariable` or `str`.")
     }
@@ -732,7 +732,7 @@ impl SymbolicContext {
             let fake_network = self.mk_fake_network();
             return match FnUpdate::try_from_str(function.as_str(), &fake_network) {
                 Ok(update) => Ok(self.as_native().mk_fn_update_true(&update)),
-                Err(e) => throw_runtime_error(format!("Cannot parse function: {}", e)),
+                Err(e) => throw_runtime_error(format!("Cannot parse function: {e}")),
             };
         }
         throw_type_error("Expected `Bdd` or `UpdateFunction`.")
@@ -774,8 +774,7 @@ impl SymbolicContext {
             let par_id = self.as_native().find_network_parameter(name.as_str());
             return match (var_id, par_id) {
                 (None, None) => throw_index_error(format!(
-                    "Name `{}` does not match any variable or parameter.",
-                    name
+                    "Name `{name}` does not match any variable or parameter."
                 )),
                 (Some(_), Some(_)) => unreachable!(),
                 (_, Some(par_id)) => Ok(Right(par_id)),

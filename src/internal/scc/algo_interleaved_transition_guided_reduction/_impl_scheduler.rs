@@ -7,7 +7,7 @@ use crate::internal::scc::algo_interleaved_transition_guided_reduction::{Process
 use crate::{log_essential, should_log};
 
 impl Scheduler {
-    /// Create a new `Scheduler` with initial universe and active variables.
+    /// Create a new `Scheduler` with an initial universe and active variables.
     pub fn new(
         initial: GraphColoredVertices,
         variables: Vec<VariableId>,

@@ -38,7 +38,7 @@ impl Process for ExtendedComponentProcess {
                 );
             }
 
-            // This is a modification of the original TGR in order to allow faster checking
+            // This is a modification of the original TGR to allow faster checking
             // of regions that are not trap sets but might still contain attractors.
 
             // Check if fwd_set is globally forward-closed. If not, we extend the bottom

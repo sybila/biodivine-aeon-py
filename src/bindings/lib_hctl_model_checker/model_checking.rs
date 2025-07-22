@@ -68,15 +68,13 @@ impl ModelChecking {
                     properties.push(prop_str);
                 } else {
                     return throw_type_error(format!(
-                        "Expected `str` or `HctlFormula`. Got {:?}.",
-                        x
+                        "Expected `str` or `HctlFormula`. Got {x:?}."
                     ));
                 }
             }
         } else {
             return throw_type_error(format!(
-                "Expected `str`, `HctlFormula`, or `list`. Got {:?}.",
-                property
+                "Expected `str`, `HctlFormula`, or `list`. Got {property:?}."
             ));
         }
 

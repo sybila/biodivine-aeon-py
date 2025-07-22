@@ -35,7 +35,7 @@ impl VertexModel {
             .map(|(var, value)| {
                 let name = self.ctx.get().as_native().bdd_variable_set().name_of(var);
                 let value = i32::from(value);
-                format!("'{}': {}", name, value)
+                format!("'{name}': {value}")
             })
             .collect::<Vec<_>>();
         format!("VertexModel({{{}}})", items.join(", "))

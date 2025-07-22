@@ -206,7 +206,7 @@ impl Classification {
         for (name, prop) in properties {
             let prop_node = properties_node.__getitem__(name.as_str());
             if prop_node.get_value(py).is_some() {
-                return throw_runtime_error(format!("Property `{}` is already set.", name));
+                return throw_runtime_error(format!("Property `{name}` is already set."));
             } else {
                 prop_node.set_value(py, Some(prop));
             }
@@ -263,7 +263,7 @@ impl Classification {
             return Ok(());
         };
 
-        throw_runtime_error(format!("Cannot write archive: {}", e))
+        throw_runtime_error(format!("Cannot write archive: {e}"))
     }
 
     /// Load a [BN Classifier](https://github.com/sybila/biodivine-bn-classifier/) archive

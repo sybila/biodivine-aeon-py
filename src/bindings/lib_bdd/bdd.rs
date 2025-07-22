@@ -95,13 +95,13 @@ impl Bdd {
                         let mut reader = Cursor::new(bytes);
                         match RsBdd::read_as_bytes(&mut reader) {
                             Ok(value) => Ok(Bdd { ctx, value }),
-                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {}", e)),
+                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {e}")),
                         }
                     } else if let Ok(string) = data.extract::<String>() {
                         let mut reader = Cursor::new(string);
                         match RsBdd::read_as_string(&mut reader) {
                             Ok(value) => Ok(Bdd { ctx, value }),
-                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {}", e)),
+                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {e}")),
                         }
                     } else {
                         throw_type_error("Expected `str` or `bytes`.")
@@ -230,8 +230,7 @@ impl Bdd {
                 if let Some(size_limit) = size_limit {
                     if size_limit < dnf.len() {
                         return throw_interrupted_error(format!(
-                            "Exceeded size limit of {} clauses",
-                            size_limit
+                            "Exceeded size limit of {size_limit} clauses"
                         ));
                     }
                 }

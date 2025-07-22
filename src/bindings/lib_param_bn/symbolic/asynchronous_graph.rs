@@ -329,7 +329,7 @@ impl AsynchronousGraph {
         } else {
             let expr = BooleanExpression::resolve_expression(value)?;
             let expected_support = (0..arity)
-                .map(|it| (format!("x_{}", it), it))
+                .map(|it| (format!("x_{it}"), it))
                 .collect::<HashMap<_, _>>();
 
             // A helper function which evaluates while mapping variables to indices 1:1.
@@ -726,8 +726,7 @@ impl AsynchronousGraph {
         let Some(native_reduced) = self.native.inline_symbolic(variable) else {
             let name = self.as_native().get_variable_name(variable);
             return throw_runtime_error(format!(
-                "Cannot inline `{}`. Self-regulation detected.",
-                name
+                "Cannot inline `{name}`. Self-regulation detected."
             ));
         };
 

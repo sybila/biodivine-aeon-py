@@ -24,12 +24,12 @@ use crate::pyo3_utils::BoolLikeValue;
 use crate::{throw_runtime_error, throw_type_error, AsNative};
 
 /// An extension of `AsynchronousGraph` that admits various variable perturbations through
-/// additional colors/parameters. Such graph can then be analyzed to extract control strategies
-/// (perturbations) that are sufficient to achieve a particular outcome (an attractor or
+/// additional colors/parameters. Such a graph can then be analyzed to extract control strategies
+/// (perturbations) that are enough to achieve a particular outcome (an attractor or
 /// a phenotype).
 ///
 /// This representation is similar to `SymbolicSpaceContext` in the sense that it introduces
-/// additional variables into the symbolic encoding in order to encode more complex modes of
+/// additional variables into the symbolic encoding to encode more complex modes of
 /// behavior in a BN. However, in this case, it is also necessary to modify the actual update
 /// functions of the network. Hence, this implementation extends the `AsynchronousGraph` directly.
 ///
@@ -43,7 +43,7 @@ use crate::{throw_runtime_error, throw_type_error, AsNative};
 ///  - We maintain two versions of network dynamics: *original* (unperturbed), meaning the additional
 ///  parameters have no impact on the update functions, and *perturbed*, where a variable is
 ///  allowed to evolve only if it is not perturbed.
-///  - This representation allows us to also encode sets of perturbations, since for a perturbed
+///  - This representation allows us to also encode sets of perturbations; since for a perturbed
 ///  variable, we can use the state variable (that would otherwise be unused) to represent
 ///  the value to which the variable is perturbed.
 ///
@@ -62,7 +62,7 @@ pub struct AsynchronousPerturbationGraph(PerturbationGraph);
 
 #[pymethods]
 impl AsynchronousPerturbationGraph {
-    /// Build a new `AsynchronousPerturbationGraph` for the given `BooleanNetwork`. Optionally
+    /// Build a new `AsynchronousPerturbationGraph` for the given `BooleanNetwork`. Optionally,
     /// also specify a list of variables that can be perturbed in the resulting graph
     /// (otherwise all variables can be perturbed).
     #[new]
@@ -120,14 +120,14 @@ impl AsynchronousPerturbationGraph {
         result_ref.prune_unused_parameters(py)
     }
 
-    /// Return a "unit" (i.e. full) `ColoredVertexSet`, with the perturbation
+    /// Return a "unit" (i.e., full) `ColoredVertexSet`, with the perturbation
     /// parameters all fixed to `False`.
     pub fn mk_unit_colored_vertices(_self: Bound<'_, Self>) -> ColoredVertexSet {
         let unit = _self.borrow().as_ref().mk_unit_colored_vertices();
         Self::mk_unperturbable_colored_vertex_set(&_self, unit.as_native())
     }
 
-    /// Return a "unit" (i.e. full) `ColorSet`, with the perturbation
+    /// Return a "unit" (i.e., full) `ColorSet`, with the perturbation
     /// parameters all fixed to `False`.
     pub fn mk_unit_colors(_self: Bound<'_, Self>) -> ColorSet {
         let unit = _self.borrow().as_ref().mk_unit_colors();
@@ -181,7 +181,7 @@ impl AsynchronousPerturbationGraph {
     */
 
     /// A copy of the *base* `BooleanNetwork` that was used to create this graph,
-    /// without additional perturbation parameters or any modification (e.g. still with all
+    /// without additional perturbation parameters or any modification (e.g., still with all
     /// implicit parameters).
     pub fn base_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         // Here, `unwrap` is safe because we know that perturbed graph is only created with
@@ -220,10 +220,10 @@ impl AsynchronousPerturbationGraph {
 
     /// A copy of the `AsynchronousGraph` that represents the *unperturbed* asynchronous
     /// dynamics of this network. It supports the additional parameters necessary to represent
-    /// perturbations, but does not actually use them in any meaningful way.
+    /// perturbations, but does not use them in any meaningful way.
     ///
     /// This is effectively the "parent" implementation of this instance, so you can already
-    /// access these methods directly by calling them on this graph. Just keep in mind that
+    /// access these methods directly by calling them on this graph. Keep in mind that
     /// methods that return color sets do not fix the perturbation parameters to `False` in
     /// the "parent" implementation.
     ///
@@ -261,7 +261,7 @@ impl AsynchronousPerturbationGraph {
     }
 
     /// Find the `ParameterId` which corresponds to the synthetic parameter that is used to
-    /// encode that the given `variable` is perturbed (i.e. fixed and cannot evolve).
+    /// encode that the given `variable` is perturbed (i.e., fixed and cannot evolve).
     pub fn get_perturbation_parameter(
         _self: &Bound<'_, AsynchronousPerturbationGraph>,
         variable: &Bound<'_, PyAny>,
@@ -273,7 +273,7 @@ impl AsynchronousPerturbationGraph {
             Ok(ParameterId::from(native))
         } else {
             let name = graph.as_ref().get_network_variable_name(variable)?;
-            throw_runtime_error(format!("Variable {:?} cannot be perturbed.", name))
+            throw_runtime_error(format!("Variable {name:?} cannot be perturbed."))
         }
     }
 
@@ -303,7 +303,7 @@ impl AsynchronousPerturbationGraph {
     /// state into one of the `target` states.
     ///
     /// In other words, if you fix all the variables prescribed by one of the resulting
-    /// perturbations in the `source` state, you obtain one of the `target` states.
+    /// perturbations in the `source` state, you get one of the `target` states.
     ///
     /// This operation is mostly used internally in various control algorithms.
     ///
@@ -351,7 +351,7 @@ impl AsynchronousPerturbationGraph {
     }
 
     /// Create a `ColorSet` with unconstrained perturbation parameters, meaning every variable
-    /// that is declared as perturbable can be actually perturbed.
+    /// declared as perturbable can be actually perturbed.
     ///
     /// Meanwhile, `AsynchronousPerturbationGraph.mk_unit_colors` returns a color set where
     /// perturbation parameters are set to `False` to better resemble the behavior of a "normal"
@@ -363,7 +363,7 @@ impl AsynchronousPerturbationGraph {
     }
 
     /// Create a `ColoredVertexSet` with unconstrained perturbation parameters, meaning every
-    /// variable that is declared as perturbable can be actually perturbed.
+    /// variable declared as perturbable can be actually perturbed.
     ///
     /// Meanwhile, `AsynchronousPerturbationGraph.mk_unit_colored_vertices` returns a color set
     /// where perturbation parameters are set to `False` to better resemble the behavior of
@@ -378,7 +378,7 @@ impl AsynchronousPerturbationGraph {
     ///
     /// The difference between this method and `AsynchronousPerturbationGraph.mk_perturbations`
     /// is in how missing values are treated: In `mk_perturbations`, a variable with an unspecified
-    /// value is treated as unconstrained: i.e. it can be unperturbed, or perturbed to
+    /// value is treated as unconstrained: i.e., it can be unperturbed, or perturbed to
     /// `False`/`True`. Meanwhile, `mk_perturbation` treats any unspecified value as unperturbed,
     /// since the result must always represent a single perturbation.
     pub fn mk_perturbation(
@@ -429,9 +429,9 @@ impl AsynchronousPerturbationGraph {
     ///
     /// The dictionary should contain `True`/`False` for a perturbed variable and `None` for
     /// an unperturbed variable. If all perturbable variables are specified, the result is
-    /// a singleton set. If some of the perturbable variables is missing from the dictionary,
+    /// a singleton set. If some of the perturbable variables are missing from the dictionary,
     /// it is unconstrained and the result contains any perturbation that matches the description
-    /// w.r.t. the remaining (specified) variables.
+    /// with respect to the remaining (specified) variables.
     ///
     pub fn mk_perturbations(
         _self: Py<Self>,
@@ -502,7 +502,7 @@ impl AsynchronousPerturbationGraph {
         PerturbationSet::mk_native(_self.clone(), set)
     }
 
-    /// Compute the *robustness* of the given color set w.r.t. the unit color set.
+    /// Compute the *robustness* of the given color set with respect to the unit color set.
     ///
     /// Note that this is essentially just `set.cardinality() / unit.cardinality()` with some
     /// additional measures taken to prevent floating point overflow with large numbers.
@@ -513,8 +513,8 @@ impl AsynchronousPerturbationGraph {
 
         let unit = AsynchronousPerturbationGraph::mk_unit_colors(_self);
 
-        // The following method always give an approximation up to 6 decimal places, even if the
-        // cardinality would overflow to f64::infinity.
+        // The following method always gives an approximation up to 6 decimal places, even if the
+        // cardinality overflows to f64::infinity.
 
         let p_card = set.as_native().exact_cardinality() * 1_000_000;
         let u_card = unit.as_native().exact_cardinality();
@@ -525,13 +525,13 @@ impl AsynchronousPerturbationGraph {
     }
 
     /// Transform the given `ColorSet` such that any information about perturbations is removed
-    /// and transformed into the "canonical" representation (i.e. perturbation parameters are
+    /// and transformed into the "canonical" representation (i.e., perturbation parameters are
     /// set to `false`).
     ///
     /// *This is a relatively low-level operation that you should not need unless you are working
     ///  with internal encoding of colored perturbations.*
     ///
-    /// See also `AsynchronousPerturbationGraph.mk_unit_colors` vs
+    /// See also `AsynchronousPerturbationGraph.mk_unit_colors` vs.
     /// `AsynchronousPerturbationGraph.mk_perturbable_unit_colors`.
     pub fn strip_perturbation_data(
         _self: &Bound<'_, AsynchronousPerturbationGraph>,
@@ -643,7 +643,7 @@ impl AsynchronousPerturbationGraph {
     }
 
     /// Returns a list of perturbed variables together with their values, or error if the
-    /// variables are invalid (e.g. not perturbable). If a variable is not present, it is not
+    /// variables are invalid (e.g., not perturbable). If a variable is not present, it is not
     /// returned. It is up to the caller to interpret this correctly.
     pub fn resolve_perturbation(
         _self: &PyRef<'_, AsynchronousPerturbationGraph>,

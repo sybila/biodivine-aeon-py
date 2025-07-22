@@ -44,9 +44,9 @@ impl PerturbationModel {
                     .get_variable_name(var.into());
                 if let Some(value) = value {
                     let value = i32::from(value);
-                    format!("'{}': {}", name, value)
+                    format!("'{name}': {value}")
                 } else {
-                    format!("'{}': None", name)
+                    format!("'{name}': None")
                 }
             })
             .collect::<Vec<_>>();
@@ -57,7 +57,7 @@ impl PerturbationModel {
         self.__str__()
     }
 
-    /// The number of actual values in this `PerturbationModel` (i.e. retained network variables).
+    /// The number of actual values in this `PerturbationModel` (i.e., retained network variables).
     pub fn __len__(&self) -> usize {
         self.items().len()
     }

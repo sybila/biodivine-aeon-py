@@ -52,7 +52,7 @@ impl<'py> FromPyObject<'py> for BoolLikeValue {
             }
         }
 
-        throw_type_error(format!("Expected `True`/`False` or `1`/`0`. Got `{}`.", ob))
+        throw_type_error(format!("Expected `True`/`False` or `1`/`0`. Got `{ob}`."))
     }
 }
 
@@ -113,8 +113,7 @@ impl<'py> FromPyObject<'py> for SignValue {
         }
 
         throw_type_error(format!(
-            "Expected one of `positive`/`negative`/`+`/`-`. Got `{}`.",
-            ob
+            "Expected one of `positive`/`negative`/`+`/`-`. Got `{ob}`."
         ))
     }
 }

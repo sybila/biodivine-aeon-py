@@ -78,7 +78,7 @@ impl BddVariableSet {
 
     pub fn __repr__(&self) -> String {
         let names = self.variable_names();
-        format!("BddVariableSet({:?})", names)
+        format!("BddVariableSet({names:?})")
     }
 
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
@@ -315,7 +315,7 @@ impl BddVariableSet {
             return if let Some(var) = self.0.var_by_name(name.as_str()) {
                 Ok(var)
             } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
+                throw_index_error(format!("Unknown variable name `{name}`."))
             };
         }
         throw_type_error("Expected `BddVariable` or `str`.")

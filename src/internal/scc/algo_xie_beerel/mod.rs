@@ -21,7 +21,7 @@ pub fn xie_beerel_attractors(
             universe.approx_cardinality(),
             universe.symbolic_size(),
         );
-        std::io::stdout().lock().flush().unwrap();
+        std::io::stdout().lock().flush()?;
     }
 
     let mut universe = universe.clone();
@@ -33,7 +33,7 @@ pub fn xie_beerel_attractors(
                 universe.approx_cardinality(),
                 universe.symbolic_size()
             );
-            std::io::stdout().lock().flush().unwrap();
+            std::io::stdout().lock().flush()?;
         }
 
         let pivots = universe.pick_vertex();
@@ -65,12 +65,12 @@ pub fn xie_beerel_attractors(
                     problem_size,
                     (current.log2() / max.log2()) * 100.0
                 );
-                std::io::stdout().lock().flush().unwrap();
+                std::io::stdout().lock().flush()?;
             }
 
-            // This ensures `pivot_component` is still subset of `pivot_basin` even if we do not
+            // This ensures `pivot_component` is still a subset of `pivot_basin` even if we do not
             // enforce it explicitly in `reachability_step`, since anything that leaks out
-            // is completely eliminated.
+            // is eliminated.
             let escaped_basin = pivot_component.minus(&pivot_basin);
             if !escaped_basin.is_empty() {
                 pivot_component = pivot_component.minus_colors(&escaped_basin.colors());
@@ -89,7 +89,7 @@ pub fn xie_beerel_attractors(
                     pivot_component.colors().approx_cardinality(),
                     pivot_component.symbolic_size(),
                 );
-                std::io::stdout().lock().flush().unwrap();
+                std::io::stdout().lock().flush()?;
             }
             result.push(pivot_component);
         }
@@ -103,7 +103,7 @@ pub fn xie_beerel_attractors(
             "Attractor detection finished with {} results.",
             result.len(),
         );
-        std::io::stdout().lock().flush().unwrap();
+        std::io::stdout().lock().flush()?;
     }
     Ok(result)
 }
