@@ -35,7 +35,7 @@ impl Display for Class {
         // Format the result
         let short_name: String = behaviour_count
             .iter()
-            .filter(|(_, &count)| count > 0)
+            .filter(|(_, count)| **count > 0)
             .map(|(behaviour, &count)| format!("{count} x {behaviour}"))
             .collect::<Vec<_>>()
             .join(", ");

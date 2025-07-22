@@ -1,9 +1,9 @@
-use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue, SignValue};
+use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::pyo3_utils::{BoolLikeValue, SignValue, richcmp_eq_by_key};
 use crate::{
-    global_log_level, runtime_error, throw_index_error, throw_runtime_error, throw_type_error,
-    AsNative,
+    AsNative, global_log_level, runtime_error, throw_index_error, throw_runtime_error,
+    throw_type_error,
 };
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
 use biodivine_lib_param_bn::{Monotonicity, SdGraph, Sign};

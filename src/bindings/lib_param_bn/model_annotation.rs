@@ -1,8 +1,8 @@
-use crate::{throw_runtime_error, AsNative};
+use crate::{AsNative, throw_runtime_error};
 use macros::Wrapper;
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::IntoPyObjectExt;
 
 /*
    I am sorry for this mess, but this seems to be the best solution at the moment

@@ -11,11 +11,12 @@ use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphCo
 use biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces;
 use either::Either;
 use num_bigint::BigInt;
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3::IntoPyObjectExt;
 
+use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
@@ -24,7 +25,6 @@ use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationSet};
-use crate::AsNative;
 
 /// A symbolic representation of a set of "colours", i.e. interpretations of explicit and
 /// implicit parameters within a particular `BooleanNetwork`.

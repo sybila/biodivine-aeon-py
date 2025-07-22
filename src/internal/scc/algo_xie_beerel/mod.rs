@@ -1,9 +1,9 @@
 use crate::bindings::global_interrupt;
 use crate::internal::scc::algo_saturated_reachability::{reach_bwd, reachability_step};
 use crate::{log_essential, should_log};
+use biodivine_lib_param_bn::VariableId;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
-use biodivine_lib_param_bn::VariableId;
 use pyo3::PyResult;
 use std::io::Write;
 

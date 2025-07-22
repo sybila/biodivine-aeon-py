@@ -1,7 +1,7 @@
+use crate::AsNative;
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::AsNative;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;

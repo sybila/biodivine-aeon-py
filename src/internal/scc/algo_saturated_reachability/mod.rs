@@ -1,8 +1,8 @@
 use crate::bindings::global_interrupt;
 use crate::log_essential;
+use biodivine_lib_param_bn::VariableId;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
-use biodivine_lib_param_bn::VariableId;
 use pyo3::PyResult;
 
 /// Performs one reachability step using the saturation scheme.

@@ -5,8 +5,8 @@ use std::fs::File;
 use std::io::Read;
 
 use biodivine_lib_bdd::Bdd;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::BooleanNetwork;
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
 use zip::ZipArchive;
 
 /// Read the contents of a file from a zip archive into a string.
@@ -58,9 +58,11 @@ pub fn load_classification_archive(
         let category_id = category_id.strip_suffix(".txt").unwrap();
 
         // The insert should create a new item, otherwise the archive is malformed.
-        assert!(categories
-            .insert(category_id.to_string(), color_set)
-            .is_none());
+        assert!(
+            categories
+                .insert(category_id.to_string(), color_set)
+                .is_none()
+        );
     }
 
     Ok((categories, aeon_str))

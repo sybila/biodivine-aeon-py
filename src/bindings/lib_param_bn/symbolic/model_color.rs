@@ -5,16 +5,16 @@ use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::{runtime_error, throw_index_error, throw_type_error, AsNative};
-use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
+use crate::{AsNative, runtime_error, throw_index_error, throw_type_error};
+use Either::{Left, Right};
 use biodivine_lib_bdd::BddPartialValuation;
+use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use either::Either;
 use pyo3::prelude::{PyAnyMethods, PyListMethods};
 use pyo3::types::{PyDict, PyList, PyTuple};
-use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyObject, PyResult, Python};
+use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyObject, PyResult, Python, pyclass, pymethods};
 use std::sync::Arc;
-use Either::{Left, Right};
 
 /// Represents a single "color" stored in a `ColorSet` (or a `ColoredVertexSet`), or a projection
 /// of said color to the chosen uninterpreted functions.
@@ -308,7 +308,9 @@ impl ColorModel {
             return UpdateFunction::new_raw(fake_ctx, Arc::new(instantiated_function))
                 .into_py_any(py);
         }
-        throw_type_error("Expected `UpdateFunction`, `BooleanNetwork`, or a valid function identifier (`VariableId`, `ParameterId`, or a string name) with an `args` collection.")
+        throw_type_error(
+            "Expected `UpdateFunction`, `BooleanNetwork`, or a valid function identifier (`VariableId`, `ParameterId`, or a string name) with an `args` collection.",
+        )
     }
 }
 

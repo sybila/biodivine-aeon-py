@@ -1,15 +1,15 @@
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
+use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
 use crate::{throw_runtime_error, throw_type_error};
+use RsBooleanExpression::{Not, Variable};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_bdd::boolean_expression::BooleanExpression::{And, Cond, Iff, Imp, Or, Xor};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
-use std::collections::hash_map::DefaultHasher;
 use std::collections::HashSet;
+use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-use RsBooleanExpression::{Not, Variable};
 /*
    “Pretend to be good always and even God will be fooled.”
                                    — Kurt Vonnegut

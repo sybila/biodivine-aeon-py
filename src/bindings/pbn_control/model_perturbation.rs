@@ -1,13 +1,13 @@
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 use std::collections::HashMap;
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::set_perturbation::PerturbationSet;
-use crate::{throw_index_error, throw_runtime_error, AsNative};
+use crate::{AsNative, throw_index_error, throw_runtime_error};
 
 /// Represents a single perturbation stored in a `PerturbationSet` (or a `ColoredPerturbationSet`),
 /// or a projection of said perturbation to the chosen variables.

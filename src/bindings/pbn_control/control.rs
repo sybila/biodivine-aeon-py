@@ -1,14 +1,14 @@
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::pbn_control::{
-    extract_phenotype_type, AsynchronousPerturbationGraph, ColoredPerturbationSet,
+    AsynchronousPerturbationGraph, ColoredPerturbationSet, extract_phenotype_type,
 };
-use crate::{global_log_level, should_log, throw_runtime_error, AsNative};
+use crate::{AsNative, global_log_level, should_log, throw_runtime_error};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_pbn_control::control::{ControlMap, PhenotypeOscillationType};
 use pyo3::prelude::PyAnyMethods;
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct Control {

@@ -10,18 +10,18 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::control::sanitize_control_map;
 use crate::bindings::pbn_control::set_colored_perturbation::ColoredPerturbationSet;
 use crate::bindings::pbn_control::{PerturbationModel, PerturbationSet};
 use crate::pyo3_utils::BoolLikeValue;
-use crate::{throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, throw_runtime_error, throw_type_error};
 
 /// An extension of `AsynchronousGraph` that admits various variable perturbations through
 /// additional colors/parameters. Such a graph can then be analyzed to extract control strategies
@@ -85,7 +85,7 @@ impl AsynchronousPerturbationGraph {
         let implicit_params = n_ref.as_native().implicit_parameters();
         if !implicit_params.is_empty() {
             return throw_runtime_error(
-                "`PerturbationGraph` cannot be created from a network with implicit parameters.\nUse `BooleanNetwork.name_implicit_parameters` to assign names to all anonymous functions."
+                "`PerturbationGraph` cannot be created from a network with implicit parameters.\nUse `BooleanNetwork.name_implicit_parameters` to assign names to all anonymous functions.",
             );
         }
 
@@ -675,7 +675,9 @@ impl AsynchronousPerturbationGraph {
                 result.insert(k_var, v);
             }
         } else {
-            return throw_type_error("Expected a dictionary of `VariableIdType` keys and `BoolType | None` values, or a `PerturbationModel`.");
+            return throw_type_error(
+                "Expected a dictionary of `VariableIdType` keys and `BoolType | None` values, or a `PerturbationModel`.",
+            );
         }
         Ok(result)
     }

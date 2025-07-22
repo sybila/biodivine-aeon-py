@@ -7,8 +7,8 @@
 
 use crate::bindings::global_interrupt;
 use crate::should_log;
-use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use biodivine_lib_param_bn::VariableId;
+use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
 use pyo3::PyResult;
 
 mod _impl_extended_component_process;

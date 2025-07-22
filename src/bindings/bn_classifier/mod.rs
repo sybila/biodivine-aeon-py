@@ -1,5 +1,5 @@
-use pyo3::prelude::*;
 use pyo3::PyResult;
+use pyo3::prelude::*;
 
 mod class;
 mod classification;

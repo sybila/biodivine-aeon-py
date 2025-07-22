@@ -1,11 +1,11 @@
 use super::regulatory_graph::RegulatoryGraph;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{runtime_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, runtime_error, throw_index_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
 use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
 use macros::Wrapper;
