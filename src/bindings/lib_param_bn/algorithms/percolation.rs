@@ -15,15 +15,15 @@ pub struct Percolation {
 
 #[pymethods]
 impl Percolation {
-    /// Performs a percolation of a single subspace.
+    /// Performs percolation of a single subspace.
     ///
     /// Percolation propagates the values of variables that are guaranteed to be constant in the
     /// given subspace. Note that this function will not overwrite values fixed in the original
     /// space if they percolate to a conflicting value. Also note that the result is a subspace
-    /// of the original space, i.e. it does not just contain the newly propagated variables.
+    /// of the original space, i.e., it does not just contain the newly propagated variables.
     ///
     /// This method should technically work on parametrized networks as well, but the constant
-    /// check is performed across all interpretations, hence a lot of sub-spaces will not
+    /// check is performed across all interpretations, hence a lot of subspaces will not
     /// percolate meaningfully. We recommend using other symbolic methods for such systems.
     #[staticmethod]
     pub fn percolate_subspace(
@@ -34,16 +34,17 @@ impl Percolation {
         // TODO: Logging?
         let native_graph = graph.as_native();
         let state_variables = native_graph.symbolic_context().state_variables();
-        let mut network_variables = vec![
-            VariableId::from_index(0);
+        let mut network_variables: Vec<Option<VariableId>> = vec![
+            None;
             native_graph
                 .symbolic_context()
                 .bdd_variable_set()
-                .num_vars() as usize
+                .num_vars()
+                as usize
         ];
         for var in native_graph.variables() {
             let bdd_var = state_variables[var.to_index()];
-            network_variables[bdd_var.to_index()] = var;
+            network_variables[bdd_var.to_index()] = Some(var);
         }
 
         let initial_space = graph.resolve_subspace_valuation(space)?;
@@ -90,7 +91,11 @@ impl Percolation {
 
                     restriction.clear();
                     for input in inputs.clone() {
-                        let var = network_variables[input.to_index()];
+                        let Some(var) = network_variables[input.to_index()] else {
+                            // This input corresponds to some network parameter. Parameters cannot
+                            // be fixed by subspace percolation.
+                            continue;
+                        };
                         if let Some(value) = fixed[var.to_index()] {
                             restriction.push((input, value));
                             inputs.remove(&input);
