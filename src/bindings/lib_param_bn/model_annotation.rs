@@ -1,8 +1,8 @@
-use crate::{throw_runtime_error, AsNative};
+use crate::{AsNative, throw_runtime_error};
 use macros::Wrapper;
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::IntoPyObjectExt;
 
 /*
    I am sorry for this mess, but this seems to be the best solution at the moment
@@ -162,13 +162,13 @@ impl ModelAnnotation {
             .borrow(py)
             .as_native()
             .get_child(&self.path)
-            .map(|it| format!("{}", it))
+            .map(|it| format!("{it}"))
             .unwrap_or_else(String::new)
     }
 
     pub fn __repr__(&self, py: Python) -> String {
         let self_str = self.__str__(py);
-        format!("ModelAnnotation.from_aeon({:?})", self_str)
+        format!("ModelAnnotation.from_aeon({self_str:?})")
     }
 
     pub fn __len__(&self, py: Python) -> usize {
@@ -266,7 +266,7 @@ impl ModelAnnotation {
 
         match std::fs::read_to_string(path) {
             Ok(file_contents) => Self::from_aeon(py, file_contents.as_str()),
-            Err(e) => throw_runtime_error(format!("Cannot read file: {}.", e)),
+            Err(e) => throw_runtime_error(format!("Cannot read file: {e}.")),
         }
     }
 

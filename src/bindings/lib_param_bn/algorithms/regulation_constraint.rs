@@ -1,10 +1,10 @@
+use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::regulatory_graph::RegulatoryGraph;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::AsNative;
 use pyo3::types::PyDict;
-use pyo3::{pyclass, pymethods, Bound, PyAny, PyResult, Python};
+use pyo3::{Bound, PyAny, PyResult, Python, pyclass, pymethods};
 
 /// An "algorithm object" that can be used to compute symbolic constraints that correspond
 /// to typical properties of model regulations (i.e. monotonicity and essentiality).

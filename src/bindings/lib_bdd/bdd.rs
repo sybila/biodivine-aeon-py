@@ -5,7 +5,7 @@ use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::bindings::lib_bdd::op_function::{OpFunction2, OpFunction3};
 use crate::{
-    runtime_error, throw_interrupted_error, throw_runtime_error, throw_type_error, AsNative,
+    AsNative, runtime_error, throw_interrupted_error, throw_runtime_error, throw_type_error,
 };
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_bdd::{BddPathIterator, BddSatisfyingValuations};
@@ -95,13 +95,13 @@ impl Bdd {
                         let mut reader = Cursor::new(bytes);
                         match RsBdd::read_as_bytes(&mut reader) {
                             Ok(value) => Ok(Bdd { ctx, value }),
-                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {}", e)),
+                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {e}")),
                         }
                     } else if let Ok(string) = data.extract::<String>() {
                         let mut reader = Cursor::new(string);
                         match RsBdd::read_as_string(&mut reader) {
                             Ok(value) => Ok(Bdd { ctx, value }),
-                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {}", e)),
+                            Err(e) => throw_runtime_error(format!("Cannot read `Bdd`: {e}")),
                         }
                     } else {
                         throw_type_error("Expected `str` or `bytes`.")
@@ -230,8 +230,7 @@ impl Bdd {
                 if let Some(size_limit) = size_limit {
                     if size_limit < dnf.len() {
                         return throw_interrupted_error(format!(
-                            "Exceeded size limit of {} clauses",
-                            size_limit
+                            "Exceeded size limit of {size_limit} clauses"
                         ));
                     }
                 }

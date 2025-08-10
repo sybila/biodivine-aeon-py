@@ -2,6 +2,7 @@ import sys
 
 from biodivine_aeon import *
 
+
 # A simple demo script showcasing the percolation functionality.
 # Right now, this isn't really doing anything useful, but it is
 #  a reasonable demonstration of the percolation feature.

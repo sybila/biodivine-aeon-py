@@ -5,12 +5,12 @@ use biodivine_hctl_model_checker::model_checking::{
 };
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::{throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, throw_runtime_error, throw_type_error};
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct ModelChecking {
@@ -68,15 +68,13 @@ impl ModelChecking {
                     properties.push(prop_str);
                 } else {
                     return throw_type_error(format!(
-                        "Expected `str` or `HctlFormula`. Got {:?}.",
-                        x
+                        "Expected `str` or `HctlFormula`. Got {x:?}."
                     ));
                 }
             }
         } else {
             return throw_type_error(format!(
-                "Expected `str`, `HctlFormula`, or `list`. Got {:?}.",
-                property
+                "Expected `str`, `HctlFormula`, or `list`. Got {property:?}."
             ));
         }
 

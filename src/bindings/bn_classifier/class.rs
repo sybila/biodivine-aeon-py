@@ -4,7 +4,7 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 
 use pyo3::basic::CompareOp;
 use pyo3::types::{PyAnyMethods, PyTuple};
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::pyo3_utils::richcmp_eq_by_key;

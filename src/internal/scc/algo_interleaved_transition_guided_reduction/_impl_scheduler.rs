@@ -1,13 +1,13 @@
+use biodivine_lib_param_bn::VariableId;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
-use biodivine_lib_param_bn::VariableId;
 use pyo3::PyResult;
 
 use crate::internal::scc::algo_interleaved_transition_guided_reduction::{Process, Scheduler};
 use crate::{log_essential, should_log};
 
 impl Scheduler {
-    /// Create a new `Scheduler` with initial universe and active variables.
+    /// Create a new `Scheduler` with an initial universe and active variables.
     pub fn new(
         initial: GraphColoredVertices,
         variables: Vec<VariableId>,

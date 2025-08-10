@@ -1,11 +1,11 @@
 use super::regulatory_graph::RegulatoryGraph;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{runtime_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, runtime_error, throw_index_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
 use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
 use macros::Wrapper;
@@ -52,7 +52,7 @@ impl NetworkVariableContext for BooleanNetwork {
             return if let Some(var) = self.as_native().as_graph().find_variable(name.as_str()) {
                 Ok(var)
             } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
+                throw_index_error(format!("Unknown variable name `{name}`."))
             };
         }
         throw_type_error("Expected `VariableId` or `str`.")
@@ -150,7 +150,7 @@ impl BooleanNetwork {
             .into_iter()
             .map(|it| match it {
                 None => "None".to_string(),
-                Some(fun) => format!("\"{}\"", fun),
+                Some(fun) => format!("\"{fun}\""),
             })
             .collect::<Vec<_>>();
         format!(
@@ -1004,7 +1004,7 @@ impl BooleanNetwork {
             return if let Some(var) = self.0.find_parameter(name.as_str()) {
                 Ok(var)
             } else {
-                throw_index_error(format!("Unknown parameter name `{}`.", name))
+                throw_index_error(format!("Unknown parameter name `{name}`."))
             };
         }
         throw_type_error("Expected `ParameterId` or `str`.")

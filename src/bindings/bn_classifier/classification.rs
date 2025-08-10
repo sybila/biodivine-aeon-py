@@ -10,9 +10,9 @@ use biodivine_lib_param_bn::symbolic_async_graph::{
 use biodivine_pbn_control::control::PhenotypeOscillationType;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyList};
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
-use crate::bindings::bn_classifier::class::{extend_map, Class};
+use crate::bindings::bn_classifier::class::{Class, extend_map};
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::algorithms::attractors::Attractors;
 use crate::bindings::lib_param_bn::algorithms::reachability::Reachability;
@@ -27,7 +27,7 @@ use crate::bindings::pbn_control::extract_phenotype_type;
 use crate::internal::classification::load_inputs::load_classification_archive;
 use crate::internal::classification::write_output::build_classification_archive;
 use crate::internal::scc::{Behaviour, Classifier};
-use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, runtime_error, throw_runtime_error, throw_type_error};
 
 /// An "algorithm object" that groups all methods related to the classification of various
 /// model properties.
@@ -206,7 +206,7 @@ impl Classification {
         for (name, prop) in properties {
             let prop_node = properties_node.__getitem__(name.as_str());
             if prop_node.get_value(py).is_some() {
-                return throw_runtime_error(format!("Property `{}` is already set.", name));
+                return throw_runtime_error(format!("Property `{name}` is already set."));
             } else {
                 prop_node.set_value(py, Some(prop));
             }
@@ -263,7 +263,7 @@ impl Classification {
             return Ok(());
         };
 
-        throw_runtime_error(format!("Cannot write archive: {}", e))
+        throw_runtime_error(format!("Cannot write archive: {e}"))
     }
 
     /// Load a [BN Classifier](https://github.com/sybila/biodivine-bn-classifier/) archive

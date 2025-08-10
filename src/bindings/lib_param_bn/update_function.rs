@@ -1,10 +1,10 @@
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
-use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::{AsNative, runtime_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsExpression;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use pyo3::basic::CompareOp;
@@ -164,7 +164,7 @@ impl UpdateFunction {
                     .as_native()
                     .find_variable(arg_str.as_str())
                 else {
-                    return throw_runtime_error(format!("Unknown variable `{}`.", arg_str));
+                    return throw_runtime_error(format!("Unknown variable `{arg_str}`."));
                 };
                 args.push(FnUpdate::mk_var(variable));
             } else if let Ok(arg_fun) = arg.extract::<UpdateFunction>() {

@@ -1,20 +1,20 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
-use crate::{global_log_level, throw_type_error, AsNative};
+use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::{AsNative, global_log_level, throw_type_error};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
 use biodivine_lib_param_bn::trap_spaces::{NetworkColoredSpaces, NetworkSpaces};
 use biodivine_lib_param_bn::{ExtendedBoolean, Space};
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use pyo3::IntoPyObjectExt;
 
 /// An extension of the `SymbolicContext` which supports symbolic representation of network
 /// sub-spaces.

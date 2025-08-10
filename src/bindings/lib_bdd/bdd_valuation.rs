@@ -1,7 +1,7 @@
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
-use crate::{throw_runtime_error, throw_type_error, AsNative};
+use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::{AsNative, throw_runtime_error, throw_type_error};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
@@ -178,7 +178,7 @@ impl BddValuation {
     /// assert val_1.values() == [False, True, True]
     /// ```
     fn values(&self) -> Vec<bool> {
-        self.value.clone().vector()
+        self.value.clone().into_vector()
     }
 
     /// The list of `(BddVariable, bool)` tuples, similar to `dict.items()` (can be also used to build a dictionary).
@@ -346,7 +346,7 @@ impl BddPartialValuation {
             .map(|(var, value)| {
                 let name = self.ctx.get().as_native().name_of(var);
                 let value = i32::from(value);
-                format!("'{}': {}", name, value)
+                format!("'{name}': {value}")
             })
             .collect::<Vec<_>>();
         format!("{{{}}}", items.join(", "))

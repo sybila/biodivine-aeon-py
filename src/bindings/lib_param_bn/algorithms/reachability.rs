@@ -1,6 +1,6 @@
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::{global_log_level, AsNative};
+use crate::{AsNative, global_log_level};
 use pyo3::prelude::*;
 
 /// An "algorithm object" that facilitates reachability procedures, i.e. iterative computation

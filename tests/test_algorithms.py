@@ -61,3 +61,18 @@ def test_algorithms():
         bwd = Reachability.reach_bwd(graph, pivot)
 
         assert fwd.intersect(bwd) == a
+
+def test_percolation_case_1():
+    bn = BooleanNetwork.from_file("./tests/model-3.aeon")
+    stg = AsynchronousGraph(bn)
+
+    subspace = { 'APC': 1 }
+    percolated = Percolation.percolate_subspace(stg, subspace)
+    print(percolated)
+
+    # Percolating one input should not affect other outputs!
+    inputs = bn.inputs(infer=True)
+    for v in inputs:
+        if bn.get_variable_name(v) == 'APC':
+            continue
+        assert v not in percolated

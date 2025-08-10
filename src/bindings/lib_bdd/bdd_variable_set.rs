@@ -2,8 +2,8 @@ use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_bdd::bdd_valuation::{BddPartialValuation, BddValuation};
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
-use crate::{throw_index_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::{AsNative, throw_index_error, throw_runtime_error, throw_type_error};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -78,7 +78,7 @@ impl BddVariableSet {
 
     pub fn __repr__(&self) -> String {
         let names = self.variable_names();
-        format!("BddVariableSet({:?})", names)
+        format!("BddVariableSet({names:?})")
     }
 
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
@@ -315,7 +315,7 @@ impl BddVariableSet {
             return if let Some(var) = self.0.var_by_name(name.as_str()) {
                 Ok(var)
             } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
+                throw_index_error(format!("Unknown variable name `{name}`."))
             };
         }
         throw_type_error("Expected `BddVariable` or `str`.")

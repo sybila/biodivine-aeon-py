@@ -2,7 +2,7 @@ use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGra
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
-use crate::{global_log_level, AsNative};
+use crate::{AsNative, global_log_level};
 use pyo3::prelude::*;
 
 #[pyclass(module = "biodivine_aeon", frozen)]

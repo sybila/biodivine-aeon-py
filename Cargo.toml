@@ -1,7 +1,7 @@
 [package]
 name = "biodivine-aeon-py"
-version = "1.2.4"
-edition = "2021"
+version = "1.2.5"
+edition = "2024"
 
 [lib]
 name = "biodivine_aeon"
@@ -18,21 +18,23 @@ static-z3 = ["z3/static-link-z3"]
 algorithms-pyo3-bindings = []  # Feature flag for Python bindings for the algorithms module
 
 [dependencies]
-pyo3 = { version = "0.23.5", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
+pyo3 = { version = "0.25.1", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
 biodivine-lib-param-bn = { version="0.5.14", features=["solver-z3"] }
 biodivine-lib-bdd = "0.5.24"
 #biodivine-pbn-control = "0.3.1"
 biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "d1a66a5f1b2922198fcec10369f432d0046a00df" }
 biodivine-hctl-model-checker = "0.3.0"
+# Needs to be updated in dependencies first...
 rand = "0.8.5"
 macros = { path = "macros" }
-zip = "2.1.3"
+zip = "4.3.0"
 num-bigint = "0.4.6"
 num-traits = "0.2.19"
 either = "1.13.0"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
+# Needs to be updated in dependencies first...
 z3="^0.12.1"
 z3-sys = "^0.8.1"
 
@@ -42,4 +44,4 @@ dyn-clone = "1.0.18"
 pyo3-log = "0.12.1"
 
 [build-dependencies]
-pyo3-build-config = "0.23.2"
+pyo3-build-config = "0.25.1"

@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult};
+use pyo3::{Bound, Py, PyAny, PyResult, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::{index_error, AsNative};
+use crate::{AsNative, index_error};
 
 /// Represents a single vertex stored in a `VertexSet` (or a `ColoredVertexSet`), or a projection
 /// of said vertex to the chosen variables.
@@ -35,7 +35,7 @@ impl VertexModel {
             .map(|(var, value)| {
                 let name = self.ctx.get().as_native().bdd_variable_set().name_of(var);
                 let value = i32::from(value);
-                format!("'{}': {}", name, value)
+                format!("'{name}': {value}")
             })
             .collect::<Vec<_>>();
         format!("VertexModel({{{}}})", items.join(", "))

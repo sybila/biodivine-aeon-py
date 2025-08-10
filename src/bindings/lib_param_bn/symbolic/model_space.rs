@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::{throw_index_error, AsNative};
+use crate::{AsNative, throw_index_error};
 
 /// Represents a single space stored in a `SpaceSet` (or a `ColoredSpaceSet`), or a projection
 /// of said space to the chosen variables.
@@ -39,7 +39,7 @@ impl SpaceModel {
                 if let Some(value) = value {
                     format!("'{}': {}", name, i32::from(value))
                 } else {
-                    format!("'{}': *", name)
+                    format!("'{name}': *")
                 }
             })
             .collect::<Vec<_>>();

@@ -1,19 +1,19 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
-use crate::{index_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::{AsNative, index_error, throw_index_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_param_bn::FnUpdate;
 use either::{Either, Left, Right};
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
-use pyo3::IntoPyObjectExt;
 use std::collections::HashMap;
 
 /// Intuitively, a `SymbolicContext` encodes the entities of a `BooleanNetwork` into a set
@@ -78,7 +78,7 @@ impl NetworkVariableContext for SymbolicContext {
             return self
                 .as_native()
                 .find_network_variable(name.as_str())
-                .ok_or_else(|| index_error(format!("Unknown variable name `{}`.", name)));
+                .ok_or_else(|| index_error(format!("Unknown variable name `{name}`.")));
         }
         throw_type_error("Expected `VariableId`, `BddVariable` or `str`.")
     }
@@ -732,7 +732,7 @@ impl SymbolicContext {
             let fake_network = self.mk_fake_network();
             return match FnUpdate::try_from_str(function.as_str(), &fake_network) {
                 Ok(update) => Ok(self.as_native().mk_fn_update_true(&update)),
-                Err(e) => throw_runtime_error(format!("Cannot parse function: {}", e)),
+                Err(e) => throw_runtime_error(format!("Cannot parse function: {e}")),
             };
         }
         throw_type_error("Expected `Bdd` or `UpdateFunction`.")
@@ -774,8 +774,7 @@ impl SymbolicContext {
             let par_id = self.as_native().find_network_parameter(name.as_str());
             return match (var_id, par_id) {
                 (None, None) => throw_index_error(format!(
-                    "Name `{}` does not match any variable or parameter.",
-                    name
+                    "Name `{name}` does not match any variable or parameter."
                 )),
                 (Some(_), Some(_)) => unreachable!(),
                 (_, Some(par_id)) => Ok(Right(par_id)),

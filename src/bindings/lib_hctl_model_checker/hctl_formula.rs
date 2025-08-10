@@ -1,7 +1,7 @@
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, throw_runtime_error, throw_type_error};
 use biodivine_hctl_model_checker::mc_utils::{
     check_hctl_var_support, collect_unique_hctl_vars, collect_unique_wild_cards,
 };
@@ -16,7 +16,7 @@ use biodivine_hctl_model_checker::preprocessing::parser::{
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyTuple};
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 use std::collections::HashSet;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
@@ -146,7 +146,9 @@ fn resolve_temporal_unary_operator(op: String) -> PyResult<UnaryOp> {
         "all_future" => Ok(UnaryOp::AF),
         "exist_global" => Ok(UnaryOp::EG),
         "all_global" => Ok(UnaryOp::AG),
-        _ => throw_type_error("Expected one of 'exist_next', 'all_next', 'exist_future', 'all_future', 'exist_global', 'all_global'.")
+        _ => throw_type_error(
+            "Expected one of 'exist_next', 'all_next', 'exist_future', 'all_future', 'exist_global', 'all_global'.",
+        ),
     }
 }
 

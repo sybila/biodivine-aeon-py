@@ -1,8 +1,8 @@
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::internal::scc::algo_interleaved_transition_guided_reduction::interleaved_transition_guided_reduction;
-use crate::{global_log_level, AsNative};
+use crate::{AsNative, global_log_level};
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 

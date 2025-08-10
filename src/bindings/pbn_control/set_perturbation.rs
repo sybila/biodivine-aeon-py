@@ -2,25 +2,25 @@ use std::collections::HashMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::ops::{Not, Shr};
 
-use biodivine_lib_bdd::{bdd, Bdd as RsBdd};
+use biodivine_lib_bdd::{Bdd as RsBdd, bdd};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use num_bigint::BigInt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationModel};
-use crate::{throw_runtime_error, AsNative};
+use crate::{AsNative, throw_runtime_error};
 
 /// A symbolic representation of a set of "perturbations". A perturbation specifies for each
 /// variable whether it is fixed or not, and if it is fixed, it prescribes a value. To do so,
@@ -55,7 +55,7 @@ impl PerturbationSet {
     /// However, in some cases you may want to create it manually from an
     /// `AsynchronousPerturbationGraph` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid set of perturbations.
     #[new]
     pub fn new(py: Python, ctx: Py<AsynchronousPerturbationGraph>, bdd: &Bdd) -> Self {
@@ -161,7 +161,7 @@ impl PerturbationSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single vertex.
+    /// True if this set is a singleton, i.e., a single vertex.
     pub fn is_singleton(&self, py: Python) -> PyResult<bool> {
         let mut it = self.__iter__(py)?;
         let fst = it.native.next();
@@ -169,7 +169,7 @@ impl PerturbationSet {
         Ok(fst.is_some() && snd.is_none())
     }
 
-    /// Deterministically pick a subset of this set that contains exactly a single vertex.
+    /// Deterministically, pick a subset of this set that contains exactly a single vertex.
     ///
     /// If this set is empty, the result is also empty.
     pub fn pick_singleton(&self, py: Python) -> PyResult<Self> {
@@ -187,7 +187,7 @@ impl PerturbationSet {
         self.as_native().symbolic_size()
     }
 
-    /// Obtain the underlying `Bdd` of this `PerturbationSet`.
+    /// Get the underlying `Bdd` of this `PerturbationSet`.
     pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py).as_ref().symbolic_context();
@@ -195,7 +195,7 @@ impl PerturbationSet {
         Bdd::new_raw_2(ctx_ref.bdd_variable_set(), rs_bdd)
     }
 
-    /// Obtain the internal representation of this `PerturbationSet`, which uses the
+    /// Get the internal representation of this `PerturbationSet`, which uses the
     /// `AsynchronousPerturbationGraph` encoding. This is a colored set of vertices, where
     /// the colors only depend on the perturbation parameters, and the vertices are only
     /// constrained in case the variable is perturbed.

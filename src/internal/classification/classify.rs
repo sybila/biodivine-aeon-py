@@ -61,7 +61,7 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
     println!("Parsing formulae and generating symbolic representation...");
     // Combine all assertions into one formula and add it to the list of properties.
     let assertion = build_combined_assertion(&assertions);
-    // Adjust message depending on the number of properties (singular/multiple)
+    // Adjust the message depending on the number of properties (singular/multiple)
     let assertion_message = if assertions.len() == 1 {
         "property (assertion)"
     } else {
@@ -130,9 +130,9 @@ pub fn classify(model_path: &str, output_zip: &str) -> Result<(), String> {
     println!("Classification properties successfully evaluated.");
 
     // This is an important step where we ensure that the "model checking context"
-    // does not "leak" outside of the BN classifier. In essence, this ensures that the
+    // does not "leak" outside the BN classifier. In essence, this ensures that the
     // BDD that we output is compatible with any `SymbolicAsyncGraph` based on the
-    // originally supplied model (i.e. if we want to read the BDD, we don't have to
+    // originally supplied model (i.e., if we want to read the BDD, we don't have to
     // add any additional state variables to the symbolic context).
     let valid_colors = sanitize_colors(&graph, &valid_colors);
     let property_colors: Vec<GraphColors> = property_colors
@@ -202,7 +202,7 @@ mod tests {
         // empty vector should result in true constant
         assert_eq!(build_combined_assertion(&[]), "true".to_string());
 
-        // otherwise, result should be a conjunction ending with `& true`
+        // otherwise, a result should be a conjunction ending with `& true`
         assert_eq!(
             build_combined_assertion(&[formula1.clone(), formula2.clone()]),
             "(3{x}: @{x}: AX {x}) & (false)".to_string(),

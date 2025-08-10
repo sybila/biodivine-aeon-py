@@ -9,20 +9,20 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 };
 use biodivine_lib_param_bn::trap_spaces::{NetworkColoredSpaces, NetworkSpaces};
 use num_bigint::BigInt;
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3::IntoPyObjectExt;
 
+use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::model_space::SpaceModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::AsNative;
 
 /// A symbolic representation of a set of "spaces", i.e. hypercubes in the state space
 /// of a particular `BooleanNetwork`.

@@ -35,11 +35,11 @@ impl Display for Class {
         // Format the result
         let short_name: String = behaviour_count
             .iter()
-            .filter(|(_, &count)| count > 0)
-            .map(|(behaviour, &count)| format!("{} x {}", count, behaviour))
+            .filter(|(_, count)| **count > 0)
+            .map(|(behaviour, &count)| format!("{count} x {behaviour}"))
             .collect::<Vec<_>>()
             .join(", ");
-        write!(f, "{}", short_name)
+        write!(f, "{short_name}")
     }
 }
 
@@ -50,7 +50,7 @@ impl PartialOrd for Class {
 }
 
 /// Classes actually have a special ordering - primarily, they are ordered by the
-/// number of behaviours, secondarily they are ordered by the actual behaviours.
+/// number of behaviors, secondarily they are ordered by the actual behaviors.
 impl Ord for Class {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.0.len() != other.0.len() {

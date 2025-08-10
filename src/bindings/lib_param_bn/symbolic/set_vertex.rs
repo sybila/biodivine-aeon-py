@@ -1,5 +1,5 @@
-use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
+use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
@@ -11,12 +11,14 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphVertices};
 use biodivine_lib_param_bn::{ExtendedBoolean, Space};
 use num_bigint::BigInt;
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3::IntoPyObjectExt;
 
+use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
@@ -24,8 +26,6 @@ use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::AsNative;
 
 /// A symbolic representation of a set of "vertices", i.e. valuations of variables
 /// of a particular `BooleanNetwork`.

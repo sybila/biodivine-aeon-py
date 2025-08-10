@@ -1,9 +1,9 @@
-use crate::bindings::lib_param_bn::variable_id::VariableId;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue, SignValue};
+use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::pyo3_utils::{BoolLikeValue, SignValue, richcmp_eq_by_key};
 use crate::{
-    global_log_level, runtime_error, throw_index_error, throw_runtime_error, throw_type_error,
-    AsNative,
+    AsNative, global_log_level, runtime_error, throw_index_error, throw_runtime_error,
+    throw_type_error,
 };
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
 use biodivine_lib_param_bn::{Monotonicity, SdGraph, Sign};
@@ -48,7 +48,7 @@ impl NetworkVariableContext for RegulatoryGraph {
             return if let Some(var) = self.as_native().find_variable(name.as_str()) {
                 Ok(var)
             } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
+                throw_index_error(format!("Unknown variable name `{name}`."))
             };
         }
         throw_type_error("Expected `VariableId` or `str`.")
@@ -126,7 +126,7 @@ impl RegulatoryGraph {
 
     fn __repr__(&self) -> String {
         let (names, regulations) = self.__getnewargs__();
-        format!("RegulatoryGraph({:?}, {:?})", names, regulations)
+        format!("RegulatoryGraph({names:?}, {regulations:?})")
     }
 
     pub fn __getnewargs__(&self) -> (Vec<String>, Vec<String>) {
@@ -151,7 +151,7 @@ impl RegulatoryGraph {
     #[staticmethod]
     fn from_file(file_path: &str) -> PyResult<RegulatoryGraph> {
         match std::fs::read_to_string(file_path) {
-            Err(e) => throw_runtime_error(format!("Cannot read file {}: `{}`.", file_path, e)),
+            Err(e) => throw_runtime_error(format!("Cannot read file {file_path}: `{e}`.")),
             Ok(contents) => Self::from_aeon(contents.as_str()),
         }
     }
@@ -691,7 +691,7 @@ impl RegulatoryGraph {
             let Some((source, monotonicity, observable, target)) =
                 biodivine_lib_param_bn::Regulation::try_from_string(item.as_str())
             else {
-                return throw_runtime_error(format!("Invalid regulation string: `{}`.", item));
+                return throw_runtime_error(format!("Invalid regulation string: `{item}`."));
             };
             let monotonicity = match monotonicity {
                 None => None,
@@ -710,8 +710,7 @@ impl RegulatoryGraph {
                     Err(_) => key.to_string(),
                 };
                 return throw_type_error(format!(
-                    "Unknown key in the regulation dictionary: {:?}",
-                    error
+                    "Unknown key in the regulation dictionary: {error:?}"
                 ));
             }
 

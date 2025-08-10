@@ -7,19 +7,19 @@ use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::pyo3_utils::BoolLikeValue;
-use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, runtime_error, throw_runtime_error, throw_type_error};
 use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
-use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_bdd::BddValuation;
+use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
 use either::{Left, Right};
+use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
-use pyo3::IntoPyObjectExt;
 use std::collections::HashMap;
 
 #[pyclass(module = "biodivine_aeon", frozen, subclass)]
@@ -329,7 +329,7 @@ impl AsynchronousGraph {
         } else {
             let expr = BooleanExpression::resolve_expression(value)?;
             let expected_support = (0..arity)
-                .map(|it| (format!("x_{}", it), it))
+                .map(|it| (format!("x_{it}"), it))
                 .collect::<HashMap<_, _>>();
 
             // A helper function which evaluates while mapping variables to indices 1:1.
@@ -726,8 +726,7 @@ impl AsynchronousGraph {
         let Some(native_reduced) = self.native.inline_symbolic(variable) else {
             let name = self.as_native().get_variable_name(variable);
             return throw_runtime_error(format!(
-                "Cannot inline `{}`. Self-regulation detected.",
-                name
+                "Cannot inline `{name}`. Self-regulation detected."
             ));
         };
 
@@ -795,7 +794,9 @@ impl AsynchronousGraph {
                 .map(|(a, b)| (a.into(), b))
                 .collect());
         }
-        throw_type_error("Expected a dictionary of `VariableIdType` keys and `BoolType` values or a `VertexModel`.")
+        throw_type_error(
+            "Expected a dictionary of `VariableIdType` keys and `BoolType` values or a `VertexModel`.",
+        )
     }
 
     pub fn wrap_native(py: Python, stg: SymbolicAsyncGraph) -> PyResult<AsynchronousGraph> {

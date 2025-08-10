@@ -1,7 +1,7 @@
+use crate::AsNative;
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::AsNative;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -46,12 +46,12 @@ impl BddVariableSetBuilder {
 
     fn __str__(&self) -> String {
         let size = self.as_native().clone().build().num_vars();
-        format!("BddVariableSetBuilder(len = {})", size)
+        format!("BddVariableSetBuilder(len = {size})")
     }
 
     fn __repr__(&self) -> String {
         let names = self.__getstate__();
-        format!("BddVariableSetBuilder({:?})", names)
+        format!("BddVariableSetBuilder({names:?})")
     }
 
     fn __getstate__(&self) -> Vec<String> {

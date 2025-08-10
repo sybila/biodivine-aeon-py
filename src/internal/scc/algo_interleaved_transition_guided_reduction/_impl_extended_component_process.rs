@@ -1,6 +1,6 @@
+use biodivine_lib_param_bn::VariableId;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph};
-use biodivine_lib_param_bn::VariableId;
 use pyo3::PyResult;
 
 use crate::internal::scc::algo_interleaved_transition_guided_reduction::{
@@ -38,7 +38,7 @@ impl Process for ExtendedComponentProcess {
                 );
             }
 
-            // This is a modification of the original TGR in order to allow faster checking
+            // This is a modification of the original TGR to allow faster checking
             // of regions that are not trap sets but might still contain attractors.
 
             // Check if fwd_set is globally forward-closed. If not, we extend the bottom
