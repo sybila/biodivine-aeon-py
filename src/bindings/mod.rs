@@ -1,5 +1,6 @@
 use pyo3::{PyResult, Python};
 
+#[cfg(feature = "algorithms-pyo3-bindings")]
 pub mod algorithms;
 pub mod bn_classifier;
 pub mod lib_bdd;

@@ -1,12 +1,17 @@
-mod reachability_config;
-mod reachability_error;
-mod reachability_impl;
+use pyo3::{
+    types::{PyModule, PyModuleMethods as _},
+    Bound, PyResult,
+};
 
-pub use reachability_config::ReachabilityConfig;
-pub use reachability_error::ReachabilityError;
-pub use reachability_impl::Reachability;
+use crate::internal::algorithms::reachability::{Reachability, ReachabilityConfig};
 
-#[cfg(feature = "algorithms-pyo3-bindings")]
-mod mod_python;
-#[cfg(feature = "algorithms-pyo3-bindings")]
-pub use mod_python::*;
+mod _impl_pyerr;
+mod reachability_config_python;
+mod reachablility_impl_python;
+
+pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    module.add_class::<Reachability>()?;
+    module.add_class::<ReachabilityConfig>()?;
+
+    Ok(())
+}

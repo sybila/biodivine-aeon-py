@@ -1,12 +1,20 @@
-mod percolation_config;
-mod percolation_error;
-mod percolation_impl;
+use pyo3::{
+    types::{PyModule, PyModuleMethods as _},
+    Bound, PyResult,
+};
 
-pub use percolation_config::PercolationConfig;
-pub use percolation_error::PercolationError;
-pub use percolation_impl::Percolation;
+mod _impl_pyerr;
+mod percolation_config_python;
+mod percolation_impl_python;
+mod subspace_representation;
 
-#[cfg(feature = "algorithms-pyo3-bindings")]
-mod mod_python;
-#[cfg(feature = "algorithms-pyo3-bindings")]
-pub use mod_python::*;
+pub use subspace_representation::SubspaceRepresentation;
+
+use crate::internal::algorithms::percolation::{Percolation, PercolationConfig};
+
+pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    module.add_class::<Percolation>()?;
+    module.add_class::<PercolationConfig>()?;
+
+    Ok(())
+}

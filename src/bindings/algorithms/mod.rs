@@ -1,12 +1,19 @@
-pub mod cancellation;
-pub mod configurable;
+use pyo3::{types::PyModule, Bound, PyResult};
+
 pub mod fixed_points;
-pub mod macros;
+pub mod graph_representation;
 pub mod percolation;
 pub mod reachability;
+pub mod token_python;
 pub mod trap_spaces;
 
-#[cfg(feature = "algorithms-pyo3-bindings")]
-mod mod_python;
-#[cfg(feature = "algorithms-pyo3-bindings")]
-pub use mod_python::*;
+pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    pyo3_log::init();
+
+    fixed_points::register(module)?;
+    trap_spaces::register(module)?;
+    percolation::register(module)?;
+    reachability::register(module)?;
+
+    Ok(())
+}
