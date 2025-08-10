@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub mod cancellation;
 pub mod configurable;
 pub mod fixed_points;
