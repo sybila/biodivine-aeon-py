@@ -1,6 +1,11 @@
 import sys
 
-from biodivine_aeon import *
+from biodivine_aeon import (
+    AsynchronousGraph,
+    BooleanNetwork,
+    PercolationComp,
+    SymbolicSpaceContext,
+)
 
 # A simple demo script showcasing the percolation functionality.
 # Right now, this isn't really doing anything useful, but it is

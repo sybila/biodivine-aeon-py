@@ -1,6 +1,6 @@
 import sys
 
-from biodivine_aeon import *
+from biodivine_aeon import BooleanNetwork, FixedPointsComp
 
 bn = BooleanNetwork.from_file(sys.argv[1])
 bn = bn.infer_valid_graph()
