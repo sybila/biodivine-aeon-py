@@ -1,5 +1,5 @@
 #[doc(hidden)]
-pub use log::{log, log_enabled, Level};
+pub use log::{Level, log, log_enabled};
 
 /// A macro for logging messages with level determined by the size of data structure.
 ///
@@ -13,14 +13,14 @@ pub use log::{log, log_enabled, Level};
 #[macro_export]
 macro_rules! debug_with_limit {
     (target: $target:expr, size: $size:expr, $($arg:tt)*) => {
-        let level = if $size > 100_000 {
+        let __debug_with_limit_level = if $size > 100_000 {
             $crate::internal::algorithms::macros::Level::Debug
         } else {
             $crate::internal::algorithms::macros::Level::Trace
         };
 
-        if $crate::internal::algorithms::macros::log_enabled!(target: $target, level) {
-            $crate::internal::algorithms::macros::log!(target: $target, level, $($arg)*);
+        if $crate::internal::algorithms::macros::log_enabled!(target: $target, __debug_with_limit_level) {
+            $crate::internal::algorithms::macros::log!(target: $target, __debug_with_limit_level, $($arg)*);
         }
     };
 }
