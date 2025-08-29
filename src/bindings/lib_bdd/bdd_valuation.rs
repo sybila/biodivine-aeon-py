@@ -178,7 +178,7 @@ impl BddValuation {
     /// assert val_1.values() == [False, True, True]
     /// ```
     fn values(&self) -> Vec<bool> {
-        self.value.clone().into_vector()
+        self.value.clone().vector()
     }
 
     /// The list of `(BddVariable, bool)` tuples, similar to `dict.items()` (can be also used to build a dictionary).
