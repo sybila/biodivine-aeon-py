@@ -1,7 +1,7 @@
 use biodivine_lib_param_bn::{
+    BooleanNetwork,
     biodivine_std::traits::Set,
     symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
-    BooleanNetwork,
 };
 use log::{info, trace};
 use macros::Configurable;

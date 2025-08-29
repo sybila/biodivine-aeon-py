@@ -1,8 +1,9 @@
 use std::{collections::HashSet, time::Duration};
 
-use pyo3::{pymethods, PyResult};
+use pyo3::{PyResult, pymethods};
 
 use crate::{
+    AsNative as _,
     bindings::{
         algorithms::{
             graph_representation::PyGraphRepresentation, token_python::CancelTokenPython,
@@ -12,7 +13,6 @@ use crate::{
     internal::algorithms::{
         cancellation::CancelTokenTimer, configurable::Config as _, reachability::ReachabilityConfig,
     },
-    AsNative as _,
 };
 
 /// These methods are Python facing wrappers of native methods and thus should not be used from

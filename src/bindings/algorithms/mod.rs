@@ -1,4 +1,4 @@
-use pyo3::{types::PyModule, Bound, PyResult};
+use pyo3::{Bound, PyResult, types::PyModule};
 
 pub mod fixed_points;
 pub mod graph_representation;

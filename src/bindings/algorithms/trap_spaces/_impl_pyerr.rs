@@ -1,4 +1,4 @@
-use pyo3::{create_exception, exceptions::PyException, PyErr};
+use pyo3::{PyErr, create_exception, exceptions::PyException};
 
 use crate::{
     bindings::algorithms::{

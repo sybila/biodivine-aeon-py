@@ -1,4 +1,4 @@
-use pyo3::{create_exception, exceptions::PyException, Python};
+use pyo3::{Python, create_exception, exceptions::PyException};
 
 use crate::internal::algorithms::cancellation::CancellationHandler;
 

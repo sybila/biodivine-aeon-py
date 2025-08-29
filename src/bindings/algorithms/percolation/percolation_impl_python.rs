@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use pyo3::{pymethods, PyResult};
+use pyo3::{PyResult, pymethods};
 
 use crate::{
     bindings::{

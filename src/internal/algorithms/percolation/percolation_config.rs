@@ -1,4 +1,4 @@
-use biodivine_lib_param_bn::{symbolic_async_graph::SymbolicAsyncGraph, BooleanNetwork};
+use biodivine_lib_param_bn::{BooleanNetwork, symbolic_async_graph::SymbolicAsyncGraph};
 use macros::Config;
 
 use crate::{

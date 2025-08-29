@@ -1,5 +1,5 @@
-use biodivine_lib_bdd::{bdd, Bdd};
-use biodivine_lib_param_bn::{trap_spaces::SymbolicSpaceContext, VariableId};
+use biodivine_lib_bdd::{Bdd, bdd};
+use biodivine_lib_param_bn::{VariableId, trap_spaces::SymbolicSpaceContext};
 use log::debug;
 
 use crate::{internal::algorithms::cancellation::CancellationHandler, is_cancelled};

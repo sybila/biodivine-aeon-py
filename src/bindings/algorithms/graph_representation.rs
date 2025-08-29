@@ -1,6 +1,7 @@
-use pyo3::{create_exception, exceptions::PyException, FromPyObject, Py, PyErr, Python};
+use pyo3::{FromPyObject, Py, PyErr, Python, create_exception, exceptions::PyException};
 
 use crate::{
+    AsNative as _,
     bindings::{
         algorithms::{
             fixed_points::PyFixedPointsConfig, token_python::CancelTokenPython,
@@ -21,7 +22,6 @@ use crate::{
         reachability::{ReachabilityConfig, ReachabilityError},
         trap_spaces::{TrapSpaces, TrapSpacesConfig, TrapSpacesError},
     },
-    AsNative as _,
 };
 
 #[derive(FromPyObject)]

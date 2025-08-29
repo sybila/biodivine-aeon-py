@@ -2,10 +2,10 @@ use std::collections::HashSet;
 
 use biodivine_lib_bdd::bdd;
 use biodivine_lib_param_bn::{
+    BooleanNetwork,
     biodivine_std::traits::Set,
     symbolic_async_graph::SymbolicAsyncGraph,
     trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
-    BooleanNetwork,
 };
 use log::info;
 use macros::Configurable;

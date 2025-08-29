@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::{
-    symbolic_async_graph::SymbolicAsyncGraph, BooleanNetwork, VariableId,
+    BooleanNetwork, VariableId, symbolic_async_graph::SymbolicAsyncGraph,
 };
 use log::{debug, info, trace};
 use macros::Configurable;

@@ -1,12 +1,12 @@
-use pyo3::{pymethods, PyResult};
+use pyo3::{PyResult, pymethods};
 
 use crate::{
+    AsNative as _,
     bindings::{
         algorithms::graph_representation::PyGraphRepresentation,
         lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet,
     },
     internal::algorithms::reachability::{Reachability, ReachabilityConfig},
-    AsNative as _,
 };
 
 /// These methods are Python facing wrappers of native methods and thus should not be used from

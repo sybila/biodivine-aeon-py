@@ -1,6 +1,6 @@
 use biodivine_lib_param_bn::{
-    symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     BooleanNetwork,
+    symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
 };
 use macros::Config;
 

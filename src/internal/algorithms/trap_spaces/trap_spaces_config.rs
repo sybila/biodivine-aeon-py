@@ -1,7 +1,7 @@
 use biodivine_lib_param_bn::{
+    BooleanNetwork,
     symbolic_async_graph::SymbolicAsyncGraph,
     trap_spaces::{NetworkColoredSpaces, SymbolicSpaceContext},
-    BooleanNetwork,
 };
 use macros::Config;
 

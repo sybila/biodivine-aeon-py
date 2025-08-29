@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use biodivine_lib_param_bn::VariableId;
 use pyo3::FromPyObject;
 
-use crate::{bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding, AsNative as _};
+use crate::{AsNative as _, bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding};
 
 #[derive(FromPyObject)]
 pub enum SubspaceRepresentation {

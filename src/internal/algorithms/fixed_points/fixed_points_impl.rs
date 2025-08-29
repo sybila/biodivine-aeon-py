@@ -2,9 +2,9 @@ use std::collections::{HashMap, HashSet};
 
 use biodivine_lib_bdd::{Bdd, BddVariable};
 use biodivine_lib_param_bn::{
+    BooleanNetwork,
     biodivine_std::traits::Set,
     symbolic_async_graph::{GraphColoredVertices, GraphColors, GraphVertices, SymbolicAsyncGraph},
-    BooleanNetwork,
 };
 use log::{debug, info, trace};
 use macros::Configurable;

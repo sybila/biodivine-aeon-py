@@ -1,8 +1,8 @@
 use std::{
     fmt::Debug,
     sync::{
-        atomic::{AtomicBool, Ordering::SeqCst},
         Arc,
+        atomic::{AtomicBool, Ordering::SeqCst},
     },
     time::Duration,
 };

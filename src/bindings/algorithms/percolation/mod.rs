@@ -1,6 +1,6 @@
 use pyo3::{
-    types::{PyModule, PyModuleMethods as _},
     Bound, PyResult,
+    types::{PyModule, PyModuleMethods as _},
 };
 
 mod _impl_pyerr;
