@@ -28,7 +28,7 @@ with open("report.txt", "w") as report:
                         continue
 
                     model_number, time, *rest = line1.split(",")
-                    model_number_new, time_new, *rest = line2.split(",")
+                    model_number_new, time_new, *rest_new = line2.split(",")
 
                     if time.strip() == "FAIL":
                         report.write(
@@ -52,7 +52,7 @@ with open("report.txt", "w") as report:
                     percentage_speed += time_new / time
 
                     output = rest[0] if rest else "Empty"
-                    output_new = rest[0] if rest else "Empty"
+                    output_new = rest_new[0] if rest_new else "Empty"
                     if output != output_new:
                         report.write(
                             f"- {model_number}: Different outputs for the old ({output}) and new ({output_new}) implementations.\n"
