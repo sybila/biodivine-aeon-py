@@ -1887,7 +1887,7 @@ class ReachabilityConfig:
 class ReachabilityComp:
     """
     Implements symbolic reachability operations over an `AsynchronousGraph`. This means the
-    computation of both largets and smallest forward- or backward-closed sets of states.
+    computation of both largest and smallest forward- or backward-closed sets of states.
     """
 
     @staticmethod
@@ -1983,7 +1983,7 @@ class TrapSpacesConfig:
     ) -> None:
         """
         Create a new `TrapSpacesConfig` object. The `graph_representation` parameter is required and
-        specifies the underlying `BooleanNetwork`,from which an 'AsynchronousGraph' with its `SymbolicSpaceContext`
+        specifies the underlying `BooleanNetwork`, from which an `AsynchronousGraph` with its `SymbolicSpaceContext`
         is created. The other parameters are optional and can be used to specify a restriction,
         a time limit, and a BDD size limit for the trap spaces computation.
         For the meaning of the parameters, see the documentation of their respective with_

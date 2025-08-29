@@ -79,7 +79,7 @@ impl PyTrapSpacesConfig {
 
     /// Create a new `TrapSpacesConfig` from the given `BooleanNetwork`,
     /// with otherwise default configuration.
-    /// `AsynchronousGraph` is currently not supported, use `from_graph_with_context` instead.
+    /// `AsynchronousGraph` is currently not supported, use `create_from_graph_with_context` instead.
     #[staticmethod]
     pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
         PyTrapSpacesConfig::try_from(graph_representation)
