@@ -1,4 +1,4 @@
-use pyo3::{pyclass, pymethods, PyResult};
+use pyo3::{PyResult, pyclass, pymethods};
 
 use crate::bindings::{
     algorithms::graph_representation::PyGraphRepresentation,
@@ -10,8 +10,7 @@ use crate::bindings::{
 use super::PyFixedPointsConfig;
 
 /// Implements fixed point search over an `AsynchronousGraph`
-#[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "FixedPointsComp")]
+#[pyclass(name = "FixedPointsComp", module = "biodivine_aeon", frozen)]
 pub struct PyFixedPoints(PyFixedPointsConfig);
 
 /// These methods are Python facing wrappers of native methods and thus should not be used from

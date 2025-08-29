@@ -1,6 +1,7 @@
-use pyo3::{pyclass, pymethods, Py, PyResult};
+use pyo3::{Py, PyResult, pyclass, pymethods};
 
 use crate::{
+    AsNative as _,
     bindings::{
         algorithms::graph_representation::PyGraphRepresentation,
         lib_param_bn::symbolic::{
@@ -8,15 +9,13 @@ use crate::{
             symbolic_space_context::SymbolicSpaceContext,
         },
     },
-    AsNative as _,
 };
 
 use super::PyTrapSpacesConfig;
 
 /// Implments trap spaces search over an `AsynchronousGraph` and its
 /// `SymbolicSpaceContext`.
-#[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "TrapSpacesComp")]
+#[pyclass(name = "TrapSpacesComp", module = "biodivine_aeon", frozen)]
 pub struct PyTrapSpaces(PyTrapSpacesConfig);
 
 /// These methods are Python facing wrappers of native methods and thus should not be used from

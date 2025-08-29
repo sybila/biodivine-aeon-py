@@ -1,8 +1,9 @@
 use std::time::Duration;
 
-use pyo3::{pyclass, pymethods, Py, PyResult};
+use pyo3::{Py, PyResult, pyclass, pymethods};
 
 use crate::{
+    AsNative as _,
     bindings::{
         algorithms::{
             graph_representation::PyGraphRepresentation, token_python::CancelTokenPython,
@@ -16,7 +17,6 @@ use crate::{
         configurable::{Config as _, Configurable as _},
         fixed_points::{FixedPoints, FixedPointsConfig},
     },
-    AsNative as _,
 };
 
 /// A configuration class for the `FixedPointsComp` class. It allows you to specify various
@@ -27,8 +27,7 @@ use crate::{
 /// The configuration is immutable, meaning that each `with_*` method
 /// returns a new instance of `FixedPointsConfig` with the specified modifications.
 /// This API design means the method calls can be chained together.
-#[pyclass(module = "biodivine_aeon", frozen)]
-#[pyo3(name = "FixedPointsConfig")]
+#[pyclass(name = "FixedPointsConfig", module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct PyFixedPointsConfig {
     pub inner: FixedPoints,
