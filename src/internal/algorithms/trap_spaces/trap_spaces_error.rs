@@ -10,7 +10,7 @@ use crate::internal::algorithms::{
 /// An error returned by a [TrapSpaces] procedure.
 #[derive(Error)]
 pub enum TrapSpacesError {
-    #[error("config creation failed")]
+    #[error("config creation failed: {0}")]
     CreationFailed(String),
     #[error("operation cancelled")]
     Cancelled(Bdd),
@@ -48,9 +48,7 @@ impl From<CancellationError<Bdd>> for TrapSpacesError {
 impl From<FixedPointsError> for TrapSpacesError {
     fn from(error_value: FixedPointsError) -> Self {
         match error_value {
-            FixedPointsError::CreationFailed(_) => {
-                TrapSpacesError::CreationFailed(error_value.clone().to_string())
-            }
+            FixedPointsError::CreationFailed(msg) => TrapSpacesError::CreationFailed(msg),
             FixedPointsError::Cancelled(bdd) => TrapSpacesError::Cancelled(bdd),
             FixedPointsError::BddSizeLimitExceeded(bdd) => {
                 TrapSpacesError::BddSizeLimitExceeded(bdd)

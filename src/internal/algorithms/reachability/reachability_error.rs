@@ -8,7 +8,7 @@ use crate::internal::algorithms::cancellation::CancellationError;
 /// An error returned by a [Reachability] procedure.
 #[derive(Error)]
 pub enum ReachabilityError {
-    #[error("config creation failed")]
+    #[error("config creation failed: {0}")]
     CreationFailed(String),
     #[error("operation cancelled")]
     Cancelled(GraphColoredVertices),

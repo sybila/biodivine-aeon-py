@@ -87,6 +87,10 @@ pub fn derive_config(input: TokenStream) -> TokenStream {
 /// #[derive(Configurable)]
 /// struct MyConfigurable(MyConfig);
 /// ```
+///
+/// Requirements:
+/// - For named structs, the type must implement `Default` (used in `with_config`).
+/// - For tuple structs with a single field, no `Default` bound is required.
 #[proc_macro_derive(Configurable)]
 pub fn derive_configurable(input: TokenStream) -> TokenStream {
     derive_configurable::derive_configurable_impl(input)

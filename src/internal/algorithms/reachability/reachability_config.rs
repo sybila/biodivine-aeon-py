@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use biodivine_lib_param_bn::{
-    symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
     BooleanNetwork, VariableId,
+    symbolic_async_graph::{GraphColoredVertices, SymbolicAsyncGraph},
 };
 use macros::Config;
 
@@ -121,7 +121,7 @@ impl ReachabilityConfig {
 impl ReachabilityConfig {
     /// Return the variables sorted in ascending order.
     pub fn sorted_variables(&self) -> Vec<VariableId> {
-        let mut variables = Vec::from_iter(self.variables.clone());
+        let mut variables: Vec<_> = self.variables.iter().copied().collect();
         variables.sort();
         variables
     }
