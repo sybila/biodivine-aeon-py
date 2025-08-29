@@ -1,11 +1,15 @@
 #!/bin/bash
+set -Eeuo pipefail
+command -v curl >/dev/null 2>&1 || { echo "curl is required."; exit 1; }
+command -v unzip >/dev/null 2>&1 || { echo "unzip is required."; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo "python3 is required."; exit 1; }
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <timeout (e.g., 10s, 1m, 1h)>"
   exit 1
 fi
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || { echo "Failed to cd into script directory."; exit 1; }
 
 TARGET_DIR="edition-2022-aeon"
 ZIP_FILE="edition-2022-aeon.zip"
