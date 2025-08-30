@@ -67,16 +67,13 @@ impl Percolation {
 
         let graph = &self.config().graph;
 
-        let mut network_variables = vec![
-            VariableId::from_index(0);
-            graph.symbolic_context().bdd_variable_set().num_vars()
-                as usize
-        ];
+        let mut network_variables =
+            vec![None; graph.symbolic_context().bdd_variable_set().num_vars() as usize];
 
         let state_variables = graph.symbolic_context().state_variables();
         for var in graph.variables() {
             let bdd_var = state_variables[var.to_index()];
-            network_variables[bdd_var.to_index()] = var;
+            network_variables[bdd_var.to_index()] = Some(var);
         }
 
         // Variables that have a known fixed value.
@@ -132,7 +129,11 @@ impl Percolation {
 
                         restriction.clear();
                         for input in inputs.clone() {
-                            let var = network_variables[input.to_index()];
+                            let Some(var) = network_variables[input.to_index()] else {
+                                // This input corresponds to some network parameter. Parameters cannot
+                                // be fixed by subspace percolation.
+                                continue;
+                            };
                             if let Some(value) = fixed[var.to_index()] {
                                 restriction.push((input, value));
                                 inputs.remove(&input);
