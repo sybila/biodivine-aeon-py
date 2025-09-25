@@ -197,6 +197,11 @@ impl Bdd {
             .to_dot_string(self.ctx.get().as_native(), zero_pruned)
     }
 
+    /// If this BDD is a terminal node, return its Boolean value. Otherwise, return `None`.
+    fn as_bool(&self) -> Option<bool> {
+        self.as_native().as_bool()
+    }
+
     /// Produce a `BooleanExpression` which is logically equivalent to the function represented by this `Bdd`.
     ///
     /// The format uses an and-or expansion of the function graph, hence it is not very

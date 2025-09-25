@@ -239,6 +239,10 @@ def test_bdd():
     }
     assert bdd_x.support_set() == {BddVariable(0), BddVariable(1), BddVariable(2)}
     assert bdd_clause.support_set() == {BddVariable(0), BddVariable(1)}
+    # Quick new helpers
+    assert bdd_true.as_bool() is True
+    assert bdd_false.as_bool() is False
+    assert bdd_x.as_bool() is None
 
     # Graph queries
     root = bdd_x.root()

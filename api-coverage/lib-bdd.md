@@ -670,6 +670,10 @@ we will need either complicated generics, or heavy use of `Any`.
             <td><code>Bdd.implies</code></td>
         </tr>
         <tr>
+            <td><code>Bdd::as_bool</code></td>
+            <td><code>Bdd.as_bool</code></td>
+        </tr>
+        <tr>
             <td><code>Bdd::root_pointer</code></td>
             <td><code>Bdd.root</code></td>
         </tr>
