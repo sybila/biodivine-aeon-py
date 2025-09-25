@@ -5,15 +5,17 @@ use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::bindings::lib_bdd::op_function::{OpFunction2, OpFunction3};
 use crate::{
-    AsNative, runtime_error, throw_interrupted_error, throw_runtime_error, throw_type_error,
+    runtime_error, throw_interrupted_error, throw_runtime_error, throw_type_error, AsNative,
 };
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_bdd::{BddPathIterator, BddSatisfyingValuations};
+use macros::Wrapper;
 use num_bigint::BigUint;
 use num_traits::FromPrimitive;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
+use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{HashMap, HashSet};
@@ -513,7 +515,7 @@ impl Bdd {
         }
     }
 
-    /// Computes a logical equivalence (i.e. $f \Leftrightarrow g$, or $f = g$) of two `Bdd` objects.
+    /// Computes a logical equivalence (i.e. `f <=> g`, or `f = g`) of two `Bdd` objects.
     ///
     /// Accepts an optional `limit` argument. If the number of nodes in the resulting `Bdd` exceeds this limit,
     /// the method terminates prematurely and throws an `InterruptedError` instead of returning a result.
@@ -799,7 +801,7 @@ impl Bdd {
     /// variables.
     ///
     /// Another useful way of understanding this operation is through relations: Consider a relation
-    /// $R \subseteq A \times B$ represented as a `Bdd`. The result of `R.pick(variables_B)`, denoted $R'$
+    /// `R` which is of type `A \times B` and is represented as a `Bdd`. The result of `R.pick(variables_B)`, denoted $R'$
     /// is a *sub-relation* which is a bijection: for every $a \in A$ which is present in the original $R$,
     /// we selected exactly one $b \in B$ s.t. $(a,b) \in R' \land (a, b) \in R$. If we instead compute
     /// `R.pick(variables_A)`, we obtain a different bijection: one where we selected exactly $a \in A$ for every
@@ -828,7 +830,7 @@ impl Bdd {
 
         let variables = self.ctx.get().resolve_variables(variables)?;
         if let Some(seed) = seed {
-            let mut rng = rand::prelude::StdRng::seed_from_u64(seed);
+            let mut rng = StdRng::seed_from_u64(seed);
             pick_random_rng(self, &variables, &mut rng)
         } else {
             pick_random_rng(self, &variables, &mut rand::thread_rng())
@@ -906,7 +908,7 @@ impl Bdd {
         }
 
         let result = if let Some(seed) = seed {
-            let mut rng = rand::prelude::StdRng::seed_from_u64(seed);
+            let mut rng = StdRng::seed_from_u64(seed);
             inner(self.as_native(), &mut rng)
         } else {
             inner(self.as_native(), &mut rand::thread_rng())
@@ -930,6 +932,37 @@ impl Bdd {
             .most_negative_valuation()
             .map(|it| BddValuation::new_raw(self.ctx.clone(), it))
             .ok_or_else(|| runtime_error("BDD is empty."))
+    }
+
+    /// Create a uniform valuation sampler for this BDD, optionally initialized with a seed.
+    ///
+    /// Note that a uniform sampler is made specifically for a single BDD object and cannot
+    /// be reused across different BDDs.
+    #[pyo3(signature = (seed = None))]
+    pub fn mk_uniform_valuation_sampler(&self, seed: Option<u64>) -> UniformValuationSampler {
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        UniformValuationSampler(self.as_native().mk_uniform_valuation_sampler(rng))
+    }
+
+    /// Create a naive valuation sampler for this BDD, optionally initialized with a seed.
+    #[pyo3(signature = (seed = None))]
+    pub fn mk_naive_valuation_sampler(&self, seed: Option<u64>) -> NaiveSampler {
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        NaiveSampler(biodivine_lib_bdd::random_sampling::NaiveSampler::from(rng))
+    }
+
+    /// Sample a random valuation using the provided sampler.
+    pub fn random_valuation_sample(&self, sampler: &Bound<'_, PyAny>) -> PyResult<Option<BddValuation>> {
+        let valuation = if let Ok(uniform_sampler) = sampler.cast::<UniformValuationSampler>() {
+            let mut sampler_state = uniform_sampler.borrow_mut();
+            self.as_native().random_valuation_sample(sampler_state.as_native_mut())
+        } else if let Ok(naive_sampler) = sampler.cast::<NaiveSampler>() {
+            let mut sampler_state = naive_sampler.borrow_mut();
+            self.as_native().random_valuation_sample(sampler_state.as_native_mut())
+        } else {
+            return throw_type_error("Expected `UniformValuationSampler` or `NaiveSampler`.");
+        };
+        Ok(valuation.map(|it| BddValuation::new_raw(self.ctx.clone(), it)))
     }
 
     /// An iterator over all `BddValuation` objects that satisfy this `Bdd`.
@@ -969,7 +1002,7 @@ impl Bdd {
             bdd.random_clause(rng)
         }
         let result = if let Some(seed) = seed {
-            let mut rng = rand::prelude::StdRng::seed_from_u64(seed);
+            let mut rng = StdRng::seed_from_u64(seed);
             inner(self.as_native(), &mut rng)
         } else {
             inner(self.as_native(), &mut rand::thread_rng())
@@ -1223,3 +1256,13 @@ impl _BddClauseIterator {
         Self::__next__(slf)
     }
 }
+
+/// A naive valuation sampler for BDDs.
+#[pyclass(module = "biodivine_aeon")]
+#[derive(Clone, Wrapper)]
+pub struct NaiveSampler(biodivine_lib_bdd::random_sampling::NaiveSampler<StdRng>);
+
+/// A uniform valuation sampler for BDDs.
+#[pyclass(module = "biodivine_aeon")]
+#[derive(Clone, Wrapper)]
+pub struct UniformValuationSampler(biodivine_lib_bdd::random_sampling::UniformValuationSampler<StdRng>);

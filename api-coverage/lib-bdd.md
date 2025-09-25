@@ -1,6 +1,6 @@
 # Biodivine `lib-bdd` API coverage
 
-This document should be up-to-date with `lib-bdd` version `0.5.13`.
+This document should be up-to-date with `lib-bdd` version `0.6.2`.
 
 ## `BddVariable` (frozen)
 
@@ -606,6 +606,10 @@ we will need either complicated generics, or heavy use of `Any`.
  * We still cannot override Python keywords like `and` and `or`, so we would have
    to use something else.
 
+Also note that `NaiveSampler` and `UniformValuationSampler` technically have their 
+mirror implementations in Python, but they currently have no public API and simply
+hold the state of the random value generators.
+
 <table>
     <thead>
         <tr>
@@ -950,6 +954,18 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr>
             <td><code>Bdd::most_positive_valuation</code></td>
             <td><code>Bdd.valuation_most_positive</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::mk_uniform_valuation_sampler</code></td>
+            <td><code>Bdd.mk_uniform_valuation_sampler</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.mk_naive_valuation_sampler</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::random_valuation_sample</code></td>
+            <td><code>Bdd.random_valuation_sample</code></td>
         </tr>
         <tr>
             <td><code>Bdd::sat_valuations</code></td>

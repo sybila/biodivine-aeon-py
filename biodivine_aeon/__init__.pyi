@@ -78,6 +78,17 @@ class BddPointer:
     def as_bool(self) -> Optional[bool]:
         ...
 
+
+class NaiveSampler:
+    def __init__(self) -> None:
+        ...
+
+
+class UniformValuationSampler:
+    def __init__(self) -> None:
+        ...
+
+
 class BddVariableSetBuilder:
     def __init__(self, variables: Optional[Sequence[str]] = None) -> None:
         """
@@ -360,6 +371,12 @@ class Bdd:
     def valuation_most_positive(self) -> BddValuation:
         ...
     def valuation_most_negative(self) -> BddValuation:
+        ...
+    def mk_uniform_valuation_sampler(self, seed: Optional[int] = None) -> UniformValuationSampler:
+        ...
+    def mk_naive_valuation_sampler(self, seed: Optional[int] = None) -> NaiveSampler:
+        ...
+    def random_valuation_sample(self, sampler: Union[NaiveSampler, UniformValuationSampler]) -> Optional[BddValuation]:
         ...
     def valuation_iterator(self) -> Iterator[BddValuation]:
         ...

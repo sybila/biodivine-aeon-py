@@ -444,6 +444,26 @@ def test_bdd():
     for ptr in pointers:
         assert isinstance(ptr, BddPointer)
 
+    # Test sampling methods
+    uniform_sampler = bdd_x.mk_uniform_valuation_sampler()
+    naive_sampler = bdd_x.mk_naive_valuation_sampler()
+    
+    # Test that samplers are created correctly
+    assert isinstance(uniform_sampler, UniformValuationSampler)
+    assert isinstance(naive_sampler, NaiveSampler)
+    
+    # Test sampling with both samplers
+    uniform_sample = bdd_x.random_valuation_sample(uniform_sampler)
+    naive_sample = bdd_x.random_valuation_sample(naive_sampler)
+    
+    # Both should return valid valuations or None
+    if uniform_sample is not None:
+        assert isinstance(uniform_sample, BddValuation)
+        assert uniform_sample in bdd_x.valuation_iterator()
+    if naive_sample is not None:
+        assert isinstance(naive_sample, BddValuation)
+        assert naive_sample in bdd_x.valuation_iterator()
+
 
 def test_boolean_expression():
     a = BooleanExpression("a")
