@@ -1,0 +1,14 @@
+This project contains Python bindings for a collection of Rust libraries using PyO3. One of these, `biodivine-lib-bdd` has recently been updated. We want to reflect these changes in the bindings as well.
+
+In the `api-coverage` folder, you will find `lib-bdd.0.5.22.api.txt` (the public API of the older version that is currently covered), `lib-bdd.0.6.1.api.txt` (the latest public API), and `lib-bdd.diff.txt`, the list of differences between these two APIs. The documentation for this library is also available online. Finally, in `lib-bdd.md`, there is a discussion showing which features of the Rust library are mirrored into Python and how.
+
+The actual PyO3 bindings are located in the `./src/bindings/lib_bdd` Rust module.
+
+Finally, in `./biodivine_aeon/__init__.pyi`, there are type annotations for the Python functions/classes that are available through these bindings.
+
+Your task is to:
+ - Analyze the public API changes and the current bindings to decice which updated features should be mirrored into Python and how.
+ - Update the `lib-bdd.md` file to reflect your plan for what should now be included in the bindings and how, adhering to the existing format of the file.
+ - Update the actual Rust code of the bindings in `./src/bindings/lib-bdd` according to these proposed changes.
+ - Update the type annotations in `__init__.pyi` to reflect these changes.
+ - Generate Python tests of the new functionality in the `./tests` folder.
