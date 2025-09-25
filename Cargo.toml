@@ -15,7 +15,9 @@ crate-type = ["cdylib", "rlib"]
 # you don't need it as long as you have Z3 installed (because your
 # build may take >30min if you enable it).
 static-z3 = ["z3/static-link-z3"]
-algorithms-pyo3-bindings = []  # Feature flag for Python bindings for the algorithms module
+
+# Feature flag that enables Python bindings for the algorithms module
+algorithms-pyo3-bindings = []
 
 [dependencies]
 pyo3 = { version = "0.26.0", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
@@ -32,17 +34,15 @@ zip = "5.1.1"
 num-bigint = "0.4"
 num-traits = "0.2"
 either = "1.15"
+thiserror = "2.0"
+log = "0.4"
+dyn-clone = "1.0"
+pyo3-log = "0.13"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
 # Cannot update `z3` because this version is used by lib-param-bn.
 z3="^0.18.2"
-z3-sys = "^0.9.10"
-
-thiserror = "2.0.11"
-log = "0.4.22"
-dyn-clone = "1.0.18"
-pyo3-log = "0.12.1"
 
 [build-dependencies]
 pyo3-build-config = "0.26.0"
