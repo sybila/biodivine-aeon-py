@@ -434,6 +434,16 @@ def test_bdd():
     assert bdd_clause.substitute('b', var_c) == expected
     assert bdd_clause.rename([('b', 'c')]) == expected
 
+    # Test pointers method
+    pointers = bdd_x.pointers()
+    assert isinstance(pointers, list)
+    assert len(pointers) == bdd_x.node_count()
+    # Root should be in the pointers list
+    assert bdd_x.root() in pointers
+    # All pointers should be valid BddPointer objects
+    for ptr in pointers:
+        assert isinstance(ptr, BddPointer)
+
 
 def test_boolean_expression():
     a = BooleanExpression("a")

@@ -756,6 +756,10 @@ we will need either complicated generics, or heavy use of `Any`.
             <td><code>Bdd.support_set_contains</code></td>
         </tr>
         <tr>
+            <td><code>Bdd::pointers</code></td>
+            <td><code>Bdd.pointers</code></td>
+        </tr>
+        <tr>
             <td><code>Bdd::is_false</code></td>
             <td><code>Bdd.is_false</code></td>
         </tr>

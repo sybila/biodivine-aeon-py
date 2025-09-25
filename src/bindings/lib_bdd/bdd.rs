@@ -374,6 +374,15 @@ impl Bdd {
         Ok(self.as_native().support_set_contains(&var))
     }
 
+    /// Return a list of all BDD node pointers in this BDD.
+    fn pointers(&self) -> Vec<BddPointer> {
+        self.as_native()
+            .pointers()
+            .into_iter()
+            .map(|it| it.into())
+            .collect()
+    }
+
     /// True if this `Bdd` represents a constant $false$ function.
     fn is_false(&self) -> bool {
         self.as_native().is_false()
