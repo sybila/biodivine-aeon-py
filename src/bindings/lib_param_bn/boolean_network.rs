@@ -225,8 +225,11 @@ impl BooleanNetwork {
         binarize: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
         let path: &Path = file_path.as_ref();
-        let extension = path.extension().and_then(|it| it.to_str());
-        let bn = if extension == Some("json") {
+        let extension = path
+            .extension()
+            .and_then(|it| it.to_str())
+            .unwrap_or_default();
+        let bn = if extension.eq_ignore_ascii_case("json") {
             // JSON files can be opened as BMA models
             let file_contents = std::fs::read_to_string(path).map_err(runtime_error)?;
             let model = BmaModel::from_json_string(file_contents.as_str())
