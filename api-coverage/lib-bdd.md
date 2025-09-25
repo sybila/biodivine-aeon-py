@@ -252,8 +252,11 @@ explore it in the future.
             <td><code>BddVariableSet.variable_ids</code></td>
         </tr>
         <tr>
-            <td></td>
-            <td><code>BddVariableSet.variable_names</code></td>
+            <td><code>BddVariableSet::variable_names</code></td>
+            <td rowspan="2"><code>BddVariableSet.variable_names</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::variable_names_ref</code></td>
         </tr>
         <tr>
             <td><code>BddVariableSet::var_by_name</code></td>
@@ -261,8 +264,11 @@ explore it in the future.
         </tr>
         <tr>
             <td><code>BddVariableSet::name_of</code></td>
-            <td><code>BddVariableSet.get_variable_name</code></td>
+            <td rowspan="2"><code>BddVariableSet.get_variable_name</code></td>
         </tr> 
+        <tr>
+            <td><code>BddVariableSet::name_of_str</code></td>
+        </tr>
         <tr><td colspan="2" align="center">BDD constructors</td></tr>
         <tr>
             <td><code>BddVariableSet::mk_false</code></td>
@@ -302,11 +308,29 @@ explore it in the future.
         </tr>
         <tr>
             <td><code>BddVariableSet::mk_cnf</code></td>
-            <td><code>BddVariableSet.mk_cnf</code></td>
+            <td rowspan="4"><code>BddVariableSet.mk_cnf</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_cnf_ref</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_cnf_valuation</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_cnf_valuation_ref</code></td>
         </tr>
         <tr>
             <td><code>BddVariableSet::mk_dnf</code></td>
-            <td><code>BddVariableSet.mk_dnf</code></td>
+            <td rowspan="4"><code>BddVariableSet.mk_dnf</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_dnf_ref</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_dnf_valuation</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_dnf_valuation_ref</code></td>
         </tr>
         <tr>
             <td><code>BddVariableSet::mk_sat_exactly_k</code></td>
@@ -417,7 +441,19 @@ explore it in the future.
         <tr><td colspan="2" align="center">Iteration / conversion</td></tr>
         <tr>
             <td><code>BddValuation::vector</code></td>
-            <td><code>BddValuation.values</code></td>
+            <td rowspan="5"><code>BddValuation.values</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::borrow</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::as_vector</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::into_vector</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::as_vector_mut</code></td>
         </tr>
         <tr>
             <td></td>
@@ -426,6 +462,14 @@ explore it in the future.
         <tr>
             <td><code>BddValuation::to_values</code></td>
             <td><code>BddValuation.items</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::to_partial_valuation</code></td>
+            <td><code>BddPartialValuation.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::mk_bdd</code></td>
+            <td><code>Bdd.__init__</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -448,13 +492,16 @@ explore it in the future.
         <tr><td colspan="2" align="center">Special methods</td></tr>
         <tr>
             <td><code>BddPartialValuation::empty</code></td>
-            <td rowspan="3"><code>BddPartialValuation.__init__</code></td>
+            <td rowspan="4"><code>BddPartialValuation.__init__</code></td>
         </tr>
         <tr>
             <td><code>BddPartialValuation::from_values</code></td> 
         </tr>
         <tr>
             <td><code>BddPartialValuation::from<&BddValuation></code></td> 
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::from_values_iter</code></td>
         </tr>
         <tr>
             <td><code>BddPartialValuation::eq</code></td>
@@ -730,7 +777,10 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr><td colspan="2" align="center">Boolean operations</td></tr>
         <tr>
             <td><code>Bdd::not</code></td>
-            <td><code>Bdd.l_not</code></td>
+            <td rowspan="2"><code>Bdd.l_not</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::into_not</code></td>
         </tr>
         <tr>
             <td><code>Bdd::and</code></td>
@@ -818,17 +868,23 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::restrict</code></td>
-            <td rowspan="2"><code>Bdd.r_restrict</code></td>
+            <td rowspan="3"><code>Bdd.r_restrict</code></td>
         </tr>
         <tr>
             <td><code>Bdd::var_restrict</code></td>
         </tr>
         <tr>
+            <td><code>Bdd::restrict_valuation</code></td>
+        </tr>
+        <tr>
             <td><code>Bdd::select</code></td>
-            <td rowspan="2"><code>Bdd.r_select</code></td>
+            <td rowspan="3"><code>Bdd.r_select</code></td>
         </tr>
         <tr>
             <td><code>Bdd::var_select</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::select_valuation</code></td>
         </tr>
         <tr> 
             <td><code>Bdd::binary_op_nested</code></td>
@@ -841,7 +897,23 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr> 
             <td><code>Bdd::binary_op_with_for_all</code></td>
             <td><code>Bdd.apply_with_for_all</code></td>
-        </tr> 
+        </tr>
+        <tr>
+            <td><code>Bdd::binary_op_with_exists_trigger</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::binary_op_with_for_all_trigger</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::exists_trigger</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::for_all_trigger</code></td>
+            <td></td>
+        </tr>
         <tr><td colspan="2" align="center">Valuations / Clauses</td></tr>
         <tr>
             <td><code>Bdd::sat_witness</code></td>
