@@ -526,7 +526,6 @@ impl AsynchronousPerturbationGraph {
 
             Ok(robustness.to_f64().unwrap_or(f64::NAN) / 1_000_000.0)
         }
-
     }
 
     /// Transform the given `ColorSet` such that any information about perturbations is removed
