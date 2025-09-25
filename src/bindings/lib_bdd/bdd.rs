@@ -368,6 +368,12 @@ impl Bdd {
             .collect()
     }
 
+    /// True if the given variable is present in the support set of this `Bdd`.
+    fn support_set_contains(&self, variable: &Bound<'_, PyAny>) -> PyResult<bool> {
+        let var = self.ctx.get().resolve_variable(variable)?;
+        Ok(self.as_native().support_set_contains(&var))
+    }
+
     /// True if this `Bdd` represents a constant $false$ function.
     fn is_false(&self) -> bool {
         self.as_native().is_false()

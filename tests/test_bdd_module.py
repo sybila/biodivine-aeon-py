@@ -243,6 +243,8 @@ def test_bdd():
     assert bdd_true.as_bool() is True
     assert bdd_false.as_bool() is False
     assert bdd_x.as_bool() is None
+    assert bdd_clause.support_set_contains('a')
+    assert not bdd_clause.support_set_contains('c')
 
     # Graph queries
     root = bdd_x.root()
