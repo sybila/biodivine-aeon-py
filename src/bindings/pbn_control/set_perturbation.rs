@@ -8,7 +8,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
@@ -117,7 +117,7 @@ impl PerturbationSet {
     }
 
     /// Returns the number of vertices that are represented in this set.
-    pub fn cardinality(&self) -> BigInt {
+    pub fn cardinality(&self) -> BigUint {
         let pruner = Self::mk_duplicate_pruning_bdd(self.ctx.get());
         let pruned = self.as_native().as_bdd().and(&pruner);
         let all_variables = self

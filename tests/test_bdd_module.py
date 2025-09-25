@@ -115,6 +115,28 @@ def test_bdd_variable_set():
     assert ctx.mk_conjunctive_clause(clause_1) == ctx.mk_dnf([clause_1, clause_2])
     assert ctx.mk_disjunctive_clause(clause_1) == ctx.mk_cnf([clause_1, clause_2])
 
+    # Test dictionary methods
+    id_dict = ctx.to_id_dict()
+    name_dict = ctx.to_name_dict()
+    
+    # Check id_dict maps variables to names
+    assert id_dict[BddVariable(0)] == "a"
+    assert id_dict[BddVariable(1)] == "b" 
+    assert id_dict[BddVariable(2)] == "c"
+    assert len(id_dict) == 3
+    
+    # Check name_dict maps names to variables
+    assert name_dict["a"] == BddVariable(0)
+    assert name_dict["b"] == BddVariable(1)
+    assert name_dict["c"] == BddVariable(2)
+    assert len(name_dict) == 3
+    
+    # Check they are inverses
+    for var_id, name in id_dict.items():
+        assert name_dict[name] == var_id
+    for name, var_id in name_dict.items():
+        assert id_dict[var_id] == name
+
 
 def test_bdd_valuation():
     ctx = BddVariableSet(["a", "b", "c"])
@@ -239,6 +261,12 @@ def test_bdd():
     }
     assert bdd_x.support_set() == {BddVariable(0), BddVariable(1), BddVariable(2)}
     assert bdd_clause.support_set() == {BddVariable(0), BddVariable(1)}
+    # Quick new helpers
+    assert bdd_true.as_bool() is True
+    assert bdd_false.as_bool() is False
+    assert bdd_x.as_bool() is None
+    assert bdd_clause.support_set_contains('a')
+    assert not bdd_clause.support_set_contains('c')
 
     # Graph queries
     root = bdd_x.root()
@@ -385,9 +413,56 @@ def test_bdd():
     assert bdd_clause.clause_most_free() == BddPartialValuation(ctx, {'a': False, 'b': True})
     assert bdd_clause.clause_most_fixed() == BddPartialValuation(ctx, {'a': False, 'b': True})
 
+    # New API in lib-bdd 0.6.1
+    w = bdd_x.node_valuation_weights()
+    assert isinstance(w, list) and len(w) == bdd_x.node_count()
+    oa = bdd_x.overapproximate_to_size(4)
+    ua = bdd_x.underapproximate_to_size(4)
+    assert oa.node_count() <= 4
+    assert ua.node_count() <= 4
+    # General eliminate pointer APIs should accept empty list (no-op)
+    assert bdd_x.overapproximate([]) == bdd_x
+    assert bdd_x.underapproximate([]) == bdd_x
+
+    # Cardinality-based approximation returns correct cardinality
+    bdd_card_over = bdd_x.overapproximate_to_cardinality(4)
+    bdd_card_under = bdd_x.underapproximate_to_cardinality(2)
+    assert bdd_card_over.cardinality() >= 4
+    assert bdd_card_under.cardinality() <= 2
+
     expected = Bdd(BddPartialValuation(ctx, {'a': False, 'c': True}))
     assert bdd_clause.substitute('b', var_c) == expected
     assert bdd_clause.rename([('b', 'c')]) == expected
+
+    # Test pointers method
+    pointers = bdd_x.pointers()
+    assert isinstance(pointers, list)
+    assert len(pointers) == bdd_x.node_count()
+    # Root should be in the pointers list
+    assert bdd_x.root() in pointers
+    # All pointers should be valid BddPointer objects
+    for ptr in pointers:
+        assert isinstance(ptr, BddPointer)
+
+    # Test sampling methods
+    uniform_sampler = bdd_x.mk_uniform_valuation_sampler()
+    naive_sampler = bdd_x.mk_naive_valuation_sampler()
+    
+    # Test that samplers are created correctly
+    assert isinstance(uniform_sampler, UniformValuationSampler)
+    assert isinstance(naive_sampler, NaiveSampler)
+    
+    # Test sampling with both samplers
+    uniform_sample = bdd_x.random_valuation_sample(uniform_sampler)
+    naive_sample = bdd_x.random_valuation_sample(naive_sampler)
+    
+    # Both should return valid valuations or None
+    if uniform_sample is not None:
+        assert isinstance(uniform_sample, BddValuation)
+        assert uniform_sample in bdd_x.valuation_iterator()
+    if naive_sample is not None:
+        assert isinstance(naive_sample, BddValuation)
+        assert naive_sample in bdd_x.valuation_iterator()
 
 
 def test_boolean_expression():

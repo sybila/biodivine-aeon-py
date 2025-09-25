@@ -297,6 +297,30 @@ impl BddVariableSet {
         };
         Ok(Bdd::new_raw(self_, rs_bdd))
     }
+
+    /// Return a dictionary mapping variable IDs to their names.
+    fn to_id_dict(&self, py: Python<'_>) -> PyResult<Py<PyDict>> {
+        let dict = PyDict::new(py);
+        for var in self.0.variables() {
+            let name = self.0.name_of(var);
+            let var_id = BddVariable::from(var);
+            dict.set_item(var_id, name)?;
+        }
+        Ok(dict.into())
+    }
+
+    /// Return a dictionary mapping variable names to their IDs.
+    ///
+    /// This is the inverse of `to_id_dict`.
+    fn to_name_dict(&self, py: Python<'_>) -> PyResult<Py<PyDict>> {
+        let dict = PyDict::new(py);
+        for var in self.0.variables() {
+            let name = self.0.name_of(var);
+            let var_id = BddVariable::from(var);
+            dict.set_item(name, var_id)?;
+        }
+        Ok(dict.into())
+    }
 }
 
 impl BddVariableSet {

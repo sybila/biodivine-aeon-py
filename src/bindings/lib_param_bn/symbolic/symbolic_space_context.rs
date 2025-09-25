@@ -202,7 +202,7 @@ impl SymbolicSpaceContext {
         self_: Py<SymbolicSpaceContext>,
         set: &Bound<'_, PyAny>,
         py: Python,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let ctx = self_.get();
         if let Ok(set) = set.extract::<ColoredSpaceSet>() {
             let bdd = ctx.as_native()._mk_sub_spaces(
@@ -242,7 +242,7 @@ impl SymbolicSpaceContext {
         self_: Py<SymbolicSpaceContext>,
         set: &Bound<'_, PyAny>,
         py: Python,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let ctx = self_.get();
         if let Ok(set) = set.extract::<ColoredSpaceSet>() {
             let bdd = ctx.as_native()._mk_super_spaces(
@@ -318,6 +318,61 @@ impl SymbolicSpaceContext {
     pub fn vertices_to_spaces(&self, bdd: &Bdd) -> Bdd {
         let native = self.as_native().vertices_to_spaces(bdd.as_native());
         Bdd::new_raw_2(bdd.__ctx__(), native)
+    }
+
+    /// Get the dual variable pair for a given network variable.
+    /// Returns a tuple of (positive_variable, negative_variable) BDD variables.
+    pub fn get_dual_variable_pair(
+        self_: PyRef<SymbolicSpaceContext>,
+        var: &Bound<'_, PyAny>,
+    ) -> PyResult<(BddVariable, BddVariable)> {
+        let var = self_.as_ref().resolve_network_variable(var)?;
+        let (pos_var, neg_var) = self_.as_native().get_dual_variable_pair(var);
+        Ok((BddVariable::from(pos_var), BddVariable::from(neg_var)))
+    }
+
+    /// Get all dual variable pairs for all network variables.
+    /// Returns a list of tuples of (positive_variable, negative_variable) BDD variables.
+    pub fn get_dual_variables(
+        self_: PyRef<SymbolicSpaceContext>,
+    ) -> Vec<(BddVariable, BddVariable)> {
+        self_
+            .as_native()
+            .get_dual_variables()
+            .into_iter()
+            .map(|(pos_var, neg_var)| (BddVariable::from(pos_var), BddVariable::from(neg_var)))
+            .collect()
+    }
+
+    /// Compute a BDD which encodes all spaces in which the value of `function` can be
+    /// `false` for some state. This is the dual of `mk_can_go_to_true`.
+    pub fn mk_can_go_to_false(&self, _py: Python, function: &Bdd) -> PyResult<Bdd> {
+        let bdd = self.as_native().mk_can_go_to_false(function.as_native());
+        Ok(Bdd::new_raw_2(function.__ctx__(), bdd))
+    }
+
+    /// Compute the set of all spaces that have exactly `k` free variables.
+    pub fn mk_exactly_k_free_spaces(self_: Py<SymbolicSpaceContext>, k: usize) -> SpaceSet {
+        let set = self_.get().as_native().mk_exactly_k_free_spaces(k);
+        SpaceSet::wrap_native(self_.clone(), set)
+    }
+
+    /// Compute a BDD that encodes all spaces where there exists a down transition
+    /// for the given variable and function.
+    pub fn mk_has_down_transition(&self, var: &BddVariable, function: &Bdd) -> Bdd {
+        let bdd = self
+            .as_native()
+            .mk_has_down_transition(*var.as_native(), function.as_native());
+        Bdd::new_raw_2(function.__ctx__(), bdd)
+    }
+
+    /// Compute a BDD that encodes all spaces where there exists an up transition
+    /// for the given variable and function.
+    pub fn mk_has_up_transition(&self, var: &BddVariable, function: &Bdd) -> Bdd {
+        let bdd = self
+            .as_native()
+            .mk_has_up_transition(*var.as_native(), function.as_native());
+        Bdd::new_raw_2(function.__ctx__(), bdd)
     }
 }
 

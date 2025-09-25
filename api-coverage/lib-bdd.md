@@ -1,6 +1,6 @@
 # Biodivine `lib-bdd` API coverage
 
-This document should be up-to-date with `lib-bdd` version `0.5.13`.
+This document should be up-to-date with `lib-bdd` version `0.6.2`.
 
 ## `BddVariable` (frozen)
 
@@ -252,8 +252,11 @@ explore it in the future.
             <td><code>BddVariableSet.variable_ids</code></td>
         </tr>
         <tr>
-            <td></td>
-            <td><code>BddVariableSet.variable_names</code></td>
+            <td><code>BddVariableSet::variable_names</code></td>
+            <td rowspan="2"><code>BddVariableSet.variable_names</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::variable_names_ref</code></td>
         </tr>
         <tr>
             <td><code>BddVariableSet::var_by_name</code></td>
@@ -261,8 +264,19 @@ explore it in the future.
         </tr>
         <tr>
             <td><code>BddVariableSet::name_of</code></td>
-            <td><code>BddVariableSet.get_variable_name</code></td>
+            <td rowspan="2"><code>BddVariableSet.get_variable_name</code></td>
         </tr> 
+        <tr>
+            <td><code>BddVariableSet::name_of_str</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::variable_name_assignment</code></td>
+            <td><code>BddVariableSet.to_id_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddVariableSet.to_name_dict</code></td>
+        </tr>
         <tr><td colspan="2" align="center">BDD constructors</td></tr>
         <tr>
             <td><code>BddVariableSet::mk_false</code></td>
@@ -302,11 +316,29 @@ explore it in the future.
         </tr>
         <tr>
             <td><code>BddVariableSet::mk_cnf</code></td>
-            <td><code>BddVariableSet.mk_cnf</code></td>
+            <td rowspan="4"><code>BddVariableSet.mk_cnf</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_cnf_ref</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_cnf_valuation</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_cnf_valuation_ref</code></td>
         </tr>
         <tr>
             <td><code>BddVariableSet::mk_dnf</code></td>
-            <td><code>BddVariableSet.mk_dnf</code></td>
+            <td rowspan="4"><code>BddVariableSet.mk_dnf</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_dnf_ref</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_dnf_valuation</code></td>
+        </tr>
+        <tr>
+            <td><code>BddVariableSet::mk_dnf_valuation_ref</code></td>
         </tr>
         <tr>
             <td><code>BddVariableSet::mk_sat_exactly_k</code></td>
@@ -417,7 +449,19 @@ explore it in the future.
         <tr><td colspan="2" align="center">Iteration / conversion</td></tr>
         <tr>
             <td><code>BddValuation::vector</code></td>
-            <td><code>BddValuation.values</code></td>
+            <td rowspan="5"><code>BddValuation.values</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::borrow</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::as_vector</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::into_vector</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::as_vector_mut</code></td>
         </tr>
         <tr>
             <td></td>
@@ -426,6 +470,14 @@ explore it in the future.
         <tr>
             <td><code>BddValuation::to_values</code></td>
             <td><code>BddValuation.items</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::to_partial_valuation</code></td>
+            <td><code>BddPartialValuation.__init__</code></td>
+        </tr>
+        <tr>
+            <td><code>BddValuation::mk_bdd</code></td>
+            <td><code>Bdd.__init__</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
@@ -448,13 +500,16 @@ explore it in the future.
         <tr><td colspan="2" align="center">Special methods</td></tr>
         <tr>
             <td><code>BddPartialValuation::empty</code></td>
-            <td rowspan="3"><code>BddPartialValuation.__init__</code></td>
+            <td rowspan="4"><code>BddPartialValuation.__init__</code></td>
         </tr>
         <tr>
             <td><code>BddPartialValuation::from_values</code></td> 
         </tr>
         <tr>
             <td><code>BddPartialValuation::from<&BddValuation></code></td> 
+        </tr>
+        <tr>
+            <td><code>BddPartialValuation::from_values_iter</code></td>
         </tr>
         <tr>
             <td><code>BddPartialValuation::eq</code></td>
@@ -550,6 +605,10 @@ poses a few challenges:
 we will need either complicated generics, or heavy use of `Any`.
  * We still cannot override Python keywords like `and` and `or`, so we would have
    to use something else.
+
+Also note that `NaiveSampler` and `UniformValuationSampler` technically have their 
+mirror implementations in Python, but they currently have no public API and simply
+hold the state of the random value generators.
 
 <table>
     <thead>
@@ -670,6 +729,10 @@ we will need either complicated generics, or heavy use of `Any`.
             <td><code>Bdd.implies</code></td>
         </tr>
         <tr>
+            <td><code>Bdd::as_bool</code></td>
+            <td><code>Bdd.as_bool</code></td>
+        </tr>
+        <tr>
             <td><code>Bdd::root_pointer</code></td>
             <td><code>Bdd.root</code></td>
         </tr>
@@ -691,6 +754,14 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr>
             <td><code>Bdd::support_set</code></td>
             <td><code>Bdd.support_set</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::support_set_contains</code></td>
+            <td><code>Bdd.support_set_contains</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::pointers</code></td>
+            <td><code>Bdd.pointers</code></td>
         </tr>
         <tr>
             <td><code>Bdd::is_false</code></td>
@@ -722,7 +793,10 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr><td colspan="2" align="center">Boolean operations</td></tr>
         <tr>
             <td><code>Bdd::not</code></td>
-            <td><code>Bdd.l_not</code></td>
+            <td rowspan="2"><code>Bdd.l_not</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::into_not</code></td>
         </tr>
         <tr>
             <td><code>Bdd::and</code></td>
@@ -810,17 +884,23 @@ we will need either complicated generics, or heavy use of `Any`.
         </tr>
         <tr>
             <td><code>Bdd::restrict</code></td>
-            <td rowspan="2"><code>Bdd.r_restrict</code></td>
+            <td rowspan="3"><code>Bdd.r_restrict</code></td>
         </tr>
         <tr>
             <td><code>Bdd::var_restrict</code></td>
         </tr>
         <tr>
+            <td><code>Bdd::restrict_valuation</code></td>
+        </tr>
+        <tr>
             <td><code>Bdd::select</code></td>
-            <td rowspan="2"><code>Bdd.r_select</code></td>
+            <td rowspan="3"><code>Bdd.r_select</code></td>
         </tr>
         <tr>
             <td><code>Bdd::var_select</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::select_valuation</code></td>
         </tr>
         <tr> 
             <td><code>Bdd::binary_op_nested</code></td>
@@ -833,7 +913,23 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr> 
             <td><code>Bdd::binary_op_with_for_all</code></td>
             <td><code>Bdd.apply_with_for_all</code></td>
-        </tr> 
+        </tr>
+        <tr>
+            <td><code>Bdd::binary_op_with_exists_trigger</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::binary_op_with_for_all_trigger</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::exists_trigger</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::for_all_trigger</code></td>
+            <td></td>
+        </tr>
         <tr><td colspan="2" align="center">Valuations / Clauses</td></tr>
         <tr>
             <td><code>Bdd::sat_witness</code></td>
@@ -858,6 +954,18 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr>
             <td><code>Bdd::most_positive_valuation</code></td>
             <td><code>Bdd.valuation_most_positive</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::mk_uniform_valuation_sampler</code></td>
+            <td><code>Bdd.mk_uniform_valuation_sampler</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>Bdd.mk_naive_valuation_sampler</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::random_valuation_sample</code></td>
+            <td><code>Bdd.random_valuation_sample</code></td>
         </tr>
         <tr>
             <td><code>Bdd::sat_valuations</code></td>
@@ -890,6 +998,35 @@ we will need either complicated generics, or heavy use of `Any`.
         <tr>
             <td><code>Bdd::sat_clauses</code></td>
             <td><code>Bdd.clause_iterator</code></td>
+        </tr>
+        <tr><td colspan="2" align="center">Approximation</td></tr>
+        <tr>
+            <td><code>Bdd::overapproximate</code></td>
+            <td><code>Bdd.overapproximate</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::underapproximate</code></td>
+            <td><code>Bdd.underapproximate</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::overapproximate_to_cardinality</code></td>
+            <td><code>Bdd.overapproximate_to_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::underapproximate_to_cardinality</code></td>
+            <td><code>Bdd.underapproximate_to_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::overapproximate_to_size</code></td>
+            <td><code>Bdd.overapproximate_to_size</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::underapproximate_to_size</code></td>
+            <td><code>Bdd.underapproximate_to_size</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::node_valuation_weights</code></td>
+            <td><code>Bdd.node_valuation_weights</code></td>
         </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>

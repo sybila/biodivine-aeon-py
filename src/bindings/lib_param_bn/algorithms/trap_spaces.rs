@@ -1,5 +1,6 @@
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::{AsNative, global_log_level};
 use pyo3::prelude::*;
@@ -46,8 +47,38 @@ impl TrapSpaces {
     /// Currently, this method always slower than [Self::essential_symbolic], because it first has to compute
     /// the essential set.
     #[staticmethod]
-    #[pyo3(signature = (ctx, graph, restriction = None))]
+    #[pyo3(signature = (ctx, graph, restriction = None, exclude_fixed_points = None))]
     pub fn minimal_symbolic(
+        py: Python,
+        ctx: Py<SymbolicSpaceContext>,
+        graph: &AsynchronousGraph,
+        restriction: Option<&ColoredSpaceSet>,
+        exclude_fixed_points: Option<&ColoredVertexSet>,
+    ) -> PyResult<ColoredSpaceSet> {
+        let unit = ctx
+            .get()
+            .as_native()
+            .mk_unit_colored_spaces(graph.as_native());
+        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
+        let exclude_fixed_points = exclude_fixed_points.map(|it| it.as_native());
+        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
+            ctx.get().as_native(),
+            graph.as_native(),
+            restriction,
+            exclude_fixed_points,
+            global_log_level(py)?,
+            &|| py.check_signals(),
+        )?;
+        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+    }
+
+    /// Computes the long-lived coloured trap spaces of the provided `network` within the specified
+    /// `restriction` set.
+    ///
+    /// Long-lived trap spaces are those that persist for extended periods in the network dynamics.
+    #[staticmethod]
+    #[pyo3(signature = (ctx, graph, restriction = None))]
+    pub fn long_lived_symbolic(
         py: Python,
         ctx: Py<SymbolicSpaceContext>,
         graph: &AsynchronousGraph,
@@ -58,7 +89,7 @@ impl TrapSpaces {
             .as_native()
             .mk_unit_colored_spaces(graph.as_native());
         let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
+        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_long_lived_symbolic(
             ctx.get().as_native(),
             graph.as_native(),
             restriction,
