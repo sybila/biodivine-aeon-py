@@ -230,7 +230,7 @@ impl BooleanNetwork {
             // JSON files can be opened as BMA models
             let file_contents = std::fs::read_to_string(path).map_err(runtime_error)?;
             let model = BmaModel::from_json_string(file_contents.as_str())
-                .map_err(|e| runtime_error(format!("Error loading BMA JSON model: {}", e)))?;
+                .map_err(|e| runtime_error(format!("Error loading BMA JSON model: {e}")))?;
             convert_bma_model(model, binarize)?
         } else {
             biodivine_lib_param_bn::BooleanNetwork::try_from_file(file_path)
@@ -1090,5 +1090,5 @@ fn convert_bma_model(
     }
 
     biodivine_lib_param_bn::BooleanNetwork::try_from(model)
-        .map_err(|e| runtime_error(format!("BMA to AEON conversion error: {}", e)))
+        .map_err(|e| runtime_error(format!("BMA to AEON conversion error: {e}")))
 }
