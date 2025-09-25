@@ -442,9 +442,10 @@ impl ColoredPerturbationSet {
                 }
 
                 if let Some(limit) = result_limit
-                    && results.len() >= limit {
-                        return Ok(results);
-                    }
+                    && results.len() >= limit
+                {
+                    return Ok(results);
+                }
             }
         }
 
@@ -678,12 +679,13 @@ impl _ColorPerturbationModelIterator {
 
                 // Copy perturbation parameter (and state if relevant).
                 if let Some(p_var) = self.parameter_mapping.get(&n_var)
-                    && let Some(value) = it.get_value(*p_var) {
-                        pert_val.set_value(*p_var, value);
-                        if value {
-                            pert_val.set_value(s_var, it.get_value(s_var).unwrap())
-                        }
+                    && let Some(value) = it.get_value(*p_var)
+                {
+                    pert_val.set_value(*p_var, value);
+                    if value {
+                        pert_val.set_value(s_var, it.get_value(s_var).unwrap())
                     }
+                }
             }
 
             let color = ColorModel::new_native(

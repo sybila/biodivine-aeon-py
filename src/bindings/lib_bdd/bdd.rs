@@ -235,11 +235,12 @@ impl Bdd {
         let native = if optimize {
             self.as_native()._to_optimized_dnf(&|dnf| {
                 if let Some(size_limit) = size_limit
-                    && size_limit < dnf.len() {
-                        return throw_interrupted_error(format!(
-                            "Exceeded size limit of {size_limit} clauses"
-                        ));
-                    }
+                    && size_limit < dnf.len()
+                {
+                    return throw_interrupted_error(format!(
+                        "Exceeded size limit of {size_limit} clauses"
+                    ));
+                }
                 py.check_signals()
             })?
         } else {
@@ -377,10 +378,7 @@ impl Bdd {
 
     /// Return a list of all BDD node pointers in this BDD.
     fn pointers(&self) -> Vec<BddPointer> {
-        self.as_native()
-            .pointers()
-            .map(|it| it.into())
-            .collect()
+        self.as_native().pointers().map(|it| it.into()).collect()
     }
 
     /// True if this `Bdd` represents a constant $false$ function.

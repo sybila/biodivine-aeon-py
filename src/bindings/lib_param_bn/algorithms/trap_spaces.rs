@@ -1,9 +1,9 @@
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::{AsNative, global_log_level};
 use pyo3::prelude::*;
-use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct TrapSpaces {

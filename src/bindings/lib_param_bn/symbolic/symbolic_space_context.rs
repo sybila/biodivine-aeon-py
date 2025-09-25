@@ -333,8 +333,11 @@ impl SymbolicSpaceContext {
 
     /// Get all dual variable pairs for all network variables.
     /// Returns a list of tuples of (positive_variable, negative_variable) BDD variables.
-    pub fn get_dual_variables(self_: PyRef<SymbolicSpaceContext>) -> Vec<(BddVariable, BddVariable)> {
-        self_.as_native()
+    pub fn get_dual_variables(
+        self_: PyRef<SymbolicSpaceContext>,
+    ) -> Vec<(BddVariable, BddVariable)> {
+        self_
+            .as_native()
             .get_dual_variables()
             .into_iter()
             .map(|(pos_var, neg_var)| (BddVariable::from(pos_var), BddVariable::from(neg_var)))
@@ -349,33 +352,26 @@ impl SymbolicSpaceContext {
     }
 
     /// Compute the set of all spaces that have exactly `k` free variables.
-    pub fn mk_exactly_k_free_spaces(
-        self_: Py<SymbolicSpaceContext>,
-        k: usize,
-    ) -> SpaceSet {
+    pub fn mk_exactly_k_free_spaces(self_: Py<SymbolicSpaceContext>, k: usize) -> SpaceSet {
         let set = self_.get().as_native().mk_exactly_k_free_spaces(k);
         SpaceSet::wrap_native(self_.clone(), set)
     }
 
     /// Compute a BDD that encodes all spaces where there exists a down transition
     /// for the given variable and function.
-    pub fn mk_has_down_transition(
-        &self,
-        var: &BddVariable,
-        function: &Bdd,
-    ) -> Bdd {
-        let bdd = self.as_native().mk_has_down_transition(*var.as_native(), function.as_native());
+    pub fn mk_has_down_transition(&self, var: &BddVariable, function: &Bdd) -> Bdd {
+        let bdd = self
+            .as_native()
+            .mk_has_down_transition(*var.as_native(), function.as_native());
         Bdd::new_raw_2(function.__ctx__(), bdd)
     }
 
     /// Compute a BDD that encodes all spaces where there exists an up transition
     /// for the given variable and function.
-    pub fn mk_has_up_transition(
-        &self,
-        var: &BddVariable,
-        function: &Bdd,
-    ) -> Bdd {
-        let bdd = self.as_native().mk_has_up_transition(*var.as_native(), function.as_native());
+    pub fn mk_has_up_transition(&self, var: &BddVariable, function: &Bdd) -> Bdd {
+        let bdd = self
+            .as_native()
+            .mk_has_up_transition(*var.as_native(), function.as_native());
         Bdd::new_raw_2(function.__ctx__(), bdd)
     }
 }

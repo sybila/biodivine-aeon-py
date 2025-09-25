@@ -509,9 +509,10 @@ impl SymbolicContext {
             let bdd_var = *bdd_var.as_native();
             for var in self.as_native().network_variables() {
                 if let Some(table) = self.as_native().get_implicit_function_table(var)
-                    && table.contains(bdd_var) {
-                        return VariableId::from(var).into_py_any(py);
-                    }
+                    && table.contains(bdd_var)
+                {
+                    return VariableId::from(var).into_py_any(py);
+                }
             }
             for par in self.as_native().network_parameters() {
                 let table = self.as_native().get_explicit_function_table(par);
