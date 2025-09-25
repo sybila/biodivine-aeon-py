@@ -519,9 +519,14 @@ impl AsynchronousPerturbationGraph {
         let p_card = set.as_native().exact_cardinality() * 1_000_000u32;
         let u_card = unit.as_native().exact_cardinality();
 
-        let robustness: BigUint = p_card / u_card;
+        if u_card == BigUint::from(0u32) {
+            Ok(f64::NAN)
+        } else {
+            let robustness: BigUint = p_card / u_card;
 
-        Ok(robustness.to_f64().unwrap_or(f64::NAN) / 1_000_000.0)
+            Ok(robustness.to_f64().unwrap_or(f64::NAN) / 1_000_000.0)
+        }
+
     }
 
     /// Transform the given `ColorSet` such that any information about perturbations is removed
