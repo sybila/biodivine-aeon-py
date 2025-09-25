@@ -2,25 +2,25 @@ use std::collections::HashMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::ops::{Not, Shr};
 
-use biodivine_lib_bdd::{bdd, Bdd as RsBdd};
+use biodivine_lib_bdd::{Bdd as RsBdd, bdd};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
+use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationModel};
-use crate::{throw_runtime_error, AsNative};
+use crate::{AsNative, throw_runtime_error};
 
 /// A symbolic representation of a set of "perturbations". A perturbation specifies for each
 /// variable whether it is fixed or not, and if it is fixed, it prescribes a value. To do so,

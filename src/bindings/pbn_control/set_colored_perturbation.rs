@@ -13,17 +13,17 @@ use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::{PerturbationModel, PerturbationSet};
-use crate::{throw_runtime_error, AsNative};
+use crate::{AsNative, throw_runtime_error};
 
 /// A symbolic representation of a colored set of "perturbations". A perturbation specifies for
 /// each variable whether it is fixed or not, and if it is fixed, it prescribes a value. To do so,
@@ -441,11 +441,10 @@ impl ColoredPerturbationSet {
                     results.push((model, robustness, color_set));
                 }
 
-                if let Some(limit) = result_limit {
-                    if results.len() >= limit {
+                if let Some(limit) = result_limit
+                    && results.len() >= limit {
                         return Ok(results);
                     }
-                }
             }
         }
 
@@ -678,14 +677,13 @@ impl _ColorPerturbationModelIterator {
                 color_val.unset_value(s_var);
 
                 // Copy perturbation parameter (and state if relevant).
-                if let Some(p_var) = self.parameter_mapping.get(&n_var) {
-                    if let Some(value) = it.get_value(*p_var) {
+                if let Some(p_var) = self.parameter_mapping.get(&n_var)
+                    && let Some(value) = it.get_value(*p_var) {
                         pert_val.set_value(*p_var, value);
                         if value {
                             pert_val.set_value(s_var, it.get_value(s_var).unwrap())
                         }
                     }
-                }
             }
 
             let color = ColorModel::new_native(

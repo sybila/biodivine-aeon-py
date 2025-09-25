@@ -5,7 +5,7 @@ use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
 use crate::bindings::lib_bdd::op_function::{OpFunction2, OpFunction3};
 use crate::{
-    runtime_error, throw_interrupted_error, throw_runtime_error, throw_type_error, AsNative,
+    AsNative, runtime_error, throw_interrupted_error, throw_runtime_error, throw_type_error,
 };
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_bdd::{BddPathIterator, BddSatisfyingValuations};
@@ -234,13 +234,12 @@ impl Bdd {
     ) -> PyResult<Vec<BddPartialValuation>> {
         let native = if optimize {
             self.as_native()._to_optimized_dnf(&|dnf| {
-                if let Some(size_limit) = size_limit {
-                    if size_limit < dnf.len() {
+                if let Some(size_limit) = size_limit
+                    && size_limit < dnf.len() {
                         return throw_interrupted_error(format!(
                             "Exceeded size limit of {size_limit} clauses"
                         ));
                     }
-                }
                 py.check_signals()
             })?
         } else {
@@ -380,7 +379,6 @@ impl Bdd {
     fn pointers(&self) -> Vec<BddPointer> {
         self.as_native()
             .pointers()
-            .into_iter()
             .map(|it| it.into())
             .collect()
     }
@@ -952,13 +950,18 @@ impl Bdd {
     }
 
     /// Sample a random valuation using the provided sampler.
-    pub fn random_valuation_sample(&self, sampler: &Bound<'_, PyAny>) -> PyResult<Option<BddValuation>> {
+    pub fn random_valuation_sample(
+        &self,
+        sampler: &Bound<'_, PyAny>,
+    ) -> PyResult<Option<BddValuation>> {
         let valuation = if let Ok(uniform_sampler) = sampler.cast::<UniformValuationSampler>() {
             let mut sampler_state = uniform_sampler.borrow_mut();
-            self.as_native().random_valuation_sample(sampler_state.as_native_mut())
+            self.as_native()
+                .random_valuation_sample(sampler_state.as_native_mut())
         } else if let Ok(naive_sampler) = sampler.cast::<NaiveSampler>() {
             let mut sampler_state = naive_sampler.borrow_mut();
-            self.as_native().random_valuation_sample(sampler_state.as_native_mut())
+            self.as_native()
+                .random_valuation_sample(sampler_state.as_native_mut())
         } else {
             return throw_type_error("Expected `UniformValuationSampler` or `NaiveSampler`.");
         };
@@ -1131,17 +1134,13 @@ impl Bdd {
     /// Compute a new `Bdd` which over-approximates this `Bdd`, and its
     /// cardinality is greater or equal to the given `target`.
     pub fn overapproximate_to_cardinality(&self, target: BigUint) -> PyResult<Bdd> {
-        Ok(self.new_from(
-            self.as_native().overapproximate_to_cardinality(&target),
-        ))
+        Ok(self.new_from(self.as_native().overapproximate_to_cardinality(&target)))
     }
 
     /// Compute a new `Bdd` which under-approximates this `Bdd`, and its
     /// cardinality is less or equal to the given `target`.
     pub fn underapproximate_to_cardinality(&self, target: BigUint) -> PyResult<Bdd> {
-        Ok(self.new_from(
-            self.as_native().underapproximate_to_cardinality(&target),
-        ))
+        Ok(self.new_from(self.as_native().underapproximate_to_cardinality(&target)))
     }
 }
 
@@ -1265,4 +1264,6 @@ pub struct NaiveSampler(biodivine_lib_bdd::random_sampling::NaiveSampler<StdRng>
 /// A uniform valuation sampler for BDDs.
 #[pyclass(module = "biodivine_aeon")]
 #[derive(Clone, Wrapper)]
-pub struct UniformValuationSampler(biodivine_lib_bdd::random_sampling::UniformValuationSampler<StdRng>);
+pub struct UniformValuationSampler(
+    biodivine_lib_bdd::random_sampling::UniformValuationSampler<StdRng>,
+);

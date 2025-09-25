@@ -298,11 +298,10 @@ impl BooleanNetwork {
         let source = self_.as_ref().resolve_network_variable(source)?;
         let target = self_.as_ref().resolve_network_variable(target)?;
 
-        if let Some(update) = self_.as_native().get_update_function(target) {
-            if update.collect_arguments().contains(&source) {
+        if let Some(update) = self_.as_native().get_update_function(target)
+            && update.collect_arguments().contains(&source) {
                 return throw_runtime_error("Cannot remove regulation that is in use.");
             }
-        }
 
         // Remove from RG.
         self_
