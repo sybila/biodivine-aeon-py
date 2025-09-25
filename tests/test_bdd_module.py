@@ -115,6 +115,28 @@ def test_bdd_variable_set():
     assert ctx.mk_conjunctive_clause(clause_1) == ctx.mk_dnf([clause_1, clause_2])
     assert ctx.mk_disjunctive_clause(clause_1) == ctx.mk_cnf([clause_1, clause_2])
 
+    # Test dictionary methods
+    id_dict = ctx.to_id_dict()
+    name_dict = ctx.to_name_dict()
+    
+    # Check id_dict maps variables to names
+    assert id_dict[BddVariable(0)] == "a"
+    assert id_dict[BddVariable(1)] == "b" 
+    assert id_dict[BddVariable(2)] == "c"
+    assert len(id_dict) == 3
+    
+    # Check name_dict maps names to variables
+    assert name_dict["a"] == BddVariable(0)
+    assert name_dict["b"] == BddVariable(1)
+    assert name_dict["c"] == BddVariable(2)
+    assert len(name_dict) == 3
+    
+    # Check they are inverses
+    for var_id, name in id_dict.items():
+        assert name_dict[name] == var_id
+    for name, var_id in name_dict.items():
+        assert id_dict[var_id] == name
+
 
 def test_bdd_valuation():
     ctx = BddVariableSet(["a", "b", "c"])

@@ -269,6 +269,14 @@ explore it in the future.
         <tr>
             <td><code>BddVariableSet::name_of_str</code></td>
         </tr>
+        <tr>
+            <td><code>BddVariableSet::variable_name_assignment</code></td>
+            <td><code>BddVariableSet.to_id_dict</code></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><code>BddVariableSet.to_name_dict</code></td>
+        </tr>
         <tr><td colspan="2" align="center">BDD constructors</td></tr>
         <tr>
             <td><code>BddVariableSet::mk_false</code></td>
