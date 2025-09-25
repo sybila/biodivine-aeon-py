@@ -29,7 +29,6 @@ macros = { path = "macros" }
 zip = "5.1.1"
 num-bigint = "0.4"
 num-traits = "0.2"
-num-rational = "0.4"
 either = "1.15"
 
 # Include Z3 dependencies as strictly as possible, we don't want
