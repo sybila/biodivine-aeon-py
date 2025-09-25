@@ -626,7 +626,7 @@ impl AsynchronousPerturbationGraph {
         ColorSet::mk_native(self_ref.as_ref().symbolic_context(), set)
     }
 
-    pub fn mk_perturbable_color_vartex_set(
+    pub fn mk_perturbable_color_vertex_set(
         _self: &Bound<'_, AsynchronousPerturbationGraph>,
         set: &GraphColoredVertices,
     ) -> ColoredVertexSet {

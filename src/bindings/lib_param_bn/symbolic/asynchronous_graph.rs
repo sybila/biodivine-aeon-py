@@ -431,7 +431,7 @@ impl AsynchronousGraph {
                 .transfer_from(set.as_native(), original_ctx.as_native())
                 .map(|it| ColoredVertexSet::mk_native(self.ctx.clone(), it).into_py_any(py))
         } else {
-            return throw_type_error("Expected `ColorSet`, `VartexSet`, or `ColoredVertexSet`.");
+            return throw_type_error("Expected `ColorSet`, `VertexSet`, or `ColoredVertexSet`.");
         }
         .transpose()?;
         if let Some(set) = set {
