@@ -417,7 +417,7 @@ impl AsynchronousGraph {
         py: Python,
         set: &Bound<'_, PyAny>,
         original_ctx: &AsynchronousGraph,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let set = if let Ok(set) = set.extract::<ColorSet>() {
             self.as_native()
                 .transfer_colors_from(set.as_native(), original_ctx.as_native())
@@ -431,7 +431,7 @@ impl AsynchronousGraph {
                 .transfer_from(set.as_native(), original_ctx.as_native())
                 .map(|it| ColoredVertexSet::mk_native(self.ctx.clone(), it).into_py_any(py))
         } else {
-            return throw_type_error("Expected `ColorSet`, `VartexSet`, or `ColoredVertexSet`.");
+            return throw_type_error("Expected `ColorSet`, `VertexSet`, or `ColoredVertexSet`.");
         }
         .transpose()?;
         if let Some(set) = set {
@@ -770,6 +770,14 @@ impl AsynchronousGraph {
         };
 
         AsynchronousGraph::wrap_native(py, native_result)
+    }
+
+    /// Compute the logically unique subset of the given color set.
+    /// This method returns a subset of colors that are logically unique
+    /// within the context of this asynchronous graph.
+    pub fn logically_unique_colors(&self, colors: &ColorSet) -> ColorSet {
+        let result = self.as_native().logically_unique_subset(colors.as_native());
+        ColorSet::mk_native(self.ctx.clone(), result)
     }
 }
 

@@ -9,7 +9,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 };
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use either::Either;
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
@@ -118,7 +118,7 @@ impl ColoredPerturbationSet {
     }
 
     /// Returns the number of vertex-color pairs that are represented in this set.
-    fn cardinality(&self) -> BigInt {
+    fn cardinality(&self) -> BigUint {
         let pruner = PerturbationSet::mk_duplicate_pruning_bdd(self.ctx.get());
         let pruned = self.as_native().as_bdd().and(&pruner);
         let all_variables = self
@@ -441,10 +441,10 @@ impl ColoredPerturbationSet {
                     results.push((model, robustness, color_set));
                 }
 
-                if let Some(limit) = result_limit {
-                    if results.len() >= limit {
-                        return Ok(results);
-                    }
+                if let Some(limit) = result_limit
+                    && results.len() >= limit
+                {
+                    return Ok(results);
                 }
             }
         }
@@ -678,12 +678,12 @@ impl _ColorPerturbationModelIterator {
                 color_val.unset_value(s_var);
 
                 // Copy perturbation parameter (and state if relevant).
-                if let Some(p_var) = self.parameter_mapping.get(&n_var) {
-                    if let Some(value) = it.get_value(*p_var) {
-                        pert_val.set_value(*p_var, value);
-                        if value {
-                            pert_val.set_value(s_var, it.get_value(s_var).unwrap())
-                        }
+                if let Some(p_var) = self.parameter_mapping.get(&n_var)
+                    && let Some(value) = it.get_value(*p_var)
+                {
+                    pert_val.set_value(*p_var, value);
+                    if value {
+                        pert_val.set_value(s_var, it.get_value(s_var).unwrap())
                     }
                 }
             }

@@ -7,5 +7,5 @@ pub mod lib_param_bn;
 pub mod pbn_control;
 
 pub fn global_interrupt() -> PyResult<()> {
-    Python::with_gil(|py| py.check_signals())
+    Python::attach(|py| py.check_signals())
 }

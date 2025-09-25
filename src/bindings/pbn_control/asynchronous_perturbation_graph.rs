@@ -4,7 +4,7 @@ use biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use biodivine_pbn_control::perturbation::PerturbationGraph;
 use macros::Wrapper;
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
@@ -516,12 +516,16 @@ impl AsynchronousPerturbationGraph {
         // The following method always gives an approximation up to 6 decimal places, even if the
         // cardinality overflows to f64::infinity.
 
-        let p_card = set.as_native().exact_cardinality() * 1_000_000;
+        let p_card = set.as_native().exact_cardinality() * 1_000_000u32;
         let u_card = unit.as_native().exact_cardinality();
 
-        let robustness: BigInt = p_card / u_card;
+        if u_card == BigUint::from(0u32) {
+            Ok(f64::NAN)
+        } else {
+            let robustness: BigUint = p_card / u_card;
 
-        Ok(robustness.to_f64().unwrap_or(f64::NAN) / 1_000_000.0)
+            Ok(robustness.to_f64().unwrap_or(f64::NAN) / 1_000_000.0)
+        }
     }
 
     /// Transform the given `ColorSet` such that any information about perturbations is removed
@@ -622,7 +626,7 @@ impl AsynchronousPerturbationGraph {
         ColorSet::mk_native(self_ref.as_ref().symbolic_context(), set)
     }
 
-    pub fn mk_perturbable_color_vartex_set(
+    pub fn mk_perturbable_color_vertex_set(
         _self: &Bound<'_, AsynchronousPerturbationGraph>,
         set: &GraphColoredVertices,
     ) -> ColoredVertexSet {
