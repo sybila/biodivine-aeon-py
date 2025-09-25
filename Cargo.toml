@@ -18,11 +18,11 @@ static-z3 = ["z3/static-link-z3"]
 
 [dependencies]
 pyo3 = { version = "0.26.0", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
-biodivine-lib-param-bn = { version="0.5.13", features=["solver-z3"] }
-biodivine-lib-bdd = "0.5.22"
+biodivine-lib-param-bn = { version="0.6.1", features=["solver-z3"] }
+biodivine-lib-bdd = "0.6.1"
 #biodivine-pbn-control = "0.3.1"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "d1a66a5f1b2922198fcec10369f432d0046a00df" }
-biodivine-hctl-model-checker = "0.3.0"
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "efacdb66f84d5d3849df2082c62e7585fc56eeee" }
+biodivine-hctl-model-checker = "0.3.4"
 # Cannot update `rand` because lib-bdd uses it to generate random big-int values.
 rand = "0.8"
 macros = { path = "macros" }
@@ -34,8 +34,8 @@ either = "1.15"
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
 # Cannot update `z3` because this version is used by lib-param-bn.
-z3="^0.12.1"
-z3-sys = "^0.8.1"
+z3="^0.18.2"
+z3-sys = "^0.9.10"
 
 [build-dependencies]
 pyo3-build-config = "0.26.0"

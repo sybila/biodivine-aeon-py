@@ -10,7 +10,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 };
 use biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces;
 use either::Either;
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
@@ -120,7 +120,7 @@ impl ColoredSpaceSet {
     }
 
     /// Returns the number of space-color pairs that are represented in this set.
-    fn cardinality(&self) -> BigInt {
+    fn cardinality(&self) -> BigUint {
         self.as_native().exact_cardinality()
     }
 

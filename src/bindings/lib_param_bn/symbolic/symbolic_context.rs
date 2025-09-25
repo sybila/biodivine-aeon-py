@@ -456,7 +456,7 @@ impl SymbolicContext {
     ///
     /// The function can accept a `BddVariable`. In such case, it will try to identify the
     /// function table in which the variable resides. Note that this is a linear search.
-    pub fn find_function(&self, function: &Bound<'_, PyAny>, py: Python) -> PyResult<PyObject> {
+    pub fn find_function(&self, function: &Bound<'_, PyAny>, py: Python) -> PyResult<Py<PyAny>> {
         if let Ok(id) = function.extract::<ParameterId>() {
             return if id.__index__() < self.explicit_function_count() {
                 id.into_py_any(py)

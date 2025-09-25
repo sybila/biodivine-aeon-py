@@ -13,7 +13,7 @@ use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use either::Either;
 use pyo3::prelude::{PyAnyMethods, PyListMethods};
 use pyo3::types::{PyDict, PyList, PyTuple};
-use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyObject, PyResult, Python, pyclass, pymethods};
+use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 use std::sync::Arc;
 
 /// Represents a single "color" stored in a `ColorSet` (or a `ColoredVertexSet`), or a projection
@@ -225,7 +225,7 @@ impl ColorModel {
         item: &Bound<'_, PyAny>,
         args: Option<Bound<'_, PyList>>,
         infer_regulations: Option<bool>,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         fn assert_args_is_none(args: Option<Bound<'_, PyList>>) -> PyResult<()> {
             if args.is_some() {
                 throw_type_error("Argument `args` not expected when `item` is an `UpdateFunction`.")
@@ -344,7 +344,7 @@ impl ColorModel {
         &self,
         py: Python,
         update_function: UpdateFunction,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let instantiated_function = self.instantiate_fn_update(update_function.as_native())?;
         let update =
             UpdateFunction::new_raw(update_function.__ctx__(), Arc::new(instantiated_function));

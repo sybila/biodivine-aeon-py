@@ -9,21 +9,21 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 };
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use either::Either;
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
-use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
+use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::{PerturbationModel, PerturbationSet};
-use crate::{AsNative, throw_runtime_error};
+use crate::{throw_runtime_error, AsNative};
 
 /// A symbolic representation of a colored set of "perturbations". A perturbation specifies for
 /// each variable whether it is fixed or not, and if it is fixed, it prescribes a value. To do so,
@@ -118,7 +118,7 @@ impl ColoredPerturbationSet {
     }
 
     /// Returns the number of vertex-color pairs that are represented in this set.
-    fn cardinality(&self) -> BigInt {
+    fn cardinality(&self) -> BigUint {
         let pruner = PerturbationSet::mk_duplicate_pruning_bdd(self.ctx.get());
         let pruned = self.as_native().as_bdd().and(&pruner);
         let all_variables = self

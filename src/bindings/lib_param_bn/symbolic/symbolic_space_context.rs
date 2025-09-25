@@ -202,7 +202,7 @@ impl SymbolicSpaceContext {
         self_: Py<SymbolicSpaceContext>,
         set: &Bound<'_, PyAny>,
         py: Python,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let ctx = self_.get();
         if let Ok(set) = set.extract::<ColoredSpaceSet>() {
             let bdd = ctx.as_native()._mk_sub_spaces(
@@ -242,7 +242,7 @@ impl SymbolicSpaceContext {
         self_: Py<SymbolicSpaceContext>,
         set: &Bound<'_, PyAny>,
         py: Python,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let ctx = self_.get();
         if let Ok(set) = set.extract::<ColoredSpaceSet>() {
             let bdd = ctx.as_native()._mk_super_spaces(

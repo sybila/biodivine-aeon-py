@@ -417,7 +417,7 @@ impl AsynchronousGraph {
         py: Python,
         set: &Bound<'_, PyAny>,
         original_ctx: &AsynchronousGraph,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let set = if let Ok(set) = set.extract::<ColorSet>() {
             self.as_native()
                 .transfer_colors_from(set.as_native(), original_ctx.as_native())

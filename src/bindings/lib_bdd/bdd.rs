@@ -9,7 +9,7 @@ use crate::{
 };
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_bdd::{BddPathIterator, BddSatisfyingValuations};
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use num_traits::FromPrimitive;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -396,12 +396,12 @@ impl Bdd {
     /// For results that exceed the `f64` maximal value (i.e. overflow to infinity), the method will still revert
     /// to unbounded integers.
     #[pyo3(signature = (exact = true))]
-    pub fn cardinality(&self, exact: bool) -> BigInt {
+    pub fn cardinality(&self, exact: bool) -> BigUint {
         if exact {
             self.as_native().exact_cardinality()
         } else {
             let result = self.as_native().cardinality();
-            if let Some(value) = BigInt::from_f64(result) {
+            if let Some(value) = BigUint::from_f64(result) {
                 value
             } else {
                 self.as_native().exact_cardinality()
@@ -412,7 +412,7 @@ impl Bdd {
     /// Compute the number of canonical clauses of this `Bdd`. These are the disjunctive clauses
     /// reported by `Bdd.clause_iterator`. Clause cardinality can be thus used as the expected
     /// item count for this iterator.
-    pub fn clause_cardinality(&self) -> BigInt {
+    pub fn clause_cardinality(&self) -> BigUint {
         self.as_native().exact_clause_cardinality()
     }
 

@@ -60,6 +60,7 @@ impl TrapSpaces {
             ctx.get().as_native(),
             graph.as_native(),
             restriction,
+            None,
             global_log_level(py)?,
             &|| py.check_signals(),
         )?;

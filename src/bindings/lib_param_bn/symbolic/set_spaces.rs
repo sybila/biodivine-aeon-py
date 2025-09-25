@@ -8,7 +8,7 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
 use biodivine_lib_param_bn::trap_spaces::{NetworkColoredSpaces, NetworkSpaces};
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -112,7 +112,7 @@ impl SpaceSet {
     }
 
     /// Returns the number of spaces that are represented in this set.
-    pub fn cardinality(&self) -> BigInt {
+    pub fn cardinality(&self) -> BigUint {
         self.as_native().exact_cardinality()
     }
 
