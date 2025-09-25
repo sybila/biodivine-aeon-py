@@ -42,7 +42,7 @@ impl SymbolicSpaceContext {
     /// A `SymbolicSpaceContext` is created from a `BooleanNetwork`, just as a regular
     /// `SymbolicContext`. However, no extra symbolic variables can be specified in this case.
     #[new]
-    pub fn new(
+    pub fn from_boolean_network(
         py: Python,
         network: &BooleanNetwork,
     ) -> PyResult<(SymbolicSpaceContext, SymbolicContext)> {
@@ -377,6 +377,10 @@ impl SymbolicSpaceContext {
 }
 
 impl SymbolicSpaceContext {
+    pub fn new(ctx: biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext) -> Self {
+        SymbolicSpaceContext(ctx)
+    }
+
     pub fn resolve_subspace_valuation(
         self_: Py<SymbolicSpaceContext>,
         subspace: &Bound<'_, PyAny>,

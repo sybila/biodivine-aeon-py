@@ -115,6 +115,8 @@ in the `maturin` [tutorial](https://www.maturin.rs/tutorial):
  - Create a Python [virtual environment](https://docs.python.org/3/library/venv.html) for testing and activate it.
  - \[Dynamic linking\] Run `maturin develop` to install a local version of AEON.py into this virtual environment.
  - \[Static linking\] Run `maturin develop --features static-z3` to do the same, but with a static version of Z3.
+ - \[New algorithms implementations\] Run `maturin develop --features algorithms-pyo3-bindings` to enable the new
+    algorithms with interruptible execution and improved logging.
 
 If the build passes, you should be able to use the library on your local machine. Feel free to also install Jupyter
 notebooks and test the library in the interactive environment (or on one of the examples).

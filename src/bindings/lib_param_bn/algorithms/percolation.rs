@@ -15,7 +15,8 @@ pub struct Percolation {
 
 #[pymethods]
 impl Percolation {
-    /// Performs percolation of a single subspace.
+    /// **Deprecated**: Use `PecolationComp.percolate_subspace()` instead.
+    /// Performs a percolation of a single subspace.
     ///
     /// Percolation propagates the values of variables that are guaranteed to be constant in the
     /// given subspace. Note that this function will not overwrite values fixed in the original
@@ -31,7 +32,6 @@ impl Percolation {
         graph: &AsynchronousGraph,
         space: &Bound<'_, PyAny>,
     ) -> PyResult<HashMap<VariableIdBinding, bool>> {
-        // TODO: Logging?
         let native_graph = graph.as_native();
         let state_variables = native_graph.symbolic_context().state_variables();
         let mut network_variables: Vec<Option<VariableId>> = vec![

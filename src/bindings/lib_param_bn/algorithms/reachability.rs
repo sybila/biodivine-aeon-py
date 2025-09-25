@@ -12,6 +12,7 @@ pub struct Reachability {
 
 #[pymethods]
 impl Reachability {
+    /// **Deprecated**: Use `ReachabilityComp.forward_closed_superset()` instead.
     /// Compute the (colored) set of vertices that are forward-reachable from the given
     /// initial set.
     ///
@@ -33,6 +34,7 @@ impl Reachability {
         .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))
     }
 
+    /// **Deprecated**: Use `ReachabilityComp.backward_closed_superset()` instead.
     /// Compute the (colored) set of vertices that are backward-reachable from the given
     /// initial set.
     ///

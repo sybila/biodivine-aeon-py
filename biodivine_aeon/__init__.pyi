@@ -1,4 +1,5 @@
-from typing import Literal, Callable, Sequence, TypedDict, Iterator, overload, Mapping, Union, Optional
+from typing import (Callable, Iterator, Literal, Mapping, Optional, Sequence,
+                    Set, TypedDict, Union, overload)
 
 LOG_NOTHING: Literal[0]
 LOG_ESSENTIAL: Literal[1]
@@ -1379,7 +1380,7 @@ class AsynchronousGraph:
         A new `AsynchronousGraph` is constructed from a `BooleanNetwork`. Optionally, you can also provide
         a `SymbolicContext` (that is compatible with said network), or a `unit_bdd` which restricts the set
         of vertices and colors of the `AsynchronousGraph`.
-    
+
         Note that the graph structure is immutable: if you change the original network, you have to create
         a new `AsynchronousGraph`.
         """
@@ -1894,3 +1895,167 @@ class NamedRegulation(TypedDict):
     sign: Optional[SignType]
     essential: BoolType
 Regulation = Union[IdRegulation, NamedRegulation]
+
+class ReachabilityConfig:
+    """
+    A configuration class for the `ReachabilityComp` class. It allows you to specify various
+    parameters for the reachability analysis, such as the underlying `AsynchronousGraph`, a subgraph,
+    a set of variables, a time limit, a BDD size limit, and a steps limit. The configuration
+    can be created using a Python constructor or the `create_from` method, and you can modify it using the
+    `with_*` methods. The configuration is immutable, meaning that each `with_*` method
+    returns a new instance of `ReachabilityConfig` with the specified modifications.
+    This API design means the method calls can be chained together.
+    """
+
+    def __init__(
+        self,
+        graph_representation: Union[AsynchronousGraph, BooleanNetwork],
+        subgraph: Optional[ColoredVertexSet] = None,
+        variables: Optional[Set[VariableId]] = None,
+        time_limit_millis: Optional[int] = None,
+        bdd_size_limit: Optional[int] = None,
+        steps_limit: Optional[int] = None,
+    ) -> None:
+        """
+        Create a new `ReachabilityConfig` object. The `graph_representation` parameter is required and
+        can be either an `AsynchronousGraph` or a `BooleanNetwork`. The other parameters
+        are optional and can be used to specify a subgraph, a set of variables, a time limit,
+        a BDD size limit, and a steps limit for the reachability analysis.
+
+        For the meaning of the parameters, see the documentation of their respective with_
+        methods (e.g. `with_subgraph`, `with_variables`, etc.).
+        """
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> ReachabilityConfig: ...
+    def with_subgraph(self, subgraph: ColoredVertexSet) -> ReachabilityConfig: ...
+    def with_variables(self, variables: Set[VariableId]) -> ReachabilityConfig: ...
+    def with_time_limit(self, duration_in_millis: int) -> ReachabilityConfig: ...
+    def with_bdd_size_limit(self, bdd_size_limit: int) -> ReachabilityConfig: ...
+    def with_steps_limit(self, steps_limit: int) -> ReachabilityConfig: ...
+
+class ReachabilityComp:
+    """
+    Implements symbolic reachability operations over an `AsynchronousGraph`. This means the
+    computation of both largest and smallest forward- or backward-closed sets of states.
+    """
+
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> ReachabilityComp: ...
+    @staticmethod
+    def with_config(config: ReachabilityConfig) -> ReachabilityComp: ...
+    def forward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    def backward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    def forward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    def backward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+
+class PercolationConfig:
+    """
+    A configuration class for the `PercolationComp` class. It allows you to specify various
+    parameters for subspace percolation, such as the underlying `AsynchronousGraph`,
+    and a time limit. The configuration can be created using a Python
+    constructor or the `create_from` method, and you can modify it using the `with_*`
+    methods. The configuration is immutable, meaning that each `with_*` method
+    returns a new instance of `PercolationConfig` with the specified modifications.
+    This API design means the method calls can be chained together.
+    """
+
+    def __init__(
+        self,
+        graph_representation: Union[AsynchronousGraph, BooleanNetwork],
+        time_limit_millis: Optional[int] = None,
+    ) -> None:
+        """
+        Create a new `PercolationConfig` object. The `graph_representation` parameter is required and
+        can be either an `AsynchronousGraph` or a `BooleanNetwork`. The other parameters
+        are optional and can be used to specify a time limit for the subspace percolation algorithm.
+
+        For the meaning of the parameters, see the documentation of their respective with_
+        methods (e.g. `with_time_limit`, etc.).
+        """
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> PercolationConfig: ...
+    def with_time_limit(self, duration_in_millis: int) -> PercolationConfig: ...
+
+class PercolationComp:
+    """
+    Implements subspace percolation over an `AsynchronousGraph`.
+    """
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> PercolationComp: ...
+    @staticmethod
+    def with_config(config: PercolationConfig) -> PercolationComp: ...
+    def percolate_subspace(
+        self,
+        subspace: Union[list[tuple[VariableId, bool]], dict[VariableId, bool]]
+    ) -> dict[VariableId, bool]: ...
+
+class FixedPointsConfig:
+    def __init__(
+        self,
+        graph_representation: Union[AsynchronousGraph, BooleanNetwork],
+        restriction: Optional[ColoredVertexSet] = None,
+        time_limit_millis: Optional[int] = None,
+        bdd_size_limit: Optional[int] = None,
+    ) -> None:
+        """
+        Create a new `FixedPointsConfig` object. The `graph_representation` parameter is required and
+        specifies the underlying `AsynchronousGraph` or `BooleanNetwork`. The other parameters are optional
+        and can be used to specify a restriction, a time limit, and a BDD size limit for
+        the fixed points computation.
+
+        For the meaning of the parameters, see the documentation of their respective with_
+        methods (e.g. `with_restriction`, `with_time_limit`, etc.).
+        """
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> FixedPointsConfig: ...
+    def with_restriction(self, restriction: ColoredVertexSet) -> FixedPointsConfig: ...
+    def with_time_limit(self, duration_in_millis: int) -> FixedPointsConfig: ...
+    def with_bdd_size_limit(self, bdd_size_limit: int) -> FixedPointsConfig: ...
+
+class FixedPointsComp:
+    @staticmethod
+    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> FixedPointsComp: ...
+    @staticmethod
+    def with_config(config: FixedPointsConfig) -> FixedPointsComp: ...
+    def naive_symbolic(self) -> ColoredVertexSet: ...
+    def symbolic(self) -> ColoredVertexSet: ...
+    def symbolic_vertices(self) -> VertexSet: ...
+    def symbolic_colors(self) -> ColorSet: ...
+
+class TrapSpacesConfig:
+    def __init__(
+        self,
+        graph_representation: BooleanNetwork,
+        restriction: Optional[ColoredSpaceSet] = None,
+        time_limit_millis: Optional[int] = None,
+        bdd_size_limit: Optional[int] = None,
+    ) -> None:
+        """
+        Create a new `TrapSpacesConfig` object. The `graph_representation` parameter is required and
+        specifies the underlying `BooleanNetwork`, from which an `AsynchronousGraph` with its `SymbolicSpaceContext`
+        is created. The other parameters are optional and can be used to specify a restriction,
+        a time limit, and a BDD size limit for the trap spaces computation.
+        For the meaning of the parameters, see the documentation of their respective with_
+        methods (e.g. `with_restriction`, `with_time_limit`, etc.).
+        """
+    @staticmethod
+    def create_from(graph_representation: BooleanNetwork) -> TrapSpacesConfig: ...
+    @staticmethod
+    def create_from_graph_with_context(
+        graph: AsynchronousGraph,
+        context: SymbolicSpaceContext
+    ) -> TrapSpacesConfig: ...
+    def with_restriction(self, restriction: ColoredSpaceSet) -> TrapSpacesConfig: ...
+    def with_time_limit(self, duration_in_millis: int) -> TrapSpacesConfig: ...
+    def with_bdd_size_limit(self, bdd_size_limit: int) -> TrapSpacesConfig: ...
+
+class TrapSpacesComp:
+    @staticmethod
+    def create_from(graph_representation: BooleanNetwork) -> TrapSpacesComp: ...
+    @staticmethod
+    def with_config(config: TrapSpacesConfig) -> TrapSpacesComp: ...
+    def essential_symbolic(self) -> ColoredSpaceSet: ...
+    def minimal_symbolic(self) -> ColoredSpaceSet: ...
+    def minimize(self, set: ColoredSpaceSet) -> ColoredSpaceSet: ...
+    def maximize(self, set: ColoredSpaceSet) -> ColoredSpaceSet: ...
+

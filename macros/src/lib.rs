@@ -1,4 +1,8 @@
 extern crate proc_macro;
+
+mod derive_config;
+mod derive_configurable;
+
 use proc_macro::TokenStream;
 use std::io::Write;
 use syn::__private::ToTokens;
@@ -56,4 +60,38 @@ pub fn derive_wrapper(item: TokenStream) -> TokenStream {
 
     let result = String::from_utf8(result).unwrap();
     result.parse().unwrap()
+}
+
+/// A derive macro that automatically implements the `Config` trait for structs
+/// that have a `cancellation` field of type `Box<dyn CancellationHandler>`.
+///
+/// # Example
+///
+/// ```
+/// #[derive(Config)]
+/// struct MyConfig {
+///     pub cancellation: Box<dyn CancellationHandler>,
+///     // other fields...
+/// }
+/// ```
+#[proc_macro_derive(Config)]
+pub fn derive_config(input: TokenStream) -> TokenStream {
+    derive_config::derive_config_impl(input)
+}
+
+/// A derive macro that automatically implements the `Configurable` trait for structs
+/// that have a `config` field of type `Config` or contain a single unnamed field of type `Config`.
+///
+/// # Example
+/// ```
+/// #[derive(Configurable)]
+/// struct MyConfigurable(MyConfig);
+/// ```
+///
+/// Requirements:
+/// - For named structs, the type must implement `Default` (used in `with_config`).
+/// - For tuple structs with a single field, no `Default` bound is required.
+#[proc_macro_derive(Configurable)]
+pub fn derive_configurable(input: TokenStream) -> TokenStream {
+    derive_configurable::derive_configurable_impl(input)
 }

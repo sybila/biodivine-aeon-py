@@ -12,6 +12,7 @@ pub struct TrapSpaces {
 
 #[pymethods]
 impl TrapSpaces {
+    /// **Deprecated**: Use `TrapSpacesComp.essential_symbolic()` instead.
     /// Computes the coloured set of "essential" trap spaces of a Boolean network.
     ///
     /// A trap space is essential if it cannot be further reduced through percolation. In general, every
@@ -39,6 +40,7 @@ impl TrapSpaces {
         Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
     }
 
+    /// **Deprecated**: Use `TrapSpacesComp.minimal_symbolic()` instead.
     /// Computes the minimal coloured trap spaces of the provided `network` within the specified
     /// `restriction` set.
     ///
@@ -97,6 +99,7 @@ impl TrapSpaces {
         Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
     }
 
+    /// **Deprecated**: Use `TrapSpacesComp.minimal()` instead.
     /// Compute the inclusion-minimal spaces within a particular subset.
     #[staticmethod]
     pub fn minimize(
@@ -113,6 +116,7 @@ impl TrapSpaces {
         Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
     }
 
+    /// **Deprecated**: Use `TrapSpacesComp.maximal()` instead.
     /// Compute the inclusion-maximal spaces within a particular subset.
     #[staticmethod]
     pub fn maximize(
