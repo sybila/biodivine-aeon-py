@@ -64,11 +64,11 @@ impl Reachability {
         let graph = &self.config().graph;
         let subgraph = &self.config().subgraph;
 
-        if let Some(subgraph) = subgraph {
-            if !initial.is_subset(subgraph) {
-                info!(target: TARGET_FORWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
-                return Err(ReachabilityError::InvalidSubgraph);
-            }
+        if let Some(subgraph) = subgraph
+            && !initial.is_subset(subgraph)
+        {
+            info!(target: TARGET_FORWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
+            return Err(ReachabilityError::InvalidSubgraph);
         }
 
         let mut steps = 0usize;
@@ -132,11 +132,11 @@ impl Reachability {
         let graph = &self.config().graph;
         let subgraph = &self.config().subgraph;
 
-        if let Some(subgraph) = subgraph {
-            if !initial.is_subset(subgraph) {
-                info!(target: TARGET_BACKWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
-                return Err(ReachabilityError::InvalidSubgraph);
-            }
+        if let Some(subgraph) = subgraph
+            && !initial.is_subset(subgraph)
+        {
+            info!(target: TARGET_BACKWARD_SUPERSET, "Initial set is not a subset of the subgraph.");
+            return Err(ReachabilityError::InvalidSubgraph);
         }
 
         let mut steps = 0usize;
@@ -201,11 +201,11 @@ impl Reachability {
         let graph = &self.config().graph;
         let subgraph = &self.config().subgraph;
 
-        if let Some(subgraph) = subgraph {
-            if !initial.is_subset(subgraph) {
-                info!(target: TARGET_FORWARD_SUBSET, "Initial set is not a subset of the subgraph.");
-                return Err(ReachabilityError::InvalidSubgraph);
-            }
+        if let Some(subgraph) = subgraph
+            && !initial.is_subset(subgraph)
+        {
+            info!(target: TARGET_FORWARD_SUBSET, "Initial set is not a subset of the subgraph.");
+            return Err(ReachabilityError::InvalidSubgraph);
         }
 
         let mut steps = 0usize;
@@ -274,11 +274,11 @@ impl Reachability {
         let graph = &self.config().graph;
         let subgraph = &self.config().subgraph;
 
-        if let Some(subgraph) = subgraph {
-            if !initial.is_subset(subgraph) {
-                info!(target: TARGET_BACKWARD_SUBSET, "Initial set is not a subset of the subgraph.");
-                return Err(ReachabilityError::InvalidSubgraph);
-            }
+        if let Some(subgraph) = subgraph
+            && !initial.is_subset(subgraph)
+        {
+            info!(target: TARGET_BACKWARD_SUBSET, "Initial set is not a subset of the subgraph.");
+            return Err(ReachabilityError::InvalidSubgraph);
         }
 
         let mut steps = 0usize;
