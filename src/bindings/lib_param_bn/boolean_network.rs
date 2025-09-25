@@ -13,7 +13,9 @@ use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::collections::HashMap;
+use std::path::Path;
 use std::sync::Arc;
+use biodivine_lib_io_bma::BmaModel;
 
 /// A `BooleanNetwork` extends a `RegulatoryGraph` with the ability to reference logical
 /// parameters (Boolean uninterpreted functions), and with the ability to store an
@@ -205,20 +207,37 @@ impl BooleanNetwork {
 
     /// Read a `BooleanNetwork` from a file path.
     ///
-    /// Supported file formats are `.aeon`, `.sbml`, or `.bnet`.
+    /// Supported file formats are `.aeon`, `.sbml`, `.bnet`, or `.json` (BioModelsAnalyzer format).
     ///
     /// By default, the method reads the underlying regulatory graph just as it is described in the input file.
     /// However, such graph may not always be logically consistent with the actual update functions. If you set
     /// `repair_graph=True`, the underlying graph is instead inferred correctly from the actual update functions.
+    ///
+    /// Multivalued BMA files are automatically binarized. You can turn this off using the
+    /// `binarize` argument (in which case the import will fail). BMA `.xml` files are also
+    /// supported, but only using the `from_bma_xml` method.
     #[staticmethod]
-    #[pyo3(signature = (file_path, repair_graph = false))]
+    #[pyo3(signature = (file_path, repair_graph = false, binarize = true))]
     pub fn from_file(
         py: Python,
         file_path: &str,
         repair_graph: bool,
+        binarize: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let bn = biodivine_lib_param_bn::BooleanNetwork::try_from_file(file_path)
-            .map_err(runtime_error)?;
+        let path: &Path = file_path.as_ref();
+        let extension = path.extension().and_then(|it| it.to_str());
+        let bn = if extension == Some("json") {
+            // JSON files can be opened as BMA models
+            let file_contents = std::fs::read_to_string(path).map_err(runtime_error)?;
+            let model = BmaModel::from_json_string(file_contents.as_str())
+                .map_err(|e| {
+                    runtime_error(format!("Error loading BMA JSON model: {}", e))
+                })?;
+            convert_bma_model(model, binarize)?
+        } else {
+            biodivine_lib_param_bn::BooleanNetwork::try_from_file(file_path)
+                .map_err(runtime_error)?
+        };
         let bn = if repair_graph {
             bn.infer_valid_graph().map_err(runtime_error)?
         } else {
@@ -588,6 +607,61 @@ impl BooleanNetwork {
     /// Produce a `.sbml` string representation of this `BooleanNetwork`.
     pub fn to_sbml(&self) -> String {
         self.as_native().to_sbml(None)
+    }
+
+    /// Try to load a `BooleanNetwork` from the contents of a BioModelsAnalyzer `.json` file.
+    ///
+    /// By default, multivalued models are binarized.
+    #[staticmethod]
+    #[pyo3(signature = (file_contents, binarize = true))]
+    pub fn from_bma_json(py: Python, file_contents: &str, binarize: bool) -> PyResult<Py<BooleanNetwork>> {
+        let model = BmaModel::from_json_string(file_contents)
+            .map_err(|e| {
+                runtime_error(format!("Error loading BMA JSON model: {e}"))
+            })?;
+        BooleanNetwork(convert_bma_model(model, binarize)?).export_to_python(py)
+    }
+
+    /// Output the given `BooleanNetwork` in BMA `.json` file format, optionally with `pretty`
+    /// formatting.
+    #[pyo3(signature = (pretty = false))]
+    pub fn to_bma_json(&self, pretty: bool) -> PyResult<String> {
+        let model = BmaModel::try_from(self.as_native())
+            .map_err(|e| {
+                runtime_error(format!("AEON to BMA conversion error: {e}"))
+            })?;
+        let result = if pretty {
+            model.to_json_string_pretty()
+        } else {
+            model.to_json_string()
+        };
+        result.map_err(|e| {
+                runtime_error(format!("BMA JSON conversion error: {e}"))
+            })
+    }
+
+    /// Try to load a `BooleanNetwork` from the contents of a BioModelsAnalyzer `.xml` file.
+    ///
+    /// By default, multivalued models are binarized.
+    #[staticmethod]
+    #[pyo3(signature = (file_contents, binarize = true))]
+    pub fn from_bma_xml(py: Python, file_contents: &str, binarize: bool) -> PyResult<Py<BooleanNetwork>> {
+        let model = BmaModel::from_xml_string(file_contents)
+            .map_err(|e| {
+                runtime_error(format!("Error loading BMA XML model: {e}"))
+            })?;
+        BooleanNetwork(convert_bma_model(model, binarize)?).export_to_python(py)
+    }
+
+    /// Output the given `BooleanNetwork` in BMA `.xml` file format.
+    pub fn to_bma_xml(&self) -> PyResult<String> {
+        let model = BmaModel::try_from(self.as_native())
+            .map_err(|e| {
+                runtime_error(format!("AEON to BMA conversion error: {e}"))
+            })?;
+        model.to_xml_string().map_err(|e| {
+            runtime_error(format!("BMA XML conversion error: {e}"))
+        })
     }
 
     /// The number of *explicit parameters*, i.e. named uninterpreted functions in this network.
@@ -1009,4 +1083,15 @@ impl BooleanNetwork {
         }
         throw_type_error("Expected `ParameterId` or `str`.")
     }
+}
+
+fn convert_bma_model(model: BmaModel, binarize: bool) -> PyResult<biodivine_lib_param_bn::BooleanNetwork> {
+    if !binarize && !model.is_boolean() {
+        return throw_runtime_error("Multi-valued BMA model must be binarized");
+    }
+
+    biodivine_lib_param_bn::BooleanNetwork::try_from(model)
+        .map_err(|e| {
+            runtime_error(format!("BMA to AEON conversion error: {}", e))
+        })
 }
