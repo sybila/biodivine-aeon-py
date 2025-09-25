@@ -771,6 +771,14 @@ impl AsynchronousGraph {
 
         AsynchronousGraph::wrap_native(py, native_result)
     }
+
+    /// Compute the logically unique subset of the given colors.
+    /// This method returns a subset of colors that are logically unique
+    /// within the context of this asynchronous graph.
+    pub fn logically_unique_colors(&self, colors: &ColorSet) -> ColorSet {
+        let result = self.as_native().logically_unique_subset(colors.as_native());
+        ColorSet::mk_native(self.ctx.clone(), result)
+    }
 }
 
 impl AsynchronousGraph {

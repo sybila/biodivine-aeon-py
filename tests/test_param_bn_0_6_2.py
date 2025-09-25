@@ -10,6 +10,29 @@ import biodivine_aeon as aeon
 
 
 
+def test_asynchronous_graph_logically_unique_colors():
+    """Test the new logically_unique_subset method on AsynchronousGraph."""
+    # Create a simple Boolean network
+    network = aeon.BooleanNetwork.from_aeon("""
+    a -> a
+    b -> a
+    c -> a
+    $a: c | f(a, b, c)
+    """)
+    
+    graph = aeon.AsynchronousGraph(network)
+    
+    # Get some colors
+    colors = graph.mk_unit_colors()
+    
+    # Test logically_unique_subset
+    unique_colors = graph.logically_unique_colors(colors)
+    assert unique_colors.cardinality() < colors.cardinality()
+
+    # The result should be a subset of the original colors
+    assert unique_colors.is_subset(colors)
+
+
 def test_trap_spaces_new_methods():
     """Test the new methods and updated signatures in TrapSpaces."""
     # Create a simple Boolean network

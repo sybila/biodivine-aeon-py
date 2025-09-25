@@ -2712,6 +2712,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
             <td><code>SymbolicAsyncGraph::pick_witness</code></td>
             <td></td>
         </tr>
+        <tr>
+            <td><code>SymbolicAsyncGraph::logically_unique_subset</code></td>
+            <td><code>AsynchronousGraph.logically_unique_colors</code></td>
+        </tr>
     </tbody>
 </table>
 
