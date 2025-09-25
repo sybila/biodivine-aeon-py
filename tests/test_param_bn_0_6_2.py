@@ -22,6 +22,7 @@ def test_symbolic_space_context_new_methods():
     
     # Test get_dual_variable_pair
     var_a = network.find_variable("a")
+    assert var_a is not None
     pos_var, neg_var = ctx.get_dual_variable_pair(var_a)
     assert isinstance(pos_var, aeon.BddVariable)
     assert isinstance(neg_var, aeon.BddVariable)
@@ -52,6 +53,7 @@ def test_symbolic_space_context_new_methods():
     
     # Test mk_has_down_transition and mk_has_up_transition
     var_bdd = ctx.find_network_bdd_variable("a")
+    assert var_bdd is not None
     has_down = ctx.mk_has_down_transition(var_bdd, function)
     has_up = ctx.mk_has_up_transition(var_bdd, function)
     
@@ -142,7 +144,9 @@ def test_comprehensive_workflow():
     
     # Test transition analysis
     var_a = network.find_variable("a")
+    assert var_a is not None
     bdd_a = ctx.find_network_bdd_variable(var_a)
+    assert bdd_a is not None
     
     function_a = graph.mk_update_function("a")
     has_down = ctx.mk_has_down_transition(bdd_a, function_a)
