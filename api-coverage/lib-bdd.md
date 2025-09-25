@@ -899,6 +899,35 @@ we will need either complicated generics, or heavy use of `Any`.
             <td><code>Bdd::sat_clauses</code></td>
             <td><code>Bdd.clause_iterator</code></td>
         </tr>
+        <tr><td colspan="2" align="center">Approximation</td></tr>
+        <tr>
+            <td><code>Bdd::overapproximate</code></td>
+            <td><code>Bdd.overapproximate</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::underapproximate</code></td>
+            <td><code>Bdd.underapproximate</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::overapproximate_to_cardinality</code></td>
+            <td><code>Bdd.overapproximate_to_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::underapproximate_to_cardinality</code></td>
+            <td><code>Bdd.underapproximate_to_cardinality</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::overapproximate_to_size</code></td>
+            <td><code>Bdd.overapproximate_to_size</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::underapproximate_to_size</code></td>
+            <td><code>Bdd.underapproximate_to_size</code></td>
+        </tr>
+        <tr>
+            <td><code>Bdd::node_valuation_weights</code></td>
+            <td><code>Bdd.node_valuation_weights</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
             <td><code>Bdd::substitute</code></td>

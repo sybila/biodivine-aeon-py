@@ -391,6 +391,23 @@ def test_bdd():
     assert bdd_clause.clause_most_free() == BddPartialValuation(ctx, {'a': False, 'b': True})
     assert bdd_clause.clause_most_fixed() == BddPartialValuation(ctx, {'a': False, 'b': True})
 
+    # New API in lib-bdd 0.6.1
+    w = bdd_x.node_valuation_weights()
+    assert isinstance(w, list) and len(w) == bdd_x.node_count()
+    oa = bdd_x.overapproximate_to_size(4)
+    ua = bdd_x.underapproximate_to_size(4)
+    assert oa.node_count() <= 4
+    assert ua.node_count() <= 4
+    # General eliminate pointer APIs should accept empty list (no-op)
+    assert bdd_x.overapproximate([]) == bdd_x
+    assert bdd_x.underapproximate([]) == bdd_x
+
+    # Cardinality-based approximation returns correct cardinality
+    bdd_card_over = bdd_x.overapproximate_to_cardinality(4)
+    bdd_card_under = bdd_x.underapproximate_to_cardinality(2)
+    assert bdd_card_over.cardinality() >= 4
+    assert bdd_card_under.cardinality() <= 2
+
     expected = Bdd(BddPartialValuation(ctx, {'a': False, 'c': True}))
     assert bdd_clause.substitute('b', var_c) == expected
     assert bdd_clause.rename([('b', 'c')]) == expected

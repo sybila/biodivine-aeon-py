@@ -1054,6 +1054,53 @@ impl Bdd {
     pub fn validate(&self) -> PyResult<()> {
         self.as_native().validate().map_err(runtime_error)
     }
+
+    /// Compute valuation weights of each node. This can be useful for implementing custom
+    /// sampling strategies. The return value is a list of non-negative integers indexed
+    /// by the BDD node indices (corresponding to `BddPointer` values).
+    pub fn node_valuation_weights(&self) -> Vec<BigUint> {
+        self.as_native().node_valuation_weights()
+    }
+
+    /// Over-approximate this BDD to have at most `target_size` decision nodes.
+    pub fn overapproximate_to_size(&self, target_size: usize) -> Bdd {
+        self.new_from(self.as_native().overapproximate_to_size(target_size))
+    }
+
+    /// Under-approximate this BDD to have at most `target_size` decision nodes.
+    pub fn underapproximate_to_size(&self, target_size: usize) -> Bdd {
+        self.new_from(self.as_native().underapproximate_to_size(target_size))
+    }
+
+    /// Over-approximate this BDD by eliminating the specified decision nodes.
+    pub fn overapproximate(&self, to_eliminate: Vec<BddPointer>) -> PyResult<Bdd> {
+        let nodes: Vec<biodivine_lib_bdd::BddPointer> =
+            to_eliminate.into_iter().map(|p| *p.as_native()).collect();
+        Ok(self.new_from(self.as_native().overapproximate(&nodes)))
+    }
+
+    /// Under-approximate this BDD by eliminating the specified decision nodes.
+    pub fn underapproximate(&self, to_eliminate: Vec<BddPointer>) -> PyResult<Bdd> {
+        let nodes: Vec<biodivine_lib_bdd::BddPointer> =
+            to_eliminate.into_iter().map(|p| *p.as_native()).collect();
+        Ok(self.new_from(self.as_native().underapproximate(&nodes)))
+    }
+
+    /// Compute a new `Bdd` which over-approximates this `Bdd`, and its
+    /// cardinality is greater or equal to the given `target`.
+    pub fn overapproximate_to_cardinality(&self, target: BigUint) -> PyResult<Bdd> {
+        Ok(self.new_from(
+            self.as_native().overapproximate_to_cardinality(&target),
+        ))
+    }
+
+    /// Compute a new `Bdd` which under-approximates this `Bdd`, and its
+    /// cardinality is less or equal to the given `target`.
+    pub fn underapproximate_to_cardinality(&self, target: BigUint) -> PyResult<Bdd> {
+        Ok(self.new_from(
+            self.as_native().underapproximate_to_cardinality(&target),
+        ))
+    }
 }
 
 impl AsNative<RsBdd> for Bdd {
