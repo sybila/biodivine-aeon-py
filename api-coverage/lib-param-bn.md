@@ -1,6 +1,6 @@
-# Biodivine `lib-bdd` API coverage
+# Biodivine `lib-param-bn` API coverage
 
-This document should be up-to-date with `lib-bdd` version `0.5.10`.
+This document should be up-to-date with `lib-param-bn` version `0.6.2`.
 
 ### `biodivine_std` module
 
