@@ -5,7 +5,6 @@ This module tests the new functionality that was added to the Python bindings
 to reflect the changes in lib-param-bn from version 0.5.13 to 0.6.2.
 """
 
-import pytest
 import biodivine_aeon as aeon
 
 
@@ -168,7 +167,3 @@ def test_comprehensive_workflow():
     assert isinstance(spaces_2, aeon.SpaceSet)
     assert isinstance(has_down, aeon.Bdd)
     assert isinstance(has_up, aeon.Bdd)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
