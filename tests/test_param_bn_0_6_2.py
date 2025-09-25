@@ -64,7 +64,7 @@ def test_symbolic_space_context_new_methods():
 
 
 def test_asynchronous_graph_logically_unique_colors():
-    """Test the new logically_unique_subset method on AsynchronousGraph."""
+    """Test the new logically_unique_colors method on AsynchronousGraph."""
     # Create a simple Boolean network
     network = aeon.BooleanNetwork.from_aeon("""
     a -> a
@@ -78,7 +78,7 @@ def test_asynchronous_graph_logically_unique_colors():
     # Get some colors
     colors = graph.mk_unit_colors()
     
-    # Test logically_unique_subset
+    # Test logically_unique_colors
     unique_colors = graph.logically_unique_colors(colors)
     assert unique_colors.cardinality() < colors.cardinality()
 
