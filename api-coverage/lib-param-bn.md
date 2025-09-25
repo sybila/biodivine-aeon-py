@@ -1378,6 +1378,30 @@ using the normal methods, but new methods are added to facilitate the mapping.
             <td><code>SymbolicSpaceContext::vertices_to_spaces</code></td>
             <td><code>SymbolicSpaceContext.vertices_to_spaces</code></td>
         </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::get_dual_variable_pair</code></td>
+            <td><code>SymbolicSpaceContext.get_dual_variable_pair</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::get_dual_variables</code></td>
+            <td><code>SymbolicSpaceContext.get_dual_variables</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_can_go_to_false</code></td>
+            <td><code>SymbolicSpaceContext.mk_can_go_to_false</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_exactly_k_free_spaces</code></td>
+            <td><code>SymbolicSpaceContext.mk_exactly_k_free_spaces</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_has_down_transition</code></td>
+            <td><code>SymbolicSpaceContext.mk_has_down_transition</code></td>
+        </tr>
+        <tr>
+            <td><code>SymbolicSpaceContext::mk_has_up_transition</code></td>
+            <td><code>SymbolicSpaceContext.mk_has_up_transition</code></td>
+        </tr>
         <tr><td colspan="2" align="center">Other</td></tr>
         <tr>
             <td><code>SymbolicSpaceContext::bdd_variable_set</code></td>
