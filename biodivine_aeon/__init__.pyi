@@ -80,14 +80,10 @@ class BddPointer:
 
 
 class NaiveSampler:
-    def __init__(self) -> None:
-        ...
-
+    ...
 
 class UniformValuationSampler:
-    def __init__(self) -> None:
-        ...
-
+    ...
 
 class BddVariableSetBuilder:
     def __init__(self, variables: Optional[Sequence[str]] = None) -> None:
