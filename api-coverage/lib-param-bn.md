@@ -2743,6 +2743,10 @@ minimal API necessary to retrieve the relevant values. All model classes are `fr
             <td><code>TrapSpaces::(_)minimal_symbolic</code></td>
             <td><code>TrapSpaces.minimal_symbolic</code></td>
         </tr>
+        <tr>
+            <td><code>TrapSpaces::long_lived_symbolic</code></td>
+            <td><code>TrapSpaces.long_lived_symbolic</code></td>
+        </tr>
     </tbody>
 </table>
 
