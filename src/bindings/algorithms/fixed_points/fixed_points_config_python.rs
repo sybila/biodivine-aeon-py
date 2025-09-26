@@ -27,6 +27,10 @@ use crate::{
 /// The configuration is immutable, meaning that each `with_*` method
 /// returns a new instance of `FixedPointsConfig` with the specified modifications.
 /// This API design means the method calls can be chained together.
+///
+/// **This feature should eventually replace `FixedPoints` and is currently in "preview mode",
+/// so please expect the API of this object to change. For guaranteed stable API, please rely
+/// on `FixedPoints`.**
 #[pyclass(name = "FixedPointsConfig", module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct PyFixedPointsConfig {

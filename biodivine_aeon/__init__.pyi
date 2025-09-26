@@ -1905,6 +1905,10 @@ class ReachabilityConfig:
     `with_*` methods. The configuration is immutable, meaning that each `with_*` method
     returns a new instance of `ReachabilityConfig` with the specified modifications.
     This API design means the method calls can be chained together.
+
+    **This feature should eventually replace `Reachability` and is currently in "preview mode",
+    so please expect the API of this object to change. For guaranteed stable API, please rely
+    on `Reachability`.**
     """
 
     def __init__(
@@ -1937,6 +1941,10 @@ class ReachabilityComp:
     """
     Implements symbolic reachability operations over an `AsynchronousGraph`. This means the
     computation of both largest and smallest forward- or backward-closed sets of states.
+
+    **This feature should eventually replace `Reachability` and is currently in "preview mode",
+    so please expect the API of this object to change. For guaranteed stable API, please rely
+    on `Reachability`.**
     """
 
     @staticmethod
@@ -1957,6 +1965,10 @@ class PercolationConfig:
     methods. The configuration is immutable, meaning that each `with_*` method
     returns a new instance of `PercolationConfig` with the specified modifications.
     This API design means the method calls can be chained together.
+
+    **This feature should eventually replace `Percolation` and is currently in "preview mode",
+    so please expect the API of this object to change. For guaranteed stable API, please rely
+    on `Percolation`.**
     """
 
     def __init__(
@@ -1979,6 +1991,10 @@ class PercolationConfig:
 class PercolationComp:
     """
     Implements subspace percolation over an `AsynchronousGraph`.
+
+    **This feature should eventually replace `Percolation` and is currently in "preview mode",
+    so please expect the API of this object to change. For guaranteed stable API, please rely
+    on `Percolation`.**
     """
     @staticmethod
     def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> PercolationComp: ...

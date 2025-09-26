@@ -13,8 +13,12 @@ use crate::{
 
 use super::PyTrapSpacesConfig;
 
-/// Implments trap spaces search over an `AsynchronousGraph` and its
+/// Implements trap spaces search over an `AsynchronousGraph` and its
 /// `SymbolicSpaceContext`.
+///
+/// **This feature should eventually replace `TrapSpaces` and is currently in "preview mode",
+/// so please expect the API of this object to change. For guaranteed stable API, please rely
+/// on `TrapSpaces`.**
 #[pyclass(name = "TrapSpacesComp", module = "biodivine_aeon", frozen)]
 pub struct PyTrapSpaces(PyTrapSpacesConfig);
 

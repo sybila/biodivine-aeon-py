@@ -30,6 +30,10 @@ use crate::{
 /// The configuration is immutable, meaning that each `with_*` method
 /// returns a new instance of `TrapSpacesConfig` with the specified modifications.
 /// This API design means the method calls can be chained together.
+///
+/// **This feature should eventually replace `TrapSpaces` and is currently in "preview mode",
+/// so please expect the API of this object to change. For guaranteed stable API, please rely
+/// on `TrapSpaces`.**
 #[pyclass(name = "TrapSpacesConfig", module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
 pub struct PyTrapSpacesConfig {

@@ -10,6 +10,10 @@ use crate::bindings::{
 use super::PyFixedPointsConfig;
 
 /// Implements fixed point search over an `AsynchronousGraph`
+///
+/// **This feature should eventually replace `FixedPoints` and is currently in "preview mode",
+/// so please expect the API of this object to change. For guaranteed stable API, please rely
+/// on `FixedPoints`.**
 #[pyclass(name = "FixedPointsComp", module = "biodivine_aeon", frozen)]
 pub struct PyFixedPoints(PyFixedPointsConfig);
 
