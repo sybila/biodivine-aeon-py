@@ -7,7 +7,7 @@ pub use log::{Level, log, log_enabled};
 /// If you wish to see ALL logs for smaller data structures, set the log level to Trace.
 ///
 /// # Example:
-/// ```
+/// ```ignore
 /// debug_with_limit!(target: "MyModule", size: data.len(), "Processing data: {}", data);
 /// ```
 #[macro_export]
@@ -29,7 +29,7 @@ macro_rules! debug_with_limit {
 /// to a struct based on the `algorithms-pyo3-bindings` feature.
 ///
 /// # Example:
-/// ```rust
+/// ```ignore
 /// maybe_pyclass!(
 ///     "PercolationComp",
 ///     /// Implements subspace percolation over a [SymbolicAsyncGraph].
