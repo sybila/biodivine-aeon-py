@@ -2,7 +2,7 @@ use pyo3::{Python, create_exception, exceptions::PyException};
 
 use crate::internal::algorithms::cancellation::CancellationHandler;
 
-/// A [CancellationHandler] that wraps any ohter [CancellationHandler] and also checks for Python
+/// A [CancellationHandler] that wraps any other [CancellationHandler] and also checks for Python
 /// interrupts.
 #[derive(Clone, Debug, Default)]
 pub struct CancelTokenPython(Box<dyn CancellationHandler>);
@@ -13,7 +13,7 @@ impl CancellationHandler for CancelTokenPython {
             return true;
         }
 
-        Python::with_gil(|py| py.check_signals()).is_err()
+        Python::attach(|py| py.check_signals()).is_err()
     }
 
     fn start_timer(&self) {
@@ -27,4 +27,4 @@ impl CancelTokenPython {
     }
 }
 
-create_exception!(cancellation, CancelledError, PyException);
+create_exception!(biodivine_aeon, CancelledError, PyException);

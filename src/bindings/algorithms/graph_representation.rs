@@ -40,7 +40,7 @@ impl TryFrom<PyGraphRepresentation> for ReachabilityConfig {
                 Ok(ReachabilityConfig::from(graph.get().as_native().clone())
                     .with_cancellation(CancelTokenPython::default()))
             }
-            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
+            PyGraphRepresentation::Network(network) => Python::attach(|py| {
                 ReachabilityConfig::try_from(network.borrow(py).as_native())
                     .map(|config| config.with_cancellation(CancelTokenPython::default()))
             }),
@@ -58,7 +58,7 @@ impl TryFrom<PyGraphRepresentation> for PercolationConfig {
                 Ok(PercolationConfig::from(graph.get().as_native().clone())
                     .with_cancellation(CancelTokenPython::default()))
             }
-            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
+            PyGraphRepresentation::Network(network) => Python::attach(|py| {
                 PercolationConfig::try_from(network.borrow(py).as_native())
                     .map(|config| config.with_cancellation(CancelTokenPython::default()))
             }),
@@ -81,7 +81,7 @@ impl TryFrom<PyGraphRepresentation> for PyFixedPointsConfig {
                     ctx: graph.get().symbolic_context().clone(),
                 })
             }
-            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
+            PyGraphRepresentation::Network(network) => Python::attach(|py| {
                 let stg = AsynchronousGraph::new(py, network, None, None)?;
                 let config = FixedPointsConfig::from(stg.as_native().clone())
                     .with_cancellation(CancelTokenPython::default());
@@ -106,7 +106,7 @@ impl TryFrom<PyGraphRepresentation> for PyTrapSpacesConfig {
                     "Currently, trap spaces cannot be created from just a graph. Use a boolean network or from_graph_with_context() instead."
                         .to_string()).into())
             },
-            PyGraphRepresentation::Network(network) => Python::with_gil(|py| {
+            PyGraphRepresentation::Network(network) => Python::attach(|py| {
                 let config = TrapSpacesConfig::try_from(network.borrow(py).as_native())?
                     .with_cancellation(
                         CancelTokenPython::default(),
