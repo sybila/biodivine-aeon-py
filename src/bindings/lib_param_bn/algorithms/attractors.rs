@@ -1,8 +1,12 @@
+use crate::AsNative;
 use crate::bindings::lib_param_bn::NetworkVariableContext;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::internal::scc::algo_interleaved_transition_guided_reduction::interleaved_transition_guided_reduction;
-use crate::{AsNative, global_log_level};
+use biodivine_algo_bdd_scc::attractor::{
+    AttractorConfig, InterleavedTransitionGuidedReduction, ItgrState, XieBeerelAttractors,
+    XieBeerelState,
+};
+use computation_process::{Algorithm, Stateful};
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
@@ -33,8 +37,8 @@ impl Attractors {
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
         to_reduce: Option<&Bound<'_, PyList>>,
-        py: Python,
     ) -> PyResult<ColoredVertexSet> {
+        // Convert `Option<PyList<?>>` to `Vec<VariableId>`
         let mut to_reduce_native = Vec::new();
         if let Some(to_reduce) = to_reduce {
             for x in to_reduce {
@@ -44,23 +48,27 @@ impl Attractors {
             to_reduce_native.extend(graph.as_native().variables());
         }
 
+        // Convert `Option<ColoredVertexSet>` to `GraphColoredVertices`
         let restriction_native = if let Some(r) = restriction {
             r.as_native().clone()
         } else {
             graph.as_native().mk_unit_colored_vertices()
         };
 
-        let (states, _) = interleaved_transition_guided_reduction(
-            graph.as_native(),
-            restriction_native,
-            &to_reduce_native,
-            global_log_level(py)?,
-        )?;
+        cancel_this::on_python(|| {
+            let config = AttractorConfig::new(graph.as_native().clone());
+            let state = ItgrState::new_with_variables(
+                graph.as_native(),
+                &restriction_native,
+                &to_reduce_native,
+            );
+            let result = InterleavedTransitionGuidedReduction::run(config, state)?;
 
-        Ok(ColoredVertexSet::mk_native(
-            graph.symbolic_context(),
-            states,
-        ))
+            Ok(ColoredVertexSet::mk_native(
+                graph.symbolic_context(),
+                result,
+            ))
+        })
     }
 
     /// Perform attractor detection on the given symbolic set.
@@ -80,25 +88,25 @@ impl Attractors {
     pub fn xie_beerel(
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
-        py: Python,
     ) -> PyResult<Vec<ColoredVertexSet>> {
+        // Convert `Option<ColoredVertexSet>` to `GraphColoredVertices`
         let restriction_native = if let Some(r) = restriction {
             r.as_native().clone()
         } else {
             graph.as_native().mk_unit_colored_vertices()
         };
 
-        let transitions = graph.as_native().variables().collect::<Vec<_>>();
-        let result = crate::internal::scc::algo_xie_beerel::xie_beerel_attractors(
-            graph.as_native(),
-            &restriction_native,
-            &transitions,
-            global_log_level(py)?,
-        )?;
-        Ok(result
-            .into_iter()
-            .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))
-            .collect())
+        cancel_this::on_python(|| {
+            let config = AttractorConfig::new(graph.as_native().clone());
+            let state = XieBeerelState::from(&restriction_native);
+            let mut result = Vec::new();
+            for attr in XieBeerelAttractors::configure(config, state) {
+                let attr = ColoredVertexSet::mk_native(graph.symbolic_context(), attr?);
+                result.push(attr);
+            }
+
+            Ok(result)
+        })
     }
 
     /// Compute the (colored) attractor set of the given `AsynchronousGraph`.
@@ -111,9 +119,8 @@ impl Attractors {
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
         to_reduce: Option<&Bound<'_, PyList>>,
-        py: Python,
     ) -> PyResult<Vec<ColoredVertexSet>> {
-        let reduced = Self::transition_guided_reduction(graph, restriction, to_reduce, py)?;
-        Self::xie_beerel(graph, Some(&reduced), py)
+        let reduced = Self::transition_guided_reduction(graph, restriction, to_reduce)?;
+        Self::xie_beerel(graph, Some(&reduced))
     }
 }

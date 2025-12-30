@@ -352,14 +352,13 @@ impl Classification {
     #[staticmethod]
     #[pyo3(signature = (graph, attractors = None))]
     pub fn classify_attractor_bifurcation(
-        py: Python,
         graph: &AsynchronousGraph,
         attractors: Option<Vec<ColoredVertexSet>>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let attractors = if let Some(attractors) = attractors {
             attractors
         } else {
-            Attractors::attractors(graph, None, None, py)?
+            Attractors::attractors(graph, None, None)?
         };
 
         let attractors = attractors
@@ -434,7 +433,7 @@ impl Classification {
         let traps = if let Some(traps) = traps {
             traps
         } else {
-            Attractors::attractors(graph, None, None, py)?
+            Attractors::attractors(graph, None, None)?
         };
 
         let mut all_colors = graph.mk_empty_colors();
