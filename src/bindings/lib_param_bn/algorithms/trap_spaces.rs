@@ -13,7 +13,7 @@ pub struct TrapSpaces {
 #[pymethods]
 impl TrapSpaces {
     /// **Deprecated**: Use `TrapSpacesComp.essential_symbolic()` instead.
-    /// Computes the coloured set of "essential" trap spaces of a Boolean network.
+    /// Computes the colored set of "essential" trap spaces of a Boolean network.
     ///
     /// A trap space is essential if it cannot be further reduced through percolation. In general, every
     /// minimal trap space is always essential.
@@ -25,19 +25,20 @@ impl TrapSpaces {
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredSpaceSet>,
     ) -> PyResult<ColoredSpaceSet> {
-        let unit = ctx
-            .get()
-            .as_native()
-            .mk_unit_colored_spaces(graph.as_native());
-        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_essential_symbolic(
-            ctx.get().as_native(),
-            graph.as_native(),
-            restriction,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        cancel_this::on_python(|| {
+            let unit = ctx
+                .get()
+                .as_native()
+                .mk_unit_colored_spaces(graph.as_native());
+            let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
+            let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_essential_symbolic(
+                ctx.get().as_native(),
+                graph.as_native(),
+                restriction,
+                global_log_level(py)?,
+            )?;
+            Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        })
     }
 
     /// **Deprecated**: Use `TrapSpacesComp.minimal_symbolic()` instead.
@@ -55,21 +56,22 @@ impl TrapSpaces {
         restriction: Option<&ColoredSpaceSet>,
         exclude_fixed_points: Option<&ColoredVertexSet>,
     ) -> PyResult<ColoredSpaceSet> {
-        let unit = ctx
-            .get()
-            .as_native()
-            .mk_unit_colored_spaces(graph.as_native());
-        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
-        let exclude_fixed_points = exclude_fixed_points.map(|it| it.as_native());
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
-            ctx.get().as_native(),
-            graph.as_native(),
-            restriction,
-            exclude_fixed_points,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        cancel_this::on_python(|| {
+            let unit = ctx
+                .get()
+                .as_native()
+                .mk_unit_colored_spaces(graph.as_native());
+            let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
+            let exclude_fixed_points = exclude_fixed_points.map(|it| it.as_native());
+            let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimal_symbolic(
+                ctx.get().as_native(),
+                graph.as_native(),
+                restriction,
+                exclude_fixed_points,
+                global_log_level(py)?,
+            )?;
+            Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        })
     }
 
     /// Computes the long-lived coloured trap spaces of the provided `network` within the specified
@@ -84,19 +86,20 @@ impl TrapSpaces {
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredSpaceSet>,
     ) -> PyResult<ColoredSpaceSet> {
-        let unit = ctx
-            .get()
-            .as_native()
-            .mk_unit_colored_spaces(graph.as_native());
-        let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_long_lived_symbolic(
-            ctx.get().as_native(),
-            graph.as_native(),
-            restriction,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        cancel_this::on_python(|| {
+            let unit = ctx
+                .get()
+                .as_native()
+                .mk_unit_colored_spaces(graph.as_native());
+            let restriction = restriction.map(|it| it.as_native()).unwrap_or(&unit);
+            let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_long_lived_symbolic(
+                ctx.get().as_native(),
+                graph.as_native(),
+                restriction,
+                global_log_level(py)?,
+            )?;
+            Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        })
     }
 
     /// **Deprecated**: Use `TrapSpacesComp.minimal()` instead.
@@ -107,13 +110,14 @@ impl TrapSpaces {
         ctx: Py<SymbolicSpaceContext>,
         set: &ColoredSpaceSet,
     ) -> PyResult<ColoredSpaceSet> {
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimize(
-            ctx.get().as_native(),
-            set.as_native(),
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        cancel_this::on_python(|| {
+            let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_minimize(
+                ctx.get().as_native(),
+                set.as_native(),
+                global_log_level(py)?,
+            )?;
+            Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        })
     }
 
     /// **Deprecated**: Use `TrapSpacesComp.maximal()` instead.
@@ -124,12 +128,13 @@ impl TrapSpaces {
         ctx: Py<SymbolicSpaceContext>,
         set: &ColoredSpaceSet,
     ) -> PyResult<ColoredSpaceSet> {
-        let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_maximize(
-            ctx.get().as_native(),
-            set.as_native(),
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        cancel_this::on_python(|| {
+            let result = biodivine_lib_param_bn::trap_spaces::TrapSpaces::_maximize(
+                ctx.get().as_native(),
+                set.as_native(),
+                global_log_level(py)?,
+            )?;
+            Ok(ColoredSpaceSet::wrap_native(ctx.clone(), result))
+        })
     }
 }

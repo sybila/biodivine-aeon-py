@@ -1,6 +1,10 @@
 from biodivine_aeon import *
 import sys
 
+import biodivine_aeon
+
+biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_NOTHING
+
 # This script computes the attractors of a single,
 # fully specified Boolean network. This includes both fixed points
 # and complex attractors. However, it is typically faster to compute
@@ -37,7 +41,7 @@ bn = BooleanNetwork.from_file(sys.argv[1])
 bn = bn.infer_valid_graph()
 
 # If you want to inline constant input nodes, uncomment this line:
-#bn = bn.inline_constants(infer_constants=True, repair_graph=True)
+bn = bn.inline_constants(infer_constants=True, repair_graph=True)
 
 limit = None
 if len(sys.argv) == 3:

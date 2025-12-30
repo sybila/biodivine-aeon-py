@@ -14,10 +14,10 @@ use pyo3::types::{PyDict, PyList, PySet};
 use std::collections::HashSet;
 
 /// A regulatory graph is a directed graph consisting of network *variables* connected using
-/// *regulations*. Each regulation can be labeled as *essential* (also known as *observable*)
+/// *regulations*. Each regulation can be labeled as *essential* (also known as *observable*),
 /// and it can have a specified *sign* (also known as *monotonicity*).
 ///
-/// Currently, the set of variables in a regulatory graph is immutable, because changing the
+/// Currently, the set of variables in a regulatory graph is immutable because changing the
 /// variable count would disrupt any `VariableId` references to existing variables. However,
 /// there are still multiple properties that can be mutated:
 ///  1. The variable names can be changed using `RegulatoryGraph.set_variable_name`.
@@ -62,7 +62,7 @@ impl NetworkVariableContext for RegulatoryGraph {
 impl RegulatoryGraph {
     /// To construct a `RegulatoryGraph`, you have to provide:
     ///  - A list of variable names. If this list is not given, it is inferred from the list of regulations.
-    ///  - A list of regulations. These can be either `NamedRegulation` dictionaries, or string objects compatible
+    ///  - A list of regulations. These can be either `NamedRegulation` dictionaries or string objects compatible
     ///    with the `.aeon` format notation.
     ///
     /// If you don't provide any arguments, an "empty" `RegulatoryGraph` is constructed with no variables
@@ -91,7 +91,7 @@ impl RegulatoryGraph {
             (Vec::new(), Vec::new())
         };
 
-        // Then build a regulatory graph using either the given variable names, or the inferred variable names
+        // Then build a regulatory graph using either the given variable names or the inferred variable names
         // (if explicit names are not provided).
         let mut graph = if let Some(variables) = variables {
             biodivine_lib_param_bn::RegulatoryGraph::new(variables)
@@ -217,7 +217,7 @@ impl RegulatoryGraph {
     }
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
-    /// such variable does not exist.
+    /// such a variable does not exist.
     pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         let var = self.resolve_network_variable(variable)?;
         Ok(self.0.get_variable_name(var).clone())
@@ -312,7 +312,7 @@ impl RegulatoryGraph {
         py: Python<'a>,
         regulation: &Bound<'a, PyAny>,
     ) -> PyResult<Option<Bound<'a, PyDict>>> {
-        // This is a bit inefficient, but should be good enough for now.
+        // This is a bit inefficient but should be good enough for now.
         let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
         let source = self.as_native().find_variable(s.as_str()).unwrap();
         let target = self.as_native().find_variable(t.as_str()).unwrap();
@@ -389,7 +389,7 @@ impl RegulatoryGraph {
     ///
     /// Raises a `RuntimeError` if the inlined variable has a self-regulation. This is because inlining
     /// a self-regulated variable potentially "erases" a feedback loop in the graph, which can fundamentally
-    /// change its behaviour. And as opposed to `RegulatoryGraph.drop`, the intention of this method is to produce
+    /// change its behavior. And as opposed to `RegulatoryGraph.drop`, the intention of this method is to produce
     /// a result that is functionally compatible with the original regulatory graph. Of course, you can use
     /// `RegulatoryGraph.remove_regulation` to explicitly remove the self-loop before inlining the variable.
     pub fn inline_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
@@ -472,7 +472,7 @@ impl RegulatoryGraph {
 
     /// Heuristically computes an approximation of a minimal feedback vertex set of this `RegulatoryGraph`.
     ///
-    /// A feedback vertex set (FVS) is a set of variables which once removed cause the graph to become acyclic.
+    /// A feedback vertex set (FVS) is a set of variables that once removed cause the graph to become acyclic.
     /// The set is minimal if there is no smaller set that is also an FVS (in terms of cardinality).
     ///
     /// You can specify a `subgraph` restriction, in which case the algorithm operates only on the subgraph
@@ -489,23 +489,21 @@ impl RegulatoryGraph {
         parity: Option<SignValue>,
         subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<HashSet<VariableId>> {
-        let sd_graph = SdGraph::from(self.as_native());
-        let restriction = self.resolve_subgraph(subgraph)?;
-        let fvs = if let Some(parity) = parity {
-            sd_graph._restricted_parity_feedback_vertex_set(
-                &restriction,
-                parity.sign(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?
-        } else {
-            sd_graph._restricted_feedback_vertex_set(
-                &restriction,
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?
-        };
-        Ok(fvs.into_iter().map(VariableId::from).collect())
+        cancel_this::on_python(|| {
+            let log_level = global_log_level(py)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let restriction = self.resolve_subgraph(subgraph)?;
+            let fvs = if let Some(parity) = parity {
+                sd_graph._restricted_parity_feedback_vertex_set(
+                    &restriction,
+                    parity.sign(),
+                    log_level,
+                )?
+            } else {
+                sd_graph._restricted_feedback_vertex_set(&restriction, log_level)?
+            };
+            Ok(fvs.into_iter().map(VariableId::from).collect())
+        })
     }
 
     /// Heuristically computes an approximation of a maximal set of independent cycles of this `RegulatoryGraph`.
@@ -527,25 +525,25 @@ impl RegulatoryGraph {
         parity: Option<SignValue>,
         subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Vec<Vec<VariableId>>> {
-        let sd_graph = SdGraph::from(self.as_native());
-        let restriction = self.resolve_subgraph(subgraph)?;
-        let cycles = if let Some(parity) = parity {
-            sd_graph._restricted_independent_parity_cycles(
-                &restriction,
-                parity.sign(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?
-        } else {
-            sd_graph._restricted_independent_cycles(&restriction, global_log_level(py)?, &|| {
-                py.check_signals()
-            })?
-        };
-        let cycles = cycles
-            .into_iter()
-            .map(|cycle| cycle.into_iter().map(VariableId::from).collect::<Vec<_>>())
-            .collect();
-        Ok(cycles)
+        cancel_this::on_python(|| {
+            let log_level = global_log_level(py)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let restriction = self.resolve_subgraph(subgraph)?;
+            let cycles = if let Some(parity) = parity {
+                sd_graph._restricted_independent_parity_cycles(
+                    &restriction,
+                    parity.sign(),
+                    log_level,
+                )?
+            } else {
+                sd_graph._restricted_independent_cycles(&restriction, log_level)?
+            };
+            let cycles = cycles
+                .into_iter()
+                .map(|cycle| cycle.into_iter().map(VariableId::from).collect::<Vec<_>>())
+                .collect();
+            Ok(cycles)
+        })
     }
 
     /// Compute the set of *non-trivial* strongly connected components of this `RegulatoryGraph`.
@@ -560,17 +558,16 @@ impl RegulatoryGraph {
         py: Python,
         subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
-        let subgraph = self.resolve_subgraph(subgraph)?;
-        let sd_graph = SdGraph::from(self.as_native());
-        let components = sd_graph._restricted_strongly_connected_components(
-            &subgraph,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(components
-            .into_iter()
-            .map(|c| c.into_iter().map(|it| it.into()).collect())
-            .collect())
+        cancel_this::on_python(|| {
+            let subgraph = self.resolve_subgraph(subgraph)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let components = sd_graph
+                ._restricted_strongly_connected_components(&subgraph, global_log_level(py)?)?;
+            Ok(components
+                .into_iter()
+                .map(|c| c.into_iter().map(|it| it.into()).collect())
+                .collect())
+        })
     }
 
     /// Compute the set of weakly connected components of this `RegulatoryGraph`. Note that typical regulatory graphs
@@ -583,17 +580,16 @@ impl RegulatoryGraph {
         py: Python,
         subgraph: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
-        let subgraph = self.resolve_subgraph(subgraph)?;
-        let sd_graph = SdGraph::from(self.as_native());
-        let components = sd_graph._restricted_weakly_connected_components(
-            &subgraph,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(components
-            .into_iter()
-            .map(|c| c.into_iter().map(|it| it.into()).collect())
-            .collect())
+        cancel_this::on_python(|| {
+            let subgraph = self.resolve_subgraph(subgraph)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let components = sd_graph
+                ._restricted_weakly_connected_components(&subgraph, global_log_level(py)?)?;
+            Ok(components
+                .into_iter()
+                .map(|c| c.into_iter().map(|it| it.into()).collect())
+                .collect())
+        })
     }
 
     /// Find the shortest cycle in this `RegulatoryGraph` that contains the `pivot` variable, or `None` if no such

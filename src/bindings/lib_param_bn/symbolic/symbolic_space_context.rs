@@ -17,7 +17,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
 /// An extension of the `SymbolicContext` which supports symbolic representation of network
-/// sub-spaces.
+/// subspaces.
 ///
 /// To implement this, `SymbolicSpaceContext` uses the "extra variables" feature of the
 /// standard `SymbolicContext`. On its own, `SymbolicSpaceContext` currently does not allow
@@ -91,7 +91,7 @@ impl SymbolicSpaceContext {
         Py::new(py, (SymbolicSpaceContext(native), inner))
     }
 
-    /// The symbolic variable that encodes the fact that a specified `network_variable` can have value `True`
+    /// The symbolic variable that encodes the fact that a specified `network_variable` can have the value `True`
     /// in a particular subspace.
     pub fn get_positive_space_variable(
         self_: PyRef<SymbolicSpaceContext>,
@@ -102,7 +102,7 @@ impl SymbolicSpaceContext {
         Ok(BddVariable::from(var))
     }
 
-    /// The symbolic variable that encodes the fact that a specified `network_variable` can have value `False`
+    /// The symbolic variable that encodes the fact that a specified `network_variable` can have the value `False`
     /// in a particular subspace.
     pub fn get_negative_space_variable(
         self_: PyRef<SymbolicSpaceContext>,
@@ -127,12 +127,13 @@ impl SymbolicSpaceContext {
     /// these are to some extent still interesting in some applications. You'll need to
     /// intersect it with `SymbolicSpaceContext.mk_unit_bdd`.
     pub fn mk_can_go_to_true(&self, py: Python, function: &Bdd) -> PyResult<Bdd> {
-        let bdd = self.as_native()._mk_can_go_to_true(
-            function.as_native(),
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        );
-        bdd.map(|it| Bdd::new_raw_2(function.__ctx__(), it))
+        cancel_this::on_python(|| {
+            let bdd = self
+                .as_native()
+                ._mk_can_go_to_true(function.as_native(), global_log_level(py)?);
+            let bdd = bdd.map(|it| Bdd::new_raw_2(function.__ctx__(), it))?;
+            Ok(bdd)
+        })
     }
 
     /// Compute an empty colored subspace relation.
@@ -203,75 +204,67 @@ impl SymbolicSpaceContext {
         set: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<Py<PyAny>> {
-        let ctx = self_.get();
-        if let Ok(set) = set.extract::<ColoredSpaceSet>() {
-            let bdd = ctx.as_native()._mk_sub_spaces(
-                set.as_native().as_bdd(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?;
-            let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
-            return ColoredSpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
-        }
-        if let Ok(set) = set.extract::<SpaceSet>() {
-            let bdd = ctx.as_native()._mk_sub_spaces(
-                set.as_native().as_bdd(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?;
-            let set = NetworkSpaces::new(bdd, ctx.as_native());
-            return SpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
-        }
-        if let Ok(bdd) = set.extract::<Bdd>() {
-            let bdd =
-                ctx.as_native()
-                    ._mk_sub_spaces(bdd.as_native(), global_log_level(py)?, &|| {
-                        py.check_signals()
-                    })?;
-            let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
-            return bdd.into_py_any(py);
-        }
-        throw_type_error("Expected `ColoredSpaceSet`, `SpaceSet`, or `Bdd`.")
+        let log_level = global_log_level(py)?;
+        cancel_this::on_python(|| {
+            let ctx = self_.get();
+            if let Ok(set) = set.extract::<ColoredSpaceSet>() {
+                let bdd = ctx
+                    .as_native()
+                    ._mk_sub_spaces(set.as_native().as_bdd(), log_level)?;
+                let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
+                return ColoredSpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
+            }
+            if let Ok(set) = set.extract::<SpaceSet>() {
+                let bdd = ctx
+                    .as_native()
+                    ._mk_sub_spaces(set.as_native().as_bdd(), log_level)?;
+                let set = NetworkSpaces::new(bdd, ctx.as_native());
+                return SpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
+            }
+            if let Ok(bdd) = set.extract::<Bdd>() {
+                let bdd = ctx.as_native()._mk_sub_spaces(bdd.as_native(), log_level)?;
+                let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
+                return bdd.into_py_any(py);
+            }
+            throw_type_error("Expected `ColoredSpaceSet`, `SpaceSet`, or `Bdd`.")
+        })
     }
 
-    /// Extend the given `set` with all the sub-spaces for every element of the set.
+    /// Extend the given `set` with all the subspaces for every element of the set.
     ///
-    /// For colored sets, this extension is happening color-wise, so new sub-spaces are added with the same color
+    /// For colored sets, this extension is happening color-wise, so new subspaces are added with the same color
     /// as their parent space.
     pub fn mk_super_spaces(
         self_: Py<SymbolicSpaceContext>,
         set: &Bound<'_, PyAny>,
         py: Python,
     ) -> PyResult<Py<PyAny>> {
-        let ctx = self_.get();
-        if let Ok(set) = set.extract::<ColoredSpaceSet>() {
-            let bdd = ctx.as_native()._mk_super_spaces(
-                set.as_native().as_bdd(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?;
-            let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
-            return ColoredSpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
-        }
-        if let Ok(set) = set.extract::<SpaceSet>() {
-            let bdd = ctx.as_native()._mk_super_spaces(
-                set.as_native().as_bdd(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?;
-            let set = NetworkSpaces::new(bdd, ctx.as_native());
-            return SpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
-        }
-        if let Ok(bdd) = set.extract::<Bdd>() {
-            let bdd = ctx.as_native()._mk_super_spaces(
-                bdd.as_native(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?;
-            let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
-            return bdd.into_py_any(py);
-        }
-        throw_type_error("Expected `ColoredSpaceSet`, `SpaceSet`, or `Bdd`.")
+        let log_level = global_log_level(py)?;
+        cancel_this::on_python(|| {
+            let ctx = self_.get();
+            if let Ok(set) = set.extract::<ColoredSpaceSet>() {
+                let bdd = ctx
+                    .as_native()
+                    ._mk_super_spaces(set.as_native().as_bdd(), log_level)?;
+                let set = NetworkColoredSpaces::new(bdd, ctx.as_native());
+                return ColoredSpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
+            }
+            if let Ok(set) = set.extract::<SpaceSet>() {
+                let bdd = ctx
+                    .as_native()
+                    ._mk_super_spaces(set.as_native().as_bdd(), log_level)?;
+                let set = NetworkSpaces::new(bdd, ctx.as_native());
+                return SpaceSet::wrap_native(self_.clone(), set).into_py_any(py);
+            }
+            if let Ok(bdd) = set.extract::<Bdd>() {
+                let bdd = ctx
+                    .as_native()
+                    ._mk_super_spaces(bdd.as_native(), log_level)?;
+                let bdd = Bdd::new_raw_2(self_.borrow(py).as_ref().bdd_variable_set(), bdd);
+                return bdd.into_py_any(py);
+            }
+            throw_type_error("Expected `ColoredSpaceSet`, `SpaceSet`, or `Bdd`.")
+        })
     }
 
     /// Compute the `SpaceSet` that represents a single network subspace.

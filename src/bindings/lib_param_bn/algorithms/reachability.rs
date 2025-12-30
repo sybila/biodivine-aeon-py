@@ -24,14 +24,16 @@ impl Reachability {
         graph: &AsynchronousGraph,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach_basic_saturation(
-            graph.as_native(),
-            initial.as_native(),
-            |g, s, v| g.var_post_out(v, s),
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )
-        .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))
+        cancel_this::on_python(|| {
+            let result = biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach_basic_saturation(
+                graph.as_native(),
+                initial.as_native(),
+                |g, s, v| g.var_post_out(v, s),
+                global_log_level(py)?
+            )
+                .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))?;
+            Ok(result)
+        })
     }
 
     /// **Deprecated**: Use `ReachabilityComp.backward_closed_superset()` instead.
@@ -46,13 +48,16 @@ impl Reachability {
         graph: &AsynchronousGraph,
         initial: &ColoredVertexSet,
     ) -> PyResult<ColoredVertexSet> {
-        biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach_basic_saturation(
-            graph.as_native(),
-            initial.as_native(),
-            |g, s, v| g.var_pre_out(v, s),
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )
-        .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))
+        let log_level = global_log_level(py)?;
+        cancel_this::on_python(|| {
+            let result = biodivine_lib_param_bn::symbolic_async_graph::reachability::Reachability::_reach_basic_saturation(
+                graph.as_native(),
+                initial.as_native(),
+                |g, s, v| g.var_pre_out(v, s),
+                log_level
+            )
+                .map(|it| ColoredVertexSet::mk_native(graph.symbolic_context(), it))?;
+            Ok(result)
+        })
     }
 }

@@ -20,17 +20,18 @@ static-z3 = ["z3/static-link-z3"]
 algorithms-pyo3-bindings = []
 
 [dependencies]
+macros = { path = "macros" }
 pyo3 = { version = "0.27", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
-biodivine-lib-param-bn = { version="0.6.2", features=["solver-z3"] }
+biodivine-lib-param-bn = { version="0.7.0", features=["solver-z3"] }
 biodivine-lib-bdd = "0.6.2"
 #biodivine-pbn-control = "0.3.1"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "efacdb66f84d5d3849df2082c62e7585fc56eeee" }
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "9e31bab9d000266ea25c35cc752c69077973d43c" }
 biodivine-hctl-model-checker = "0.3.4"
 biodivine-lib-io-bma = "0.1.2"
 # Cannot update `rand` because lib-bdd uses it to generate random big-int values.
 rand = "0.8"
-macros = { path = "macros" }
-zip = "5.1.1"
+cancel-this = { version = "0.4.0", features = ["pyo3"] }
+zip = "7.0"
 num-bigint = "0.4"
 num-traits = "0.2"
 either = "1.15"
