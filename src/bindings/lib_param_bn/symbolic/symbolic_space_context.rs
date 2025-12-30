@@ -387,7 +387,7 @@ impl SymbolicSpaceContext {
         py: Python,
     ) -> PyResult<Vec<(biodivine_lib_param_bn::VariableId, bool)>> {
         let mut result = Vec::new();
-        if let Ok(dict) = subspace.downcast::<PyDict>() {
+        if let Ok(dict) = subspace.cast::<PyDict>() {
             for (k, v) in dict {
                 if v.is_none() {
                     continue;

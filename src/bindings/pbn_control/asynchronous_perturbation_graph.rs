@@ -657,7 +657,7 @@ impl AsynchronousPerturbationGraph {
         let perturbable: HashSet<biodivine_lib_param_bn::VariableId> =
             HashSet::from_iter(_self.as_native().perturbable_variables().clone());
         let mut result = HashMap::new();
-        if let Ok(dict) = value.downcast::<PyDict>() {
+        if let Ok(dict) = value.cast::<PyDict>() {
             for (k, v) in dict {
                 let k_var = parent_ref.resolve_network_variable(&k)?;
 
@@ -668,7 +668,7 @@ impl AsynchronousPerturbationGraph {
                 let val = v.extract::<Option<bool>>()?;
                 result.insert(k_var, val);
             }
-        } else if let Ok(model) = value.downcast::<PerturbationModel>() {
+        } else if let Ok(model) = value.cast::<PerturbationModel>() {
             for (k, v) in model.get().items() {
                 let k_var: biodivine_lib_param_bn::VariableId = k.into();
 

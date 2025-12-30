@@ -787,14 +787,14 @@ impl AsynchronousGraph {
         subspace: &Bound<'_, PyAny>,
     ) -> PyResult<Vec<(biodivine_lib_param_bn::VariableId, bool)>> {
         let mut result = Vec::new();
-        if let Ok(dict) = subspace.downcast::<PyDict>() {
+        if let Ok(dict) = subspace.cast::<PyDict>() {
             for (k, v) in dict {
                 let k = self.ctx.get().resolve_network_variable(&k)?;
                 let v = v.extract::<BoolLikeValue>()?;
                 result.push((k, v.bool()));
             }
             return Ok(result);
-        } else if let Ok(model) = subspace.downcast::<VertexModel>() {
+        } else if let Ok(model) = subspace.cast::<VertexModel>() {
             return Ok(model
                 .get()
                 .items()

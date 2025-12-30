@@ -79,7 +79,7 @@ impl BddValuation {
                         Ok(BddValuation { ctx, value })
                     }
                     Some(values) => {
-                        if let Ok(list) = values.downcast::<PyList>() {
+                        if let Ok(list) = values.cast::<PyList>() {
                             if list.len() != var_count {
                                 return throw_runtime_error(format!(
                                     "Expected {} variables, got {}.",
@@ -301,7 +301,7 @@ impl BddPartialValuation {
                     Ok(BddPartialValuation { ctx, value })
                 }
                 Some(values) => {
-                    if let Ok(dict) = values.downcast::<PyDict>() {
+                    if let Ok(dict) = values.cast::<PyDict>() {
                         let value = dict
                             .iter()
                             .map(|(a, b)| {

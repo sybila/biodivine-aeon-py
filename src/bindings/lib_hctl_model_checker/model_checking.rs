@@ -59,7 +59,7 @@ impl ModelChecking {
             properties.push(prop.__str__());
         } else if let Ok(prop_str) = property.extract::<String>() {
             properties.push(prop_str);
-        } else if let Ok(prop_list) = property.downcast::<PyList>() {
+        } else if let Ok(prop_list) = property.cast::<PyList>() {
             is_singular = false;
             for x in prop_list {
                 if let Ok(prop) = x.extract::<HctlFormula>() {

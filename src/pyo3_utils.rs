@@ -1,10 +1,10 @@
 use crate::throw_type_error;
 use biodivine_lib_param_bn::{Monotonicity, Sign};
 use pyo3::basic::CompareOp;
-use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyBool, PyString};
 use pyo3::{
-    Borrowed, Bound, FromPyObject, IntoPyObject, IntoPyObjectExt, Py, PyAny, PyResult, Python,
+    Borrowed, Bound, FromPyObject, IntoPyObject, IntoPyObjectExt, Py, PyAny, PyErr, PyResult,
+    Python,
 };
 use std::convert::Infallible;
 
@@ -39,12 +39,14 @@ impl BoolLikeValue {
     }
 }
 
-impl<'py> FromPyObject<'py> for BoolLikeValue {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        if let Ok(v) = ob.extract::<bool>() {
+impl<'a, 'py> FromPyObject<'a, 'py> for BoolLikeValue {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'a, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if let Ok(v) = obj.extract::<bool>() {
             return Ok(BoolLikeValue(v));
         }
-        if let Ok(v) = ob.extract::<usize>() {
+        if let Ok(v) = obj.extract::<usize>() {
             match v {
                 0 => return Ok(BoolLikeValue(false)),
                 1 => return Ok(BoolLikeValue(true)),
@@ -52,7 +54,9 @@ impl<'py> FromPyObject<'py> for BoolLikeValue {
             }
         }
 
-        throw_type_error(format!("Expected `True`/`False` or `1`/`0`. Got `{ob}`."))
+        throw_type_error(format!(
+            "Expected `True`/`False` or `1`/`0`. Got `{obj:?}`."
+        ))
     }
 }
 
@@ -95,15 +99,17 @@ impl SignValue {
     }
 }
 
-impl<'py> FromPyObject<'py> for SignValue {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        if let Ok(v) = ob.extract::<bool>() {
+impl<'a, 'py> FromPyObject<'a, 'py> for SignValue {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'a, 'py, PyAny>) -> Result<Self, Self::Error> {
+        if let Ok(v) = obj.extract::<bool>() {
             return match v {
                 true => Ok(SignValue(Sign::Positive)),
                 false => Ok(SignValue(Sign::Negative)),
             };
         }
-        if let Ok(v) = ob.extract::<String>() {
+        if let Ok(v) = obj.extract::<String>() {
             // Activation and inhibition are included for backwards compatibility.
             match v.as_str() {
                 "positive" | "+" | "activation" => return Ok(SignValue(Sign::Positive)),
@@ -113,7 +119,7 @@ impl<'py> FromPyObject<'py> for SignValue {
         }
 
         throw_type_error(format!(
-            "Expected one of `positive`/`negative`/`+`/`-`. Got `{ob}`."
+            "Expected one of `positive`/`negative`/`+`/`-`. Got `{obj:?}`."
         ))
     }
 }

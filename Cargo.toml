@@ -20,7 +20,7 @@ static-z3 = ["z3/static-link-z3"]
 algorithms-pyo3-bindings = []
 
 [dependencies]
-pyo3 = { version = "0.26.0", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
+pyo3 = { version = "0.27", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
 biodivine-lib-param-bn = { version="0.6.2", features=["solver-z3"] }
 biodivine-lib-bdd = "0.6.2"
 #biodivine-pbn-control = "0.3.1"
@@ -45,4 +45,4 @@ pyo3-log = "0.13"
 z3="^0.18.2"
 
 [build-dependencies]
-pyo3-build-config = "0.26.0"
+pyo3-build-config = "0.27"

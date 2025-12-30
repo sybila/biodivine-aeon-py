@@ -356,7 +356,7 @@ impl BddVariableSet {
             let valuation = valuation.as_native().clone();
             return Ok(biodivine_lib_bdd::BddPartialValuation::from(valuation));
         }
-        if let Ok(values) = valuation.downcast::<PyDict>() {
+        if let Ok(values) = valuation.cast::<PyDict>() {
             let mut result = biodivine_lib_bdd::BddPartialValuation::empty();
             for (key, value) in values {
                 let key = self.resolve_variable(&key)?;
@@ -377,7 +377,7 @@ impl BddVariableSet {
         if let Ok(variable) = self.resolve_variable(variables) {
             return Ok(vec![variable]);
         }
-        if let Ok(variables) = variables.downcast::<PyList>() {
+        if let Ok(variables) = variables.cast::<PyList>() {
             let result = variables
                 .iter()
                 .map(|it| self.resolve_variable(&it))

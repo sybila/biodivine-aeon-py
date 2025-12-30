@@ -644,11 +644,11 @@ impl RegulatoryGraph {
         };
 
         let mut result = HashSet::new();
-        if let Ok(list) = variables.downcast::<PyList>() {
+        if let Ok(list) = variables.cast::<PyList>() {
             for item in list {
                 result.insert(self.resolve_network_variable(&item)?);
             }
-        } else if let Ok(set) = variables.downcast::<PySet>() {
+        } else if let Ok(set) = variables.cast::<PySet>() {
             for item in set {
                 result.insert(self.resolve_network_variable(&item)?);
             }
@@ -699,7 +699,7 @@ impl RegulatoryGraph {
                 Some(Monotonicity::Inhibition) => Some(Negative),
             };
             Ok((source, monotonicity, observable, target))
-        } else if let Ok(item) = regulation.downcast::<PyDict>() {
+        } else if let Ok(item) = regulation.cast::<PyDict>() {
             for key in item.keys() {
                 let error = match key.extract::<String>() {
                     Ok(name) => match name.as_str() {
