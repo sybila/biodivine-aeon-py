@@ -11,16 +11,17 @@ use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphCo
 use either::Either;
 use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
-use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
 use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::perturbation_type::PerturbationType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::{PerturbationModel, PerturbationSet};
 use crate::{AsNative, throw_runtime_error};
@@ -273,7 +274,7 @@ impl ColoredPerturbationSet {
     pub fn select_perturbations(
         &self,
         py: Python,
-        perturbations: &Bound<'_, PyAny>,
+        perturbations: PerturbationType,
     ) -> PyResult<ColoredPerturbationSet> {
         let borrowed = self.ctx.borrow(py);
         let parent = borrowed.as_ref();
@@ -281,8 +282,7 @@ impl ColoredPerturbationSet {
         let mapping =
             native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
 
-        let perturbations =
-            AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbations)?;
+        let perturbations = perturbations.resolve(borrowed.as_native())?;
         let mut selection = BddPartialValuation::empty();
 
         // Go through the given perturbation and mark everything that should be perturbed.
@@ -318,15 +318,14 @@ impl ColoredPerturbationSet {
     fn select_perturbation(
         &self,
         py: Python,
-        perturbation: &Bound<'_, PyAny>,
+        perturbation: PerturbationType,
     ) -> PyResult<ColorSet> {
         let borrowed = self.ctx.borrow(py);
         let parent = borrowed.as_ref();
         let native_graph = self.ctx.get().as_native();
         let mapping =
             native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
-        let perturbation =
-            AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbation)?;
+        let perturbation = perturbation.resolve(borrowed.as_native())?;
         let mut restriction = BddPartialValuation::empty();
 
         // Initially, set all variables to unperturbed.
@@ -368,17 +367,13 @@ impl ColoredPerturbationSet {
     /// any missing perturbable variables are treated as unperturbed.*
     ///
     /// See also `AsynchronousPerturbationGraph.colored_robustness`.
-    fn perturbation_robustness(
-        &self,
-        py: Python,
-        perturbation: &Bound<'_, PyAny>,
-    ) -> PyResult<f64> {
+    fn perturbation_robustness(&self, py: Python, perturbation: PerturbationType) -> PyResult<f64> {
         let colors = self.select_perturbation(py, perturbation)?;
         AsynchronousPerturbationGraph::colored_robustness(self.ctx.bind(py).clone(), &colors)
     }
 
     /// Only retain those perturbations that have the given `size`. If `up_to` is set to `True`,
-    /// then retain perturbations that have smaller or equal size.
+    /// then retain perturbations that have a smaller or equal size.
     ///
     /// This is similar to `AsynchronousPerturbationGraph.mk_perturbations_with_size`.
     fn select_by_size(&self, py: Python, size: usize, up_to: bool) -> ColoredPerturbationSet {
@@ -452,7 +447,7 @@ impl ColoredPerturbationSet {
         Ok(results)
     }
 
-    /// Deterministically, pick a subset of this set that contains exactly a single
+    /// Deterministically, pick a subset of this set that exactly contains a single
     /// perturbation-color pair.
     ///
     /// If this set is empty, the result is also empty.
@@ -504,13 +499,13 @@ impl ColoredPerturbationSet {
     /// of a variable that is not perturbable is requested).
     ///
     /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is
-    /// equivalent to `set.colors().items()`. Similarly, with `retained_variables = None` and
+    /// an equivalent to `set.colors().items()`. Similarly, with `retained_variables = None` and
     /// `retained_functions = []`, this is equivalent to `set.perturbations().items()`.
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]
     fn items(
         &self,
         py: Python,
-        retained_variables: Option<&Bound<'_, PyList>>,
+        retained_variables: Option<Vec<VariableIdSymType>>,
         retained_functions: Option<&Bound<'_, PyList>>,
     ) -> PyResult<_ColorPerturbationModelIterator> {
         let ctx = self.ctx.get();
@@ -582,10 +577,7 @@ impl ColoredPerturbationSet {
             .as_native()
             .get_perturbation_bdd_mapping(ctx.as_native().perturbable_variables());
         let retained_network_variables = if let Some(retained) = retained_variables {
-            retained
-                .iter()
-                .map(|it| symbolic_ctx.resolve_network_variable(&it))
-                .collect::<PyResult<Vec<_>>>()?
+            VariableIdSymType::resolve_collection(retained, symbolic_ctx.as_native())?
         } else {
             ctx.as_native().perturbable_variables().clone()
         };
@@ -669,8 +661,8 @@ impl _ColorPerturbationModelIterator {
             let native_ctx = self.ctx.get().as_native();
             // From the color model, we only remove the state variables (perturbation parameters
             // are kept to ensure compatibility).
-            // From `pert_val`, we copy available perturbation parameter,
-            // and also copy state variable if it is perturbed.
+            // From `pert_val`, we copy the available perturbation parameter
+            // and also copy the state variable if it is perturbed.
             for n_var in native_ctx.network_variables() {
                 let s_var = native_ctx.get_state_variable(n_var);
 

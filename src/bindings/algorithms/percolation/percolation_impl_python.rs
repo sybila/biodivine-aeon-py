@@ -4,7 +4,7 @@ use pyo3::{PyResult, pymethods};
 
 use crate::{
     bindings::{
-        algorithms::graph_representation::PyGraphRepresentation,
+        algorithms::graph_representation::PyAsynchronousGraphType,
         lib_param_bn::variable_id::VariableId,
     },
     internal::algorithms::percolation::{Percolation, PercolationConfig},
@@ -20,7 +20,7 @@ impl Percolation {
     /// with otherwise default configuration.
     #[staticmethod]
     #[pyo3(name = "create_from")]
-    pub fn python_create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn python_create_from(graph_representation: PyAsynchronousGraphType) -> PyResult<Self> {
         Ok(Percolation(PercolationConfig::python_create_from(
             graph_representation,
         )?))

@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use pyo3::{Bound, Py, PyAny, PyResult, pyclass, pymethods};
+use pyo3::{Py, PyResult, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::{AsNative, index_error};
 
 /// Represents a single vertex stored in a `VertexSet` (or a `ColoredVertexSet`), or a projection
@@ -50,9 +50,9 @@ impl VertexModel {
         self.to_values().len()
     }
 
-    pub fn __getitem__(&self, key: &Bound<'_, PyAny>) -> PyResult<bool> {
+    pub fn __getitem__(&self, key: VariableIdSymType) -> PyResult<bool> {
         let ctx = self.ctx.get();
-        let variable = ctx.resolve_network_variable(key)?;
+        let variable = key.resolve(ctx.as_native())?;
         let bdd_variable = ctx.as_native().get_state_variable(variable);
         self.native.get_value(bdd_variable).ok_or_else(|| {
             index_error(format!(
@@ -62,9 +62,9 @@ impl VertexModel {
         })
     }
 
-    pub fn __contains__(&self, key: &Bound<'_, PyAny>) -> PyResult<bool> {
+    pub fn __contains__(&self, key: VariableIdSymType) -> PyResult<bool> {
         let ctx = self.ctx.get();
-        let variable = ctx.resolve_network_variable(key)?;
+        let variable = key.resolve(ctx.as_native())?;
         let bdd_variable = ctx.as_native().get_state_variable(variable);
         Ok(self.native.has_value(bdd_variable))
     }

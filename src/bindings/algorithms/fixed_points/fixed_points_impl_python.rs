@@ -1,7 +1,7 @@
 use pyo3::{PyResult, pyclass, pymethods};
 
 use crate::bindings::{
-    algorithms::graph_representation::PyGraphRepresentation,
+    algorithms::graph_representation::PyAsynchronousGraphType,
     lib_param_bn::symbolic::{
         set_color::ColorSet, set_colored_vertex::ColoredVertexSet, set_vertex::VertexSet,
     },
@@ -24,7 +24,7 @@ impl PyFixedPoints {
     /// Create a new `FixedPointsComp` instance with the given `AsynchronousGraph` or
     /// `BooleanNetwork` and otherwise default configuration.
     #[staticmethod]
-    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn create_from(graph_representation: PyAsynchronousGraphType) -> PyResult<Self> {
         Ok(PyFixedPoints(PyFixedPointsConfig::try_from(
             graph_representation,
         )?))

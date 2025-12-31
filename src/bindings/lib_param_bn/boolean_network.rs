@@ -1,19 +1,21 @@
 use super::regulatory_graph::RegulatoryGraph;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::regulation::RegulationOutput;
+use crate::bindings::lib_param_bn::argument_types::regulation_type::RegulationType;
+use crate::bindings::lib_param_bn::argument_types::sign_type::SignType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_multiple_type::VariableIdMultipleType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{AsNative, runtime_error, throw_index_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_io_bma::BmaModel;
-use biodivine_lib_param_bn::Sign::{Negative, Positive};
-use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
+use biodivine_lib_param_bn::FnUpdate;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::sync::Arc;
 
@@ -38,33 +40,6 @@ use std::sync::Arc;
 #[derive(Clone, Wrapper)]
 pub struct BooleanNetwork(biodivine_lib_param_bn::BooleanNetwork);
 
-impl NetworkVariableContext for BooleanNetwork {
-    fn resolve_network_variable(
-        &self,
-        variable: &Bound<'_, PyAny>,
-    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
-        if let Ok(id) = variable.extract::<VariableId>() {
-            return if id.__index__() < self.as_native().num_vars() {
-                Ok(*id.as_native())
-            } else {
-                throw_index_error(format!("Unknown variable ID `{}`.", id.__index__()))
-            };
-        }
-        if let Ok(name) = variable.extract::<String>() {
-            return if let Some(var) = self.as_native().as_graph().find_variable(name.as_str()) {
-                Ok(var)
-            } else {
-                throw_index_error(format!("Unknown variable name `{name}`."))
-            };
-        }
-        throw_type_error("Expected `VariableId` or `str`.")
-    }
-
-    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
-        self.as_native().get_variable_name(variable).to_string()
-    }
-}
-
 #[pymethods]
 impl BooleanNetwork {
     /// A new `BooleanNetwork` is constructed in a similar fashion to `RegulatoryGraph`, but additionally
@@ -79,7 +54,7 @@ impl BooleanNetwork {
     #[pyo3(signature = (variables = None, regulations = None, parameters = None, functions = None))]
     fn new(
         variables: Option<&Bound<'_, PyAny>>,
-        regulations: Option<&Bound<'_, PyList>>,
+        regulations: Option<Vec<RegulationType>>,
         parameters: Option<Vec<(String, u32)>>,
         functions: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<(BooleanNetwork, RegulatoryGraph)> {
@@ -264,10 +239,10 @@ impl BooleanNetwork {
     /// corresponding `VariableId`.
     pub fn set_variable_name(
         mut self_: PyRefMut<'_, Self>,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         name: &str,
     ) -> PyResult<()> {
-        let var = self_.as_ref().resolve_network_variable(variable)?;
+        let var = variable.resolve(self_.as_native())?;
         self_
             .as_mut()
             .as_native_mut()
@@ -285,13 +260,10 @@ impl BooleanNetwork {
     /// with the `.aeon` format.
     pub fn add_regulation(
         mut self_: PyRefMut<'_, Self>,
-        regulation: &Bound<'_, PyAny>,
+        regulation: RegulationType,
     ) -> PyResult<()> {
-        let (s, m, o, t) = RegulatoryGraph::resolve_regulation(Some(self_.as_ref()), regulation)?;
-        let m = m.as_ref().map(|it| match it {
-            Positive => Monotonicity::Activation,
-            Negative => Monotonicity::Inhibition,
-        });
+        let (s, m, o, t) = regulation.resolve_named(self_.as_native())?;
+        let m = m.map(|it| SignType::from(it).monotonicity());
         self_
             .as_mut()
             .as_native_mut()
@@ -309,14 +281,13 @@ impl BooleanNetwork {
     /// regulation, or throws a `RuntimeError` if the regulation does not exist. Also throws
     /// a `RuntimeError` if the regulation exists, but is used by the corresponding update
     /// function and so cannot be safely removed.
-    pub fn remove_regulation<'a>(
+    pub fn remove_regulation(
         mut self_: PyRefMut<'_, Self>,
-        py: Python<'a>,
-        source: &Bound<'a, PyAny>,
-        target: &Bound<'a, PyAny>,
-    ) -> PyResult<Bound<'a, PyDict>> {
-        let source = self_.as_ref().resolve_network_variable(source)?;
-        let target = self_.as_ref().resolve_network_variable(target)?;
+        source: VariableIdType,
+        target: VariableIdType,
+    ) -> PyResult<RegulationOutput> {
+        let source = source.resolve(self_.as_native())?;
+        let target = target.resolve(self_.as_native())?;
 
         if let Some(update) = self_.as_native().get_update_function(target)
             && update.collect_arguments().contains(&source)
@@ -336,7 +307,7 @@ impl BooleanNetwork {
             .as_graph_mut()
             .remove_regulation(source, target)
             .map_err(runtime_error)?;
-        RegulatoryGraph::encode_regulation(py, &removed)
+        Ok(RegulationOutput::from(&removed))
     }
 
     /// Update the `sign` and `essential` flags of a regulation in the underlying
@@ -344,52 +315,39 @@ impl BooleanNetwork {
     ///
     /// Returns the previous state of the regulation as an `IdRegulation` dictionary,
     /// assuming the regulation already existed.
-    pub fn ensure_regulation<'a>(
+    pub fn ensure_regulation(
         mut self_: PyRefMut<'_, Self>,
-        py: Python<'a>,
-        regulation: &Bound<'a, PyAny>,
-    ) -> PyResult<Option<Bound<'a, PyDict>>> {
+        regulation: RegulationType,
+    ) -> PyResult<Option<RegulationOutput>> {
         // This is a bit inefficient, but should be good enough for now.
-        let (s, m, o, t) = RegulatoryGraph::resolve_regulation(Some(self_.as_ref()), regulation)?;
-        let source = self_
-            .as_ref()
-            .as_native()
-            .find_variable(s.as_str())
-            .unwrap();
-        let target = self_
-            .as_ref()
-            .as_native()
-            .find_variable(t.as_str())
-            .unwrap();
-        let m = m.as_ref().map(|it| match it {
-            Positive => Monotonicity::Activation,
-            Negative => Monotonicity::Inhibition,
-        });
+        let (s, m, o, t) = regulation.resolve_id(self_.as_native())?;
+        let m = m.map(|it| SignType::from(it).monotonicity());
+
         // Remove old regulation from both BN and RN.
-        let _ignore = self_
-            .as_native_mut()
-            .as_graph_mut()
-            .remove_regulation(source, target);
-        let old = self_
-            .as_mut()
-            .as_native_mut()
-            .remove_regulation(source, target)
-            .ok();
+        let _ignore = self_.as_native_mut().as_graph_mut().remove_regulation(s, t);
+        let old = self_.as_mut().as_native_mut().remove_regulation(s, t).ok();
 
         // Add new regulation to both BN and RN.
+        let reg = biodivine_lib_param_bn::Regulation {
+            regulator: s,
+            target: t,
+            observable: o,
+            monotonicity: m,
+        };
+
         self_
             .as_native_mut()
             .as_graph_mut()
-            .add_regulation(s.as_str(), t.as_str(), o, m)
+            .add_raw_regulation(reg.clone())
             .map_err(runtime_error)?;
+
         self_
             .as_mut()
             .as_native_mut()
-            .add_regulation(s.as_str(), t.as_str(), o, m)
+            .add_raw_regulation(reg)
             .map_err(runtime_error)?;
 
-        old.map(|it| RegulatoryGraph::encode_regulation(py, &it))
-            .transpose()
+        Ok(old.map(|it| RegulationOutput::from(&it)))
     }
 
     /// Create a copy of this `BooleanNetwork` that is extended with the given list of `variables`.
@@ -442,9 +400,11 @@ impl BooleanNetwork {
     pub fn drop(
         self_: PyRef<'_, Self>,
         py: Python,
-        variables: &Bound<'_, PyAny>,
+        variables: VariableIdMultipleType,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let removed = self_.as_ref().resolve_variables(variables)?;
+        let to_remove: Vec<VariableIdType> = variables.clone().into();
+        let to_remove: HashSet<biodivine_lib_param_bn::VariableId> =
+            VariableIdType::resolve_collection(to_remove, self_.as_native())?;
 
         let drop_rg = self_.as_ref().drop(variables)?;
         let mut drop_bn = biodivine_lib_param_bn::BooleanNetwork::new(drop_rg.as_native().clone());
@@ -456,7 +416,7 @@ impl BooleanNetwork {
         }
 
         for var in self_.as_native().variables() {
-            if removed.contains(&var) {
+            if to_remove.contains(&var) {
                 // Do not copy removed variables.
                 continue;
             }
@@ -466,7 +426,7 @@ impl BooleanNetwork {
                 let has_removed_variable = fun
                     .collect_arguments()
                     .into_iter()
-                    .any(|var| removed.contains(&var));
+                    .any(|var| to_remove.contains(&var));
                 if !has_removed_variable {
                     drop_bn
                         .add_string_update_function(
@@ -536,10 +496,10 @@ impl BooleanNetwork {
     pub fn inline_variable(
         self_: PyRef<'_, Self>,
         py: Python,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         repair_graph: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let variable = self_.as_ref().resolve_network_variable(variable)?;
+        let variable = variable.resolve(self_.as_native())?;
         let Some(bn) = self_.as_native().inline_variable(variable, repair_graph) else {
             return throw_runtime_error("Variable has a self-regulation.");
         };
@@ -761,11 +721,11 @@ impl BooleanNetwork {
     pub fn get_update_function(
         self_: Py<BooleanNetwork>,
         py: Python,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
     ) -> PyResult<Option<UpdateFunction>> {
         let fun = {
             let self_ref = self_.borrow(py);
-            let variable = self_ref.as_ref().resolve_network_variable(variable)?;
+            let variable = variable.resolve(self_ref.as_native())?;
             self_ref.as_native().get_update_function(variable).clone()
         };
         if let Some(fun) = fun {
@@ -784,10 +744,10 @@ impl BooleanNetwork {
     pub fn set_update_function(
         self_: Py<BooleanNetwork>,
         py: Python,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         function: &Bound<'_, PyAny>,
     ) -> PyResult<Option<UpdateFunction>> {
-        let old_fun = Self::get_update_function(self_.clone(), py, variable)?;
+        let old_fun = Self::get_update_function(self_.clone(), py, variable.clone())?;
         let new_fun = if function.is_none() {
             None
         } else if let Ok(fun) = function.extract::<UpdateFunction>() {
@@ -799,7 +759,7 @@ impl BooleanNetwork {
             return throw_type_error("Expected `UpdateFunction` or `str`.");
         };
         let mut bn = self_.borrow_mut(py);
-        let variable = bn.as_ref().resolve_network_variable(variable)?;
+        let variable = variable.resolve(bn.as_native())?;
         bn.as_native_mut()
             .set_update_function(variable, new_fun)
             .map_err(runtime_error)?;
@@ -939,10 +899,10 @@ impl BooleanNetwork {
     #[pyo3(signature = (variable, name = None))]
     pub fn assign_parameter_name(
         &mut self,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         name: Option<String>,
     ) -> PyResult<ParameterId> {
-        let variable = self.resolve_network_variable(variable)?;
+        let variable = variable.resolve(self.as_native())?;
         let name = name.as_deref();
         self.as_native_mut()
             .assign_parameter_name(variable, name)
@@ -971,10 +931,10 @@ impl BooleanNetwork {
     #[pyo3(signature = (variable, ctx = None))]
     pub fn is_variable_input(
         &self,
-        variable: &Bound<PyAny>,
+        variable: VariableIdType,
         ctx: Option<&SymbolicContext>,
     ) -> PyResult<bool> {
-        let variable = self.resolve_network_variable(variable)?;
+        let variable = variable.resolve(self.as_native())?;
         let ctx = ctx.map(|it| it.as_native());
         Ok(self.as_native().is_var_input(variable, ctx))
     }
@@ -992,10 +952,10 @@ impl BooleanNetwork {
     #[pyo3(signature = (variable, ctx = None))]
     pub fn is_variable_constant(
         &self,
-        variable: &Bound<PyAny>,
+        variable: VariableIdType,
         ctx: Option<&SymbolicContext>,
     ) -> PyResult<Option<bool>> {
-        let variable = self.resolve_network_variable(variable)?;
+        let variable = variable.resolve(self.as_native())?;
         let ctx = ctx.map(|it| it.as_native());
         Ok(self.as_native().is_var_constant(variable, ctx))
     }

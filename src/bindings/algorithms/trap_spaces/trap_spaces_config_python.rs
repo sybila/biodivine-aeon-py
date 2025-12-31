@@ -6,7 +6,7 @@ use crate::{
     AsNative as _,
     bindings::{
         algorithms::{
-            graph_representation::PyGraphRepresentation, token_python::CancelTokenPython,
+            graph_representation::PyAsynchronousGraphType, token_python::CancelTokenPython,
         },
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
@@ -54,7 +54,7 @@ impl PyTrapSpacesConfig {
     #[new]
     #[pyo3(signature = (graph_representation, restriction = None, time_limit_millis = None, bdd_size_limit = None))]
     pub fn python_new(
-        graph_representation: PyGraphRepresentation,
+        graph_representation: PyAsynchronousGraphType,
         restriction: Option<&ColoredSpaceSet>,
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
@@ -85,7 +85,7 @@ impl PyTrapSpacesConfig {
     /// with otherwise default configuration.
     /// `AsynchronousGraph` is currently not supported, use `create_from_graph_with_context` instead.
     #[staticmethod]
-    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn create_from(graph_representation: PyAsynchronousGraphType) -> PyResult<Self> {
         PyTrapSpacesConfig::try_from(graph_representation)
     }
 

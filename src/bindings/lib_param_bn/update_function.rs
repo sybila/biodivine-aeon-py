@@ -1,12 +1,16 @@
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::VariableOrParameterIdType;
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::bindings::lib_param_bn::argument_types::update_function_type::UpdateFunctionType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
+use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{AsNative, runtime_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsExpression;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
+use either::Either;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
@@ -111,20 +115,19 @@ impl UpdateFunction {
     }
 
     /// Test if a variable or a parameter is used by this `UpdateFunction`.
-    fn __contains__(&self, py: Python, item: &Bound<'_, PyAny>) -> PyResult<bool> {
+    fn __contains__(&self, py: Python, item: VariableOrParameterIdType) -> PyResult<bool> {
+        println!("{:?}", item);
         let ctx = self.ctx.borrow(py);
-        if let Ok(variable) = ctx.as_ref().resolve_network_variable(item) {
-            Ok(self.value.contains_variable(variable))
-        } else if let Ok(parameter) = ctx.resolve_parameter(item) {
-            Ok(self.value.contains_parameter(parameter))
-        } else {
-            throw_type_error("Expected `VariableId`, `ParameterId`, or `str`.")
+        match item.resolve(ctx.as_native()) {
+            Ok(Either::Left(var)) => Ok(self.as_native().contains_variable(var)),
+            Ok(Either::Right(par)) => Ok(self.as_native().contains_parameter(par)),
+            Err(_) => Ok(false),
         }
     }
 
     /// Return an `UpdateFunction` for a constant value.
     #[staticmethod]
-    pub fn mk_const(ctx: Py<BooleanNetwork>, value: BoolLikeValue) -> PyResult<UpdateFunction> {
+    pub fn mk_const(ctx: Py<BooleanNetwork>, value: BoolType) -> PyResult<UpdateFunction> {
         let fun = if value.bool() {
             FnUpdate::mk_true()
         } else {
@@ -138,9 +141,9 @@ impl UpdateFunction {
     pub fn mk_var(
         py: Python,
         ctx: Py<BooleanNetwork>,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
     ) -> PyResult<UpdateFunction> {
-        let variable = ctx.borrow(py).as_ref().resolve_network_variable(variable)?;
+        let variable = variable.resolve(ctx.borrow(py).as_native())?;
         let fun = FnUpdate::mk_var(variable);
         Ok(Self::new_raw(ctx, Arc::new(fun)))
     }
@@ -506,26 +509,23 @@ impl UpdateFunction {
     pub fn substitute_all(
         &self,
         py: Python,
-        substitution: &Bound<'_, PyDict>,
+        substitution: HashMap<VariableIdType, UpdateFunctionType>,
     ) -> PyResult<UpdateFunction> {
         let mut vars = HashMap::new();
         let bn = self.ctx.borrow(py);
         for (k, v) in substitution {
-            let k = bn.as_ref().resolve_network_variable(&k)?;
-            let v = Self::new(py, self.ctx.clone(), &v)?;
+            let k = k.resolve(bn.as_native())?;
+            let v = v.resolve(bn.as_native())?;
             vars.insert(k, v);
         }
 
         fn rec(
             _self: &FnUpdate,
-            vars: &HashMap<biodivine_lib_param_bn::VariableId, UpdateFunction>,
+            vars: &HashMap<biodivine_lib_param_bn::VariableId, FnUpdate>,
         ) -> FnUpdate {
             match _self {
                 FnUpdate::Const(value) => FnUpdate::Const(*value),
-                FnUpdate::Var(var) => vars
-                    .get(var)
-                    .map(|it| it.as_native().clone())
-                    .unwrap_or_else(|| FnUpdate::Var(*var)),
+                FnUpdate::Var(var) => vars.get(var).cloned().unwrap_or(FnUpdate::Var(*var)),
                 FnUpdate::Param(param, args) => {
                     let args = args.iter().map(|it| rec(it, vars)).collect::<Vec<_>>();
                     FnUpdate::Param(*param, args)
@@ -553,7 +553,7 @@ impl UpdateFunction {
         &self,
         py: Python,
         new_ctx: Option<Py<BooleanNetwork>>,
-        variables: Option<&Bound<'_, PyDict>>,
+        variables: Option<HashMap<VariableIdType, VariableIdType>>,
         parameters: Option<&Bound<'_, PyDict>>,
     ) -> PyResult<UpdateFunction> {
         let mut rename_variables = HashMap::new();
@@ -564,8 +564,8 @@ impl UpdateFunction {
             let new_ctx = new_ctx.borrow(py);
             if let Some(variables) = variables {
                 for (k, v) in variables {
-                    let k = old_ctx.as_ref().resolve_network_variable(&k)?;
-                    let v = new_ctx.as_ref().resolve_network_variable(&v)?;
+                    let k = k.resolve(old_ctx.as_native())?;
+                    let v = v.resolve(new_ctx.as_native())?;
                     rename_variables.insert(k, v);
                 }
             }
@@ -580,8 +580,8 @@ impl UpdateFunction {
             let new_ctx = self.ctx.borrow(py);
             if let Some(variables) = variables {
                 for (k, v) in variables {
-                    let k = old_ctx.as_ref().resolve_network_variable(&k)?;
-                    let v = new_ctx.as_ref().resolve_network_variable(&v)?;
+                    let k = k.resolve(old_ctx.as_native())?;
+                    let v = v.resolve(new_ctx.as_native())?;
                     rename_variables.insert(k, v);
                 }
             }

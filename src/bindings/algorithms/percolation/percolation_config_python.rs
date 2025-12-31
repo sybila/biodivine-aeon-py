@@ -4,7 +4,7 @@ use pyo3::{PyResult, pymethods};
 
 use crate::{
     bindings::algorithms::{
-        graph_representation::PyGraphRepresentation, token_python::CancelTokenPython,
+        graph_representation::PyAsynchronousGraphType, token_python::CancelTokenPython,
     },
     internal::algorithms::{
         cancellation::CancelTokenTimer, configurable::Config as _, percolation::PercolationConfig,
@@ -18,7 +18,7 @@ impl PercolationConfig {
     #[new]
     #[pyo3(signature = (graph_representation, time_limit_millis = None))]
     pub fn python_new(
-        graph_representation: PyGraphRepresentation,
+        graph_representation: PyAsynchronousGraphType,
         time_limit_millis: Option<u64>,
     ) -> PyResult<Self> {
         let mut config = PercolationConfig::try_from(graph_representation)?;
@@ -36,7 +36,7 @@ impl PercolationConfig {
     /// with otherwise default configuration.
     #[staticmethod]
     #[pyo3(name = "create_from")]
-    pub fn python_create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn python_create_from(graph_representation: PyAsynchronousGraphType) -> PyResult<Self> {
         Ok(PercolationConfig::try_from(graph_representation)?)
     }
 

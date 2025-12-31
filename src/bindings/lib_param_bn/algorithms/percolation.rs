@@ -5,6 +5,7 @@ use biodivine_lib_param_bn::VariableId;
 use pyo3::prelude::*;
 
 use crate::AsNative;
+use crate::bindings::lib_param_bn::argument_types::subspace_valuation_type::SubspaceValuationType;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::variable_id::VariableId as VariableIdBinding;
 
@@ -30,7 +31,7 @@ impl Percolation {
     pub fn percolate_subspace(
         py: Python,
         graph: &AsynchronousGraph,
-        space: &Bound<'_, PyAny>,
+        space: SubspaceValuationType,
     ) -> PyResult<HashMap<VariableIdBinding, bool>> {
         let native_graph = graph.as_native();
         let state_variables = native_graph.symbolic_context().state_variables();
@@ -47,7 +48,7 @@ impl Percolation {
             network_variables[bdd_var.to_index()] = Some(var);
         }
 
-        let initial_space = graph.resolve_subspace_valuation(space)?;
+        let initial_space = space.resolve(native_graph)?;
 
         // Variables that have a known fixed value.
         let mut fixed: Vec<Option<bool>> = vec![None; native_graph.num_vars()];

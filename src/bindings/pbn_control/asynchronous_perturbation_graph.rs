@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use biodivine_lib_param_bn::biodivine_std::bitvector::ArrayBitVector;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
@@ -7,21 +7,26 @@ use macros::Wrapper;
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::PyList;
 
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::bindings::lib_param_bn::argument_types::perturbation_type::PerturbationType;
+use crate::bindings::lib_param_bn::argument_types::subspace_valuation_type::SubspaceValuationType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::variable_id::{
+    VariableId, VariableIdResolvable, VariableIdResolver,
+};
+use crate::bindings::pbn_control::PerturbationSet;
 use crate::bindings::pbn_control::control::sanitize_control_map;
 use crate::bindings::pbn_control::set_colored_perturbation::ColoredPerturbationSet;
-use crate::bindings::pbn_control::{PerturbationModel, PerturbationSet};
-use crate::pyo3_utils::BoolLikeValue;
-use crate::{AsNative, throw_runtime_error, throw_type_error};
+use crate::{AsNative, throw_runtime_error};
 
 /// An extension of `AsynchronousGraph` that admits various variable perturbations through
 /// additional colors/parameters. Such a graph can then be analyzed to extract control strategies
@@ -70,13 +75,13 @@ impl AsynchronousPerturbationGraph {
     pub fn new(
         py: Python,
         network: &Bound<'_, BooleanNetwork>,
-        perturb: Option<&Bound<'_, PyList>>,
+        perturb: Option<Vec<VariableIdType>>,
     ) -> PyResult<(AsynchronousPerturbationGraph, AsynchronousGraph)> {
         let n_ref = network.borrow();
         let perturb_native = if let Some(perturb) = perturb {
             perturb
                 .iter()
-                .map(|it| n_ref.resolve_network_variable(&it))
+                .map(|it| it.resolve(n_ref.as_native()))
                 .collect::<PyResult<Vec<_>>>()?
         } else {
             Vec::from_iter(n_ref.as_native().variables())
@@ -140,7 +145,7 @@ impl AsynchronousPerturbationGraph {
         _self: Bound<'_, Self>,
         function: &Bound<'_, PyAny>,
         row: &Bound<'_, PyList>,
-        value: BoolLikeValue,
+        value: BoolType,
     ) -> PyResult<ColorSet> {
         let result = _self
             .borrow()
@@ -167,7 +172,7 @@ impl AsynchronousPerturbationGraph {
     /// parameters for `False`.
     pub fn mk_subspace(
         _self: Bound<'_, Self>,
-        subspace: &Bound<'_, PyAny>,
+        subspace: SubspaceValuationType,
     ) -> PyResult<ColoredVertexSet> {
         let result = _self.borrow().as_ref().mk_subspace(subspace)?;
         Ok(Self::mk_unperturbable_colored_vertex_set(
@@ -264,15 +269,16 @@ impl AsynchronousPerturbationGraph {
     /// encode that the given `variable` is perturbed (i.e., fixed and cannot evolve).
     pub fn get_perturbation_parameter(
         _self: &Bound<'_, AsynchronousPerturbationGraph>,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdSymType,
     ) -> PyResult<ParameterId> {
         let graph = _self.borrow();
-        let n_variable = graph.as_ref().resolve_network_variable(variable)?;
+        let var_resolver = graph.as_native().as_symbolic_context();
+        let n_variable = variable.resolve(var_resolver)?;
         let native = graph.as_native().get_perturbation_parameter(n_variable);
         if let Some(native) = native {
             Ok(ParameterId::from(native))
         } else {
-            let name = graph.as_ref().get_network_variable_name(variable)?;
+            let name = VariableIdResolver::get_name(var_resolver, n_variable);
             throw_runtime_error(format!("Variable {name:?} cannot be perturbed."))
         }
     }
@@ -314,7 +320,7 @@ impl AsynchronousPerturbationGraph {
     ) -> PyResult<ColoredPerturbationSet> {
         let source = source
             .iter()
-            .map(|it| it.extract::<BoolLikeValue>().map(bool::from))
+            .map(|it| it.extract::<BoolType>().map(bool::from))
             .collect::<PyResult<Vec<bool>>>()?;
         let source = ArrayBitVector::from(source);
         let result = _self
@@ -384,7 +390,7 @@ impl AsynchronousPerturbationGraph {
     pub fn mk_perturbation(
         _self: Py<Self>,
         py: Python,
-        perturbation: &Bound<'_, PyAny>,
+        perturbation: PerturbationType,
     ) -> PyResult<PerturbationSet> {
         let self_borrow = _self.borrow(py);
         let parent = self_borrow.as_ref();
@@ -400,7 +406,7 @@ impl AsynchronousPerturbationGraph {
             partial_valuation.set_value(*bdd_var, false);
         }
 
-        let perturbation = Self::resolve_perturbation(&self_borrow, perturbation)?;
+        let perturbation = perturbation.resolve(self_borrow.as_native())?;
 
         // Read data from the dictionary.
         for (k, v) in perturbation {
@@ -436,7 +442,7 @@ impl AsynchronousPerturbationGraph {
     pub fn mk_perturbations(
         _self: Py<Self>,
         py: Python,
-        perturbations: &Bound<'_, PyAny>,
+        perturbations: PerturbationType,
     ) -> PyResult<PerturbationSet> {
         let self_borrow = _self.borrow(py);
         let parent = self_borrow.as_ref();
@@ -446,7 +452,7 @@ impl AsynchronousPerturbationGraph {
             .get()
             .as_native()
             .get_perturbation_bdd_mapping(perturbable);
-        let perturbations = Self::resolve_perturbation(&self_borrow, perturbations)?;
+        let perturbations = perturbations.resolve(self_borrow.as_native())?;
         for (k, v) in perturbations {
             let s_var = parent.as_native().symbolic_context().get_state_variable(k);
             let p_var = *map.get(&k).unwrap();
@@ -644,45 +650,5 @@ impl AsynchronousPerturbationGraph {
         let ctx = self_ref.as_ref().symbolic_context();
         let set = GraphColoredVertices::new(bdd, ctx.get().as_native());
         ColoredVertexSet::mk_native(self_ref.as_ref().symbolic_context(), set)
-    }
-
-    /// Returns a list of perturbed variables together with their values, or error if the
-    /// variables are invalid (e.g., not perturbable). If a variable is not present, it is not
-    /// returned. It is up to the caller to interpret this correctly.
-    pub fn resolve_perturbation(
-        _self: &PyRef<'_, AsynchronousPerturbationGraph>,
-        value: &Bound<'_, PyAny>,
-    ) -> PyResult<HashMap<biodivine_lib_param_bn::VariableId, Option<bool>>> {
-        let parent_ref = _self.as_ref();
-        let perturbable: HashSet<biodivine_lib_param_bn::VariableId> =
-            HashSet::from_iter(_self.as_native().perturbable_variables().clone());
-        let mut result = HashMap::new();
-        if let Ok(dict) = value.cast::<PyDict>() {
-            for (k, v) in dict {
-                let k_var = parent_ref.resolve_network_variable(&k)?;
-
-                if !perturbable.contains(&k_var) {
-                    return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
-                };
-
-                let val = v.extract::<Option<bool>>()?;
-                result.insert(k_var, val);
-            }
-        } else if let Ok(model) = value.cast::<PerturbationModel>() {
-            for (k, v) in model.get().items() {
-                let k_var: biodivine_lib_param_bn::VariableId = k.into();
-
-                if !perturbable.contains(&k_var) {
-                    return throw_runtime_error(format!("Variable {k_var} cannot be perturbed."));
-                };
-
-                result.insert(k_var, v);
-            }
-        } else {
-            return throw_type_error(
-                "Expected a dictionary of `VariableIdType` keys and `BoolType | None` values, or a `PerturbationModel`.",
-            );
-        }
-        Ok(result)
     }
 }

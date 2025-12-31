@@ -1,4 +1,5 @@
-use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{throw_runtime_error, throw_type_error};
 use RsBooleanExpression::{Not, Variable};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
@@ -98,7 +99,7 @@ impl BooleanExpression {
 
     /// Return a `BooleanExpression` of a constant value.
     #[staticmethod]
-    pub fn mk_const(value: BoolLikeValue) -> PyResult<BooleanExpression> {
+    pub fn mk_const(value: BoolType) -> PyResult<BooleanExpression> {
         Ok(Self::from_native(RsBooleanExpression::Const(value.bool())))
     }
 
@@ -453,7 +454,7 @@ fn eval(e: &RsBooleanExpression, valuation: &Bound<'_, PyDict>) -> PyResult<bool
             let Some(value) = valuation.get_item(name)? else {
                 return throw_runtime_error(format!("Missing value of {name}."));
             };
-            value.extract::<BoolLikeValue>().map(bool::from)
+            value.extract::<BoolType>().map(bool::from)
         }
         Not(inner) => {
             let inner = eval(inner, valuation)?;

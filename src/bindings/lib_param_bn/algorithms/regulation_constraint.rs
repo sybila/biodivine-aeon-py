@@ -1,10 +1,10 @@
 use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::bindings::lib_param_bn::regulatory_graph::RegulatoryGraph;
+use crate::bindings::lib_param_bn::argument_types::regulation::RegulationOutput;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use pyo3::types::PyDict;
-use pyo3::{Bound, PyAny, PyResult, Python, pyclass, pymethods};
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
+use pyo3::{PyResult, pyclass, pymethods};
 
 /// An "algorithm object" that can be used to compute symbolic constraints that correspond
 /// to typical properties of model regulations (i.e. monotonicity and essentiality).
@@ -34,9 +34,9 @@ impl RegulationConstraint {
     pub fn mk_activation(
         context: &SymbolicContext,
         function: &Bdd,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdSymType,
     ) -> PyResult<Bdd> {
-        let var = context.resolve_network_variable(variable)?;
+        let var = variable.resolve(context.as_native())?;
         let native =
             biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_activation(
                 context.as_native(),
@@ -63,9 +63,9 @@ impl RegulationConstraint {
     pub fn mk_inhibition(
         context: &SymbolicContext,
         function: &Bdd,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdSymType,
     ) -> PyResult<Bdd> {
-        let var = context.resolve_network_variable(variable)?;
+        let var = variable.resolve(context.as_native())?;
         let native =
             biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_inhibition(
                 context.as_native(),
@@ -93,9 +93,9 @@ impl RegulationConstraint {
     pub fn mk_essential(
         context: &SymbolicContext,
         function: &Bdd,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdSymType,
     ) -> PyResult<Bdd> {
-        let var = context.resolve_network_variable(variable)?;
+        let var = variable.resolve(context.as_native())?;
         let native =
             biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::mk_observability(
                 context.as_native(),
@@ -120,15 +120,14 @@ impl RegulationConstraint {
     /// `source`. It returns `essential=False` only when the function has more than one
     /// interpretation, such that some depend on `source`, but not all.
     #[staticmethod]
-    pub fn infer_sufficient_regulation<'a>(
-        py: Python<'a>,
+    pub fn infer_sufficient_regulation(
         context: &SymbolicContext,
-        source: &Bound<'_, PyAny>,
-        target: &Bound<'_, PyAny>,
+        source: VariableIdSymType,
+        target: VariableIdSymType,
         function: &Bdd,
-    ) -> PyResult<Option<Bound<'a, PyDict>>> {
-        let source = context.resolve_network_variable(source)?;
-        let target = context.resolve_network_variable(target)?;
+    ) -> PyResult<Option<RegulationOutput>> {
+        let source = source.resolve(context.as_native())?;
+        let target = target.resolve(context.as_native())?;
         let native = biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint::infer_sufficient_regulation(
             context.as_native(),
             source,
@@ -136,8 +135,6 @@ impl RegulationConstraint {
             function.as_native()
         );
 
-        native
-            .map(|it| RegulatoryGraph::encode_regulation(py, &it))
-            .transpose()
+        Ok(native.map(|r| RegulationOutput::from(&r)))
     }
 }

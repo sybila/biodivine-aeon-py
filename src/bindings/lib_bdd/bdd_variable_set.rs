@@ -2,7 +2,8 @@ use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_bdd::bdd_valuation::{BddPartialValuation, BddValuation};
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
-use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{AsNative, throw_index_error, throw_runtime_error, throw_type_error};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
@@ -142,7 +143,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing the constant Boolean function given by `value`.
-    fn mk_const(self_: PyRef<'_, Self>, value: BoolLikeValue) -> PyResult<Bdd> {
+    fn mk_const(self_: PyRef<'_, Self>, value: BoolType) -> PyResult<Bdd> {
         let value = if value.bool() {
             self_.0.mk_true()
         } else {
@@ -156,7 +157,7 @@ impl BddVariableSet {
     fn mk_literal(
         self_: PyRef<'_, Self>,
         variable: &Bound<'_, PyAny>,
-        value: BoolLikeValue,
+        value: BoolType,
     ) -> PyResult<Bdd> {
         let variable = self_.resolve_variable(variable)?;
         let value = self_.0.mk_literal(variable, value.bool());
@@ -360,7 +361,7 @@ impl BddVariableSet {
             let mut result = biodivine_lib_bdd::BddPartialValuation::empty();
             for (key, value) in values {
                 let key = self.resolve_variable(&key)?;
-                let value = value.extract::<BoolLikeValue>()?;
+                let value = value.extract::<BoolType>()?;
                 result[key] = Some(value.bool());
             }
             return Ok(result);

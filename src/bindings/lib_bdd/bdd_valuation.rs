@@ -1,6 +1,7 @@
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
-use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{AsNative, throw_runtime_error, throw_type_error};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -87,7 +88,7 @@ impl BddValuation {
                                     list.len()
                                 ));
                             }
-                            let value = list.extract::<Vec<BoolLikeValue>>()?;
+                            let value = list.extract::<Vec<BoolType>>()?;
                             let value =
                                 value.into_iter().map(|it| it.into()).collect::<Vec<bool>>();
                             let value = biodivine_lib_bdd::BddValuation::new(value);
@@ -147,7 +148,7 @@ impl BddValuation {
         Ok(self.value[var])
     }
 
-    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: BoolLikeValue) -> PyResult<()> {
+    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: BoolType) -> PyResult<()> {
         let ctx = self.ctx.get();
         let var = ctx.resolve_variable(key)?;
         self.value[var] = bool::from(value);
@@ -306,7 +307,7 @@ impl BddPartialValuation {
                             .iter()
                             .map(|(a, b)| {
                                 let a = ctx.get().resolve_variable(&a);
-                                let b = b.extract::<BoolLikeValue>();
+                                let b = b.extract::<BoolType>();
                                 match (a, b) {
                                     (Ok(a), Ok(b)) => Ok((a, b.bool())),
                                     (Err(e), _) | (_, Err(e)) => Err(e),
@@ -379,11 +380,7 @@ impl BddPartialValuation {
         Ok(self.value[var])
     }
 
-    fn __setitem__(
-        &mut self,
-        key: &Bound<'_, PyAny>,
-        value: Option<BoolLikeValue>,
-    ) -> PyResult<()> {
+    fn __setitem__(&mut self, key: &Bound<'_, PyAny>, value: Option<BoolType>) -> PyResult<()> {
         let ctx = self.ctx.get();
         let value = value.map(|it| it.bool());
         let var = ctx.resolve_variable(key)?;

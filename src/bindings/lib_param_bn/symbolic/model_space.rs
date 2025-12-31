@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
+use pyo3::{Py, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::{AsNative, throw_index_error};
 
 /// Represents a single space stored in a `SpaceSet` (or a `ColoredSpaceSet`), or a projection
@@ -55,9 +55,9 @@ impl SpaceModel {
         self.to_values().len()
     }
 
-    pub fn __getitem__(&self, key: &Bound<'_, PyAny>, py: Python) -> PyResult<Option<bool>> {
+    pub fn __getitem__(&self, key: VariableIdType, py: Python) -> PyResult<Option<bool>> {
         let ctx = self.ctx.borrow(py);
-        let variable = ctx.as_ref().resolve_network_variable(key)?;
+        let variable = key.resolve(ctx.as_native().inner_context())?;
         let p = ctx.as_native().get_positive_variable(variable);
         let n = ctx.as_native().get_negative_variable(variable);
         let p = self.native.get_value(p);
@@ -73,9 +73,9 @@ impl SpaceModel {
         }
     }
 
-    pub fn __contains__(&self, key: &Bound<'_, PyAny>, py: Python) -> PyResult<bool> {
+    pub fn __contains__(&self, key: VariableIdType, py: Python) -> PyResult<bool> {
         let ctx = self.ctx.borrow(py);
-        let variable = ctx.as_ref().resolve_network_variable(key)?;
+        let variable = key.resolve(ctx.as_native().inner_context())?;
         let p = ctx.as_native().get_positive_variable(variable);
         let n = ctx.as_native().get_negative_variable(variable);
         Ok(self.native.has_value(p) && self.native.has_value(n))

@@ -12,17 +12,17 @@ use num_bigint::BigUint;
 use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::PyList;
 
 use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::symbolic::model_space::SpaceModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 
 /// A symbolic representation of a set of "spaces", i.e. hypercubes in the state space
 /// of a particular `BooleanNetwork`.
@@ -189,14 +189,14 @@ impl SpaceSet {
     #[pyo3(signature = (retained = None))]
     fn items(
         &self,
-        retained: Option<&Bound<'_, PyList>>,
+        retained: Option<Vec<VariableIdType>>,
         py: Python,
     ) -> PyResult<_SpaceModelIterator> {
         let ctx = self.ctx.borrow(py);
         let retained = if let Some(retained) = retained {
             let mut retained_vars = Vec::new();
             for var in retained {
-                let var = ctx.as_ref().resolve_network_variable(&var)?;
+                let var = var.resolve(ctx.as_native().inner_context())?;
                 retained_vars.push(ctx.as_native().get_positive_variable(var));
                 retained_vars.push(ctx.as_native().get_negative_variable(var));
             }
