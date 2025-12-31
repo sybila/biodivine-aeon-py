@@ -1,14 +1,14 @@
 use crate::AsNative;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use biodivine_algo_bdd_scc::attractor::{
     AttractorConfig, InterleavedTransitionGuidedReduction, ItgrState, XieBeerelAttractors,
     XieBeerelState,
 };
 use computation_process::{Algorithm, Stateful};
 use pyo3::prelude::*;
-use pyo3::types::PyList;
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct Attractors {
@@ -36,17 +36,14 @@ impl Attractors {
     pub fn transition_guided_reduction(
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
-        to_reduce: Option<&Bound<'_, PyList>>,
+        to_reduce: Option<Vec<VariableIdType>>,
     ) -> PyResult<ColoredVertexSet> {
         // Convert `Option<PyList<?>>` to `Vec<VariableId>`
-        let mut to_reduce_native = Vec::new();
-        if let Some(to_reduce) = to_reduce {
-            for x in to_reduce {
-                to_reduce_native.push(graph.resolve_network_variable(&x)?);
-            }
+        let to_reduce = if let Some(to_reduce) = to_reduce {
+            VariableIdType::resolve_collection(to_reduce, graph.as_native())?
         } else {
-            to_reduce_native.extend(graph.as_native().variables());
-        }
+            graph.as_native().variables().collect::<Vec<_>>()
+        };
 
         // Convert `Option<ColoredVertexSet>` to `GraphColoredVertices`
         let restriction_native = if let Some(r) = restriction {
@@ -57,11 +54,8 @@ impl Attractors {
 
         cancel_this::on_python(|| {
             let config = AttractorConfig::new(graph.as_native().clone());
-            let state = ItgrState::new_with_variables(
-                graph.as_native(),
-                &restriction_native,
-                &to_reduce_native,
-            );
+            let state =
+                ItgrState::new_with_variables(graph.as_native(), &restriction_native, &to_reduce);
             let result = InterleavedTransitionGuidedReduction::run(config, state)?;
 
             Ok(ColoredVertexSet::mk_native(
@@ -118,7 +112,7 @@ impl Attractors {
     pub fn attractors(
         graph: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
-        to_reduce: Option<&Bound<'_, PyList>>,
+        to_reduce: Option<Vec<VariableIdType>>,
     ) -> PyResult<Vec<ColoredVertexSet>> {
         let reduced = Self::transition_guided_reduction(graph, restriction, to_reduce)?;
         Self::xie_beerel(graph, Some(&reduced))

@@ -1,5 +1,5 @@
 from typing import (Callable, Iterator, Literal, Mapping, Optional, Sequence,
-                    Set, TypedDict, Union, overload)
+                    TypedDict, Union, overload)
 
 LOG_NOTHING: Literal[0]
 LOG_ESSENTIAL: Literal[1]
@@ -1474,12 +1474,6 @@ class Percolation:
     @staticmethod
     def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
 
-class Reachability:
-    @staticmethod
-    def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-    @staticmethod
-    def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-
 class RegulationConstraint:
     @staticmethod
     def mk_activation(ctx: SymbolicContext, function: Bdd, variable: VariableIdType) -> Bdd: ...
@@ -1866,6 +1860,25 @@ class Control:
                             stop_when_found: bool = False,
                             initial_states: VertexSet | None = None) -> ColoredPerturbationSet: ...
 
+class Reachability:
+    @staticmethod
+    def reach_fwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def reach_bwd(graph: AsynchronousGraph, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def forward_superset(config: Union[ReachabilityConfig, AsynchronousGraph, BooleanNetwork],
+                         initial_set: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def backward_superset(config: Union[ReachabilityConfig, AsynchronousGraph, BooleanNetwork],
+                         initial_set: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def forward_subset(config: Union[ReachabilityConfig, AsynchronousGraph, BooleanNetwork],
+                       initial_set: ColoredVertexSet) -> ColoredVertexSet: ...
+    @staticmethod
+    def backward_subset(config: Union[ReachabilityConfig, AsynchronousGraph, BooleanNetwork],
+                        initial_set: ColoredVertexSet) -> ColoredVertexSet: ...
+
+
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]
 ParameterIdType = Union[ParameterId, str]
@@ -1895,66 +1908,18 @@ class NamedRegulation(TypedDict):
     sign: Optional[SignType]
     essential: BoolType
 Regulation = Union[IdRegulation, NamedRegulation]
-
-class ReachabilityConfig:
-    """
-    A configuration class for the `ReachabilityComp` class. It allows you to specify various
-    parameters for the reachability analysis, such as the underlying `AsynchronousGraph`, a subgraph,
-    a set of variables, a time limit, a BDD size limit, and a steps limit. The configuration
-    can be created using a Python constructor or the `create_from` method, and you can modify it using the
-    `with_*` methods. The configuration is immutable, meaning that each `with_*` method
-    returns a new instance of `ReachabilityConfig` with the specified modifications.
-    This API design means the method calls can be chained together.
-
-    **This feature should eventually replace `Reachability` and is currently in "preview mode",
-    so please expect the API of this object to change. For guaranteed stable API, please rely
-    on `Reachability`.**
-    """
-
-    def __init__(
-        self,
-        graph_representation: Union[AsynchronousGraph, BooleanNetwork],
-        subgraph: Optional[ColoredVertexSet] = None,
-        variables: Optional[Set[VariableId]] = None,
-        time_limit_millis: Optional[int] = None,
-        bdd_size_limit: Optional[int] = None,
-        steps_limit: Optional[int] = None,
-    ) -> None:
-        """
-        Create a new `ReachabilityConfig` object. The `graph_representation` parameter is required and
-        can be either an `AsynchronousGraph` or a `BooleanNetwork`. The other parameters
-        are optional and can be used to specify a subgraph, a set of variables, a time limit,
-        a BDD size limit, and a steps limit for the reachability analysis.
-
-        For the meaning of the parameters, see the documentation of their respective with_
-        methods (e.g. `with_subgraph`, `with_variables`, etc.).
-        """
-    @staticmethod
-    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> ReachabilityConfig: ...
-    def with_subgraph(self, subgraph: ColoredVertexSet) -> ReachabilityConfig: ...
-    def with_variables(self, variables: Set[VariableId]) -> ReachabilityConfig: ...
-    def with_time_limit(self, duration_in_millis: int) -> ReachabilityConfig: ...
-    def with_bdd_size_limit(self, bdd_size_limit: int) -> ReachabilityConfig: ...
-    def with_steps_limit(self, steps_limit: int) -> ReachabilityConfig: ...
-
-class ReachabilityComp:
-    """
-    Implements symbolic reachability operations over an `AsynchronousGraph`. This means the
-    computation of both largest and smallest forward- or backward-closed sets of states.
-
-    **This feature should eventually replace `Reachability` and is currently in "preview mode",
-    so please expect the API of this object to change. For guaranteed stable API, please rely
-    on `Reachability`.**
-    """
-
-    @staticmethod
-    def create_from(graph_representation: Union[AsynchronousGraph, BooleanNetwork]) -> ReachabilityComp: ...
-    @staticmethod
-    def with_config(config: ReachabilityConfig) -> ReachabilityComp: ...
-    def forward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-    def backward_closed_superset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-    def forward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
-    def backward_closed_subset(self, initial: ColoredVertexSet) -> ColoredVertexSet: ...
+class GraphConfig(TypedDict):
+    graph: Union[AsynchronousGraph, BooleanNetwork]
+class ReachabilityConfig(GraphConfig, total=False):
+    active_variables: Sequence[VariableIdType]
+    max_iterations: int
+    max_symbolic_size: int
+class SccConfig(GraphConfig, total=False):
+    should_trim: Literal["none", "both", "sinks", "sources"]
+    filter_long_lived: bool
+class AttractorConfig(GraphConfig, total=False):
+    active_variables: Sequence[VariableIdType]
+    max_symbolic_size: int
 
 class PercolationConfig:
     """

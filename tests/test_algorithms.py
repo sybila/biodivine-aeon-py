@@ -67,6 +67,25 @@ def test_algorithms():
 
         assert fwd.intersect(bwd) == a
 
+    for a in attractors:
+        assert Reachability.forward_superset(graph, a) == a
+        assert Reachability.forward_subset(graph, a) == a
+
+        # Attractor is either fully bwd-closed or not (and is empty).
+        # However, we have a colored model, so we need to account for that.
+        bwd_closed = Reachability.backward_subset(graph, a)
+        closed_colors = bwd_closed.colors()
+        assert bwd_closed.intersect_colors(closed_colors) == a.intersect_colors(closed_colors)
+
+        pivot = a.pick_vertex()
+        fwd = Reachability.forward_superset(graph, pivot)
+        bwd = Reachability.backward_superset(graph, pivot)
+        assert fwd.intersect(bwd) == a
+
+        assert Reachability.backward_subset(graph, bwd) == bwd
+        assert Reachability.forward_subset(graph, fwd) == fwd
+
+
 def test_percolation_case_1():
     bn = BooleanNetwork.from_file("./tests/model-3.aeon")
     stg = AsynchronousGraph(bn)

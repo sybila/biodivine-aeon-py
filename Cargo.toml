@@ -31,7 +31,7 @@ biodivine-lib-bdd = "0.6.2"
 biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "9e31bab9d000266ea25c35cc752c69077973d43c" }
 biodivine-hctl-model-checker = "0.3.4"
 biodivine-lib-io-bma = "0.1.2"
-biodivine-algo-bdd-scc = { path = "../biodivine-algo-bdd-scc" }
+biodivine-algo-bdd-scc = "0.3.0"
 # Cannot update `rand` because lib-bdd uses it to generate random big-int values.
 rand = "0.8"
 cancel-this = { version = "0.4.0", features = ["pyo3"] }

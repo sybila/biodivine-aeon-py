@@ -1,3 +1,4 @@
+use pyo3::prelude::PyModuleMethods;
 use pyo3::{Bound, PyResult, types::PyModule};
 
 pub mod fixed_points;
@@ -13,7 +14,7 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     fixed_points::register(module)?;
     trap_spaces::register(module)?;
     percolation::register(module)?;
-    reachability::register(module)?;
+    module.add_class::<reachability::Reachability>()?;
 
     Ok(())
 }
