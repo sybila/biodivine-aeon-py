@@ -13,7 +13,8 @@ biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_NOTHING
 #
 # The script either prints the number of solutions, or the
 # first N solutions, assuming N is given as a second argument.
-# In such a case, it prints the smallest enclosing subspace of the attractor.
+# In such a case, it prints the smallest enclosing subspace
+# of the SCC.
 #
 # Note that if the network has constant nodes, we can automatically
 # percolate them without changing the outcome. However, this is not
@@ -26,12 +27,12 @@ biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_NOTHING
 #
 # You can use `.aeon`, `.bnet`, or `.sbml` as input model formats.
 #
-# Print the attractor count:
+# Print the SCC count:
 # ```
 # python3 scc.py ./path/to/network.aeon
 # ```
 #
-# Print first 1000 attractors:
+# Print first 1000 SCCs:
 # ```
 # python3 scc.py ./path/to/network.aeon 1000
 # ```

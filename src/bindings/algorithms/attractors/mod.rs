@@ -71,8 +71,8 @@ impl Attractors {
     /// Perform attractor detection on the given symbolic set.
     ///
     /// This is similar to `Attractors.attractors`, but it does not perform
-    /// `Attractors.transition_guilded_reduction`. Instead, it directly runs the attractor
-    /// detection algorithm on the `restriction` set without any preprocessing.
+    /// `Attractors.transition_guided_reduction`. Instead, it directly runs the attractor
+    /// detection algorithm on the `initial_set` set without any preprocessing.
     ///
     /// Note that the result is a collection of sets, such that for each set and each color
     /// holds that if the color is present in the set, the vertices of this color in the set
