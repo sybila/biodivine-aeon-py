@@ -17,26 +17,37 @@ use super::sampling_utils::pick_random_instances;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BbmModel {
+    /// A unique identifier.
     #[pyo3(get)]
     pub id: String,
+    /// A descriptive name of the model.
     #[pyo3(get)]
     pub name: String,
+    /// URL to the paper where the model was published.
     #[pyo3(get)]
     pub url_publication: Option<String>,
+    /// URL to the actual model data (if it exists).
     #[pyo3(get)]
     pub url_model: Option<String>,
+    /// List of keywords. See the BBM repository for the full list.
     #[pyo3(get)]
     pub keywords: Vec<String>,
+    /// The number of BN variables (excluding inputs).
     #[pyo3(get)]
     pub variables: u32,
+    /// The number of inputs (unspecified constant variables).
     #[pyo3(get)]
     pub inputs: u32,
+    /// The number of network regulations.
     #[pyo3(get)]
     pub regulations: u32,
+    /// Some additional notes.
     #[pyo3(get)]
     pub notes: Option<String>,
+    /// A bibliographic entry.
     #[pyo3(get)]
     pub bib: Option<String>,
+    /// Raw model data (typically `.aeon` model string).
     #[pyo3(get)]
     #[serde(deserialize_with = "deserialize_model_data", rename = "modelData")]
     pub raw_model_data: String, // Deserialize directly into a String
@@ -95,8 +106,12 @@ impl BbmModel {
     fn to_bn_inputs_const(&self, py: Python, const_value: bool) -> PyResult<Py<BooleanNetwork>> {
         let py_bn = BooleanNetwork::from_aeon(py, &self.raw_model_data).map_err(runtime_error)?;
         let mut bn = py_bn.borrow_mut(py).clone();
-        for variable in bn.as_native().inputs(const_value) {
-            let update_fn = biodivine_lib_param_bn::FnUpdate::mk_true();
+        for variable in bn.as_native().inputs(true) {
+            let update_fn = if const_value {
+                biodivine_lib_param_bn::FnUpdate::mk_true()
+            } else {
+                biodivine_lib_param_bn::FnUpdate::mk_false()
+            };
             bn.as_native_mut()
                 .set_update_function(variable, Some(update_fn))
                 .map_err(runtime_error)?;

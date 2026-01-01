@@ -1870,7 +1870,7 @@ class BbmModel:
     variables: int
     inputs: int
     regulations: int
-    nodes: Optional[str]
+    notes: Optional[str]
     bib: Optional[str]
     raw_model_data: str
 

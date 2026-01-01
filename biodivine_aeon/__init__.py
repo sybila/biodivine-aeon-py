@@ -45,6 +45,7 @@ __all__ = [
               'ReachabilityConfig',
               'SccConfig',
               'AttractorConfig',
+              'BbmFilterConfig',
           ] + [x for x in biodivine_aeon.__all__ if not x.startswith("_")]
 
 LOG_NOTHING: Literal[0] = 0
@@ -262,3 +263,15 @@ class AttractorConfig(GraphConfig, total=False):
     max_symbolic_size: int
     # Default: max. platform integer
     solution_count: int
+
+class BbmFilterConfig(TypedDict, total=False):
+    """
+    Configuration of the model filter in the BBM API.
+    """
+    min_variables: int
+    max_variables: int
+    min_inputs: int
+    max_inputs: int
+    min_regulations: int
+    max_regulations: int
+    keywords: Sequence[str]
