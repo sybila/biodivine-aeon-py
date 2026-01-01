@@ -30,6 +30,12 @@ pub enum PyAsynchronousGraphType {
     Network(Py<BooleanNetwork>),
 }
 
+impl From<Py<AsynchronousGraph>> for PyAsynchronousGraphType {
+    fn from(value: Py<AsynchronousGraph>) -> Self {
+        PyAsynchronousGraphType::Graph(value)
+    }
+}
+
 impl PyAsynchronousGraphType {
     pub fn clone_native(&self, py: Python) -> SymbolicAsyncGraph {
         match self {

@@ -1462,14 +1462,6 @@ class FixedPoints:
     @staticmethod
     def symbolic_colors(graph: AsynchronousGraph, set: Optional[ColoredVertexSet] = None) -> ColorSet: ...
 
-class Attractors:
-    @staticmethod
-    def attractors(graph: AsynchronousGraph, restriction: Optional[ColoredVertexSet] = None, to_reduce: Optional[Sequence[VariableIdType]] = None) -> list[ColoredVertexSet]: ...
-    @staticmethod
-    def transition_guided_reduction(graph: AsynchronousGraph, restriction: Optional[ColoredVertexSet] = None, to_reduce: Optional[Sequence[VariableIdType]] = None) -> ColoredVertexSet: ...
-    @staticmethod
-    def xie_beerel(graph: AsynchronousGraph, restriction: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
-
 class Percolation:
     @staticmethod
     def percolate_subspace(graph: AsynchronousGraph, subspace: Union[Mapping[VariableId, BoolType], Mapping[str, BoolType]]) -> dict[VariableId, bool]: ...
@@ -1877,6 +1869,19 @@ class Reachability:
     @staticmethod
     def backward_subset(config: Union[ReachabilityConfig, AsynchronousGraph, BooleanNetwork],
                         initial_set: ColoredVertexSet) -> ColoredVertexSet: ...
+
+class Attractors:
+    @staticmethod
+    def attractors(config: Union[AttractorConfig, AsynchronousGraph, BooleanNetwork],
+                   initial_set: Optional[ColoredVertexSet] = None,
+                   to_reduce: Optional[Sequence[VariableIdType]] = None) -> list[ColoredVertexSet]: ...
+    @staticmethod
+    def transition_guided_reduction(config: AsynchronousGraph,
+                                    initial_set: Optional[ColoredVertexSet] = None,
+                                    to_reduce: Optional[Sequence[VariableIdType]] = None) -> ColoredVertexSet: ...
+    @staticmethod
+    def xie_beerel(config: AsynchronousGraph,
+                   initial_set: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
 
 
 BddVariableType = Union[BddVariable, str]

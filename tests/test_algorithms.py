@@ -1,5 +1,5 @@
 from biodivine_aeon import *
-
+import pytest
 
 def test_algorithms():
     bn = BooleanNetwork.from_file("./example/workflow/data/g2a_p1026.aeon")
@@ -84,6 +84,36 @@ def test_algorithms():
 
         assert Reachability.backward_subset(graph, bwd) == bwd
         assert Reachability.forward_subset(graph, fwd) == fwd
+
+    # Test that symbolic size limits work:
+
+    with pytest.raises(InterruptedError):
+        config: ReachabilityConfig = {
+            'graph': graph,
+            'max_symbolic_size': 10
+        }
+        Reachability.backward_superset(config, unit.pick_vertex())
+
+    config: ReachabilityConfig = {
+        'graph': graph,
+        'max_symbolic_size': 10_000
+    }
+
+    assert not Reachability.backward_superset(config, unit.pick_vertex()).is_empty()
+
+    with pytest.raises(InterruptedError):
+        config: AttractorConfig = {
+            'graph': graph,
+            'max_symbolic_size': 10
+        }
+        Attractors.attractors(config, unit)
+
+    config: AttractorConfig = {
+        'graph': graph,
+        'max_symbolic_size': 10_000
+    }
+
+    assert len(Attractors.attractors(config, unit)) > 0
 
 
 def test_percolation_case_1():

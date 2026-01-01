@@ -12,10 +12,10 @@ use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyList};
 use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
+use crate::bindings::algorithms::attractors::Attractors;
 use crate::bindings::algorithms::reachability::Reachability;
 use crate::bindings::bn_classifier::class::{Class, extend_map};
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
-use crate::bindings::lib_param_bn::algorithms::attractors::Attractors;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::model_annotation::ModelAnnotation;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
@@ -352,13 +352,14 @@ impl Classification {
     #[staticmethod]
     #[pyo3(signature = (graph, attractors = None))]
     pub fn classify_attractor_bifurcation(
-        graph: &AsynchronousGraph,
+        py: Python,
+        graph: Py<AsynchronousGraph>,
         attractors: Option<Vec<ColoredVertexSet>>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let attractors = if let Some(attractors) = attractors {
             attractors
         } else {
-            Attractors::attractors(graph, None, None)?
+            Attractors::attractors(graph.clone().into(), None, None, py)?
         };
 
         let attractors = attractors
@@ -366,9 +367,9 @@ impl Classification {
             .map(|it| it.as_native().clone())
             .collect::<Vec<_>>();
 
-        let scc_classifier = Classifier::new(graph.as_native());
+        let scc_classifier = Classifier::new(graph.get().as_native());
         for attr in attractors {
-            scc_classifier.add_component(attr, graph.as_native());
+            scc_classifier.add_component(attr, graph.get().as_native());
         }
         let classification = scc_classifier.export_result();
 
@@ -378,7 +379,7 @@ impl Classification {
                 let items = k.0.into_iter().map(encode_behavior).collect::<Vec<_>>();
                 (
                     Class::new_native(items),
-                    ColorSet::mk_native(graph.symbolic_context(), v),
+                    ColorSet::mk_native(graph.get().symbolic_context(), v),
                 )
             })
             .collect())
@@ -434,7 +435,7 @@ impl Classification {
         let traps = if let Some(traps) = traps {
             traps
         } else {
-            Attractors::attractors(&graph_ref, None, None)?
+            Attractors::attractors(graph.clone().into(), None, None, py)?
         };
 
         let mut all_colors = graph_ref.mk_empty_colors();

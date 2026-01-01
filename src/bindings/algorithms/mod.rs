@@ -1,6 +1,7 @@
 use pyo3::prelude::PyModuleMethods;
 use pyo3::{Bound, PyResult, types::PyModule};
 
+pub mod attractors;
 pub mod fixed_points;
 pub mod graph_representation;
 pub mod percolation;
@@ -15,6 +16,7 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     trap_spaces::register(module)?;
     percolation::register(module)?;
     module.add_class::<reachability::Reachability>()?;
+    module.add_class::<attractors::Attractors>()?;
 
     Ok(())
 }
