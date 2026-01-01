@@ -12,10 +12,10 @@ use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyList};
 use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
+use crate::bindings::algorithms::attractors::Attractors;
+use crate::bindings::algorithms::reachability::Reachability;
 use crate::bindings::bn_classifier::class::{Class, extend_map};
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
-use crate::bindings::lib_param_bn::algorithms::attractors::Attractors;
-use crate::bindings::lib_param_bn::algorithms::reachability::Reachability;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::model_annotation::ModelAnnotation;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
@@ -353,13 +353,13 @@ impl Classification {
     #[pyo3(signature = (graph, attractors = None))]
     pub fn classify_attractor_bifurcation(
         py: Python,
-        graph: &AsynchronousGraph,
+        graph: Py<AsynchronousGraph>,
         attractors: Option<Vec<ColoredVertexSet>>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let attractors = if let Some(attractors) = attractors {
             attractors
         } else {
-            Attractors::attractors(graph, None, None, py)?
+            Attractors::attractors(graph.clone().into(), None, None, py)?
         };
 
         let attractors = attractors
@@ -367,9 +367,9 @@ impl Classification {
             .map(|it| it.as_native().clone())
             .collect::<Vec<_>>();
 
-        let scc_classifier = Classifier::new(graph.as_native());
+        let scc_classifier = Classifier::new(graph.get().as_native());
         for attr in attractors {
-            scc_classifier.add_component(attr, graph.as_native());
+            scc_classifier.add_component(attr, graph.get().as_native());
         }
         let classification = scc_classifier.export_result();
 
@@ -379,7 +379,7 @@ impl Classification {
                 let items = k.0.into_iter().map(encode_behavior).collect::<Vec<_>>();
                 (
                     Class::new_native(items),
-                    ColorSet::mk_native(graph.symbolic_context(), v),
+                    ColorSet::mk_native(graph.get().symbolic_context(), v),
                 )
             })
             .collect())
@@ -424,20 +424,21 @@ impl Classification {
     #[pyo3(signature = (graph, phenotypes, oscillation_types = None, traps = None, count_multiplicity = true))]
     pub fn classify_attractor_phenotypes(
         py: Python,
-        graph: &AsynchronousGraph,
+        graph: Py<AsynchronousGraph>,
         phenotypes: HashMap<Class, VertexSet>,
         oscillation_types: Option<HashMap<Class, String>>,
         traps: Option<Vec<ColoredVertexSet>>,
         count_multiplicity: bool,
     ) -> PyResult<HashMap<Class, ColorSet>> {
+        let graph_ref = graph.borrow(py);
         // Initialize the attractor set.
         let traps = if let Some(traps) = traps {
             traps
         } else {
-            Attractors::attractors(graph, None, None, py)?
+            Attractors::attractors(graph.clone().into(), None, None, py)?
         };
 
-        let mut all_colors = graph.mk_empty_colors();
+        let mut all_colors = graph_ref.mk_empty_colors();
         for attr in &traps {
             all_colors = all_colors.union(&attr.colors());
         }
@@ -448,7 +449,7 @@ impl Classification {
         for attr in &traps {
             let attr_classes = Self::classify_phenotypes(
                 py,
-                graph,
+                graph.clone(),
                 phenotypes.clone(),
                 oscillation_types.clone(),
                 Some(attr.clone()),
@@ -514,16 +515,17 @@ impl Classification {
     #[pyo3(signature = (graph, phenotypes, oscillation_types = None, initial_trap = None))]
     pub fn classify_phenotypes(
         py: Python,
-        graph: &AsynchronousGraph,
+        graph: Py<AsynchronousGraph>,
         phenotypes: HashMap<Class, VertexSet>,
         oscillation_types: Option<HashMap<Class, String>>,
         initial_trap: Option<ColoredVertexSet>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let mut map = HashMap::new();
+        let graph_ref = graph.borrow(py);
 
-        let unit = graph.mk_unit_colored_vertices();
-        let initial_trap = initial_trap.unwrap_or_else(|| graph.mk_unit_colored_vertices());
-        if !graph
+        let unit = graph_ref.mk_unit_colored_vertices();
+        let initial_trap = initial_trap.unwrap_or_else(|| graph_ref.mk_unit_colored_vertices());
+        if !graph_ref
             .as_native()
             .can_post_out(initial_trap.as_native())
             .is_empty()
@@ -554,7 +556,7 @@ impl Classification {
                     // remove them, and take all colors that still appear in the set (there
                     // exists at least one attractor that is fully contained in the phenotype).
                     let not_phenotype = unit.minus(&phenotype);
-                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let not_phenotype = Reachability::reach_bwd(py, graph.clone(), &not_phenotype)?;
                     let always_phenotype = phenotype.minus(&not_phenotype);
                     always_phenotype.colors()
                 }
@@ -567,14 +569,14 @@ impl Classification {
                     // that is fully outside, we get a trap set with all attractors that intersect
                     // the `phenotype` set but are not contained in it.
                     let not_phenotype = unit.minus(&phenotype);
-                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let not_phenotype = Reachability::reach_bwd(py, graph.clone(), &not_phenotype)?;
                     let always_phenotype = phenotype.minus(&not_phenotype);
                     let is_phenotype = unit.intersect(&phenotype);
-                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let is_phenotype = Reachability::reach_bwd(py, graph.clone(), &is_phenotype)?;
                     let never_phenotype = unit.minus(&is_phenotype);
                     let can_be_never_or_always = always_phenotype.union(&never_phenotype);
                     let can_be_never_or_always =
-                        Reachability::reach_bwd(py, graph, &can_be_never_or_always)?;
+                        Reachability::reach_bwd(py, graph.clone(), &can_be_never_or_always)?;
                     let always_mixed = unit.minus(&can_be_never_or_always);
                     always_mixed.colors()
                 }
@@ -586,10 +588,10 @@ impl Classification {
                     // that fully reside in the negated set (forbidden oscillation) and
                     // disregarding them.
                     let is_phenotype = unit.intersect(&phenotype);
-                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let is_phenotype = Reachability::reach_bwd(py, graph.clone(), &is_phenotype)?;
                     let never_phenotype = unit.minus(&is_phenotype);
                     let can_reach_never_phenotype =
-                        Reachability::reach_bwd(py, graph, &never_phenotype)?;
+                        Reachability::reach_bwd(py, graph.clone(), &never_phenotype)?;
                     let allowed_phenotype = unit.minus(&can_reach_never_phenotype);
                     allowed_phenotype.colors()
                 }

@@ -1,10 +1,10 @@
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
-use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
+use pyo3::{Py, PyResult, Python, pyclass, pymethods};
 use std::collections::HashMap;
 
 use crate::bindings::lib_bdd::bdd_valuation::BddPartialValuation;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::set_perturbation::PerturbationSet;
 use crate::{AsNative, throw_index_error, throw_runtime_error};
@@ -62,9 +62,9 @@ impl PerturbationModel {
         self.items().len()
     }
 
-    pub fn __getitem__(&self, py: Python, key: &Bound<'_, PyAny>) -> PyResult<Option<bool>> {
+    pub fn __getitem__(&self, py: Python, key: VariableIdSymType) -> PyResult<Option<bool>> {
         let ctx_ref = self.ctx.borrow(py);
-        let var = ctx_ref.as_ref().resolve_network_variable(key)?;
+        let var = key.resolve(self.ctx.get().as_native().as_symbolic_context())?;
         let ctx = ctx_ref.as_native();
         let s_var = ctx.as_symbolic_context().get_state_variable(var);
         let Some(par) = ctx.get_perturbation_parameter(var) else {
@@ -93,9 +93,8 @@ impl PerturbationModel {
         }
     }
 
-    pub fn __contains__(&self, py: Python, key: &Bound<'_, PyAny>) -> PyResult<bool> {
-        let ctx = self.ctx.borrow(py);
-        let variable = ctx.as_ref().resolve_network_variable(key)?;
+    pub fn __contains__(&self, key: VariableIdSymType) -> PyResult<bool> {
+        let variable = key.resolve(self.ctx.get().as_native().as_symbolic_context())?;
         if let Some(p_var) = self.parameter_mapping.get(&variable) {
             Ok(self.native.has_value(*p_var))
         } else {

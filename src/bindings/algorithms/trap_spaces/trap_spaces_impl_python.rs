@@ -3,7 +3,7 @@ use pyo3::{Py, PyResult, pyclass, pymethods};
 use crate::{
     AsNative as _,
     bindings::{
-        algorithms::graph_representation::PyGraphRepresentation,
+        algorithms::graph_representation::PyAsynchronousGraphType,
         lib_param_bn::symbolic::{
             asynchronous_graph::AsynchronousGraph, set_colored_space::ColoredSpaceSet,
             symbolic_space_context::SymbolicSpaceContext,
@@ -29,7 +29,7 @@ impl PyTrapSpaces {
     /// Create a new `TrapSpacesComp` instance with the given `BooleanNetwork`,
     /// `AsynchronousGraph` is currently not supported.
     #[staticmethod]
-    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn create_from(graph_representation: PyAsynchronousGraphType) -> PyResult<Self> {
         Ok(PyTrapSpaces(PyTrapSpacesConfig::try_from(
             graph_representation,
         )?))

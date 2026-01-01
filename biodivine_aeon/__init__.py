@@ -1,14 +1,14 @@
-from typing import Literal, TypedDict, Mapping, Union, Optional
+from typing import Literal, TypedDict, Mapping, Union, Optional, Sequence
 
 # Notes on Python version updates:
 #  - TODO: If we ever move to 3.10, we can start using `TypeAlias`.
 #  - TODO: If we ever move to 3.10, we can start using `|` instead of `Union` (and stop using `Optional`).
-#  - TODO: If we ever move to 3.11, we can start using `Generic` and `TypedDict` together.
+#  - TODO: If we ever move to 3.11, we can start using `Generic` and `TypedDict` together. Also NotRequired in `TypedDict`.
 #  - TODO: If we ever move to 3.12, we can start using `type` instead of `TypeAlias`.
 #  - TODO: If we ever move to 3.12, we can start using special syntax for generics.
 
 # Counterintuitively, these two lines should actually reexport the native PyO3 module here. But it is a bit of a hack
-# which does not work super reliably. Refer to the PyO3 guide for how this should be handled if it stops working.
+# that does not work super reliably. Refer to the PyO3 guide for how this should be handled if it stops working.
 import biodivine_aeon
 from .biodivine_aeon import *
 
@@ -16,7 +16,7 @@ from .biodivine_aeon import *
 __doc__ = biodivine_aeon.__doc__
 
 # The "__all__" list allows us to control what items are exported from the module. It has to be built as a single
-# assignment, because the interpreter will cache its contents (i.e. subsequent updates are not taken into account).
+# assignment because the interpreter will cache its contents (i.e., later updates are not taken into account).
 # We include all Python-only types that we have in this file, plus all classes from the native module as long as
 # they do not start with an underscore. We can also use this to influence the order in which items appear
 # in documentation.
@@ -41,6 +41,10 @@ __all__ = [
               'Regulation',
               'IdRegulation',
               'NamedRegulation',
+              'GraphConfig',
+              'ReachabilityConfig',
+              'SccConfig',
+              'AttractorConfig',
           ] + [x for x in biodivine_aeon.__all__ if not x.startswith("_")]
 
 LOG_NOTHING: Literal[0] = 0
@@ -201,3 +205,60 @@ usage of these deprecated dictionary keys.
 
  > For backwards compatibility, the type is currently not generic, but provided as two separate aliases.
 """
+
+class GraphConfig(TypedDict):
+    graph: Union[AsynchronousGraph, BooleanNetwork]
+
+class ReachabilityConfig(GraphConfig, total=False):
+    """
+    A configuration object for the `Reachability` computation. It allows you to specify various
+    parameters for the reachability analysis, such as the underlying `AsynchronousGraph`,
+    the set of active variables, a BDD size limit, and a steps limit.
+
+    **This feature is currently in "preview mode", so please expect that the API of this object
+    can change.**
+    """
+
+    # Default: All variables
+    active_variables: Sequence[VariableIdType]
+    # Default: max. platform integer
+    max_iterations: int
+    # Default: max. platform integer
+    max_symbolic_size: int
+
+class SccConfig(GraphConfig, total=False):
+    """
+    A configuration object for the `SCCs` computation. It allows you to specify various
+    parameters for the analysis, such as trimming and long-lived SCC filtering.
+
+    You can also limit the number of enumerated SCCs using `solution_count`.
+
+    **This feature is currently in "preview mode", so please expect that the API of this object
+    can change.**
+    """
+
+    # Default: both
+    should_trim: Literal["none", "both", "sinks", "sources"]
+    # Default: false
+    filter_long_lived: bool
+    # Default: max. platform integer
+    solution_count: int
+
+class AttractorConfig(GraphConfig, total=False):
+    """
+    A configuration object for the `Attractors` class. It allows you to specify various
+    parameters for the analysis, such as the underlying `AsynchronousGraph`,
+    the set of active variables, and a BDD size limit.
+
+    You can also limit the number of enumerated SCCs using `solution_count`.
+
+    **This feature is currently in "preview mode", so please expect that the API of this object
+    can change.**
+    """
+
+    # Default: All variables
+    active_variables: Sequence[VariableIdType]
+    # Default: max. platform integer
+    max_symbolic_size: int
+    # Default: max. platform integer
+    solution_count: int

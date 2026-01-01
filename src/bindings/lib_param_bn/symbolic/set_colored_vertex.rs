@@ -1,6 +1,6 @@
 use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
@@ -8,6 +8,7 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
@@ -244,7 +245,7 @@ impl ColoredVertexSet {
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]
     pub fn items(
         &self,
-        retained_variables: Option<&Bound<'_, PyList>>,
+        retained_variables: Option<Vec<VariableIdType>>,
         retained_functions: Option<&Bound<'_, PyList>>,
     ) -> PyResult<_ColorVertexModelIterator> {
         let ctx = self.ctx.get();
@@ -287,7 +288,7 @@ impl ColoredVertexSet {
             retained
                 .iter()
                 .map(|it| {
-                    ctx.resolve_network_variable(&it)
+                    it.resolve(ctx.as_native())
                         .map(|it| ctx.as_native().get_state_variable(it))
                 })
                 .collect::<PyResult<Vec<_>>>()?

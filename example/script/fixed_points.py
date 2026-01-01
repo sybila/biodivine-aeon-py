@@ -1,6 +1,9 @@
 import sys
 
 from biodivine_aeon import *
+import biodivine_aeon
+
+biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_VERBOSE
 
 # This script computes the fixed points of a single,
 # fully specified Boolean network.

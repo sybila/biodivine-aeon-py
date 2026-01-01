@@ -6,7 +6,7 @@ use crate::{
     AsNative as _,
     bindings::{
         algorithms::{
-            graph_representation::PyGraphRepresentation, token_python::CancelTokenPython,
+            graph_representation::PyAsynchronousGraphType, token_python::CancelTokenPython,
         },
         lib_param_bn::symbolic::{
             set_colored_vertex::ColoredVertexSet, symbolic_context::SymbolicContext,
@@ -51,7 +51,7 @@ impl PyFixedPointsConfig {
     #[new]
     #[pyo3(signature = (graph_representation, restriction = None, time_limit_millis = None, bdd_size_limit = None))]
     pub fn new_py(
-        graph_representation: PyGraphRepresentation,
+        graph_representation: PyAsynchronousGraphType,
         restriction: Option<&ColoredVertexSet>,
         time_limit_millis: Option<u64>,
         bdd_size_limit: Option<usize>,
@@ -82,7 +82,7 @@ impl PyFixedPointsConfig {
     /// Create a new `FixedPointsConfig` from the given `AsynchronousGraph` or `BooleanNetwork`,
     /// with otherwise default configuration.
     #[staticmethod]
-    pub fn create_from(graph_representation: PyGraphRepresentation) -> PyResult<Self> {
+    pub fn create_from(graph_representation: PyAsynchronousGraphType) -> PyResult<Self> {
         PyFixedPointsConfig::try_from(graph_representation)
     }
 

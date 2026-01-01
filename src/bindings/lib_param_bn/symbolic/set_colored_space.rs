@@ -17,12 +17,13 @@ use pyo3::types::PyList;
 
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::symbolic::model_space::SpaceModel;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use pyo3::IntoPyObjectExt;
@@ -237,7 +238,7 @@ impl ColoredSpaceSet {
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]
     fn items(
         &self,
-        retained_variables: Option<&Bound<'_, PyList>>,
+        retained_variables: Option<Vec<VariableIdType>>,
         retained_functions: Option<&Bound<'_, PyList>>,
         py: Python,
     ) -> PyResult<_ColorSpaceModelIterator> {
@@ -289,7 +290,7 @@ impl ColoredSpaceSet {
         let mut retained_variables = if let Some(retained) = retained_variables {
             let mut retained_vars = Vec::new();
             for var in retained {
-                let var = ctx.as_ref().resolve_network_variable(&var)?;
+                let var = var.resolve(ctx.as_native().inner_context())?;
                 retained_vars.push(ctx.as_native().get_positive_variable(var));
                 retained_vars.push(ctx.as_native().get_negative_variable(var));
             }

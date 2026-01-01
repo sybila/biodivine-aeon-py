@@ -1,13 +1,15 @@
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::bdd_variable_set::BddVariableSet;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::pyo3_utils::{BoolLikeValue, richcmp_eq_by_key};
-use crate::{AsNative, index_error, throw_index_error, throw_runtime_error, throw_type_error};
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
+use crate::pyo3_utils::richcmp_eq_by_key;
+use crate::{AsNative, throw_index_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_param_bn::FnUpdate;
 use either::{Either, Left, Right};
 use pyo3::IntoPyObjectExt;
@@ -51,43 +53,6 @@ pub struct SymbolicContext {
     bdd_vars: Py<BddVariableSet>,
 }
 
-impl NetworkVariableContext for SymbolicContext {
-    fn resolve_network_variable(
-        &self,
-        variable: &Bound<'_, PyAny>,
-    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
-        if let Ok(id) = variable.extract::<VariableId>() {
-            return if id.__index__() < self.as_native().num_state_variables() {
-                Ok(*id.as_native())
-            } else {
-                throw_index_error(format!("Invalid variable ID `{}`.", id.__index__()))
-            };
-        }
-        if let Ok(id) = variable.extract::<BddVariable>() {
-            return self
-                .as_native()
-                .find_state_variable(id.into())
-                .ok_or_else(|| {
-                    index_error(format!(
-                        "BDD variable `{}` is not a network variable.",
-                        id.__index__()
-                    ))
-                });
-        }
-        if let Ok(name) = variable.extract::<String>() {
-            return self
-                .as_native()
-                .find_network_variable(name.as_str())
-                .ok_or_else(|| index_error(format!("Unknown variable name `{name}`.")));
-        }
-        throw_type_error("Expected `VariableId`, `BddVariable` or `str`.")
-    }
-
-    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
-        self.as_native().get_network_variable_name(variable)
-    }
-}
-
 impl AsNative<biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext> for SymbolicContext {
     fn as_native(&self) -> &biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext {
         &self.native
@@ -121,14 +86,13 @@ impl SymbolicContext {
     pub fn new(
         py: Python,
         network: Py<BooleanNetwork>,
-        extra_variables: Option<&Bound<'_, PyDict>>,
+        extra_variables: Option<HashMap<VariableIdType, u16>>,
     ) -> PyResult<SymbolicContext> {
         let bn = network.borrow(py);
         let mut extra = HashMap::new();
         if let Some(extra_variables) = extra_variables {
             for (k, v) in extra_variables {
-                let k = bn.as_ref().resolve_network_variable(&k)?;
-                let v = v.extract::<u16>()?;
+                let k = k.resolve(bn.as_native())?;
                 extra.insert(k, v);
             }
         }
@@ -274,8 +238,8 @@ impl SymbolicContext {
     }
 
     /// The name of a particular network variable.
-    pub fn get_network_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
-        let variable = self.resolve_network_variable(variable)?;
+    pub fn get_network_variable_name(&self, variable: VariableIdSymType) -> PyResult<String> {
+        let variable = variable.resolve(self.as_native())?;
         Ok(self.as_native().get_network_variable_name(variable))
     }
 
@@ -563,7 +527,7 @@ impl SymbolicContext {
     }
 
     /// Create a new constant (`True`/`False`) `Bdd`.
-    pub fn mk_constant(&self, value: BoolLikeValue) -> PyResult<Bdd> {
+    pub fn mk_constant(&self, value: BoolType) -> PyResult<Bdd> {
         let rs_bdd = self.as_native().mk_constant(value.bool());
         Ok(Bdd::new_raw_2(self.bdd_vars.clone(), rs_bdd))
     }
@@ -572,8 +536,8 @@ impl SymbolicContext {
     ///
     /// This is equivalent to calling `SymbolicContext.mk_update_function` with
     /// `UpdateFunction.mk_var(variable)` as the argument.
-    pub fn mk_network_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<Bdd> {
-        let variable = self.resolve_network_variable(variable)?;
+    pub fn mk_network_variable(&self, variable: VariableIdSymType) -> PyResult<Bdd> {
+        let variable = variable.resolve(self.as_native())?;
         let rs_bdd = self.as_native().mk_state_variable_is_true(variable);
         Ok(Bdd::new_raw_2(self.bdd_vars.clone(), rs_bdd))
     }
@@ -585,11 +549,11 @@ impl SymbolicContext {
     #[pyo3(signature = (variable = None, index = None))]
     pub fn mk_extra_bdd_variable(
         &self,
-        variable: Option<&Bound<'_, PyAny>>,
+        variable: Option<VariableIdType>,
         index: Option<usize>,
     ) -> PyResult<Bdd> {
         let variable = if let Some(variable) = variable {
-            self.resolve_network_variable(variable)?
+            variable.resolve(self.as_native())?
         } else {
             biodivine_lib_param_bn::VariableId::from_index(0)
         };
@@ -692,9 +656,9 @@ impl SymbolicContext {
     /// `SymbolicContext.functions_bdd_variables`, since their variable is eliminated.
     pub fn eliminate_network_variable(
         &self,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdSymType,
     ) -> PyResult<SymbolicContext> {
-        let variable = self.resolve_network_variable(variable)?;
+        let variable = variable.resolve(self.as_native())?;
         let eliminated = self.as_native().eliminate_network_variable(variable);
         Ok(SymbolicContext {
             bdd_vars: self.bdd_vars.clone(),

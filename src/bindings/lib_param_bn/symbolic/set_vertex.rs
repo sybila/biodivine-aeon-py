@@ -14,18 +14,17 @@ use num_bigint::BigUint;
 use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::PyList;
 
 use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::symbolic::model_vertex::VertexModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 
 /// A symbolic representation of a set of "vertices", i.e. valuations of variables
 /// of a particular `BooleanNetwork`.
@@ -194,13 +193,13 @@ impl VertexSet {
     /// Consequently, the resulting `VertexModel` instances will fail with an `IndexError` if a value of a variable
     /// outside the `retained` set is requested.
     #[pyo3(signature = (retained = None))]
-    pub fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_VertexModelIterator> {
+    pub fn items(&self, retained: Option<Vec<VariableIdType>>) -> PyResult<_VertexModelIterator> {
         let ctx = self.ctx.get();
         let retained = if let Some(retained) = retained {
             retained
                 .iter()
                 .map(|it| {
-                    ctx.resolve_network_variable(&it)
+                    it.resolve(ctx.as_native())
                         .map(|it| ctx.as_native().get_state_variable(it))
                 })
                 .collect::<PyResult<Vec<_>>>()?
@@ -339,6 +338,10 @@ impl VertexSet {
             }
         }
         space
+    }
+
+    pub fn context(&self) -> Py<SymbolicContext> {
+        self.ctx.clone()
     }
 }
 

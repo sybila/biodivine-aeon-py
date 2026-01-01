@@ -22,19 +22,20 @@ impl FixedPoints {
         stg: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
     ) -> PyResult<ColoredVertexSet> {
-        let restriction = restriction
-            .map(|it| it.as_native())
-            .unwrap_or(stg.as_native().unit_colored_vertices());
-        let result = biodivine_lib_param_bn::fixed_points::FixedPoints::_symbolic(
-            stg.as_native(),
-            restriction,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(ColoredVertexSet::mk_native(stg.symbolic_context(), result))
+        cancel_this::on_python(|| {
+            let restriction = restriction
+                .map(|it| it.as_native())
+                .unwrap_or(stg.as_native().unit_colored_vertices());
+            let result = biodivine_lib_param_bn::fixed_points::FixedPoints::_symbolic(
+                stg.as_native(),
+                restriction,
+                global_log_level(py)?,
+            )?;
+            Ok(ColoredVertexSet::mk_native(stg.symbolic_context(), result))
+        })
     }
 
-    /// **Deprecated**: Use `FixedPointsComp.symbolilc_vertices()` instead.
+    /// **Deprecated**: Use `FixedPointsComp.symbolic_vertices()` instead.
     /// Iteratively compute the set of fixed-point vertices in an `AsynchronousGraph`.
     ///
     /// This is equivalent to `FixedPoints.symbolic(graph, set).vertices()`, but can be
@@ -46,16 +47,17 @@ impl FixedPoints {
         stg: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
     ) -> PyResult<VertexSet> {
-        let restriction = restriction
-            .map(|it| it.as_native())
-            .unwrap_or(stg.as_native().unit_colored_vertices());
-        let result = biodivine_lib_param_bn::fixed_points::FixedPoints::_symbolic_vertices(
-            stg.as_native(),
-            restriction,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(VertexSet::mk_native(stg.symbolic_context(), result))
+        cancel_this::on_python(|| {
+            let restriction = restriction
+                .map(|it| it.as_native())
+                .unwrap_or(stg.as_native().unit_colored_vertices());
+            let result = biodivine_lib_param_bn::fixed_points::FixedPoints::_symbolic_vertices(
+                stg.as_native(),
+                restriction,
+                global_log_level(py)?,
+            )?;
+            Ok(VertexSet::mk_native(stg.symbolic_context(), result))
+        })
     }
 
     /// **Deprecated**: Use `FixedPointsComp.symbolic_colors()` instead.
@@ -70,15 +72,16 @@ impl FixedPoints {
         stg: &AsynchronousGraph,
         restriction: Option<&ColoredVertexSet>,
     ) -> PyResult<ColorSet> {
-        let restriction = restriction
-            .map(|it| it.as_native())
-            .unwrap_or(stg.as_native().unit_colored_vertices());
-        let result = biodivine_lib_param_bn::fixed_points::FixedPoints::_symbolic_colors(
-            stg.as_native(),
-            restriction,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(ColorSet::mk_native(stg.symbolic_context(), result))
+        cancel_this::on_python(|| {
+            let restriction = restriction
+                .map(|it| it.as_native())
+                .unwrap_or(stg.as_native().unit_colored_vertices());
+            let result = biodivine_lib_param_bn::fixed_points::FixedPoints::_symbolic_colors(
+                stg.as_native(),
+                restriction,
+                global_log_level(py)?,
+            )?;
+            Ok(ColorSet::mk_native(stg.symbolic_context(), result))
+        })
     }
 }

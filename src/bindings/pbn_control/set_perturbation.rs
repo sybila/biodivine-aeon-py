@@ -10,14 +10,13 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 };
 use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
-use pyo3::prelude::PyListMethods;
-use pyo3::types::PyList;
 use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationModel};
 use crate::{AsNative, throw_runtime_error};
@@ -229,7 +228,7 @@ impl PerturbationSet {
     /// Returns an iterator over all perturbations in this `PerturbationSet` with an optional
     /// projection to a subset of network variables.
     ///
-    /// When no `retained` collection is specified, this is equivalent to
+    /// When no `retained` collection is specified, this is an equivalent to
     /// `PerturbationSet.__iter__`. However, if a retained set is given, the resulting iterator
     /// only considers unique combinations of the `retained` variables. Consequently, the
     /// resulting `PerturbationModel` instances will fail with an `IndexError` if a value of
@@ -241,18 +240,15 @@ impl PerturbationSet {
     pub fn items(
         &self,
         py: Python,
-        retained: Option<&Bound<'_, PyList>>,
+        retained: Option<Vec<VariableIdSymType>>,
     ) -> PyResult<_PerturbationModelIterator> {
         let self_ctx = self.ctx.borrow(py);
         let parent = self_ctx.as_ref();
         let ctx = self.ctx.get();
         let retained = if let Some(retained) = retained {
-            retained
-                .iter()
-                .map(|it| parent.resolve_network_variable(&it))
-                .collect::<PyResult<Vec<_>>>()?
+            VariableIdSymType::resolve_collection(retained, parent.as_native())?
         } else {
-            ctx.as_native().perturbable_variables().clone()
+            ctx.as_native().perturbable_variables().to_vec()
         };
         let map = ctx.as_native().get_perturbation_bdd_mapping(&retained);
         let mut retained_symbolic = Vec::new();
