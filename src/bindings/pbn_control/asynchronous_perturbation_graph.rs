@@ -115,6 +115,23 @@ impl AsynchronousPerturbationGraph {
         format!("AsynchronousPerturbationGraph({})", ctx.get().__str__())
     }
 
+    pub fn __getnewargs__(&self, py: Python) -> PyResult<(Py<BooleanNetwork>, Vec<VariableId>)> {
+        let network = self
+            .as_native()
+            .as_non_perturbable()
+            .as_network()
+            .unwrap()
+            .clone();
+        let network_py = BooleanNetwork::from(network).export_to_python(py)?;
+        let perturbable = self
+            .as_native()
+            .perturbable_variables()
+            .iter()
+            .map(|it| VariableId::from(*it))
+            .collect();
+        Ok((network_py, perturbable))
+    }
+
     /// Reconstruct the `BooleanNetwork` that represents the *unperturbed* dynamics of this graph.
     /// The network does not contain any perturbation parameters.
     ///

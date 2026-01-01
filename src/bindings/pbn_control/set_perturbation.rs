@@ -107,6 +107,11 @@ impl PerturbationSet {
         hasher.finish()
     }
 
+    pub fn __getnewargs__(&self, py: Python) -> (Py<AsynchronousPerturbationGraph>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
+    }
+
     pub fn __iter__(&self, py: Python) -> PyResult<_PerturbationModelIterator> {
         self.items(py, None)
     }

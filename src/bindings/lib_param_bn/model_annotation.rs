@@ -94,7 +94,6 @@ fn mk_path(path: &[String]) -> Vec<&str> {
     path.iter().map(|it| it.as_str()).collect()
 }
 
-// TODO: Figure out how this should be pickled?
 #[pymethods]
 impl ModelAnnotation {
     /// Create a new `ModelAnnotation` with an optional string `value`.
@@ -169,6 +168,30 @@ impl ModelAnnotation {
     pub fn __repr__(&self, py: Python) -> String {
         let self_str = self.__str__(py);
         format!("ModelAnnotation.from_aeon({self_str:?})")
+    }
+
+    /// Returns the arguments for pickling: the string representation of the annotation subtree
+    /// at the current path. When unpickled, this creates a new root annotation with the
+    /// serialized subtree as its content.
+    pub fn __getnewargs__(&self, py: Python) -> (Option<String>,) {
+        // Get the annotation at the current path and convert to string
+        let ann_str = self.__str__(py);
+        if ann_str.is_empty() {
+            (None,)
+        } else {
+            // Return the value at this node (if any)
+            (self.get_value(py),)
+        }
+    }
+
+    /// Custom reduce method for proper pickle support that preserves the full subtree.
+    pub fn __reduce__(&self, py: Python) -> PyResult<(Py<PyAny>, (String,))> {
+        // Get the string representation of the annotation at this path
+        let ann_str = self.__str__(py);
+        // Return the from_aeon static method and the string representation
+        let cls = py.get_type::<ModelAnnotation>();
+        let from_aeon = cls.getattr("from_aeon")?;
+        Ok((from_aeon.into(), (ann_str,)))
     }
 
     pub fn __len__(&self, py: Python) -> usize {

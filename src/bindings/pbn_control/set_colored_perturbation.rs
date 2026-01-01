@@ -110,6 +110,11 @@ impl ColoredPerturbationSet {
         hasher.finish()
     }
 
+    fn __getnewargs__(&self, py: Python) -> (Py<AsynchronousPerturbationGraph>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
+    }
+
     fn __iter__(&self, py: Python) -> PyResult<_ColorPerturbationModelIterator> {
         self.items(py, None, None)
     }

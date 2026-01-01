@@ -98,11 +98,7 @@ impl SpaceSet {
     }
 
     fn __getnewargs__(&self, py: Python) -> (Py<SymbolicSpaceContext>, Bdd) {
-        let ctx_borrowed = self.ctx.borrow(py);
-        let bdd = Bdd::new_raw_2(
-            ctx_borrowed.as_ref().bdd_variable_set(),
-            self.native.as_bdd().clone(),
-        );
+        let bdd = self.to_bdd(py);
         (self.ctx.clone(), bdd)
     }
 

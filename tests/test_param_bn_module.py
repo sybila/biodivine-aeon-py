@@ -1403,3 +1403,84 @@ def test_symbolic_pickle_deep_copy_semantics():
     
     # The objects should no longer be equal after modification
     assert original_vertices != modified
+
+
+def test_model_annotation_pickle():
+    """
+    Test that ModelAnnotation can be pickled and unpickled correctly.
+    """
+    # Create an annotation with nested children
+    ann = ModelAnnotation('root value')
+    ann['child1'].value = 'child1 value'
+    ann['child2'].value = 'child2 value'
+    ann['child1']['nested'].value = 'nested value'
+    
+    # Pickle and unpickle
+    pickled = pickle.dumps(ann)
+    unpickled = pickle.loads(pickled)
+    
+    # Verify the structure is preserved
+    assert unpickled.value == 'root value'
+    assert unpickled['child1'].value == 'child1 value'
+    assert unpickled['child2'].value == 'child2 value'
+    assert unpickled['child1']['nested'].value == 'nested value'
+    
+    # Also test pickling a sub-annotation (at a path)
+    sub_ann = ann['child1']
+    sub_pickled = pickle.dumps(sub_ann)
+    sub_unpickled = pickle.loads(sub_pickled)
+    
+    # The sub-annotation should become its own root after unpickling
+    assert sub_unpickled.value == 'child1 value'
+    assert sub_unpickled['nested'].value == 'nested value'
+
+
+def test_perturbation_graph_pickle():
+    """
+    Test that AsynchronousPerturbationGraph can be pickled and unpickled correctly.
+    """
+    bn = BooleanNetwork.from_bnet('a, b\nb, a\nc, a & b')
+    graph = AsynchronousPerturbationGraph(bn)
+    
+    # Pickle and unpickle the graph
+    pickled = pickle.dumps(graph)
+    unpickled = pickle.loads(pickled)
+    
+    # Verify the graph structure is preserved
+    assert graph.network_variable_count() == unpickled.network_variable_count()
+    assert graph.perturbable_network_variable_names() == unpickled.perturbable_network_variable_names()
+    
+    # Test that perturbation sets work on the unpickled graph
+    perturbations = unpickled.mk_unit_perturbations()
+    assert perturbations.cardinality() > 0
+
+
+def test_perturbation_set_pickle():
+    """
+    Test that PerturbationSet and ColoredPerturbationSet can be pickled correctly.
+    """
+    bn = BooleanNetwork.from_bnet('a, b\nb, a')
+    graph = AsynchronousPerturbationGraph(bn)
+    
+    # Create and pickle PerturbationSet
+    perturbations = graph.mk_unit_perturbations()
+    pickled = pickle.dumps(perturbations)
+    unpickled = pickle.loads(pickled)
+    
+    assert perturbations.cardinality() == unpickled.cardinality()
+    assert perturbations.symbolic_size() == unpickled.symbolic_size()
+    
+    # Create and pickle ColoredPerturbationSet
+    colored = graph.mk_unit_colored_perturbations()
+    colored_pickled = pickle.dumps(colored)
+    colored_unpickled = pickle.loads(colored_pickled)
+    
+    assert colored.cardinality() == colored_unpickled.cardinality()
+    assert colored.symbolic_size() == colored_unpickled.symbolic_size()
+    
+    # Verify the unpickled objects work correctly
+    singleton = unpickled.pick_singleton()
+    assert singleton.cardinality() == 1
+    
+    colored_singleton = colored_unpickled.pick_singleton()
+    assert colored_singleton.cardinality() == 1
