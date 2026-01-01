@@ -1,17 +1,21 @@
-use pyo3::{Py, PyResult, Python, pyclass, pymethods};
-use regex::Regex;
-use reqwest::blocking::get;
-use serde_json::Value;
-use std::str::FromStr;
-
-use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
-use crate::runtime_error;
-
 use super::bbm_model::BbmModel;
 use super::filter_config::BbmFilterConfig;
+use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
+use crate::runtime_error;
+use pyo3::ffi::c_str;
+use pyo3::prelude::PyAnyMethods;
+use pyo3::{Py, PyResult, Python, pyclass, pymethods};
+use regex::Regex;
+use serde_json::Value;
+use std::ffi::CString;
+use std::str::FromStr;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 thread_local! {
+    /// Used for retrieving IDs from model references.
     static ID_REGEX: Regex = Regex::new(r"bbm-(\d{3})").unwrap();
+    /// Remember if the dataset has been downloaded already.
+    static INITIALIZED: AtomicBool = const { AtomicBool::new(false) };
 }
 
 /// The API does not return the model ID right now, but the ID does appear in the bib entry.
@@ -43,13 +47,28 @@ impl BiodivineBooleanModels {
     /// all models. The returned models can then be used for further filtering or
     /// processing.
     #[staticmethod]
-    fn fetch_all_model_data() -> PyResult<Vec<BbmModel>> {
-        let url = "https://bbm.sybila.fi.muni.cz/api/models/";
-        let response = get(url)
-            .map_err(|e| runtime_error(format!("Request to BBM endpoint failed: {}", e)))?;
-        let text = response
-            .text()
-            .map_err(|e| runtime_error(format!("Failed to read the BBM response text: {}", e)))?;
+    #[pyo3(signature = (url=None))]
+    fn fetch_all_model_data(py: Python, url: Option<String>) -> PyResult<Vec<BbmModel>> {
+        // The advantage of this approach is that it correctly responds to Python cancellation.
+        let url = url.unwrap_or_else(|| "https://bbm.sybila.fi.muni.cz/api/models/".to_string());
+
+        // If the data is not initialized yet, fetch it and save it to a global Python variable.
+        INITIALIZED.with(|initialized| {
+            if !initialized.load(Ordering::SeqCst) {
+                let code = format!("_AEON_PY_MODELS_CACHE = __import__('urllib.request').request.urlopen('{url}').read().decode('utf-8')");
+                let code = CString::new(code).unwrap();
+                let result = py.run(code.as_c_str(), None, None);
+                initialized.store(true, Ordering::SeqCst);
+                result
+            } else {
+                Ok(())
+            }
+        })?;
+
+        // Retrieve downloaded data from the global Python variable
+        let text = py
+            .eval(c_str!("_AEON_PY_MODELS_CACHE"), None, None)?
+            .extract::<String>()?;
 
         let json: Value = serde_json::from_str(&text)
             .map_err(|e| runtime_error(format!("Failed to parse JSON: {}", e)))?;
@@ -75,13 +94,13 @@ impl BiodivineBooleanModels {
     ) -> PyResult<Py<BooleanNetwork>> {
         // MAX is hopefully never going to be a valid ID
         let num_id = id.parse::<usize>().unwrap_or(usize::MAX);
-        let models_list = Self::fetch_all_model_data()?;
+        let models_list = Self::fetch_all_model_data(py, None)?;
         let model = models_list
             .into_iter()
             .find(|m| m.id == id || extract_id(&m.bib).is_some_and(|it| it == num_id))
             .ok_or(runtime_error("Model not found in BBM database."))?;
 
-        let py_bn = BooleanNetwork::from_aeon(py, &model.model_data).map_err(runtime_error)?;
+        let py_bn = BooleanNetwork::from_aeon(py, &model.raw_model_data).map_err(runtime_error)?;
 
         let py_bn = match inline_inputs {
             true => py_bn.borrow_mut(py).inline_inputs(py, true, true)?,
@@ -94,9 +113,9 @@ impl BiodivineBooleanModels {
     /// provided model ID. You can use either the "classical" BBM model numbers
     /// (`015`, `077, etc.) or dedicated unique ID strings used in the model database.
     #[staticmethod]
-    pub fn fetch_model(id: &str) -> PyResult<BbmModel> {
+    pub fn fetch_model(py: Python, id: &str) -> PyResult<BbmModel> {
         let num_id = id.parse::<usize>().unwrap_or(usize::MAX);
-        let models_list = Self::fetch_all_model_data()?;
+        let models_list = Self::fetch_all_model_data(py, None)?;
         // The numerical ID is not given in the model right now, but the models are
         // listed in-order, so
         let model = models_list
@@ -120,8 +139,8 @@ impl BiodivineBooleanModels {
     /// the numerical id as well.
     #[staticmethod]
     #[pyo3(signature = (config=None))]
-    pub fn fetch_ids(config: Option<BbmFilterConfig>) -> PyResult<Vec<String>> {
-        let models_list = Self::fetch_all_model_data()?;
+    pub fn fetch_ids(py: Python, config: Option<BbmFilterConfig>) -> PyResult<Vec<String>> {
+        let models_list = Self::fetch_all_model_data(py, None)?;
 
         // Filter the models based on the provided configuration
         let models_list = match config {
