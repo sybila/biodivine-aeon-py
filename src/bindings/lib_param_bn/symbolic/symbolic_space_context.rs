@@ -60,7 +60,7 @@ impl SymbolicSpaceContext {
         match self_.as_ref().get_network() {
             Some(network) => Ok((network.clone(),)),
             None => throw_runtime_error(
-                "Cannot serialize SymbolicContext: network reference not available. This context was created internally and cannot be serialized.",
+                "Cannot serialize SymbolicSpaceContext: network reference not available. This context was created internally and cannot be serialized.",
             ),
         }
     }

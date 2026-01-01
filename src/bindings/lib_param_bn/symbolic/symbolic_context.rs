@@ -140,7 +140,6 @@ impl SymbolicContext {
         match &self.network {
             Some(network) => {
                 let extra_variables = self.extra_variables_map()?;
-                println!("{:?}", extra_variables);
                 Ok((network.clone(), extra_variables))
             }
             None => throw_runtime_error(
