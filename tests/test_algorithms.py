@@ -88,32 +88,32 @@ def test_algorithms():
     # Test that symbolic size limits work:
 
     with pytest.raises(InterruptedError):
-        config: ReachabilityConfig = {
+        config_reach: ReachabilityConfig = {
             'graph': graph,
             'max_symbolic_size': 10
         }
-        Reachability.backward_superset(config, unit.pick_vertex())
+        Reachability.backward_superset(config_reach, unit.pick_vertex())
 
-    config: ReachabilityConfig = {
+    config_reach = {
         'graph': graph,
         'max_symbolic_size': 10_000
     }
 
-    assert not Reachability.backward_superset(config, unit.pick_vertex()).is_empty()
+    assert not Reachability.backward_superset(config_reach, unit.pick_vertex()).is_empty()
 
     with pytest.raises(InterruptedError):
-        config: AttractorConfig = {
+        config_attr: AttractorConfig = {
             'graph': graph,
             'max_symbolic_size': 10
         }
-        Attractors.attractors(config, unit)
+        Attractors.attractors(config_attr, unit)
 
-    config: AttractorConfig = {
+    config_attr = {
         'graph': graph,
         'max_symbolic_size': 10_000
     }
 
-    assert len(Attractors.attractors(config, unit)) > 0
+    assert len(Attractors.attractors(config_attr, unit)) > 0
 
 
 def test_percolation_case_1():
