@@ -25,8 +25,8 @@ algorithms-pyo3-bindings = []
 [dependencies]
 macros = { path = "macros" }
 pyo3 = { version = "0.27", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
-biodivine-lib-param-bn = { version="0.7.0", features=["solver-z3"] }
-biodivine-lib-bdd = "0.6.2"
+biodivine-lib-param-bn = { version="0.7.0", features=["solver-z3", "serde"] }
+biodivine-lib-bdd = { version = "0.6.2", features = ["serde"] }
 #biodivine-pbn-control = "0.3.1"
 biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "9e31bab9d000266ea25c35cc752c69077973d43c" }
 biodivine-hctl-model-checker = "0.3.4"
