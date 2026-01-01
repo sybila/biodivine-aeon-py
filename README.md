@@ -7,20 +7,53 @@ AEON.py provides Python bindings for the internal and experimental functionality
 [AEON](https://biodivine.fi.muni.cz/aeon/). You can use it to perform analysis of 
 Boolean networks with symbolic (BDD-based or solver-based) methods. In particular, AEON.py supports:
 
- - Classical and *partially specified* Boolean networks (i.e. with missing or partially unknown update functions).
- - Major network formats like `.sbml` and `.bnet`, including model validation.
- - Competitive symbolic methods for:
-    - Attractor detection.
-    - Fixed-point enumeration.
-    - Minimal/maximal trap space enumeration.
- - Symbolic (H)CTL model checking and parameter synthesis.
- - Control/reprogramming methods.
- - Arbitrary symbolic operations on sets of Boolean states/space/functions represented through BDDs.
+ - **Boolean Network Representation**: Classical and *partially specified* Boolean networks (i.e., with missing or partially unknown update functions).
+ - **File Format Support**: Multiple network formats including `.aeon`, `.sbml`, `.bnet`, `.booleannet`, and `.bma` (JSON/XML), with bidirectional conversion (import/export) and model validation capabilities.
+ - **Network Manipulation**: Transformations and reductions including:
+    - Variable inlining and network reduction.
+    - Constant and input variable elimination.
+    - Unused parameter pruning.
+    - Graph repair and regulation constraint removal.
+    - Network extension and safe variable removal.
+ - **Core Analysis Algorithms**: Competitive symbolic methods for:
+    - Attractor detection and enumeration (with configurable limits and performance options).
+    - Fixed-point enumeration (naive and optimized symbolic methods).
+    - Minimal/maximal/essential trap space enumeration.
+    - Strongly Connected Components (SCC) computation (forward-backward and chain decomposition).
+    - Forward and backward reachability analysis (with configurable active variables and limits).
+    - Subspace percolation analysis.
+ - **Graph Analysis**: Regulatory graph operations including:
+    - Feedback vertex set computation.
+    - Cycle detection and enumeration.
+    - Forward/backward reachability in regulatory graphs.
+    - Strongly and weakly connected component analysis.
+ - **Model Checking**: Symbolic (H)CTL model checking with support for:
+    - Hybrid Computation Tree Logic formulas.
+    - Temporal and hybrid quantifiers.
+    - Parameter synthesis and property verification.
+ - **Control and Perturbation**: Control/reprogramming methods including:
+    - Attractor control (one-step, temporary, permanent).
+    - Phenotype control with oscillation types.
+    - Perturbation analysis and robustness computation.
+    - Colored perturbation sets for parameterized analysis.
+ - **Classification**: Network classification capabilities including:
+    - Long-term behavior classification.
+    - Attractor bifurcation classification.
+    - Phenotype classification with oscillation types.
+    - Dynamic property classification.
+ - **Symbolic Operations**: Comprehensive BDD-based operations for:
+    - Sets of Boolean states, spaces, and functions.
+    - Color sets, vertex sets, space sets, and their colored variants.
+    - Arbitrary symbolic set operations (intersection, union, difference, etc.).
+    - Boolean expression manipulation and evaluation.
+    - BDD serialization and optimization.
 
 ### Installation
 
-The package is available through `PyPI` for all major operating systems (Windows, Linux and macOS). 
-To install it, you can simply run:
+**Requirements**: Python 3.9 or higher.
+
+The package is available through `PyPI` for all major operating systems (Windows, Linux, and macOS). 
+To install it, execute:
 
 ```
 pip install biodivine_aeon
@@ -31,7 +64,7 @@ and the [CoLoMoTo Docker](https://github.com/colomoto/colomoto-docker) environme
 
 ### Citation
 
-If you used AEON.py for some academic work, we'd be very happy if you could cite it using 
+If you used AEON.py for some academic work, we'd be delighted if you could cite it using 
 the following publication:
 
 ```
@@ -43,18 +76,18 @@ Bioinformatics, 38(21), 4978-4980.
 ### Documentation
 
  > We also provide some simple scripts for performing common tasks in the `example/scripts` folder. However, these
- > by far do not cover everything that is supported by AEON.py. 
+ > by far do not cover everything supported by AEON.py. 
 
 The documentation of the AEON.py API is available [here](https://biodivine.fi.muni.cz/docs/aeon-py/latest/).
 It should describe the functionality of all the classes/methods, but it currently does not 
 provide self-contained examples.
 
 For that, we recommend the Jupyter notebooks available in the `examples` directory:
- - There are three non-trivial case studies using AEON.py for analysing attractor and phenotype
+ - There are three non-trivial case studies using AEON.py for analyzing attractor and phenotype
  bifurcations in real-world Boolean networks.
- - There are several "workflow" examples. Some are focused on a specific task (e.g. attractor
- or fixed-point detection) while others provide a general "overview" of a particular topic (
- like BDDs and symbolic algorithms in general).
+ - There are several "workflow" examples. Some are focused on a specific task (e.g., attractor
+ or fixed-point detection) while others provide a general "overview" of a particular topic (like 
+ BDDs and symbolic algorithms in general).
 
 Additionally, the 
 [manual](https://biodivine.fi.muni.cz/aeon/manual/v0.4.0/index.html) of the standalone AEON tool
@@ -64,7 +97,7 @@ to partially specified Boolean networks (both classical and partially specified)
 ## Development instructions
 
 To build AEON.py from source, you generally need to follow the guides/instructions available for the
-[maturin](https://github.com/PyO3/maturin) tool. However, since some of the functionality in AEON.py
+[maturin](https://github.com/PyO3/maturin) tool. However, since some functionality in AEON.py
 requires the Z3 solver, the process is slightly more error-prone, as it also involves C dependencies,
 not only pure Rust (this also complicates builds on Apple Silicon and more exotic CPUs).
 
@@ -76,7 +109,7 @@ or as a dynamic library.
 
  - Using static integration is more "stable" since the library will use a known 
    version of Z3 tested by us. However, Z3 will need to be built during the first
-   compilation, which can take ~30min (subsequent builds should be faster thanks
+   compilation, which can take ~30 min (subsequent builds should be faster thanks
    to the build cache). You can also encounter build errors if there are issues with
    your C/C++ toolchain. To use the static linking method, you'll need to add
    extra commandline arguments when building the library (see below).
@@ -89,7 +122,7 @@ or as a dynamic library.
    your system using the official method (e.g. `apt install z3`, `brew install z3`, or
    use the official Windows installer).
 
-In general, we recommend starting with dynamic linking, because if everything works, it is faster
+In general, we recommend starting with dynamic linking because if everything works, it is faster
 and easier. However, in case you run into trouble, static linking could be actually easier
 to debug, since it depends less on your actual configuration and is thus easier to reproduce across 
 different machines. Similarly, it can be easier to use static linking on systems where Z3 is not 
@@ -97,7 +130,7 @@ available through an official installer or cannot be installed globally.
 
  > In any case, on linux, you'll need typical "essential" build tools like `cmake` and `clang`
  > to even build the Z3 dependency, regardless of the linking process. On debian-ish distros,
- > `apt install build-essential cmake clang` should be sufficient.
+ > `apt install build-essential cmake clang` should be enough.
 
  > On Apple Silicon, dynamic linking for Z3 is currently not working out-of-the-box if
  > you installed Z3 through `brew`, because the library files are not discoverable by `clang`
@@ -145,8 +178,8 @@ This documentation is stored in the `api-docs` folder.
 ### Publishing
 
 Finally, you may want to release an alpha/beta version of the library to test that everything is working correctly
-on all platforms (builds are notoriously finicky in these situations, since we essentially have to build for
-every platform and multiple versions of Python). Fortunately, the CI is set up to automatically build 
+on all platforms. Builds are notoriously finicky in these situations, since we essentially have to build for
+every platform and multiple versions of Python. Fortunately, the CI is set up to automatically build 
 and publish the library on all relevant platforms every time a new tag is pushed. 
 
 Before you publish a new version, make sure that the build works at least on your own machine. Then, make 
