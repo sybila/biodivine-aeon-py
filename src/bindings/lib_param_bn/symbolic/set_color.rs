@@ -26,7 +26,7 @@ use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationSet};
 
-/// A symbolic representation of a set of "colours", i.e. interpretations of explicit and
+/// A symbolic representation of a set of "colors", i.e., interpretations of explicit and
 /// implicit parameters within a particular `BooleanNetwork`.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -65,7 +65,7 @@ impl ColorSet {
     /// Normally, a new `ColorSet` is derived using an `AsynchronousGraph`. However, in some
     /// cases you may want to create it manually from a `SymbolicContext` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid set of colors.
     #[new]
     pub fn new(py: Python, ctx: Py<SymbolicContext>, bdd: &Bdd) -> ColorSet {
@@ -105,6 +105,11 @@ impl ColorSet {
 
     pub fn __deepcopy__(self_: Py<ColorSet>, _memo: &Bound<'_, PyAny>) -> Py<ColorSet> {
         self_.clone()
+    }
+
+    fn __getnewargs__(&self, py: Python) -> (Py<SymbolicContext>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
     }
 
     pub fn __hash__(&self) -> u64 {
@@ -226,7 +231,7 @@ impl ColorSet {
     /// Returns an iterator over all interpretations in this `ColorSet` with an optional projection to a subset
     /// of uninterpreted functions.
     ///
-    /// When no `retained` collection is specified, this is equivalent to `ColorSet.__iter__`. However, if a retained
+    /// When no `retained` collection is specified, this is an equivalent to `ColorSet.__iter__`. However, if a retained
     /// set is given, the resulting iterator only considers unique combinations of the `retained` functions.
     /// Consequently, the resulting `ColorModel` instances will fail with an `IndexError` if a value of a function
     /// outside the `retained` set is requested.

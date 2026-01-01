@@ -77,7 +77,7 @@ impl BddVariableSetBuilder {
 
     /// Add a collection of new variables to this `BddVariableSetBuilder`.
     ///
-    /// Panics if some of the variables already exist.
+    /// Panics if some variables already exist.
     fn add_all(&mut self, names: Vec<String>) -> Vec<BddVariable> {
         let str_variables = names.iter().map(|it| it.as_str()).collect::<Vec<_>>();
         self.as_native_mut()

@@ -9,7 +9,7 @@ use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{AsNative, throw_index_error, throw_runtime_error, throw_type_error};
+use crate::{AsNative, runtime_error, throw_index_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_param_bn::FnUpdate;
 use either::{Either, Left, Right};
 use pyo3::IntoPyObjectExt;
@@ -36,9 +36,9 @@ use std::collections::HashMap;
 /// more complex symbolic algorithms on top of the basic encoding, like model checking, control,
 /// or trap space detection. These extra variables are grouped with the network variables for
 /// convenience. This also determines their ordering within the `BddVariableSet`: the extra
-/// variables associated with variable `x` are created right after `x` for best locality.
+/// variables associated with variable `x` are created right after `x` for the best locality.
 ///
-/// Finally, `SymbolicContext` allows to build and interpret `Bdd` objects that are valid in
+/// Finally, `SymbolicContext` allows building and interpreting `Bdd` objects that are valid in
 /// the encoding it describes. For example, you can use `SymbolicContext.mk_update_function`
 /// to create a symbolic `Bdd` representation of an `UpdateFunction`.
 ///
@@ -49,8 +49,10 @@ use std::collections::HashMap;
 #[derive(Clone)]
 pub struct SymbolicContext {
     native: biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext,
-    // A copy of the underlying variable set for the purpose of BDD linking.
+    // A copy of the underlying variable set for BDD linking.
     bdd_vars: Py<BddVariableSet>,
+    // Store network and extra_variables for pickle support
+    network: Option<Py<BooleanNetwork>>,
 }
 
 impl AsNative<biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext> for SymbolicContext {
@@ -74,12 +76,7 @@ impl SymbolicContext {
     /// are declared in the given network are actually used by some update function in said
     /// network.
     ///
-    /// *In the future, this restriction will be lifted, but it is not quite clear how soon will
-    /// this happen.*
-    ///
-    /// Furthermore, due to this dependence on a `BooleanNetwork` structure, a
-    /// `SymbolicContext` cannot be currently pickled. It is recommended that you instead save
-    /// the `.aeon` representation of the `BooleanNetwork` in question.
+    /// *In the future, this restriction will be lifted, but it is not quite clear how soon it will happen.*
     ///
     #[new]
     #[pyo3(signature = (network, extra_variables = None))]
@@ -104,6 +101,7 @@ impl SymbolicContext {
         Ok(SymbolicContext {
             bdd_vars: Py::new(py, BddVariableSet::from(ctx.bdd_variable_set().clone()))?,
             native: ctx,
+            network: Some(network.clone()),
         })
     }
 
@@ -121,20 +119,33 @@ impl SymbolicContext {
         )
     }
 
-    /*
-
-        Currently unavailable because we cannot create a context without a BN, but we don't know
-        the original BN anymore.
-
-    fn __repr__(&self) -> String {
-        unimplemented!()
+    pub fn __repr__(&self, py: Python) -> PyResult<String> {
+        match &self.network {
+            Some(network) => {
+                let extra_variables = self.extra_variables_map()?;
+                Ok(format!(
+                    "SymbolicContext({}, {:?})",
+                    BooleanNetwork::__repr__(network.borrow(py)),
+                    extra_variables
+                ))
+            }
+            None => throw_runtime_error(
+                "Cannot serialize SymbolicContext: network reference not available. This context was created internally and cannot be serialized.",
+            ),
+        }
     }
 
-    fn __getnewargs__(&self) -> String {
-        unimplemented!()
+    fn __getnewargs__(&self) -> PyResult<(Py<BooleanNetwork>, HashMap<String, u16>)> {
+        match &self.network {
+            Some(network) => {
+                let extra_variables = self.extra_variables_map()?;
+                Ok((network.clone(), extra_variables))
+            }
+            None => throw_runtime_error(
+                "Cannot serialize SymbolicContext: network reference not available. This context was created internally and cannot be serialized.",
+            ),
+        }
     }
-
-     */
 
     fn __copy__(self_: Py<SymbolicContext>) -> Py<SymbolicContext> {
         self_.clone()
@@ -177,7 +188,7 @@ impl SymbolicContext {
             .collect()
     }
 
-    /// Return a `VariableId` of the specified network variable, assuming such variable exists.
+    /// Return a `VariableId` of the specified network variable, assuming such a variable exists.
     ///
     /// Compare to methods like `BooleanNetwork.find_variable`, this method can also resolve
     /// a `BddVariable` to the corresponding `VariableId` (assuming said `BddVariable` encodes
@@ -248,7 +259,7 @@ impl SymbolicContext {
         self.as_native().num_extra_state_variables()
     }
 
-    /// The list of all extra symbolic variable in this `SymbolicContext`.
+    /// The list of all extra symbolic variables in this `SymbolicContext`.
     pub fn extra_bdd_variables_list(&self) -> Vec<BddVariable> {
         self.as_native()
             .all_extra_state_variables()
@@ -416,9 +427,9 @@ impl SymbolicContext {
     }
 
     /// Find a `ParameterId` (explicit function) or `VariableId` (implicit function) which
-    /// identifies the specified function, or `None` if such function does not exist.
+    /// identifies the specified function, or `None` if such a function does not exist.
     ///
-    /// The function can accept a `BddVariable`. In such case, it will try to identify the
+    /// The function can accept a `BddVariable`. In such a case, it will try to identify the
     /// function table in which the variable resides. Note that this is a linear search.
     pub fn find_function(&self, function: &Bound<'_, PyAny>, py: Python) -> PyResult<Py<PyAny>> {
         if let Ok(id) = function.extract::<ParameterId>() {
@@ -567,7 +578,7 @@ impl SymbolicContext {
     /// Create a `Bdd` which is valid if and only if the specified uninterpreted function is valid.
     ///
     /// The function takes a vector of arguments which must match the arity of the uninterpreted
-    /// function. An argument can be either an arbitrary `Bdd` object, or an `UpdateFunction`
+    /// function. An argument can be either an arbitrary `Bdd` object or an `UpdateFunction`
     /// from which a `Bdd` is then constructed.
     pub fn mk_function(
         &self,
@@ -606,7 +617,7 @@ impl SymbolicContext {
     ///
     /// In other words, you can use this method to translate `Bdd` objects between contexts
     /// that use similar variables and parameters, as long as the `Bdd` only uses objects that
-    /// are present in both context, and are ordered the same in both contexts.
+    /// are present in both contexts and are ordered the same.
     ///
     pub fn transfer_from(&self, bdd: &Bdd, old_ctx: &SymbolicContext) -> PyResult<Bdd> {
         let Some(rs_bdd) = self
@@ -623,10 +634,10 @@ impl SymbolicContext {
     /// the elements necessary to encode the original `BooleanNetwork` and nothing else.
     ///
     /// You can use this method in combination with `SymbolicContext.transfer_from` in algorithms
-    /// that require more complicated symbolic contexts. After such algorithm computes a result,
+    /// that require more complicated symbolic contexts. After such an algorithm computes a result,
     /// it can be safely transferred to the "canonical context" which ensures it can be then
     /// interpreted using only the input model, without any internal information about the
-    /// algorithm that was used to obtain the result.
+    /// algorithm that was used to get the result.
     ///
     pub fn to_canonical_context(&self, py: Python) -> PyResult<SymbolicContext> {
         let canonical = self.as_native().as_canonical_context();
@@ -636,6 +647,7 @@ impl SymbolicContext {
                 BddVariableSet::from(canonical.bdd_variable_set().clone()),
             )?,
             native: canonical,
+            network: self.network.clone(),
         })
     }
 
@@ -644,8 +656,8 @@ impl SymbolicContext {
     ///
     /// The new context uses the same `ParameterId` identifiers as the old context, but has
     /// different `VariableId` identifiers, since one of the variables is no longer used, and
-    /// `VariableId` identifiers must be always a contiguous sequence. You should use variable
-    /// names to "translate" `VariableId` identifiers between the two symbolic context. Of course,
+    /// `VariableId` identifiers must always be a contiguous sequence. You should use variable
+    /// names to "translate" `VariableId` identifiers between the two symbolic contexts. Of course,
     /// `SymbolicContext.transfer_from` should also still work.
     ///
     /// Note that the extra symbolic variables and implicit function tables do not disappear,
@@ -663,6 +675,7 @@ impl SymbolicContext {
         Ok(SymbolicContext {
             bdd_vars: self.bdd_vars.clone(),
             native: eliminated,
+            network: self.network.clone(),
         })
     }
 }
@@ -671,12 +684,20 @@ impl SymbolicContext {
     pub fn wrap_native(
         py: Python,
         ctx: biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext,
+        network: Option<Py<BooleanNetwork>>,
     ) -> PyResult<SymbolicContext> {
         Ok(SymbolicContext {
             bdd_vars: Py::new(py, BddVariableSet::from(ctx.bdd_variable_set().clone()))?,
             native: ctx,
+            network,
         })
     }
+
+    /// Get a reference to the stored network, if any.
+    pub fn get_network(&self) -> Option<&Py<BooleanNetwork>> {
+        self.network.as_ref()
+    }
+
     pub fn resolve_function_bdd(
         &self,
         function: &Bound<'_, PyAny>,
@@ -762,11 +783,11 @@ impl SymbolicContext {
     }
 
     /// Create a network that contains all relevant variables and parameters, but no regulations or update
-    /// functions. I.e. all the information that is available in a symbolic context.
+    /// functions. I.e., all the information that is available in a symbolic context.
     ///
     /// Note that this does not preserve extra symbolic variables in any way.
     ///
-    /// This is mostly used for functions that *need* the network, but won't actually use it for anything
+    /// This is mostly used for functions that *need* the network, but won't use it for anything
     /// other than name and arity resolution.
     pub fn mk_fake_network(&self) -> biodivine_lib_param_bn::BooleanNetwork {
         let mut rg = biodivine_lib_param_bn::RegulatoryGraph::new(self.network_variable_names());
@@ -806,5 +827,20 @@ impl SymbolicContext {
             }
         }
         bn
+    }
+
+    /// Extract the map assigning each variable the number of "extra variables" used by this
+    /// context. Useful when trying to recreate the same context from serialized data.
+    fn extra_variables_map(&self) -> PyResult<HashMap<String, u16>> {
+        let mut extra_variables = HashMap::new();
+        for var in self.as_native().network_variables() {
+            let extra = self.as_native().extra_state_variables(var).len();
+            let extra = u16::try_from(extra).map_err(runtime_error)?;
+            let name = self.as_native().get_network_variable_name(var);
+            if extra > 0 {
+                extra_variables.insert(name, extra);
+            }
+        }
+        Ok(extra_variables)
     }
 }

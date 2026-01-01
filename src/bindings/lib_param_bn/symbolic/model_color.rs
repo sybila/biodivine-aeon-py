@@ -25,7 +25,7 @@ use std::sync::Arc;
 ///
 /// However, note that each function instantiation is by default represented as a
 /// `BooleanExpression` using anonymous variable names `x_0 ... x_k` (where `k` is the arity
-/// of the uninterpreted function). If you actually want to instantiate the function w.r.t.
+/// of the uninterpreted function). If you actually want to instantiate the function with respect to
 /// a set of arguments, specific `UpdateFunction`, or a parametrized `BooleanNetwork`,
 /// you can use the `ColorModel.instantiate` method.
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -420,7 +420,7 @@ impl ColorModel {
             if let Some(value) = self.native.get_value(output) {
                 if value {
                     let valuation = biodivine_lib_bdd::BddValuation::new(input_row);
-                    let valuation = biodivine_lib_bdd::BddPartialValuation::from(valuation);
+                    let valuation = BddPartialValuation::from(valuation);
                     dnf.push(valuation);
                 }
             } else {

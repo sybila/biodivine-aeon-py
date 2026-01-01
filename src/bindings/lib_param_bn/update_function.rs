@@ -19,11 +19,11 @@ use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
-/// Describes a single update function that is used to describe the dynamics of a `BooleanNetwork`.
+/// Describes a single update function used to describe the dynamics of a `BooleanNetwork`.
 ///
 /// It is similar to a `BooleanExpression`, but additionally admits the use of *uninterpreted functions* (also called
 /// explicit parameters in the context of a `BooleanNetwork`). These are Boolean functions with unknown but fixed
-/// specification that stand in for any unknown behaviour in the corresponding `BooleanNetwork`.
+/// specification that stand in for any unknown behavior in the corresponding `BooleanNetwork`.
 ///
 /// Additionally, compared to a `BooleanExpression`, the `UpdateFunction` refers to network variables and parameters
 /// using `VariableId` and `ParameterId`. To that end, every `UpdateFunction` has an underlying `BooleanNetwork`
@@ -98,8 +98,8 @@ impl UpdateFunction {
     }
 
     fn __getnewargs__(&self, py: Python) -> (Py<BooleanNetwork>, String) {
-        // Technically, this is a "different" expression because it is created with a completely new `root`,
-        // but it is much easier (and more transparent) than serializing the root expression and trying to figure
+        // Technically, this is a "different" expression because it is created with a completely new `root`.
+        // But it is much easier (and more transparent) than serializing the root expression and trying to figure
         // out how to serialize a pointer into its AST.
         (self.ctx.clone(), self.__str__(py))
     }
@@ -210,7 +210,7 @@ impl UpdateFunction {
         Self::new_raw(left.ctx.clone(), Arc::new(fun))
     }
 
-    /// Return an `imp` of two `BooleanExpression` values.
+    /// Return an `imp` of two `UpdateFunction` values.
     #[staticmethod]
     pub fn mk_imp(left: &UpdateFunction, right: &UpdateFunction) -> UpdateFunction {
         let fun = FnUpdate::mk_binary(
@@ -221,7 +221,7 @@ impl UpdateFunction {
         Self::new_raw(left.ctx.clone(), Arc::new(fun))
     }
 
-    /// Return an `iff` of two `BooleanExpression` values.
+    /// Return an `iff` of two `UpdateFunction` values.
     #[staticmethod]
     pub fn mk_iff(left: &UpdateFunction, right: &UpdateFunction) -> UpdateFunction {
         let fun = FnUpdate::mk_binary(
@@ -232,7 +232,7 @@ impl UpdateFunction {
         Self::new_raw(left.ctx.clone(), Arc::new(fun))
     }
 
-    /// Return a `xor` of two `BooleanExpression` values.
+    /// Return an `xor` of two `UpdateFunction` values.
     #[staticmethod]
     pub fn mk_xor(left: &UpdateFunction, right: &UpdateFunction) -> UpdateFunction {
         let fun = FnUpdate::mk_binary(

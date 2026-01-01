@@ -432,7 +432,7 @@ impl BddPartialValuation {
             .collect()
     }
 
-    /// True if this valuation is an extension (i.e. a more specified version) of the `other` valuation.
+    /// True if this valuation is an extension (i.e., a more specified version) of the `other` valuation.
     pub fn extends(&self, other: &BddPartialValuation) -> bool {
         self.value.extends(other.as_native())
     }

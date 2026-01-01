@@ -7,7 +7,7 @@ use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use pyo3::{PyResult, pyclass, pymethods};
 
 /// An "algorithm object" that can be used to compute symbolic constraints that correspond
-/// to typical properties of model regulations (i.e. monotonicity and essentiality).
+/// to typical properties of model regulations (i.e., monotonicity and essentiality).
 ///
 /// However, you can use this to create symbolic constraints for arbitrary symbolic functions,
 /// not just the update functions of a BN.
@@ -77,7 +77,7 @@ impl RegulationConstraint {
     }
 
     /// Compute a `Bdd` which is satisfied exactly by those function interpretations for which
-    /// the given `function` is has the specified `variable` as an essential input (i.e. it
+    /// the given `function` is having the specified `variable` as an essential input (i.e. it
     /// plays a role in the function's outcome).
     ///
     /// Note that the result only depends on the "parameter" variables of the given

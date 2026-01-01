@@ -10,7 +10,7 @@ use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvabl
 use crate::{AsNative, index_error};
 
 /// Represents a single vertex stored in a `VertexSet` (or a `ColoredVertexSet`), or a projection
-/// of said vertex to the chosen variables.
+/// of the said vertex to the chosen variables.
 ///
 /// Behaves like an immutable dictionary: Boolean variable values can be queried using
 /// a `VariableId`, a string name, or a `BddVariable`.
@@ -45,7 +45,7 @@ impl VertexModel {
         self.__str__()
     }
 
-    /// The number of actual values in this `VertexModel` (i.e. retained network variables).
+    /// The number of actual values in this `VertexModel` (i.e., retained network variables).
     pub fn __len__(&self) -> usize {
         self.to_values().len()
     }

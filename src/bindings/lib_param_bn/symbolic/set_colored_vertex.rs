@@ -25,10 +25,10 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
-/// A symbolic representation of a relation of "coloured vertices", i.e. pairs of vertices
+/// A symbolic representation of a relation of "colored vertices", i.e., pairs of vertices
 /// (see `VertexSet`) and colors (see `ColorSet`).
 ///
-/// Together, such pair represents a specific interpretation of network parameters and
+/// Together, such a pair represents a specific interpretation of network parameters and
 /// valuation of network variables.
 ///
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -62,7 +62,7 @@ impl ColoredVertexSet {
     /// Normally, a new `ColoredVertexSet` is derived using an `AsynchronousGraph`. However, in some
     /// cases you may want to create it manually from a `SymbolicContext` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid colored set of vertices.
     #[new]
     pub fn new(ctx: Py<SymbolicContext>, bdd: &Bdd) -> Self {
@@ -106,6 +106,11 @@ impl ColoredVertexSet {
 
     pub fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
+    }
+
+    fn __getnewargs__(&self, py: Python) -> (Py<SymbolicContext>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
     }
 
     pub fn __hash__(&self) -> u64 {
@@ -154,12 +159,12 @@ impl ColoredVertexSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single vertex-color pair.
+    /// True if this set is a singleton, i.e., a single vertex-color pair.
     pub fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
 
-    /// True if this set is a subspace, i.e. it can be expressed using a single conjunctive clause.
+    /// True if this set is a subspace, i.e., it can be expressed using a single conjunctive clause.
     pub fn is_subspace(&self) -> bool {
         self.as_native().is_subspace()
     }
@@ -169,13 +174,13 @@ impl ColoredVertexSet {
         self.as_native().symbolic_size()
     }
 
-    /// Compute the existential projection of this relation to the color component. I.e. returns a set of colors
+    /// Compute the existential projection of this relation to the color component. I.e., returns a set of colors
     /// such that for each color, there is at least one vertex-color pair in the original set.
     pub fn colors(&self) -> ColorSet {
         ColorSet::mk_native(self.ctx.clone(), self.as_native().colors())
     }
 
-    /// Compute the existential projection of this relation to the vertex component. I.e. returns a set of vertices
+    /// Compute the existential projection of this relation to the vertex component. I.e., returns a set of vertices
     /// such that for each vertex, there is at least one vertex-color pair in the original set.
     pub fn vertices(&self) -> VertexSet {
         VertexSet::mk_native(self.ctx.clone(), self.as_native().vertices())
@@ -209,22 +214,22 @@ impl ColoredVertexSet {
         self.mk_derived(self.as_native().pick_color())
     }
 
-    /// Pick a subset of this relation such that each vertex that is in the original relation is only present
+    /// Pick a subset of this relation such that each vertex in the original relation is only present
     /// with a single color in the result relation.
     ///
-    /// I.e. for each `vertex` that appears in this set, `result.intersect_vertices(vertex)` is a singleton.
+    /// I.e., for each `vertex` that appears in this set `result.intersect_vertices(vertex)` is a singleton.
     pub fn pick_vertex(&self) -> Self {
         self.mk_derived(self.as_native().pick_vertex())
     }
 
-    /// Deterministically pick a subset of this set that contains exactly a single vertex-color pair.
+    /// Deterministically pick a subset of this set that exactly contains a single vertex-color pair.
     ///
     /// If this set is empty, the result is also empty.
     pub fn pick_singleton(&self) -> Self {
         self.mk_derived(self.as_native().pick_singleton())
     }
 
-    /// Obtain the underlying `Bdd` of this `ColoredVertexSet`.
+    /// Get the underlying `Bdd` of this `ColoredVertexSet`.
     pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
@@ -234,12 +239,12 @@ impl ColoredVertexSet {
     /// Returns an iterator over all interpretation-vertex pairs in this `ColoredVertexSet` relation, with an optional
     /// projection to a subset of network variables and uninterpreted functions.
     ///
-    /// When no `retained` collections are specified, this is equivalent to `ColoredVertexSet.__iter__`. However, if
+    /// When no `retained` collections are specified, this is an equivalent to `ColoredVertexSet.__iter__`. However, if
     /// a retained collection is given, the resulting iterator only considers unique combinations of the `retained`
     /// functions and variables. Consequently, the resulting `ColorModel` and `VertexModel` instances will fail with
     /// an `IndexError` if a value outside the `retained` set is requested.
     ///
-    /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is equivalent to
+    /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is an equivalent to
     /// `set.colors().items()`. Similarly, with `retained_variables = None` and `retained_functions = []`, this is
     /// equivalent to `set.vertices().items()`.
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]

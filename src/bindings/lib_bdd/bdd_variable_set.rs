@@ -124,7 +124,7 @@ impl BddVariableSet {
     }
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
-    /// such variable does not exist.
+    /// such a variable does not exist.
     pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         let var = self.resolve_variable(variable)?;
         Ok(self.0.name_of(var))
@@ -165,7 +165,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing a conjunction of positive/negative literals
-    /// (e.g. $x \land y \land \neg z$).
+    /// (e.g., $x \land y \land \neg z$).
     ///
     /// See also `BoolClauseType`.
     pub fn mk_conjunctive_clause(
@@ -183,7 +183,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing a disjunction of positive/negative literals
-    /// (e.g. $x \lor y \lor \neg z$).
+    /// (e.g., $x \lor y \lor \neg z$).
     ///
     /// See also `BoolClauseType`.
     fn mk_disjunctive_clause(self_: PyRef<'_, Self>, clause: &Bound<'_, PyAny>) -> PyResult<Bdd> {
@@ -198,7 +198,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing a conjunction of disjunctive clauses
-    /// (e.g. $(x \lor y) \land (\neg x \lor z)$).
+    /// (e.g., $(x \lor y) \land (\neg x \lor z)$).
     ///
     /// This method uses a special algorithm that is typically faster than combining
     /// the clauses one by one.
@@ -232,7 +232,7 @@ impl BddVariableSet {
     /// Compute a `Bdd` which is satisfied by (and only by) valuations where exactly `k`
     /// out of the specified `variables` are `True`.
     ///
-    /// If `variables` are `None`, the result is computed w.r.t. all variables
+    /// If `variables` are `None`, the result is computed with respect to all variables
     /// managed by this `BddVariableSet`.
     #[pyo3(signature = (k, variables = None))]
     fn mk_sat_exactly_k(
@@ -252,7 +252,7 @@ impl BddVariableSet {
     /// Compute a `Bdd` which is satisfied by (and only by) valuations where up to `k`
     /// out of the specified `variables` are `True`.
     ///
-    /// If `variables` are `None`, the result is computed w.r.t. all variables
+    /// If `variables` are `None`, the result is computed with respect to all variables
     /// managed by this `BddVariableSet`.
     #[pyo3(signature = (k, variables = None))]
     fn mk_sat_up_to_k(
@@ -282,8 +282,8 @@ impl BddVariableSet {
     /// Translate a `Bdd` between two `BddVariableSet` objects.
     ///
     /// The translation is only valid if the `Bdd` relies on variables that are in both
-    /// variable set, and their ordering is mutually compatible. If this is not satisfied,
-    /// i.e. some of the variables don't exist in the new context, or would have to be reordered,
+    /// variable sets, and their ordering is mutually compatible. If this is not satisfied,
+    /// i.e., some variables don't exist in the new context, or would have to be reordered,
     /// the method throws a runtime exception.
     fn transfer_from(
         self_: PyRef<'_, Self>,

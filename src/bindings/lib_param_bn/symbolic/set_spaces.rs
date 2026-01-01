@@ -24,7 +24,7 @@ use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 
-/// A symbolic representation of a set of "spaces", i.e. hypercubes in the state space
+/// A symbolic representation of a set of "spaces", i.e., hypercubes in the state space
 /// of a particular `BooleanNetwork`.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -55,7 +55,7 @@ impl SpaceSet {
     /// Normally, a new `SpaceSet` is derived using a `SymbolicSpaceContext`. However, in some
     /// cases you may want to create it manually from a `SymbolicSpaceContext` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid set of spaces.
     #[new]
     pub fn new(ctx: Py<SymbolicSpaceContext>, bdd: &Bdd) -> Self {
@@ -95,6 +95,11 @@ impl SpaceSet {
 
     fn __deepcopy__(self_: Py<Self>, _memo: &Bound<'_, PyAny>) -> Py<Self> {
         self_.clone()
+    }
+
+    fn __getnewargs__(&self, py: Python) -> (Py<SymbolicSpaceContext>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
     }
 
     fn __hash__(&self) -> u64 {
@@ -143,7 +148,7 @@ impl SpaceSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single subspace.
+    /// True if this set is a singleton, i.e., a single subspace.
     fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
@@ -178,7 +183,7 @@ impl SpaceSet {
         ColoredSpaceSet::wrap_native(self.ctx.clone(), native_set)
     }
 
-    /// Returns an iterator over all sub-spaces in this `SpaceSet` with an optional projection to
+    /// Returns an iterator over all subspaces in this `SpaceSet` with an optional projection to
     /// a subset of network variables.
     ///
     /// When no `retained` collection is specified, this is equivalent to `SpaceSet.__iter__`.

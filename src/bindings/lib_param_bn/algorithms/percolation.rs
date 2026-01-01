@@ -16,8 +16,8 @@ pub struct Percolation {
 
 #[pymethods]
 impl Percolation {
-    /// **Deprecated**: Use `PecolationComp.percolate_subspace()` instead.
-    /// Performs a percolation of a single subspace.
+    /// **Deprecated**: Use `PercolationComp.percolate_subspace()` instead.
+    /// Performs percolation of a single subspace.
     ///
     /// Percolation propagates the values of variables that are guaranteed to be constant in the
     /// given subspace. Note that this function will not overwrite values fixed in the original

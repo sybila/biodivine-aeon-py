@@ -110,6 +110,11 @@ impl ColoredPerturbationSet {
         hasher.finish()
     }
 
+    fn __getnewargs__(&self, py: Python) -> (Py<AsynchronousPerturbationGraph>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
+    }
+
     fn __iter__(&self, py: Python) -> PyResult<_ColorPerturbationModelIterator> {
         self.items(py, None, None)
     }
@@ -495,8 +500,8 @@ impl ColoredPerturbationSet {
     /// resulting iterator only considers unique combinations of the `retained`
     /// functions and variables. Consequently, the resulting `ColorModel` and `PerturbationModel`
     /// instances will fail with an `IndexError` if a value outside the `retained` set
-    /// is requested (for the `PerturbationModel`, `IndexError` is also thrown if a value
-    /// of a variable that is not perturbable is requested).
+    /// is requested. For the `PerturbationModel`, `IndexError` is also thrown if a value
+    /// of a variable that is not perturbable is requested.
     ///
     /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is
     /// an equivalent to `set.colors().items()`. Similarly, with `retained_variables = None` and

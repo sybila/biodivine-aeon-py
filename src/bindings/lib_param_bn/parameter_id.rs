@@ -22,7 +22,7 @@ use std::hash::{Hash, Hasher};
 /// assert d[a] != d[b]
 /// ```
 ///
-/// The value of `ParameterIdId` is frozen (i.e. immutable).
+/// The value of `ParameterIdId` is frozen (i.e., immutable).
 ///
 /// See also `ParameterIdType`.
 ///

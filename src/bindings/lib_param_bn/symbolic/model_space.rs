@@ -50,7 +50,7 @@ impl SpaceModel {
         self.__str__()
     }
 
-    /// The number of actual values in this `VertexModel` (i.e. retained network variables).
+    /// The number of actual values in this `SpaceModel` (i.e., retained network variables).
     pub fn __len__(&self) -> usize {
         self.to_values().len()
     }

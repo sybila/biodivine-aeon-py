@@ -35,7 +35,7 @@ impl ModelChecking {
     ///
     /// Note that the provided `AsynchronousGraph` must contain enough symbolic variables
     /// to successfully represent all quantified variables in the provided formulae. You can
-    /// create such graph using `AsynchronousGraph.mk_for_model_checking`, or by manually creating
+    /// create such a graph using `AsynchronousGraph.mk_for_model_checking`, or by manually creating
     /// enough extra symbolic variables for each variable in the `SymbolicContext`.
     ///
     /// The resulting `ColoredVertexSet` uses the symbolic encoding of the provided
@@ -52,7 +52,7 @@ impl ModelChecking {
         property: &Bound<'a, PyAny>,
         substitution: Option<HashMap<String, ColoredVertexSet>>,
     ) -> PyResult<Bound<'a, PyAny>> {
-        // Extract properties. This could be either one property, or a list of properties.
+        // Extract properties. This could be either one property or a list of properties.
         let mut properties = Vec::new();
         let mut is_singular = true;
         if let Ok(prop) = property.extract::<HctlFormula>() {
@@ -91,9 +91,9 @@ impl ModelChecking {
             model_check_multiple_formulae_dirty(properties, graph.as_native())
         };
 
-        // Perform the necessary type conversions to return either a single element, or
+        // Perform the necessary type conversions to return either a single element or
         // a list of elements, depending on context. There's probably a nicer way to do this,
-        // but should be good enough for now.
+        //  but it should be good enough for now.
         match result {
             Err(e) => throw_runtime_error(e),
             Ok(result) => {

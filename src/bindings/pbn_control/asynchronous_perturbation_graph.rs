@@ -56,7 +56,7 @@ use crate::{AsNative, throw_runtime_error};
 /// permanent, temporary). These aspects are managed by the analysis algorithms.
 ///
 /// *By default, `PerturbationAsynchronousGraph` behaves as if all variables are unperturbed
-/// and the newly introduced parameters are set to `False`, i.e. unperturbed. The perturbation
+/// and the newly introduced parameters are set to `False`, i.e., unperturbed. The perturbation
 /// parameters always appear in the symbolic encoding, they are just not considered in the update
 /// functions. To access the "perturbed" dynamics,
 /// see `AsynchronousPerturbationGraph.to_perturbed`.*
@@ -113,6 +113,23 @@ impl AsynchronousPerturbationGraph {
     pub fn __str__(_self: Bound<'_, Self>) -> String {
         let ctx = _self.borrow().as_ref().symbolic_context();
         format!("AsynchronousPerturbationGraph({})", ctx.get().__str__())
+    }
+
+    pub fn __getnewargs__(&self, py: Python) -> PyResult<(Py<BooleanNetwork>, Vec<VariableId>)> {
+        let network = self
+            .as_native()
+            .as_non_perturbable()
+            .as_network()
+            .unwrap()
+            .clone();
+        let network_py = BooleanNetwork::from(network).export_to_python(py)?;
+        let perturbable = self
+            .as_native()
+            .perturbable_variables()
+            .iter()
+            .map(|it| VariableId::from(*it))
+            .collect();
+        Ok((network_py, perturbable))
     }
 
     /// Reconstruct the `BooleanNetwork` that represents the *unperturbed* dynamics of this graph.
@@ -189,7 +206,7 @@ impl AsynchronousPerturbationGraph {
     /// without additional perturbation parameters or any modification (e.g., still with all
     /// implicit parameters).
     pub fn base_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
-        // Here, `unwrap` is safe because we know that perturbed graph is only created with
+        // Here, `unwrap` is safe because we know that a perturbed graph is only created with
         // a network object.
         let bn = self
             .as_native()
@@ -203,7 +220,7 @@ impl AsynchronousPerturbationGraph {
     /// A copy of the `BooleanNetwork` with the extra perturbation parameters, but with the
     /// update functions unaffected.
     pub fn unperturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
-        // Here, `unwrap` is safe because we know that perturbed graph is only created with
+        // Here, `unwrap` is safe because we know that a perturbed graph is only created with
         // a network object.
         let bn = self.as_native().as_original().as_network().unwrap().clone();
         BooleanNetwork::from(bn).export_to_python(py)
@@ -212,7 +229,7 @@ impl AsynchronousPerturbationGraph {
     /// A copy of the `BooleanNetwork` with the extra perturbation parameters and with the
     /// update functions changed to reflect the perturbations.
     pub fn perturbed_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
-        // Here, `unwrap` is safe because we know that perturbed graph is only created with
+        // Here, `unwrap` is safe because we know that a perturbed graph is only created with
         // a network object.
         let bn = self
             .as_native()
@@ -225,7 +242,7 @@ impl AsynchronousPerturbationGraph {
 
     /// A copy of the `AsynchronousGraph` that represents the *unperturbed* asynchronous
     /// dynamics of this network. It supports the additional parameters necessary to represent
-    /// perturbations, but does not use them in any meaningful way.
+    ///  perturbations but does not use them in any meaningful way.
     ///
     /// This is effectively the "parent" implementation of this instance, so you can already
     /// access these methods directly by calling them on this graph. Keep in mind that

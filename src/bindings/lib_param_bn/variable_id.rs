@@ -24,7 +24,7 @@ use std::hash::{Hash, Hasher};
 /// assert d[a] != d[b]
 /// ```
 ///
-/// The value of `VariableId` is frozen (i.e. immutable).
+/// The value of `VariableId` is frozen (i.e., immutable).
 ///
 /// See also `VariableIdType`: In most cases where the ID can be "inferred from context",
 /// a name can be also used to identify a network variable.
