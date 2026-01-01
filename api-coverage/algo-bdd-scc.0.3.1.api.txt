@@ -1,0 +1,839 @@
+pub mod biodivine_algo_bdd_scc
+pub mod biodivine_algo_bdd_scc::attractor
+pub struct biodivine_algo_bdd_scc::attractor::AttractorConfig
+pub biodivine_algo_bdd_scc::attractor::AttractorConfig::active_variables: alloc::collections::btree::set::BTreeSet<biodivine_lib_param_bn::VariableId>
+pub biodivine_algo_bdd_scc::attractor::AttractorConfig::graph: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub biodivine_algo_bdd_scc::attractor::AttractorConfig::max_symbolic_size: usize
+impl biodivine_algo_bdd_scc::attractor::AttractorConfig
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::new(graph: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::ItgrState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::ItgrStep
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::step(context: &biodivine_algo_bdd_scc::attractor::AttractorConfig, state: &mut biodivine_algo_bdd_scc::attractor::ItgrState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::XieBeerelState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::step(context: &biodivine_algo_bdd_scc::attractor::AttractorConfig, state: &mut biodivine_algo_bdd_scc::attractor::XieBeerelState) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl core::clone::Clone for biodivine_algo_bdd_scc::attractor::AttractorConfig
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::clone(&self) -> biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl core::convert::From<&biodivine_algo_bdd_scc::attractor::AttractorConfig> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::from(value: &biodivine_algo_bdd_scc::attractor::AttractorConfig) -> Self
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::attractor::AttractorConfig
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::from(value: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl core::convert::From<biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::attractor::AttractorConfig
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::from(value: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl core::marker::Freeze for biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl core::marker::Send for biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl core::marker::Sync for biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl core::marker::Unpin for biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::attractor::AttractorConfig
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::attractor::AttractorConfig where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::attractor::AttractorConfig where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::attractor::AttractorConfig::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::attractor::AttractorConfig where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::attractor::AttractorConfig::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_algo_bdd_scc::attractor::AttractorConfig where T: core::clone::Clone
+pub type biodivine_algo_bdd_scc::attractor::AttractorConfig::Owned = T
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::clone_into(&self, target: &mut T)
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_algo_bdd_scc::attractor::AttractorConfig where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::attractor::AttractorConfig where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::attractor::AttractorConfig where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_algo_bdd_scc::attractor::AttractorConfig where T: core::clone::Clone
+pub unsafe fn biodivine_algo_bdd_scc::attractor::AttractorConfig::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::attractor::AttractorConfig
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::from(t: T) -> T
+impl<T> dyn_clone::DynClone for biodivine_algo_bdd_scc::attractor::AttractorConfig where T: core::clone::Clone
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::__clone_box(&self, _: dyn_clone::sealed::Private) -> *mut ()
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::attractor::AttractorConfig where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::attractor::AttractorConfig::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::attractor::ItgrState
+impl biodivine_algo_bdd_scc::attractor::ItgrState
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::active_variables(&self) -> impl core::iter::traits::iterator::Iterator<Item = biodivine_lib_param_bn::VariableId>
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::new(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, universe: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::new_with_variables(graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, universe: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, variables: &[biodivine_lib_param_bn::VariableId]) -> Self
+impl computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::ItgrState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::ItgrStep
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::step(context: &biodivine_algo_bdd_scc::attractor::AttractorConfig, state: &mut biodivine_algo_bdd_scc::attractor::ItgrState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::attractor::ItgrState
+impl core::marker::Send for biodivine_algo_bdd_scc::attractor::ItgrState
+impl core::marker::Sync for biodivine_algo_bdd_scc::attractor::ItgrState
+impl core::marker::Unpin for biodivine_algo_bdd_scc::attractor::ItgrState
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::attractor::ItgrState
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::attractor::ItgrState
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::attractor::ItgrState where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::attractor::ItgrState where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::attractor::ItgrState::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::attractor::ItgrState where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::attractor::ItgrState::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::attractor::ItgrState where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::attractor::ItgrState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::attractor::ItgrState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::attractor::ItgrState
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::attractor::ItgrState where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::attractor::ItgrState::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::attractor::ItgrStep
+impl computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::ItgrState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::ItgrStep
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::step(context: &biodivine_algo_bdd_scc::attractor::AttractorConfig, state: &mut biodivine_algo_bdd_scc::attractor::ItgrState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::attractor::ItgrStep
+impl core::marker::Send for biodivine_algo_bdd_scc::attractor::ItgrStep
+impl core::marker::Sync for biodivine_algo_bdd_scc::attractor::ItgrStep
+impl core::marker::Unpin for biodivine_algo_bdd_scc::attractor::ItgrStep
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::attractor::ItgrStep
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::attractor::ItgrStep
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::attractor::ItgrStep where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::attractor::ItgrStep where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::attractor::ItgrStep::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::attractor::ItgrStep where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::attractor::ItgrStep::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::attractor::ItgrStep where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::attractor::ItgrStep where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::attractor::ItgrStep where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::attractor::ItgrStep
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::attractor::ItgrStep where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::attractor::ItgrStep::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::attractor::XieBeerelState
+impl computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::XieBeerelState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::step(context: &biodivine_algo_bdd_scc::attractor::AttractorConfig, state: &mut biodivine_algo_bdd_scc::attractor::XieBeerelState) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::XieBeerelState
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::from(value: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::attractor::XieBeerelState
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::from(value: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl core::convert::From<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::XieBeerelState
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::from(value: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl core::marker::Freeze for biodivine_algo_bdd_scc::attractor::XieBeerelState
+impl core::marker::Send for biodivine_algo_bdd_scc::attractor::XieBeerelState
+impl core::marker::Sync for biodivine_algo_bdd_scc::attractor::XieBeerelState
+impl core::marker::Unpin for biodivine_algo_bdd_scc::attractor::XieBeerelState
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::attractor::XieBeerelState
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::attractor::XieBeerelState
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::attractor::XieBeerelState where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::attractor::XieBeerelState where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::attractor::XieBeerelState::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::attractor::XieBeerelState where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::attractor::XieBeerelState::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::attractor::XieBeerelState where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::attractor::XieBeerelState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::attractor::XieBeerelState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::attractor::XieBeerelState
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::attractor::XieBeerelState where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelState::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::attractor::XieBeerelStep
+impl computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::XieBeerelState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::step(context: &biodivine_algo_bdd_scc::attractor::AttractorConfig, state: &mut biodivine_algo_bdd_scc::attractor::XieBeerelState) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+impl core::marker::Send for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+impl core::marker::Sync for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+impl core::marker::Unpin for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::attractor::XieBeerelStep where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::attractor::XieBeerelStep where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::attractor::XieBeerelStep::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::attractor::XieBeerelStep where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::attractor::XieBeerelStep::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::attractor::XieBeerelStep where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::attractor::XieBeerelStep where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::attractor::XieBeerelStep where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::attractor::XieBeerelStep
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::attractor::XieBeerelStep where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::attractor::XieBeerelStep::vzip(self) -> V
+pub type biodivine_algo_bdd_scc::attractor::InterleavedTransitionGuidedReduction = computation_process::computation::Computation<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::ItgrState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, biodivine_algo_bdd_scc::attractor::ItgrStep>
+pub type biodivine_algo_bdd_scc::attractor::XieBeerelAttractors = computation_process::generator::Generator<biodivine_algo_bdd_scc::attractor::AttractorConfig, biodivine_algo_bdd_scc::attractor::XieBeerelState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, biodivine_algo_bdd_scc::attractor::XieBeerelStep>
+pub mod biodivine_algo_bdd_scc::reachability
+pub struct biodivine_algo_bdd_scc::reachability::BfsPredecessors
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+impl core::marker::Send for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+impl core::marker::Sync for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+impl core::marker::Unpin for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::reachability::BfsPredecessors where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::reachability::BfsPredecessors where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::reachability::BfsPredecessors::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::reachability::BfsPredecessors where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::reachability::BfsPredecessors::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::reachability::BfsPredecessors where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::reachability::BfsPredecessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::reachability::BfsPredecessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::reachability::BfsPredecessors where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::reachability::BfsSuccessors
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+impl core::marker::Send for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+impl core::marker::Sync for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+impl core::marker::Unpin for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::reachability::BfsSuccessors where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::reachability::BfsSuccessors where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::reachability::BfsSuccessors::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::reachability::BfsSuccessors where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::reachability::BfsSuccessors::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::reachability::BfsSuccessors where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::reachability::BfsSuccessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::reachability::BfsSuccessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::reachability::BfsSuccessors where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::reachability::IterativeUnion<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep>(_)
+impl<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep> computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S>
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &mut biodivine_algo_bdd_scc::reachability::ReachabilityState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl<S> core::marker::Freeze for biodivine_algo_bdd_scc::reachability::IterativeUnion<S>
+impl<S> core::marker::Send for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where S: core::marker::Send
+impl<S> core::marker::Sync for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where S: core::marker::Sync
+impl<S> core::marker::Unpin for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where S: core::marker::Unpin
+impl<S> core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where S: core::panic::unwind_safe::RefUnwindSafe
+impl<S> core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where S: core::panic::unwind_safe::UnwindSafe
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S>
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub biodivine_algo_bdd_scc::reachability::ReachabilityConfig::active_variables: alloc::collections::btree::set::BTreeSet<biodivine_lib_param_bn::VariableId>
+pub biodivine_algo_bdd_scc::reachability::ReachabilityConfig::graph: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub biodivine_algo_bdd_scc::reachability::ReachabilityConfig::max_iterations: usize
+pub biodivine_algo_bdd_scc::reachability::ReachabilityConfig::max_symbolic_size: usize
+impl biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::new(graph: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl core::clone::Clone for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::clone(&self) -> biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl core::convert::From<&biodivine_algo_bdd_scc::attractor::AttractorConfig> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::from(value: &biodivine_algo_bdd_scc::attractor::AttractorConfig) -> Self
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::from(value: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl core::convert::From<biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::from(value: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep> computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S>
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &mut biodivine_algo_bdd_scc::reachability::ReachabilityState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep> computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &mut biodivine_algo_bdd_scc::reachability::ReachabilityState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl core::marker::Send for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl core::marker::Sync for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl core::marker::Unpin for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::reachability::ReachabilityConfig::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::reachability::ReachabilityConfig::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where T: core::clone::Clone
+pub type biodivine_algo_bdd_scc::reachability::ReachabilityConfig::Owned = T
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::clone_into(&self, target: &mut T)
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where T: core::clone::Clone
+pub unsafe fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::from(t: T) -> T
+impl<T> dyn_clone::DynClone for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where T: core::clone::Clone
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::__clone_box(&self, _: dyn_clone::sealed::Private) -> *mut ()
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::reachability::ReachabilityConfig where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityConfig::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub biodivine_algo_bdd_scc::reachability::ReachabilityState::iteration: usize
+pub biodivine_algo_bdd_scc::reachability::ReachabilityState::set: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+impl core::clone::Clone for biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::clone(&self) -> biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl core::cmp::Eq for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl core::cmp::PartialEq for biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::eq(&self, other: &biodivine_algo_bdd_scc::reachability::ReachabilityState) -> bool
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::from(value: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl core::convert::From<biodivine_algo_bdd_scc::reachability::ReachabilityState> for biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices
+pub fn biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices::from(value: biodivine_algo_bdd_scc::reachability::ReachabilityState) -> Self
+impl core::convert::From<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::from(value: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl core::fmt::Debug for biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::StructuralPartialEq for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep> computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::reachability::IterativeUnion<S>
+pub fn biodivine_algo_bdd_scc::reachability::IterativeUnion<S>::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &mut biodivine_algo_bdd_scc::reachability::ReachabilityState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep> computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &mut biodivine_algo_bdd_scc::reachability::ReachabilityState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl core::marker::Send for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl core::marker::Sync for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl core::marker::Unpin for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::reachability::ReachabilityState
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::reachability::ReachabilityState where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::reachability::ReachabilityState where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::reachability::ReachabilityState::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::reachability::ReachabilityState where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::reachability::ReachabilityState::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_algo_bdd_scc::reachability::ReachabilityState where T: core::clone::Clone
+pub type biodivine_algo_bdd_scc::reachability::ReachabilityState::Owned = T
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::clone_into(&self, target: &mut T)
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_algo_bdd_scc::reachability::ReachabilityState where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::reachability::ReachabilityState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::reachability::ReachabilityState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_algo_bdd_scc::reachability::ReachabilityState where T: core::clone::Clone
+pub unsafe fn biodivine_algo_bdd_scc::reachability::ReachabilityState::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::reachability::ReachabilityState
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::from(t: T) -> T
+impl<T> dyn_clone::DynClone for biodivine_algo_bdd_scc::reachability::ReachabilityState where T: core::clone::Clone
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::__clone_box(&self, _: dyn_clone::sealed::Private) -> *mut ()
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::reachability::ReachabilityState where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityState::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+impl core::marker::Send for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+impl core::marker::Sync for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+impl core::marker::Unpin for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::reachability::SaturationPredecessors where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::reachability::SaturationPredecessors where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::reachability::SaturationPredecessors::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::reachability::SaturationPredecessors where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::reachability::SaturationPredecessors::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::reachability::SaturationPredecessors where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::reachability::SaturationPredecessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::reachability::SaturationPredecessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::reachability::SaturationPredecessors where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+impl core::marker::Send for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+impl core::marker::Sync for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+impl core::marker::Unpin for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::reachability::SaturationSuccessors where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::reachability::SaturationSuccessors where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::reachability::SaturationSuccessors::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::reachability::SaturationSuccessors where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::reachability::SaturationSuccessors::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::reachability::SaturationSuccessors where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::reachability::SaturationSuccessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::reachability::SaturationSuccessors where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::reachability::SaturationSuccessors where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::vzip(self) -> V
+pub trait biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm: computation_process::algorithm::Algorithm<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> + 'static
+impl<T: computation_process::algorithm::Algorithm<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> + 'static> biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm for T
+pub trait biodivine_algo_bdd_scc::reachability::ReachabilityStep
+pub fn biodivine_algo_bdd_scc::reachability::ReachabilityStep::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::BfsPredecessors
+pub fn biodivine_algo_bdd_scc::reachability::BfsPredecessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::BfsSuccessors
+pub fn biodivine_algo_bdd_scc::reachability::BfsSuccessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::SaturationPredecessors
+pub fn biodivine_algo_bdd_scc::reachability::SaturationPredecessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::reachability::SaturationSuccessors
+pub fn biodivine_algo_bdd_scc::reachability::SaturationSuccessors::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trimming::RelativeSinks
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trimming::RelativeSources
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+pub type biodivine_algo_bdd_scc::reachability::BackwardReachability = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::reachability::IterativeUnion<biodivine_algo_bdd_scc::reachability::SaturationPredecessors>>
+pub type biodivine_algo_bdd_scc::reachability::BackwardReachabilityBfs = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::reachability::IterativeUnion<biodivine_algo_bdd_scc::reachability::BfsPredecessors>>
+pub type biodivine_algo_bdd_scc::reachability::ForwardReachability = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::reachability::IterativeUnion<biodivine_algo_bdd_scc::reachability::SaturationSuccessors>>
+pub type biodivine_algo_bdd_scc::reachability::ForwardReachabilityBfs = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::reachability::IterativeUnion<biodivine_algo_bdd_scc::reachability::BfsSuccessors>>
+pub type biodivine_algo_bdd_scc::reachability::ReachabilityComputation<STEP> = computation_process::computation::Computation<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, STEP>
+pub mod biodivine_algo_bdd_scc::scc
+pub struct biodivine_algo_bdd_scc::scc::ChainState
+impl computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::ChainState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::ChainStep
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::step(context: &biodivine_algo_bdd_scc::scc::SccConfig, state: &mut biodivine_algo_bdd_scc::scc::ChainState) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::ChainState
+pub fn biodivine_algo_bdd_scc::scc::ChainState::from(value: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::scc::ChainState
+pub fn biodivine_algo_bdd_scc::scc::ChainState::from(value: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl core::convert::From<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::ChainState
+pub fn biodivine_algo_bdd_scc::scc::ChainState::from(value: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl core::marker::Freeze for biodivine_algo_bdd_scc::scc::ChainState
+impl core::marker::Send for biodivine_algo_bdd_scc::scc::ChainState
+impl core::marker::Sync for biodivine_algo_bdd_scc::scc::ChainState
+impl core::marker::Unpin for biodivine_algo_bdd_scc::scc::ChainState
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::scc::ChainState
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::scc::ChainState
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::scc::ChainState where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::scc::ChainState::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::scc::ChainState where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::scc::ChainState::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::scc::ChainState::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::scc::ChainState where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::scc::ChainState::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::scc::ChainState::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::scc::ChainState where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::ChainState::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::scc::ChainState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::ChainState::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::scc::ChainState where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::ChainState::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::scc::ChainState
+pub fn biodivine_algo_bdd_scc::scc::ChainState::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::scc::ChainState where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::scc::ChainState::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::scc::ChainStep
+impl computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::ChainState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::ChainStep
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::step(context: &biodivine_algo_bdd_scc::scc::SccConfig, state: &mut biodivine_algo_bdd_scc::scc::ChainState) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::scc::ChainStep
+impl core::marker::Send for biodivine_algo_bdd_scc::scc::ChainStep
+impl core::marker::Sync for biodivine_algo_bdd_scc::scc::ChainStep
+impl core::marker::Unpin for biodivine_algo_bdd_scc::scc::ChainStep
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::scc::ChainStep
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::scc::ChainStep
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::scc::ChainStep where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::scc::ChainStep where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::scc::ChainStep::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::scc::ChainStep where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::scc::ChainStep::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::scc::ChainStep where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::scc::ChainStep where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::scc::ChainStep where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::scc::ChainStep
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::scc::ChainStep where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::scc::FwdBwdState<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm>
+impl<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm> computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::step(context: &biodivine_algo_bdd_scc::scc::SccConfig, state: &mut biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm> core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::from(value: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm> core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::from(value: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm> core::convert::From<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::from(value: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> Self
+impl<FWD, BWD> core::marker::Freeze for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>
+impl<FWD, BWD> core::marker::Send for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where BWD: core::marker::Send, FWD: core::marker::Send
+impl<FWD, BWD> core::marker::Sync for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where BWD: core::marker::Sync, FWD: core::marker::Sync
+impl<FWD, BWD> core::marker::Unpin for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>
+impl<FWD, BWD> core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where BWD: core::panic::unwind_safe::RefUnwindSafe, FWD: core::panic::unwind_safe::RefUnwindSafe
+impl<FWD, BWD> core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where BWD: core::panic::unwind_safe::UnwindSafe, FWD: core::panic::unwind_safe::UnwindSafe
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm>
+impl<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm> computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::step(context: &biodivine_algo_bdd_scc::scc::SccConfig, state: &mut biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl<FWD, BWD> core::marker::Freeze for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>
+impl<FWD, BWD> core::marker::Send for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where FWD: core::marker::Send, BWD: core::marker::Send
+impl<FWD, BWD> core::marker::Sync for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where FWD: core::marker::Sync, BWD: core::marker::Sync
+impl<FWD, BWD> core::marker::Unpin for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where FWD: core::marker::Unpin, BWD: core::marker::Unpin
+impl<FWD, BWD> core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where FWD: core::panic::unwind_safe::RefUnwindSafe, BWD: core::panic::unwind_safe::RefUnwindSafe
+impl<FWD, BWD> core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where FWD: core::panic::unwind_safe::UnwindSafe, BWD: core::panic::unwind_safe::UnwindSafe
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::scc::SccConfig
+pub biodivine_algo_bdd_scc::scc::SccConfig::filter_long_lived: bool
+pub biodivine_algo_bdd_scc::scc::SccConfig::graph: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph
+pub biodivine_algo_bdd_scc::scc::SccConfig::should_trim: biodivine_algo_bdd_scc::trimming::TrimSetting
+impl biodivine_algo_bdd_scc::scc::SccConfig
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::apply_long_lived_filter(&self, set: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::new(graph: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> biodivine_algo_bdd_scc::scc::SccConfig
+impl computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::ChainState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::ChainStep
+pub fn biodivine_algo_bdd_scc::scc::ChainStep::step(context: &biodivine_algo_bdd_scc::scc::SccConfig, state: &mut biodivine_algo_bdd_scc::scc::ChainState) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl core::clone::Clone for biodivine_algo_bdd_scc::scc::SccConfig
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::clone(&self) -> biodivine_algo_bdd_scc::scc::SccConfig
+impl core::convert::From<&biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::scc::SccConfig
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::from(value: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl core::convert::From<biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph> for biodivine_algo_bdd_scc::scc::SccConfig
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::from(value: biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph) -> Self
+impl<FWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm, BWD: biodivine_algo_bdd_scc::reachability::ReachabilityAlgorithm> computation_process::generator::GeneratorStep<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>
+pub fn biodivine_algo_bdd_scc::scc::FwdBwdStep<FWD, BWD>::step(context: &biodivine_algo_bdd_scc::scc::SccConfig, state: &mut biodivine_algo_bdd_scc::scc::FwdBwdState<FWD, BWD>) -> computation_process::completable::Completable<core::option::Option<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::scc::SccConfig
+impl core::marker::Send for biodivine_algo_bdd_scc::scc::SccConfig
+impl core::marker::Sync for biodivine_algo_bdd_scc::scc::SccConfig
+impl core::marker::Unpin for biodivine_algo_bdd_scc::scc::SccConfig
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::scc::SccConfig
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::scc::SccConfig
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::scc::SccConfig where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::scc::SccConfig where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::scc::SccConfig::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::scc::SccConfig where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::scc::SccConfig::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_algo_bdd_scc::scc::SccConfig where T: core::clone::Clone
+pub type biodivine_algo_bdd_scc::scc::SccConfig::Owned = T
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::clone_into(&self, target: &mut T)
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_algo_bdd_scc::scc::SccConfig where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::scc::SccConfig where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::scc::SccConfig where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_algo_bdd_scc::scc::SccConfig where T: core::clone::Clone
+pub unsafe fn biodivine_algo_bdd_scc::scc::SccConfig::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::scc::SccConfig
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::from(t: T) -> T
+impl<T> dyn_clone::DynClone for biodivine_algo_bdd_scc::scc::SccConfig where T: core::clone::Clone
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::__clone_box(&self, _: dyn_clone::sealed::Private) -> *mut ()
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::scc::SccConfig where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::scc::SccConfig::vzip(self) -> V
+pub trait biodivine_algo_bdd_scc::scc::SccAlgorithm<STATE>: computation_process::algorithm::GenAlgorithm<biodivine_algo_bdd_scc::scc::SccConfig, STATE, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> + 'static
+impl<STATE, T: computation_process::algorithm::GenAlgorithm<biodivine_algo_bdd_scc::scc::SccConfig, STATE, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> + 'static> biodivine_algo_bdd_scc::scc::SccAlgorithm<STATE> for T
+pub type biodivine_algo_bdd_scc::scc::ChainScc = computation_process::generator::Generator<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::ChainState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, biodivine_algo_bdd_scc::scc::ChainStep>
+pub type biodivine_algo_bdd_scc::scc::FwdBwdScc = computation_process::generator::Generator<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::FwdBwdState<biodivine_algo_bdd_scc::reachability::ForwardReachability, biodivine_algo_bdd_scc::reachability::BackwardReachability>, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, biodivine_algo_bdd_scc::scc::FwdBwdStep<biodivine_algo_bdd_scc::reachability::ForwardReachability, biodivine_algo_bdd_scc::reachability::BackwardReachability>>
+pub type biodivine_algo_bdd_scc::scc::FwdBwdSccBfs = computation_process::generator::Generator<biodivine_algo_bdd_scc::scc::SccConfig, biodivine_algo_bdd_scc::scc::FwdBwdState<biodivine_algo_bdd_scc::reachability::ForwardReachabilityBfs, biodivine_algo_bdd_scc::reachability::BackwardReachabilityBfs>, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices, biodivine_algo_bdd_scc::scc::FwdBwdStep<biodivine_algo_bdd_scc::reachability::ForwardReachabilityBfs, biodivine_algo_bdd_scc::reachability::BackwardReachabilityBfs>>
+pub mod biodivine_algo_bdd_scc::trapping
+pub struct biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+impl core::marker::Send for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+impl core::marker::Sync for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+impl core::marker::Unpin for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+impl core::marker::Send for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+impl core::marker::Sync for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+impl core::marker::Unpin for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation::vzip(self) -> V
+pub type biodivine_algo_bdd_scc::trapping::BackwardTrap = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::trimming::IterativeSubtraction<biodivine_algo_bdd_scc::trapping::HasPredecessorSaturation>>
+pub type biodivine_algo_bdd_scc::trapping::ForwardTrap = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::trimming::IterativeSubtraction<biodivine_algo_bdd_scc::trapping::HasSuccessorSaturation>>
+pub mod biodivine_algo_bdd_scc::trimming
+pub enum biodivine_algo_bdd_scc::trimming::TrimComputation
+pub biodivine_algo_bdd_scc::trimming::TrimComputation::Both(biodivine_algo_bdd_scc::trimming::TrimSinksAndSources)
+pub biodivine_algo_bdd_scc::trimming::TrimComputation::None(computation_process::computable_identity::ComputableIdentity<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>)
+pub biodivine_algo_bdd_scc::trimming::TrimComputation::Sinks(biodivine_algo_bdd_scc::trimming::TrimSinks)
+pub biodivine_algo_bdd_scc::trimming::TrimComputation::Sources(biodivine_algo_bdd_scc::trimming::TrimSources)
+impl computation_process::computable::Computable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::trimming::TrimComputation
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::try_compute(&mut self) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::trimming::TrimComputation
+impl core::marker::Send for biodivine_algo_bdd_scc::trimming::TrimComputation
+impl core::marker::Sync for biodivine_algo_bdd_scc::trimming::TrimComputation
+impl core::marker::Unpin for biodivine_algo_bdd_scc::trimming::TrimComputation
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::trimming::TrimComputation
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::trimming::TrimComputation
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::trimming::TrimComputation where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::trimming::TrimComputation where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::trimming::TrimComputation::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::trimming::TrimComputation where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::trimming::TrimComputation::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::trimming::TrimComputation where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::trimming::TrimComputation where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::trimming::TrimComputation where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::trimming::TrimComputation
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::trimming::TrimComputation where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::trimming::TrimComputation::vzip(self) -> V
+pub enum biodivine_algo_bdd_scc::trimming::TrimSetting
+pub biodivine_algo_bdd_scc::trimming::TrimSetting::Both
+pub biodivine_algo_bdd_scc::trimming::TrimSetting::None
+pub biodivine_algo_bdd_scc::trimming::TrimSetting::Sinks
+pub biodivine_algo_bdd_scc::trimming::TrimSetting::Sources
+impl biodivine_algo_bdd_scc::trimming::TrimSetting
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::build_computation(&self, graph: &biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph, set: biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> biodivine_algo_bdd_scc::trimming::TrimComputation
+impl core::clone::Clone for biodivine_algo_bdd_scc::trimming::TrimSetting
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::clone(&self) -> biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::cmp::Eq for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::cmp::PartialEq for biodivine_algo_bdd_scc::trimming::TrimSetting
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::eq(&self, other: &biodivine_algo_bdd_scc::trimming::TrimSetting) -> bool
+impl core::default::Default for biodivine_algo_bdd_scc::trimming::TrimSetting
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::default() -> biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::fmt::Debug for biodivine_algo_bdd_scc::trimming::TrimSetting
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for biodivine_algo_bdd_scc::trimming::TrimSetting
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::marker::StructuralPartialEq for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::marker::Freeze for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::marker::Send for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::marker::Sync for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::marker::Unpin for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::trimming::TrimSetting
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::trimming::TrimSetting where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::trimming::TrimSetting where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::trimming::TrimSetting::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::trimming::TrimSetting where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::trimming::TrimSetting::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> alloc::borrow::ToOwned for biodivine_algo_bdd_scc::trimming::TrimSetting where T: core::clone::Clone
+pub type biodivine_algo_bdd_scc::trimming::TrimSetting::Owned = T
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::clone_into(&self, target: &mut T)
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::to_owned(&self) -> T
+impl<T> core::any::Any for biodivine_algo_bdd_scc::trimming::TrimSetting where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::trimming::TrimSetting where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::trimming::TrimSetting where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::borrow_mut(&mut self) -> &mut T
+impl<T> core::clone::CloneToUninit for biodivine_algo_bdd_scc::trimming::TrimSetting where T: core::clone::Clone
+pub unsafe fn biodivine_algo_bdd_scc::trimming::TrimSetting::clone_to_uninit(&self, dest: *mut u8)
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::trimming::TrimSetting
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::from(t: T) -> T
+impl<T> dyn_clone::DynClone for biodivine_algo_bdd_scc::trimming::TrimSetting where T: core::clone::Clone
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::__clone_box(&self, _: dyn_clone::sealed::Private) -> *mut ()
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::trimming::TrimSetting where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::trimming::TrimSetting::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep>(_)
+impl<S: biodivine_algo_bdd_scc::reachability::ReachabilityStep> computation_process::computation::ComputationStep<biodivine_algo_bdd_scc::reachability::ReachabilityConfig, biodivine_algo_bdd_scc::reachability::ReachabilityState, biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &mut biodivine_algo_bdd_scc::reachability::ReachabilityState) -> computation_process::completable::Completable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl<S> core::marker::Freeze for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>
+impl<S> core::marker::Send for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where S: core::marker::Send
+impl<S> core::marker::Sync for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where S: core::marker::Sync
+impl<S> core::marker::Unpin for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where S: core::marker::Unpin
+impl<S> core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where S: core::panic::unwind_safe::RefUnwindSafe
+impl<S> core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where S: core::panic::unwind_safe::UnwindSafe
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S> where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::trimming::IterativeSubtraction<S>::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::trimming::RelativeSinks
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trimming::RelativeSinks
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::trimming::RelativeSinks
+impl core::marker::Send for biodivine_algo_bdd_scc::trimming::RelativeSinks
+impl core::marker::Sync for biodivine_algo_bdd_scc::trimming::RelativeSinks
+impl core::marker::Unpin for biodivine_algo_bdd_scc::trimming::RelativeSinks
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::trimming::RelativeSinks
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::trimming::RelativeSinks
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::trimming::RelativeSinks where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::trimming::RelativeSinks where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::trimming::RelativeSinks::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::trimming::RelativeSinks where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::trimming::RelativeSinks::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::trimming::RelativeSinks where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::trimming::RelativeSinks where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::trimming::RelativeSinks where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::trimming::RelativeSinks
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::trimming::RelativeSinks where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSinks::vzip(self) -> V
+pub struct biodivine_algo_bdd_scc::trimming::RelativeSources
+impl biodivine_algo_bdd_scc::reachability::ReachabilityStep for biodivine_algo_bdd_scc::trimming::RelativeSources
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::step(context: &biodivine_algo_bdd_scc::reachability::ReachabilityConfig, state: &biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices) -> cancel_this::error::Cancellable<biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices>
+impl core::marker::Freeze for biodivine_algo_bdd_scc::trimming::RelativeSources
+impl core::marker::Send for biodivine_algo_bdd_scc::trimming::RelativeSources
+impl core::marker::Sync for biodivine_algo_bdd_scc::trimming::RelativeSources
+impl core::marker::Unpin for biodivine_algo_bdd_scc::trimming::RelativeSources
+impl core::panic::unwind_safe::RefUnwindSafe for biodivine_algo_bdd_scc::trimming::RelativeSources
+impl core::panic::unwind_safe::UnwindSafe for biodivine_algo_bdd_scc::trimming::RelativeSources
+impl<T, U> core::convert::Into<U> for biodivine_algo_bdd_scc::trimming::RelativeSources where U: core::convert::From<T>
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::into(self) -> U
+impl<T, U> core::convert::TryFrom<U> for biodivine_algo_bdd_scc::trimming::RelativeSources where U: core::convert::Into<T>
+pub type biodivine_algo_bdd_scc::trimming::RelativeSources::Error = core::convert::Infallible
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::try_from(value: U) -> core::result::Result<T, <T as core::convert::TryFrom<U>>::Error>
+impl<T, U> core::convert::TryInto<U> for biodivine_algo_bdd_scc::trimming::RelativeSources where U: core::convert::TryFrom<T>
+pub type biodivine_algo_bdd_scc::trimming::RelativeSources::Error = <U as core::convert::TryFrom<T>>::Error
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::try_into(self) -> core::result::Result<U, <U as core::convert::TryFrom<T>>::Error>
+impl<T> core::any::Any for biodivine_algo_bdd_scc::trimming::RelativeSources where T: 'static + ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::type_id(&self) -> core::any::TypeId
+impl<T> core::borrow::Borrow<T> for biodivine_algo_bdd_scc::trimming::RelativeSources where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::borrow(&self) -> &T
+impl<T> core::borrow::BorrowMut<T> for biodivine_algo_bdd_scc::trimming::RelativeSources where T: ?core::marker::Sized
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::borrow_mut(&mut self) -> &mut T
+impl<T> core::convert::From<T> for biodivine_algo_bdd_scc::trimming::RelativeSources
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::from(t: T) -> T
+impl<V, T> ppv_lite86::types::VZip<V> for biodivine_algo_bdd_scc::trimming::RelativeSources where V: ppv_lite86::types::MultiLane<T>
+pub fn biodivine_algo_bdd_scc::trimming::RelativeSources::vzip(self) -> V
+pub type biodivine_algo_bdd_scc::trimming::TrimSinks = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::trimming::IterativeSubtraction<biodivine_algo_bdd_scc::trimming::RelativeSinks>>
+pub type biodivine_algo_bdd_scc::trimming::TrimSinksAndSources = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::trimming::IterativeSubtraction<biodivine_algo_bdd_scc::trimming::step_operators::RelativeSinksAndSources>>
+pub type biodivine_algo_bdd_scc::trimming::TrimSources = biodivine_algo_bdd_scc::reachability::ReachabilityComputation<biodivine_algo_bdd_scc::trimming::IterativeSubtraction<biodivine_algo_bdd_scc::trimming::RelativeSources>>

@@ -1,23 +1,24 @@
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{throw_runtime_error, throw_type_error};
+use RsBooleanExpression::{Not, Variable};
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_bdd::boolean_expression::BooleanExpression::{And, Cond, Iff, Imp, Or, Xor};
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
-use std::collections::hash_map::DefaultHasher;
 use std::collections::HashSet;
+use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-use RsBooleanExpression::{Not, Variable};
 /*
-   “Pretend to be good always and even God will be fooled.”
+   “Pretend to be good always, and even God will be fooled.”
                                    — Kurt Vonnegut
 
    Since we cannot properly return references to BooleanExpression subtrees to Python,
    we instead use a special "reference type" which maintains a reference-counted root pointer
-   as well as an unsafe "static" reference which actually only references the root pointer,
-   hence it should live long enough. This is the same mechanism we use to make "owned" iterators,
+   as well as an unsafe "static" reference which actually only references the root pointer.
+   This guarantees it should live long enough. This is the same mechanism we use to make "owned" iterators,
    but here it is extended a bit further by allowing multiple immutable references to the same
    structure, as long as the reference counter ensures safety.
 */
@@ -47,7 +48,7 @@ pub struct BooleanExpression {
 
 #[pymethods]
 impl BooleanExpression {
-    /// Build a new `BooleanExpression`, either as a copy of an existing expression, or from a string representation.
+    /// Build a new `BooleanExpression`, either as a copy of an existing expression or from a string representation.
     #[new]
     fn new(value: &Bound<'_, PyAny>) -> PyResult<BooleanExpression> {
         Self::resolve_expression(value)
@@ -72,8 +73,8 @@ impl BooleanExpression {
     }
 
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
-        // Technically, this is a "different" expression because it is created with a completely new `root`,
-        // but it is much easier (and more transparent) than serializing the root expression and trying to figure
+        // Technically, this is a "different" expression because it is created with a completely new `root`.
+        // But it is much easier (and more transparent) than serializing the root expression and trying to figure
         // out how to serialize a pointer into the AST.
         PyTuple::new(py, [self.__str__()])
     }
@@ -98,7 +99,7 @@ impl BooleanExpression {
 
     /// Return a `BooleanExpression` of a constant value.
     #[staticmethod]
-    pub fn mk_const(value: BoolLikeValue) -> PyResult<BooleanExpression> {
+    pub fn mk_const(value: BoolType) -> PyResult<BooleanExpression> {
         Ok(Self::from_native(RsBooleanExpression::Const(value.bool())))
     }
 
@@ -150,7 +151,7 @@ impl BooleanExpression {
         ))
     }
 
-    /// Return a `xor` of two `BooleanExpression` values.
+    /// Return an `xor` of two `BooleanExpression` values.
     #[staticmethod]
     pub fn mk_xor(left: &BooleanExpression, right: &BooleanExpression) -> BooleanExpression {
         Self::from_native(Xor(
@@ -435,9 +436,7 @@ impl BooleanExpression {
         if let Ok(value) = value.extract::<String>() {
             return match RsBooleanExpression::try_from(value.as_str()) {
                 Ok(expression) => Ok(BooleanExpression::from_native(expression)),
-                Err(message) => {
-                    throw_runtime_error(format!("Invalid expression: \"{}\".", message))
-                }
+                Err(message) => throw_runtime_error(format!("Invalid expression: \"{message}\".")),
             };
         }
         throw_type_error("Expected `BooleanExpression` or `str`.")
@@ -453,9 +452,9 @@ fn eval(e: &RsBooleanExpression, valuation: &Bound<'_, PyDict>) -> PyResult<bool
         RsBooleanExpression::Const(x) => Ok(*x),
         Variable(name) => {
             let Some(value) = valuation.get_item(name)? else {
-                return throw_runtime_error(format!("Missing value of {}.", name));
+                return throw_runtime_error(format!("Missing value of {name}."));
             };
-            value.extract::<BoolLikeValue>().map(bool::from)
+            value.extract::<BoolType>().map(bool::from)
         }
         Not(inner) => {
             let inner = eval(inner, valuation)?;

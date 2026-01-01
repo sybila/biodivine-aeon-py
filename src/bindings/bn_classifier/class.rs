@@ -4,14 +4,14 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 
 use pyo3::basic::CompareOp;
 use pyo3::types::{PyAnyMethods, PyTuple};
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{throw_runtime_error, throw_type_error};
 
 /// A `Class` is an immutable collection of sorted "features", such that each feature is
-/// a described by its string name. A `Class` is used by the various classification workflows
+/// described by its string name. A `Class` is used by the various classification workflows
 /// in AEON to label a specific mode of behavior that a system can exhibit.
 ///
 /// Depending on which operations are used, a class can behave either as a `set` (each feature
@@ -37,7 +37,7 @@ impl Class {
     }
 
     pub fn as_serial_string(&self) -> String {
-        // We use +++ to separate individual items in the class list. It is not perfect,
+        // We use +++ to separate individual items in the class list. It is not perfect
         // but should be Ok for the vast majority of usages.
         for i in &self.items {
             assert!(!i.contains("+++"))

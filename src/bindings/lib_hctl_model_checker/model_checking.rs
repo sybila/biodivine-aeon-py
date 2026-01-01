@@ -5,12 +5,12 @@ use biodivine_hctl_model_checker::model_checking::{
 };
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::{throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, throw_runtime_error, throw_type_error};
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct ModelChecking {
@@ -35,7 +35,7 @@ impl ModelChecking {
     ///
     /// Note that the provided `AsynchronousGraph` must contain enough symbolic variables
     /// to successfully represent all quantified variables in the provided formulae. You can
-    /// create such graph using `AsynchronousGraph.mk_for_model_checking`, or by manually creating
+    /// create such a graph using `AsynchronousGraph.mk_for_model_checking`, or by manually creating
     /// enough extra symbolic variables for each variable in the `SymbolicContext`.
     ///
     /// The resulting `ColoredVertexSet` uses the symbolic encoding of the provided
@@ -52,14 +52,14 @@ impl ModelChecking {
         property: &Bound<'a, PyAny>,
         substitution: Option<HashMap<String, ColoredVertexSet>>,
     ) -> PyResult<Bound<'a, PyAny>> {
-        // Extract properties. This could be either one property, or a list of properties.
+        // Extract properties. This could be either one property or a list of properties.
         let mut properties = Vec::new();
         let mut is_singular = true;
         if let Ok(prop) = property.extract::<HctlFormula>() {
             properties.push(prop.__str__());
         } else if let Ok(prop_str) = property.extract::<String>() {
             properties.push(prop_str);
-        } else if let Ok(prop_list) = property.downcast::<PyList>() {
+        } else if let Ok(prop_list) = property.cast::<PyList>() {
             is_singular = false;
             for x in prop_list {
                 if let Ok(prop) = x.extract::<HctlFormula>() {
@@ -68,15 +68,13 @@ impl ModelChecking {
                     properties.push(prop_str);
                 } else {
                     return throw_type_error(format!(
-                        "Expected `str` or `HctlFormula`. Got {:?}.",
-                        x
+                        "Expected `str` or `HctlFormula`. Got {x:?}."
                     ));
                 }
             }
         } else {
             return throw_type_error(format!(
-                "Expected `str`, `HctlFormula`, or `list`. Got {:?}.",
-                property
+                "Expected `str`, `HctlFormula`, or `list`. Got {property:?}."
             ));
         }
 
@@ -93,9 +91,9 @@ impl ModelChecking {
             model_check_multiple_formulae_dirty(properties, graph.as_native())
         };
 
-        // Perform the necessary type conversions to return either a single element, or
+        // Perform the necessary type conversions to return either a single element or
         // a list of elements, depending on context. There's probably a nicer way to do this,
-        // but should be good enough for now.
+        //  but it should be good enough for now.
         match result {
             Err(e) => throw_runtime_error(e),
             Ok(result) => {

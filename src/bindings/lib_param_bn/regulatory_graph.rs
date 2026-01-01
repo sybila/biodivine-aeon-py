@@ -1,23 +1,26 @@
-use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue, SignValue};
-use crate::{
-    global_log_level, runtime_error, throw_index_error, throw_runtime_error, throw_type_error,
-    AsNative,
+use crate::bindings::lib_param_bn::argument_types::regulation::RegulationOutput;
+use crate::bindings::lib_param_bn::argument_types::regulation_type::RegulationType;
+use crate::bindings::lib_param_bn::argument_types::sign_type::SignType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_multiple_type::VariableIdMultipleType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
+use crate::bindings::lib_param_bn::variable_id::{
+    VariableId, VariableIdResolvable, VariableIdResolver,
 };
+use crate::pyo3_utils::richcmp_eq_by_key;
+use crate::{AsNative, global_log_level, runtime_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_param_bn::Sign::{Negative, Positive};
-use biodivine_lib_param_bn::{Monotonicity, SdGraph, Sign};
+use biodivine_lib_param_bn::{Monotonicity, SdGraph};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList, PySet};
+use pyo3::types::PyList;
 use std::collections::HashSet;
 
 /// A regulatory graph is a directed graph consisting of network *variables* connected using
-/// *regulations*. Each regulation can be labeled as *essential* (also known as *observable*)
+/// *regulations*. Each regulation can be labeled as *essential* (also known as *observable*),
 /// and it can have a specified *sign* (also known as *monotonicity*).
 ///
-/// Currently, the set of variables in a regulatory graph is immutable, because changing the
+/// Currently, the set of variables in a regulatory graph is immutable because changing the
 /// variable count would disrupt any `VariableId` references to existing variables. However,
 /// there are still multiple properties that can be mutated:
 ///  1. The variable names can be changed using `RegulatoryGraph.set_variable_name`.
@@ -32,37 +35,11 @@ use std::collections::HashSet;
 #[derive(Clone, Wrapper)]
 pub struct RegulatoryGraph(biodivine_lib_param_bn::RegulatoryGraph);
 
-impl NetworkVariableContext for RegulatoryGraph {
-    fn resolve_network_variable(
-        &self,
-        variable: &Bound<'_, PyAny>,
-    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
-        if let Ok(id) = variable.extract::<VariableId>() {
-            return if id.__index__() < self.variable_count() {
-                Ok(*id.as_native())
-            } else {
-                throw_index_error(format!("Unknown variable ID `{}`.", id.__index__()))
-            };
-        }
-        if let Ok(name) = variable.extract::<String>() {
-            return if let Some(var) = self.as_native().find_variable(name.as_str()) {
-                Ok(var)
-            } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
-            };
-        }
-        throw_type_error("Expected `VariableId` or `str`.")
-    }
-
-    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
-        self.as_native().get_variable_name(variable).to_string()
-    }
-}
 #[pymethods]
 impl RegulatoryGraph {
     /// To construct a `RegulatoryGraph`, you have to provide:
     ///  - A list of variable names. If this list is not given, it is inferred from the list of regulations.
-    ///  - A list of regulations. These can be either `NamedRegulation` dictionaries, or string objects compatible
+    ///  - A list of regulations. These can be either `NamedRegulation` dictionaries or string objects compatible
     ///    with the `.aeon` format notation.
     ///
     /// If you don't provide any arguments, an "empty" `RegulatoryGraph` is constructed with no variables
@@ -71,13 +48,13 @@ impl RegulatoryGraph {
     #[pyo3(signature = (variables = None, regulations = None))]
     pub fn new(
         variables: Option<Vec<String>>,
-        regulations: Option<&Bound<'_, PyList>>,
+        regulations: Option<Vec<RegulationType>>,
     ) -> PyResult<RegulatoryGraph> {
         // First, try to extract regulation data if it is provided.
         let (regulations, inferred_variables) = if let Some(regulations) = regulations.as_ref() {
             let mut data = Vec::new();
             for item in regulations.iter() {
-                data.push(Self::resolve_regulation::<RegulatoryGraph>(None, &item)?);
+                data.push(item.resolve_no_context()?);
             }
             let mut variables = HashSet::new();
             for (s, _, _, t) in &data {
@@ -91,7 +68,7 @@ impl RegulatoryGraph {
             (Vec::new(), Vec::new())
         };
 
-        // Then build a regulatory graph using either the given variable names, or the inferred variable names
+        // Then build a regulatory graph using either the given variable names or the inferred variable names
         // (if explicit names are not provided).
         let mut graph = if let Some(variables) = variables {
             biodivine_lib_param_bn::RegulatoryGraph::new(variables)
@@ -126,7 +103,7 @@ impl RegulatoryGraph {
 
     fn __repr__(&self) -> String {
         let (names, regulations) = self.__getnewargs__();
-        format!("RegulatoryGraph({:?}, {:?})", names, regulations)
+        format!("RegulatoryGraph({names:?}, {regulations:?})")
     }
 
     pub fn __getnewargs__(&self) -> (Vec<String>, Vec<String>) {
@@ -151,7 +128,7 @@ impl RegulatoryGraph {
     #[staticmethod]
     fn from_file(file_path: &str) -> PyResult<RegulatoryGraph> {
         match std::fs::read_to_string(file_path) {
-            Err(e) => throw_runtime_error(format!("Cannot read file {}: `{}`.", file_path, e)),
+            Err(e) => throw_runtime_error(format!("Cannot read file {file_path}: `{e}`.")),
             Ok(contents) => Self::from_aeon(contents.as_str()),
         }
     }
@@ -217,16 +194,16 @@ impl RegulatoryGraph {
     }
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
-    /// such variable does not exist.
-    pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
-        let var = self.resolve_network_variable(variable)?;
+    /// such a variable does not exist.
+    pub fn get_variable_name(&self, variable: VariableIdType) -> PyResult<String> {
+        let var = variable.resolve(self.as_native())?;
         Ok(self.0.get_variable_name(var).clone())
     }
 
     /// Update the variable name of the provided `variable`. This does not change the
     /// corresponding `VariableId`.
-    pub fn set_variable_name(&mut self, variable: &Bound<'_, PyAny>, name: &str) -> PyResult<()> {
-        let var = self.resolve_network_variable(variable)?;
+    pub fn set_variable_name(&mut self, variable: VariableIdType, name: &str) -> PyResult<()> {
+        let var = variable.resolve(self.as_native())?;
         self.0.set_variable_name(var, name).map_err(runtime_error)
     }
 
@@ -240,8 +217,7 @@ impl RegulatoryGraph {
     pub fn regulations<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyList>> {
         let result = PyList::empty(py);
         for reg in self.as_native().regulations() {
-            let reg = Self::encode_regulation(py, reg)?;
-            result.append(reg)?;
+            result.append(RegulationOutput::from(reg))?;
         }
         Ok(result)
     }
@@ -256,16 +232,15 @@ impl RegulatoryGraph {
 
     /// Find an `IdRegulation` dictionary that represents the regulation between the two variables, or `None`
     /// if such regulation does not exist.
-    pub fn find_regulation<'a>(
+    pub fn find_regulation(
         &self,
-        py: Python<'a>,
-        source: &Bound<'_, PyAny>,
-        target: &Bound<'_, PyAny>,
-    ) -> PyResult<Option<Bound<'a, PyDict>>> {
-        let source = self.resolve_network_variable(source)?;
-        let target = self.resolve_network_variable(target)?;
+        source: VariableIdType,
+        target: VariableIdType,
+    ) -> PyResult<Option<RegulationOutput>> {
+        let source = source.resolve(self.as_native())?;
+        let target = target.resolve(self.as_native())?;
         if let Some(regulation) = self.as_native().find_regulation(source, target) {
-            Self::encode_regulation(py, regulation).map(Some)
+            Ok(Some(RegulationOutput::from(regulation)))
         } else {
             Ok(None)
         }
@@ -273,12 +248,9 @@ impl RegulatoryGraph {
 
     /// Add a new regulation to the `RegulatoryGraph`, either using a `NamedRegulation`, `IdRegulation`, or
     /// a string representation compatible with the `.aeon` format.
-    pub fn add_regulation(&mut self, regulation: &Bound<'_, PyAny>) -> PyResult<()> {
-        let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
-        let m = m.as_ref().map(|it| match it {
-            Positive => Monotonicity::Activation,
-            Negative => Monotonicity::Inhibition,
-        });
+    pub fn add_regulation(&mut self, regulation: RegulationType) -> PyResult<()> {
+        let (s, m, o, t) = regulation.resolve_named(self.as_native())?;
+        let m = m.map(|it| SignType::from(it).monotonicity());
         self.as_native_mut()
             .add_regulation(s.as_str(), t.as_str(), o, m)
             .map_err(runtime_error)
@@ -287,19 +259,18 @@ impl RegulatoryGraph {
     /// Remove a regulation that is currently present in this `RegulatoryGraph`. Returns the `IdRegulation`
     /// dictionary that represents the removed regulation, or throws a `RuntimeError` if the regulation
     /// does not exist.
-    pub fn remove_regulation<'a>(
+    pub fn remove_regulation(
         &mut self,
-        py: Python<'a>,
-        source: &Bound<'a, PyAny>,
-        target: &Bound<'a, PyAny>,
-    ) -> PyResult<Bound<'a, PyDict>> {
-        let source = self.resolve_network_variable(source)?;
-        let target = self.resolve_network_variable(target)?;
+        source: VariableIdType,
+        target: VariableIdType,
+    ) -> PyResult<RegulationOutput> {
+        let source = source.resolve(self.as_native())?;
+        let target = target.resolve(self.as_native())?;
         let removed = self
             .as_native_mut()
             .remove_regulation(source, target)
             .map_err(runtime_error)?;
-        Self::encode_regulation(py, &removed)
+        Ok(RegulationOutput::from(&removed))
     }
 
     /// Update the `sign` and `essential` flags of a regulation in this `RegulatoryGraph`.
@@ -307,24 +278,23 @@ impl RegulatoryGraph {
     ///
     /// Returns the previous state of the regulation as an `IdRegulation` dictionary, assuming the regulation
     /// already existed.
-    pub fn ensure_regulation<'a>(
+    pub fn ensure_regulation(
         &mut self,
-        py: Python<'a>,
-        regulation: &Bound<'a, PyAny>,
-    ) -> PyResult<Option<Bound<'a, PyDict>>> {
-        // This is a bit inefficient, but should be good enough for now.
-        let (s, m, o, t) = Self::resolve_regulation(Some(self), regulation)?;
-        let source = self.as_native().find_variable(s.as_str()).unwrap();
-        let target = self.as_native().find_variable(t.as_str()).unwrap();
-        let old = self.as_native_mut().remove_regulation(source, target).ok();
-        let m = m.as_ref().map(|it| match it {
-            Positive => Monotonicity::Activation,
-            Negative => Monotonicity::Inhibition,
-        });
+        regulation: RegulationType,
+    ) -> PyResult<Option<RegulationOutput>> {
+        // This is a bit inefficient but should be good enough for now.
+        let (s, m, o, t) = regulation.resolve_id(self.as_native())?;
+        let old = self.as_native_mut().remove_regulation(s, t).ok();
+        let m = m.map(|it| SignType::from(it).monotonicity());
         self.as_native_mut()
-            .add_regulation(s.as_str(), t.as_str(), o, m)
+            .add_raw_regulation(biodivine_lib_param_bn::Regulation {
+                regulator: s,
+                target: t,
+                observable: o,
+                monotonicity: m,
+            })
             .map_err(runtime_error)?;
-        old.map(|it| Self::encode_regulation(py, &it)).transpose()
+        Ok(old.map(|it| RegulationOutput::from(&it)))
     }
 
     /// Create a copy of this `RegulatoryGraph` that is extended with the given list of `variables`.
@@ -351,12 +321,14 @@ impl RegulatoryGraph {
     ///
     /// The new graph follows the variable ordering of the old graph, but since there are now variables that are
     /// missing in the new graph, the `VariableId` objects are not compatible with the original graph.
-    pub fn drop(&self, variables: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
-        let to_remove = self
-            .resolve_variables(variables)?
+    pub fn drop(&self, variables: VariableIdMultipleType) -> PyResult<RegulatoryGraph> {
+        let to_remove: Vec<VariableIdType> = variables.into();
+        let to_remove: Vec<biodivine_lib_param_bn::VariableId> =
+            VariableIdType::resolve_collection(to_remove, self.as_native())?;
+        let to_remove = to_remove
             .into_iter()
-            .map(|it| self.as_native().get_variable_name(it).to_string())
-            .collect::<HashSet<String>>();
+            .map(|it| VariableIdResolver::get_name(self.as_native(), it))
+            .collect::<HashSet<_>>();
         let names = self
             .variable_names()
             .into_iter()
@@ -389,11 +361,11 @@ impl RegulatoryGraph {
     ///
     /// Raises a `RuntimeError` if the inlined variable has a self-regulation. This is because inlining
     /// a self-regulated variable potentially "erases" a feedback loop in the graph, which can fundamentally
-    /// change its behaviour. And as opposed to `RegulatoryGraph.drop`, the intention of this method is to produce
+    /// change its behavior. And as opposed to `RegulatoryGraph.drop`, the intention of this method is to produce
     /// a result that is functionally compatible with the original regulatory graph. Of course, you can use
     /// `RegulatoryGraph.remove_regulation` to explicitly remove the self-loop before inlining the variable.
-    pub fn inline_variable(&self, variable: &Bound<'_, PyAny>) -> PyResult<RegulatoryGraph> {
-        let variable = self.resolve_network_variable(variable)?;
+    pub fn inline_variable(&self, variable: VariableIdType) -> PyResult<RegulatoryGraph> {
+        let variable = variable.resolve(self.as_native())?;
         let bn = biodivine_lib_param_bn::BooleanNetwork::new(self.as_native().clone());
         let Some(bn) = bn.inline_variable(variable, false) else {
             return throw_runtime_error("Variable has a self-regulation.");
@@ -411,8 +383,8 @@ impl RegulatoryGraph {
     }
 
     /// Compute the `set` of all predecessors (regulators) of a specific variable.
-    pub fn predecessors(&self, variable: &Bound<'_, PyAny>) -> PyResult<HashSet<VariableId>> {
-        let variable = self.resolve_network_variable(variable)?;
+    pub fn predecessors(&self, variable: VariableIdType) -> PyResult<HashSet<VariableId>> {
+        let variable = variable.resolve(self.as_native())?;
         Ok(self
             .as_native()
             .regulators(variable)
@@ -422,8 +394,8 @@ impl RegulatoryGraph {
     }
 
     /// Compute the `set` of all successors (targets) of a specific variable.
-    pub fn successors(&self, variable: &Bound<'_, PyAny>) -> PyResult<HashSet<VariableId>> {
-        let variable = self.resolve_network_variable(variable)?;
+    pub fn successors(&self, variable: VariableIdType) -> PyResult<HashSet<VariableId>> {
+        let variable = variable.resolve(self.as_native())?;
         Ok(self
             .as_native()
             .targets(variable)
@@ -438,10 +410,11 @@ impl RegulatoryGraph {
     #[pyo3(signature = (pivots, subgraph = None))]
     pub fn backward_reachable(
         &self,
-        pivots: &Bound<'_, PyAny>,
-        subgraph: Option<&Bound<'_, PyAny>>,
+        pivots: VariableIdMultipleType,
+        subgraph: Option<Vec<VariableIdType>>,
     ) -> PyResult<HashSet<VariableId>> {
-        let pivots = self.resolve_variables(pivots)?;
+        let pivots: Vec<VariableIdType> = pivots.into();
+        let pivots = VariableIdType::resolve_collection(pivots, self.as_native())?;
         let subgraph = self.resolve_subgraph(subgraph)?;
         let sd_graph = SdGraph::from(self.as_native());
         Ok(sd_graph
@@ -457,10 +430,11 @@ impl RegulatoryGraph {
     #[pyo3(signature = (pivots, subgraph = None))]
     pub fn forward_reachable(
         &self,
-        pivots: &Bound<'_, PyAny>,
-        subgraph: Option<&Bound<'_, PyAny>>,
+        pivots: VariableIdMultipleType,
+        subgraph: Option<Vec<VariableIdType>>,
     ) -> PyResult<HashSet<VariableId>> {
-        let pivots = self.resolve_variables(pivots)?;
+        let pivots: Vec<VariableIdType> = pivots.into();
+        let pivots = VariableIdType::resolve_collection(pivots, self.as_native())?;
         let subgraph = self.resolve_subgraph(subgraph)?;
         let sd_graph = SdGraph::from(self.as_native());
         Ok(sd_graph
@@ -472,7 +446,7 @@ impl RegulatoryGraph {
 
     /// Heuristically computes an approximation of a minimal feedback vertex set of this `RegulatoryGraph`.
     ///
-    /// A feedback vertex set (FVS) is a set of variables which once removed cause the graph to become acyclic.
+    /// A feedback vertex set (FVS) is a set of variables that once removed cause the graph to become acyclic.
     /// The set is minimal if there is no smaller set that is also an FVS (in terms of cardinality).
     ///
     /// You can specify a `subgraph` restriction, in which case the algorithm operates only on the subgraph
@@ -486,26 +460,24 @@ impl RegulatoryGraph {
     pub fn feedback_vertex_set(
         &self,
         py: Python,
-        parity: Option<SignValue>,
-        subgraph: Option<&Bound<'_, PyAny>>,
+        parity: Option<SignType>,
+        subgraph: Option<Vec<VariableIdType>>,
     ) -> PyResult<HashSet<VariableId>> {
-        let sd_graph = SdGraph::from(self.as_native());
-        let restriction = self.resolve_subgraph(subgraph)?;
-        let fvs = if let Some(parity) = parity {
-            sd_graph._restricted_parity_feedback_vertex_set(
-                &restriction,
-                parity.sign(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?
-        } else {
-            sd_graph._restricted_feedback_vertex_set(
-                &restriction,
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?
-        };
-        Ok(fvs.into_iter().map(VariableId::from).collect())
+        cancel_this::on_python(|| {
+            let log_level = global_log_level(py)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let restriction = self.resolve_subgraph(subgraph)?;
+            let fvs = if let Some(parity) = parity {
+                sd_graph._restricted_parity_feedback_vertex_set(
+                    &restriction,
+                    parity.sign(),
+                    log_level,
+                )?
+            } else {
+                sd_graph._restricted_feedback_vertex_set(&restriction, log_level)?
+            };
+            Ok(fvs.into_iter().map(VariableId::from).collect())
+        })
     }
 
     /// Heuristically computes an approximation of a maximal set of independent cycles of this `RegulatoryGraph`.
@@ -524,33 +496,33 @@ impl RegulatoryGraph {
     pub fn independent_cycles(
         &self,
         py: Python,
-        parity: Option<SignValue>,
-        subgraph: Option<&Bound<'_, PyAny>>,
+        parity: Option<SignType>,
+        subgraph: Option<Vec<VariableIdType>>,
     ) -> PyResult<Vec<Vec<VariableId>>> {
-        let sd_graph = SdGraph::from(self.as_native());
-        let restriction = self.resolve_subgraph(subgraph)?;
-        let cycles = if let Some(parity) = parity {
-            sd_graph._restricted_independent_parity_cycles(
-                &restriction,
-                parity.sign(),
-                global_log_level(py)?,
-                &|| py.check_signals(),
-            )?
-        } else {
-            sd_graph._restricted_independent_cycles(&restriction, global_log_level(py)?, &|| {
-                py.check_signals()
-            })?
-        };
-        let cycles = cycles
-            .into_iter()
-            .map(|cycle| cycle.into_iter().map(VariableId::from).collect::<Vec<_>>())
-            .collect();
-        Ok(cycles)
+        cancel_this::on_python(|| {
+            let log_level = global_log_level(py)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let restriction = self.resolve_subgraph(subgraph)?;
+            let cycles = if let Some(parity) = parity {
+                sd_graph._restricted_independent_parity_cycles(
+                    &restriction,
+                    parity.sign(),
+                    log_level,
+                )?
+            } else {
+                sd_graph._restricted_independent_cycles(&restriction, log_level)?
+            };
+            let cycles = cycles
+                .into_iter()
+                .map(|cycle| cycle.into_iter().map(VariableId::from).collect::<Vec<_>>())
+                .collect();
+            Ok(cycles)
+        })
     }
 
     /// Compute the set of *non-trivial* strongly connected components of this `RegulatoryGraph`.
     ///
-    /// If the `subgraph` option is specified, only operates on the subgraph induced by these variables.
+    /// If the `subgraph` option is specified, it only operates on the subgraph induced by these variables.
     ///
     /// Note that a single variable with a self-regulation is considered a non-trivial SCC, even if it is not
     /// a member of a larger component.
@@ -558,42 +530,40 @@ impl RegulatoryGraph {
     pub fn strongly_connected_components(
         &self,
         py: Python,
-        subgraph: Option<&Bound<'_, PyAny>>,
+        subgraph: Option<Vec<VariableIdType>>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
-        let subgraph = self.resolve_subgraph(subgraph)?;
-        let sd_graph = SdGraph::from(self.as_native());
-        let components = sd_graph._restricted_strongly_connected_components(
-            &subgraph,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(components
-            .into_iter()
-            .map(|c| c.into_iter().map(|it| it.into()).collect())
-            .collect())
+        cancel_this::on_python(|| {
+            let subgraph = self.resolve_subgraph(subgraph)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let components = sd_graph
+                ._restricted_strongly_connected_components(&subgraph, global_log_level(py)?)?;
+            Ok(components
+                .into_iter()
+                .map(|c| c.into_iter().map(|it| it.into()).collect())
+                .collect())
+        })
     }
 
     /// Compute the set of weakly connected components of this `RegulatoryGraph`. Note that typical regulatory graphs
     /// represent a single weakly connected component.
     ///
-    /// If the `subgraph` option is specified, only operates on the subgraph induced by these variables.
+    /// If the `subgraph` option is specified, it only operates on the subgraph induced by these variables.
     #[pyo3(signature = (subgraph = None))]
     pub fn weakly_connected_components(
         &self,
         py: Python,
-        subgraph: Option<&Bound<'_, PyAny>>,
+        subgraph: Option<Vec<VariableIdType>>,
     ) -> PyResult<Vec<HashSet<VariableId>>> {
-        let subgraph = self.resolve_subgraph(subgraph)?;
-        let sd_graph = SdGraph::from(self.as_native());
-        let components = sd_graph._restricted_weakly_connected_components(
-            &subgraph,
-            global_log_level(py)?,
-            &|| py.check_signals(),
-        )?;
-        Ok(components
-            .into_iter()
-            .map(|c| c.into_iter().map(|it| it.into()).collect())
-            .collect())
+        cancel_this::on_python(|| {
+            let subgraph = self.resolve_subgraph(subgraph)?;
+            let sd_graph = SdGraph::from(self.as_native());
+            let components = sd_graph
+                ._restricted_weakly_connected_components(&subgraph, global_log_level(py)?)?;
+            Ok(components
+                .into_iter()
+                .map(|c| c.into_iter().map(|it| it.into()).collect())
+                .collect())
+        })
     }
 
     /// Find the shortest cycle in this `RegulatoryGraph` that contains the `pivot` variable, or `None` if no such
@@ -611,12 +581,12 @@ impl RegulatoryGraph {
     #[pyo3(signature = (pivot, parity = None, subgraph = None, length = None))]
     pub fn shortest_cycle(
         &self,
-        pivot: &Bound<'_, PyAny>,
-        parity: Option<SignValue>,
-        subgraph: Option<&Bound<'_, PyAny>>,
+        pivot: VariableIdType,
+        parity: Option<SignType>,
+        subgraph: Option<Vec<VariableIdType>>,
         length: Option<usize>,
     ) -> PyResult<Option<Vec<VariableId>>> {
-        let pivot = self.resolve_network_variable(pivot)?;
+        let pivot = pivot.resolve(self.as_native())?;
         let subgraph = self.resolve_subgraph(subgraph)?;
         let length = length.unwrap_or(usize::MAX);
         let sd_graph = SdGraph::from(self.as_native());
@@ -636,143 +606,13 @@ impl RegulatoryGraph {
     /// to which an operation should be applied.
     pub fn resolve_subgraph(
         &self,
-        variables: Option<&Bound<'_, PyAny>>,
+        variables: Option<Vec<VariableIdType>>,
     ) -> PyResult<HashSet<biodivine_lib_param_bn::VariableId>> {
         let Some(variables) = variables else {
             // If no value is given, we consider the full sub-graph always.
             return Ok(HashSet::from_iter(self.as_native().variables()));
         };
 
-        let mut result = HashSet::new();
-        if let Ok(list) = variables.downcast::<PyList>() {
-            for item in list {
-                result.insert(self.resolve_network_variable(&item)?);
-            }
-        } else if let Ok(set) = variables.downcast::<PySet>() {
-            for item in set {
-                result.insert(self.resolve_network_variable(&item)?);
-            }
-        } else {
-            return throw_type_error("Expected `set` or `list`.");
-        }
-
-        Ok(result)
-    }
-
-    /// A combination of `resolve_variable` and `resolve_subgraph`: Can accept a single variable or a collection
-    /// of variables.
-    pub fn resolve_variables(
-        &self,
-        data: &Bound<'_, PyAny>,
-    ) -> PyResult<HashSet<biodivine_lib_param_bn::VariableId>> {
-        let result = if let Ok(variable) = self.resolve_network_variable(data) {
-            HashSet::from_iter([variable])
-        } else if let Ok(variables) = self.resolve_subgraph(Some(data)) {
-            variables
-        } else {
-            return throw_type_error("Expected a single variable or a collection of variables.");
-        };
-        Ok(result)
-    }
-
-    /// Extract regulation data from a dynamic `regulation` object. The regulation object can be either a string
-    /// (using internal `.aeon` representation), or a dictionary with mandatory keys `source` and `target`, plus
-    /// optional keys `essential` and `sign`. For backwards compatibility, the dictionary can also use `observable`
-    /// instead of `essential` and `monotonicity` instead of `sign`.
-    ///
-    /// The function has two modes: If `ctx` is `None`, the function can only read regulation objects where `source`
-    /// and `target` are represented using string names. If `ctx` is specified, then these can also be `VariableId`
-    /// objects that are resolved to variable names using `ctx`.
-    pub fn resolve_regulation<T: NetworkVariableContext>(
-        ctx: Option<&T>,
-        regulation: &Bound<'_, PyAny>,
-    ) -> PyResult<(String, Option<Sign>, bool, String)> {
-        if let Ok(item) = regulation.extract::<String>() {
-            let Some((source, monotonicity, observable, target)) =
-                biodivine_lib_param_bn::Regulation::try_from_string(item.as_str())
-            else {
-                return throw_runtime_error(format!("Invalid regulation string: `{}`.", item));
-            };
-            let monotonicity = match monotonicity {
-                None => None,
-                Some(Monotonicity::Activation) => Some(Positive),
-                Some(Monotonicity::Inhibition) => Some(Negative),
-            };
-            Ok((source, monotonicity, observable, target))
-        } else if let Ok(item) = regulation.downcast::<PyDict>() {
-            for key in item.keys() {
-                let error = match key.extract::<String>() {
-                    Ok(name) => match name.as_str() {
-                        "source" | "target" | "essential" | "observable" | "sign"
-                        | "monotonicity" => continue,
-                        _ => name,
-                    },
-                    Err(_) => key.to_string(),
-                };
-                return throw_type_error(format!(
-                    "Unknown key in the regulation dictionary: {:?}",
-                    error
-                ));
-            }
-
-            let Some(source) = item.get_item("source")? else {
-                return throw_type_error("Missing regulation `source` variable.");
-            };
-            let Some(target) = item.get_item("target")? else {
-                return throw_type_error("Missing regulation `target` variable.");
-            };
-
-            let (source, target) = if let Some(ctx) = ctx {
-                let source = ctx.resolve_network_variable(&source)?;
-                let target = ctx.resolve_network_variable(&target)?;
-                (
-                    ctx.get_network_variable_name(source).clone(),
-                    ctx.get_network_variable_name(target).clone(),
-                )
-            } else {
-                let Ok(source) = source.extract::<String>() else {
-                    return throw_type_error("Expected string `source` variable.");
-                };
-                let Ok(target) = target.extract::<String>() else {
-                    return throw_type_error("Expected string `target` variable.");
-                };
-                (source, target)
-            };
-
-            let observable = item
-                .get_item("essential")?
-                .or(item.get_item("observable")?) // backwards compatibility
-                .map(|it| it.extract::<BoolLikeValue>().map(bool::from))
-                .unwrap_or(Ok(true))?;
-            let monotonicity = item
-                .get_item("sign")?
-                .or(item.get_item("monotonicity")?) // backwards compatibility
-                .and_then(|it| if it.is_none() { None } else { Some(it) })
-                .map(|it| it.extract::<SignValue>().map(Sign::from))
-                .transpose()?;
-
-            Ok((source, monotonicity, observable, target))
-        } else {
-            throw_type_error("Expected regulation string or regulation dictionary.")
-        }
-    }
-
-    /// Encode the data from a single regulation into an `IdRegulation`-compatible dictionary.
-    pub fn encode_regulation<'a>(
-        py: Python<'a>,
-        regulation: &biodivine_lib_param_bn::Regulation,
-    ) -> PyResult<Bound<'a, PyDict>> {
-        let result = PyDict::new(py);
-        let source = VariableId::from(regulation.get_regulator());
-        let target = VariableId::from(regulation.get_target());
-        result.set_item("source", source)?;
-        result.set_item("target", target)?;
-        result.set_item("essential", regulation.is_observable())?;
-        match regulation.get_monotonicity() {
-            None => result.set_item("sign", py.None())?,
-            Some(Monotonicity::Activation) => result.set_item("sign", "+")?,
-            Some(Monotonicity::Inhibition) => result.set_item("sign", "-")?,
-        }
-        Ok(result)
+        VariableIdType::resolve_collection(variables, self.as_native())
     }
 }

@@ -2,8 +2,9 @@ use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_bdd::bdd_valuation::{BddPartialValuation, BddValuation};
 use crate::bindings::lib_bdd::bdd_variable::BddVariable;
 use crate::bindings::lib_bdd::boolean_expression::BooleanExpression;
-use crate::pyo3_utils::{richcmp_eq_by_key, BoolLikeValue};
-use crate::{throw_index_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
+use crate::pyo3_utils::richcmp_eq_by_key;
+use crate::{AsNative, throw_index_error, throw_runtime_error, throw_type_error};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -78,7 +79,7 @@ impl BddVariableSet {
 
     pub fn __repr__(&self) -> String {
         let names = self.variable_names();
-        format!("BddVariableSet({:?})", names)
+        format!("BddVariableSet({names:?})")
     }
 
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
@@ -123,7 +124,7 @@ impl BddVariableSet {
     }
 
     /// Return the string name of the requested `variable`, or throw `RuntimeError` if
-    /// such variable does not exist.
+    /// such a variable does not exist.
     pub fn get_variable_name(&self, variable: &Bound<'_, PyAny>) -> PyResult<String> {
         let var = self.resolve_variable(variable)?;
         Ok(self.0.name_of(var))
@@ -142,7 +143,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing the constant Boolean function given by `value`.
-    fn mk_const(self_: PyRef<'_, Self>, value: BoolLikeValue) -> PyResult<Bdd> {
+    fn mk_const(self_: PyRef<'_, Self>, value: BoolType) -> PyResult<Bdd> {
         let value = if value.bool() {
             self_.0.mk_true()
         } else {
@@ -156,7 +157,7 @@ impl BddVariableSet {
     fn mk_literal(
         self_: PyRef<'_, Self>,
         variable: &Bound<'_, PyAny>,
-        value: BoolLikeValue,
+        value: BoolType,
     ) -> PyResult<Bdd> {
         let variable = self_.resolve_variable(variable)?;
         let value = self_.0.mk_literal(variable, value.bool());
@@ -164,7 +165,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing a conjunction of positive/negative literals
-    /// (e.g. $x \land y \land \neg z$).
+    /// (e.g., $x \land y \land \neg z$).
     ///
     /// See also `BoolClauseType`.
     pub fn mk_conjunctive_clause(
@@ -182,7 +183,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing a disjunction of positive/negative literals
-    /// (e.g. $x \lor y \lor \neg z$).
+    /// (e.g., $x \lor y \lor \neg z$).
     ///
     /// See also `BoolClauseType`.
     fn mk_disjunctive_clause(self_: PyRef<'_, Self>, clause: &Bound<'_, PyAny>) -> PyResult<Bdd> {
@@ -197,7 +198,7 @@ impl BddVariableSet {
     }
 
     /// Create a new `Bdd` representing a conjunction of disjunctive clauses
-    /// (e.g. $(x \lor y) \land (\neg x \lor z)$).
+    /// (e.g., $(x \lor y) \land (\neg x \lor z)$).
     ///
     /// This method uses a special algorithm that is typically faster than combining
     /// the clauses one by one.
@@ -231,7 +232,7 @@ impl BddVariableSet {
     /// Compute a `Bdd` which is satisfied by (and only by) valuations where exactly `k`
     /// out of the specified `variables` are `True`.
     ///
-    /// If `variables` are `None`, the result is computed w.r.t. all variables
+    /// If `variables` are `None`, the result is computed with respect to all variables
     /// managed by this `BddVariableSet`.
     #[pyo3(signature = (k, variables = None))]
     fn mk_sat_exactly_k(
@@ -251,7 +252,7 @@ impl BddVariableSet {
     /// Compute a `Bdd` which is satisfied by (and only by) valuations where up to `k`
     /// out of the specified `variables` are `True`.
     ///
-    /// If `variables` are `None`, the result is computed w.r.t. all variables
+    /// If `variables` are `None`, the result is computed with respect to all variables
     /// managed by this `BddVariableSet`.
     #[pyo3(signature = (k, variables = None))]
     fn mk_sat_up_to_k(
@@ -281,8 +282,8 @@ impl BddVariableSet {
     /// Translate a `Bdd` between two `BddVariableSet` objects.
     ///
     /// The translation is only valid if the `Bdd` relies on variables that are in both
-    /// variable set, and their ordering is mutually compatible. If this is not satisfied,
-    /// i.e. some of the variables don't exist in the new context, or would have to be reordered,
+    /// variable sets, and their ordering is mutually compatible. If this is not satisfied,
+    /// i.e., some variables don't exist in the new context, or would have to be reordered,
     /// the method throws a runtime exception.
     fn transfer_from(
         self_: PyRef<'_, Self>,
@@ -296,6 +297,30 @@ impl BddVariableSet {
             return throw_runtime_error("The contexts are not compatible.");
         };
         Ok(Bdd::new_raw(self_, rs_bdd))
+    }
+
+    /// Return a dictionary mapping variable IDs to their names.
+    fn to_id_dict(&self, py: Python<'_>) -> PyResult<Py<PyDict>> {
+        let dict = PyDict::new(py);
+        for var in self.0.variables() {
+            let name = self.0.name_of(var);
+            let var_id = BddVariable::from(var);
+            dict.set_item(var_id, name)?;
+        }
+        Ok(dict.into())
+    }
+
+    /// Return a dictionary mapping variable names to their IDs.
+    ///
+    /// This is the inverse of `to_id_dict`.
+    fn to_name_dict(&self, py: Python<'_>) -> PyResult<Py<PyDict>> {
+        let dict = PyDict::new(py);
+        for var in self.0.variables() {
+            let name = self.0.name_of(var);
+            let var_id = BddVariable::from(var);
+            dict.set_item(name, var_id)?;
+        }
+        Ok(dict.into())
     }
 }
 
@@ -315,7 +340,7 @@ impl BddVariableSet {
             return if let Some(var) = self.0.var_by_name(name.as_str()) {
                 Ok(var)
             } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
+                throw_index_error(format!("Unknown variable name `{name}`."))
             };
         }
         throw_type_error("Expected `BddVariable` or `str`.")
@@ -332,11 +357,11 @@ impl BddVariableSet {
             let valuation = valuation.as_native().clone();
             return Ok(biodivine_lib_bdd::BddPartialValuation::from(valuation));
         }
-        if let Ok(values) = valuation.downcast::<PyDict>() {
+        if let Ok(values) = valuation.cast::<PyDict>() {
             let mut result = biodivine_lib_bdd::BddPartialValuation::empty();
             for (key, value) in values {
                 let key = self.resolve_variable(&key)?;
-                let value = value.extract::<BoolLikeValue>()?;
+                let value = value.extract::<BoolType>()?;
                 result[key] = Some(value.bool());
             }
             return Ok(result);
@@ -353,7 +378,7 @@ impl BddVariableSet {
         if let Ok(variable) = self.resolve_variable(variables) {
             return Ok(vec![variable]);
         }
-        if let Ok(variables) = variables.downcast::<PyList>() {
+        if let Ok(variables) = variables.cast::<PyList>() {
             let result = variables
                 .iter()
                 .map(|it| self.resolve_variable(&it))

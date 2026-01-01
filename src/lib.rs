@@ -67,12 +67,6 @@ fn global_log_level(py: Python) -> PyResult<usize> {
 }
 
 const LOG_NOTHING: usize = 0;
-const LOG_ESSENTIAL: usize = 1;
-const LOG_VERBOSE: usize = 2;
-
-fn log_essential(log_level: usize, symbolic_size: usize) -> bool {
-    log_level >= LOG_VERBOSE || (symbolic_size > 100_000 && log_level >= LOG_ESSENTIAL)
-}
 
 fn should_log(log_level: usize) -> bool {
     log_level > LOG_NOTHING
@@ -95,14 +89,16 @@ fn biodivine_aeon(py: Python, module: &Bound<'_, PyModule>) -> PyResult<()> {
     bindings::bn_classifier::register(module)?;
     bindings::pbn_control::register(module)?;
     bbm::register(module)?;
+    #[cfg(feature = "algorithms-pyo3-bindings")]
+    bindings::algorithms::register(module)?;
     Ok(())
 }
 
 /// This trait works similar to the `From` conversion, but it explicitly takes and returns
 /// a reference, which makes it a bit easier for type inference to figure out what is going
-/// on. As such, this can be often used to simplify some conversions.
+/// on. As such, this can often be used to simplify some conversions.
 ///
-/// Note that you don't need this for "value structs" (i.e. implementing copy), where everything
+/// Note that you don't need this for "value structs" (i.e., implementing copy), where everything
 /// is copied anyway and references aren't relevant.
 trait AsNative<T> {
     fn as_native(&self) -> &T;

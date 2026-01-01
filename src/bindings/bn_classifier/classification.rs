@@ -10,12 +10,12 @@ use biodivine_lib_param_bn::symbolic_async_graph::{
 use biodivine_pbn_control::control::PhenotypeOscillationType;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyList};
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
-use crate::bindings::bn_classifier::class::{extend_map, Class};
+use crate::bindings::algorithms::attractors::Attractors;
+use crate::bindings::algorithms::reachability::Reachability;
+use crate::bindings::bn_classifier::class::{Class, extend_map};
 use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
-use crate::bindings::lib_param_bn::algorithms::attractors::Attractors;
-use crate::bindings::lib_param_bn::algorithms::reachability::Reachability;
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::bindings::lib_param_bn::model_annotation::ModelAnnotation;
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
@@ -27,7 +27,7 @@ use crate::bindings::pbn_control::extract_phenotype_type;
 use crate::internal::classification::load_inputs::load_classification_archive;
 use crate::internal::classification::write_output::build_classification_archive;
 use crate::internal::scc::{Behaviour, Classifier};
-use crate::{runtime_error, throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, runtime_error, throw_runtime_error, throw_type_error};
 
 /// An "algorithm object" that groups all methods related to the classification of various
 /// model properties.
@@ -41,7 +41,7 @@ impl Classification {
     /// Extend an existing `classification` dictionary in such a way that every color
     /// in the `colors` set appears in a `Class` with the specified `features`.
     ///
-    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
+    /// For example, extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
     /// `{ `a`: [1,2,3], ['b']: [5,6], ['a','b']: [4] }`.
     ///
     /// This does not "increase" the number of times a feature appears in a class, it merely
@@ -70,9 +70,9 @@ impl Classification {
     }
 
     /// Extend an existing `classification` dictionary in such a way that every color
-    /// in the `colors` set has an additional features according to the specified `Class`.
+    /// in the `colors` set has an additional feature according to the specified `Class`.
     ///
-    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
+    /// For example, extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
     /// `{ `a`: [1,2], ['b']: [5,6], ['a','a']: [3], ['a','b']: [4] }`.
     ///
     /// In other words, compared to `Class.classification_ensure`, this does "increase" the number
@@ -102,7 +102,7 @@ impl Classification {
 
     /// Read the list of *dynamic assertions* from `.aeon` model annotations.
     ///
-    /// An assertion typically encodes a `HctlFormula` that must be satisfied by all
+    /// An assertion typically encodes an `HctlFormula` that must be satisfied by all
     /// the relevant interpretations of a partially specified model.
     ///
     /// The argument is either a `ModelAnnotation` dictionary, a path to an existing model
@@ -126,7 +126,7 @@ impl Classification {
 
     /// Read the list of *dynamic properties* from `.aeon` model annotations.
     ///
-    /// A property typically encodes a `HctlFormula` that is of interest in a particular model,
+    /// A property typically encodes an `HctlFormula` that is of interest in a particular model,
     /// but is not necessarily satisfied by all relevant interpretations of a model. Each property
     /// is identified by a name (first item in the tuple).
     ///
@@ -206,7 +206,7 @@ impl Classification {
         for (name, prop) in properties {
             let prop_node = properties_node.__getitem__(name.as_str());
             if prop_node.get_value(py).is_some() {
-                return throw_runtime_error(format!("Property `{}` is already set.", name));
+                return throw_runtime_error(format!("Property `{name}` is already set."));
             } else {
                 prop_node.set_value(py, Some(prop));
             }
@@ -263,7 +263,7 @@ impl Classification {
             return Ok(());
         };
 
-        throw_runtime_error(format!("Cannot write archive: {}", e))
+        throw_runtime_error(format!("Cannot write archive: {e}"))
     }
 
     /// Load a [BN Classifier](https://github.com/sybila/biodivine-bn-classifier/) archive
@@ -353,13 +353,13 @@ impl Classification {
     #[pyo3(signature = (graph, attractors = None))]
     pub fn classify_attractor_bifurcation(
         py: Python,
-        graph: &AsynchronousGraph,
+        graph: Py<AsynchronousGraph>,
         attractors: Option<Vec<ColoredVertexSet>>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let attractors = if let Some(attractors) = attractors {
             attractors
         } else {
-            Attractors::attractors(graph, None, None, py)?
+            Attractors::attractors(graph.clone().into(), None, None, py)?
         };
 
         let attractors = attractors
@@ -367,9 +367,9 @@ impl Classification {
             .map(|it| it.as_native().clone())
             .collect::<Vec<_>>();
 
-        let scc_classifier = Classifier::new(graph.as_native());
+        let scc_classifier = Classifier::new(graph.get().as_native());
         for attr in attractors {
-            scc_classifier.add_component(attr, graph.as_native());
+            scc_classifier.add_component(attr, graph.get().as_native());
         }
         let classification = scc_classifier.export_result();
 
@@ -379,7 +379,7 @@ impl Classification {
                 let items = k.0.into_iter().map(encode_behavior).collect::<Vec<_>>();
                 (
                     Class::new_native(items),
-                    ColorSet::mk_native(graph.symbolic_context(), v),
+                    ColorSet::mk_native(graph.get().symbolic_context(), v),
                 )
             })
             .collect())
@@ -424,20 +424,21 @@ impl Classification {
     #[pyo3(signature = (graph, phenotypes, oscillation_types = None, traps = None, count_multiplicity = true))]
     pub fn classify_attractor_phenotypes(
         py: Python,
-        graph: &AsynchronousGraph,
+        graph: Py<AsynchronousGraph>,
         phenotypes: HashMap<Class, VertexSet>,
         oscillation_types: Option<HashMap<Class, String>>,
         traps: Option<Vec<ColoredVertexSet>>,
         count_multiplicity: bool,
     ) -> PyResult<HashMap<Class, ColorSet>> {
+        let graph_ref = graph.borrow(py);
         // Initialize the attractor set.
         let traps = if let Some(traps) = traps {
             traps
         } else {
-            Attractors::attractors(graph, None, None, py)?
+            Attractors::attractors(graph.clone().into(), None, None, py)?
         };
 
-        let mut all_colors = graph.mk_empty_colors();
+        let mut all_colors = graph_ref.mk_empty_colors();
         for attr in &traps {
             all_colors = all_colors.union(&attr.colors());
         }
@@ -448,7 +449,7 @@ impl Classification {
         for attr in &traps {
             let attr_classes = Self::classify_phenotypes(
                 py,
-                graph,
+                graph.clone(),
                 phenotypes.clone(),
                 oscillation_types.clone(),
                 Some(attr.clone()),
@@ -514,16 +515,17 @@ impl Classification {
     #[pyo3(signature = (graph, phenotypes, oscillation_types = None, initial_trap = None))]
     pub fn classify_phenotypes(
         py: Python,
-        graph: &AsynchronousGraph,
+        graph: Py<AsynchronousGraph>,
         phenotypes: HashMap<Class, VertexSet>,
         oscillation_types: Option<HashMap<Class, String>>,
         initial_trap: Option<ColoredVertexSet>,
     ) -> PyResult<HashMap<Class, ColorSet>> {
         let mut map = HashMap::new();
+        let graph_ref = graph.borrow(py);
 
-        let unit = graph.mk_unit_colored_vertices();
-        let initial_trap = initial_trap.unwrap_or_else(|| graph.mk_unit_colored_vertices());
-        if !graph
+        let unit = graph_ref.mk_unit_colored_vertices();
+        let initial_trap = initial_trap.unwrap_or_else(|| graph_ref.mk_unit_colored_vertices());
+        if !graph_ref
             .as_native()
             .can_post_out(initial_trap.as_native())
             .is_empty()
@@ -554,27 +556,27 @@ impl Classification {
                     // remove them, and take all colors that still appear in the set (there
                     // exists at least one attractor that is fully contained in the phenotype).
                     let not_phenotype = unit.minus(&phenotype);
-                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let not_phenotype = Reachability::reach_bwd(py, graph.clone(), &not_phenotype)?;
                     let always_phenotype = phenotype.minus(&not_phenotype);
                     always_phenotype.colors()
                 }
                 PhenotypeOscillationType::Required => {
                     // Oscillation is required. Select all attractors that intersect the phenotype
-                    // set, but are not fully contained in it.
+                    // set but are not fully contained in it.
 
                     // This one is a bit more tricky. The idea is that if we remove every attractor
-                    // that is fully contained in the `phenotype` set as well as every attractor
+                    // fully contained in the `phenotype` set as well as every attractor
                     // that is fully outside, we get a trap set with all attractors that intersect
                     // the `phenotype` set but are not contained in it.
                     let not_phenotype = unit.minus(&phenotype);
-                    let not_phenotype = Reachability::reach_bwd(py, graph, &not_phenotype)?;
+                    let not_phenotype = Reachability::reach_bwd(py, graph.clone(), &not_phenotype)?;
                     let always_phenotype = phenotype.minus(&not_phenotype);
                     let is_phenotype = unit.intersect(&phenotype);
-                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let is_phenotype = Reachability::reach_bwd(py, graph.clone(), &is_phenotype)?;
                     let never_phenotype = unit.minus(&is_phenotype);
                     let can_be_never_or_always = always_phenotype.union(&never_phenotype);
                     let can_be_never_or_always =
-                        Reachability::reach_bwd(py, graph, &can_be_never_or_always)?;
+                        Reachability::reach_bwd(py, graph.clone(), &can_be_never_or_always)?;
                     let always_mixed = unit.minus(&can_be_never_or_always);
                     always_mixed.colors()
                 }
@@ -582,14 +584,14 @@ impl Classification {
                     // Oscillation is allowed. Any attractor that is not fully *outside* the
                     // phenotype set is valid here.
 
-                    // This is basically negating the phenotype set, and then finding all attractors
+                    // This is basically negating the phenotype set and then finding all attractors
                     // that fully reside in the negated set (forbidden oscillation) and
                     // disregarding them.
                     let is_phenotype = unit.intersect(&phenotype);
-                    let is_phenotype = Reachability::reach_bwd(py, graph, &is_phenotype)?;
+                    let is_phenotype = Reachability::reach_bwd(py, graph.clone(), &is_phenotype)?;
                     let never_phenotype = unit.minus(&is_phenotype);
                     let can_reach_never_phenotype =
-                        Reachability::reach_bwd(py, graph, &never_phenotype)?;
+                        Reachability::reach_bwd(py, graph.clone(), &never_phenotype)?;
                     let allowed_phenotype = unit.minus(&can_reach_never_phenotype);
                     allowed_phenotype.colors()
                 }
@@ -679,7 +681,7 @@ impl Classification {
 
         let mut valid_colors = mc_graph.mk_unit_colors();
         for set in results {
-            // We consider the "universal" interpretation of HCTL, i.e. formula holds only if it
+            // We consider the "universal" interpretation of HCTL, i.e., formula holds only if it
             // holds for every state.
             let invalid_set = mc_graph.unit_colored_vertices().minus(&set);
             valid_colors = valid_colors.minus(&invalid_set.colors());

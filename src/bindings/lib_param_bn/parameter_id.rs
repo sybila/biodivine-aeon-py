@@ -1,3 +1,4 @@
+use biodivine_lib_param_bn::symbolic_async_graph::SymbolicAsyncGraph;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -21,7 +22,7 @@ use std::hash::{Hash, Hasher};
 /// assert d[a] != d[b]
 /// ```
 ///
-/// The value of `ParameterIdId` is frozen (i.e. immutable).
+/// The value of `ParameterIdId` is frozen (i.e., immutable).
 ///
 /// See also `ParameterIdType`.
 ///
@@ -61,5 +62,63 @@ impl ParameterId {
 
     pub fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
         PyTuple::new(py, [self.0.to_index()])
+    }
+}
+
+/// A trait used together with [`ParameterIdType`] to safely resolve a name or a native ID
+/// into a [`biodivine_lib_param_bn::ParameterId`].
+pub trait ParameterIdResolver {
+    fn resolve_name(&self, name: &str) -> Option<biodivine_lib_param_bn::ParameterId>;
+    fn resolve_id(&self, id: usize) -> Option<biodivine_lib_param_bn::ParameterId>;
+    fn get_name(&self, id: biodivine_lib_param_bn::ParameterId) -> String;
+}
+
+impl ParameterIdResolver for biodivine_lib_param_bn::BooleanNetwork {
+    fn resolve_name(&self, name: &str) -> Option<biodivine_lib_param_bn::ParameterId> {
+        self.find_parameter(name)
+    }
+
+    fn resolve_id(&self, id: usize) -> Option<biodivine_lib_param_bn::ParameterId> {
+        if id < self.num_parameters() {
+            Some(biodivine_lib_param_bn::ParameterId::from_index(id))
+        } else {
+            None
+        }
+    }
+
+    fn get_name(&self, id: biodivine_lib_param_bn::ParameterId) -> String {
+        self.get_parameter(id).get_name().clone()
+    }
+}
+
+impl ParameterIdResolver for SymbolicAsyncGraph {
+    fn resolve_name(&self, name: &str) -> Option<biodivine_lib_param_bn::ParameterId> {
+        self.symbolic_context().resolve_name(name)
+    }
+
+    fn resolve_id(&self, id: usize) -> Option<biodivine_lib_param_bn::ParameterId> {
+        self.symbolic_context().resolve_id(id)
+    }
+
+    fn get_name(&self, id: biodivine_lib_param_bn::ParameterId) -> String {
+        self.symbolic_context().get_name(id)
+    }
+}
+
+impl ParameterIdResolver for biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext {
+    fn resolve_name(&self, name: &str) -> Option<biodivine_lib_param_bn::ParameterId> {
+        self.find_network_parameter(name)
+    }
+
+    fn resolve_id(&self, id: usize) -> Option<biodivine_lib_param_bn::ParameterId> {
+        if id < self.network_parameters().len() {
+            Some(biodivine_lib_param_bn::ParameterId::from_index(id))
+        } else {
+            None
+        }
+    }
+
+    fn get_name(&self, id: biodivine_lib_param_bn::ParameterId) -> String {
+        self.get_network_parameter_name(id)
     }
 }

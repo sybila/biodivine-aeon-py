@@ -1,8 +1,8 @@
-use crate::{throw_runtime_error, AsNative};
+use crate::{AsNative, throw_runtime_error};
 use macros::Wrapper;
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::IntoPyObjectExt;
 
 /*
    I am sorry for this mess, but this seems to be the best solution at the moment
@@ -38,7 +38,7 @@ use pyo3::IntoPyObjectExt;
 ///
 /// #### Annotation syntax
 ///
-/// Annotations are comments which start with `#!`. After the `#!` "preamble", each annotation
+/// Annotations are comments that start with `#!`. After the `#!` "preamble", each annotation
 /// can contain a "path prefix" with path segments separated using `:` (path segments can be
 /// surrounded by white space that is automatically trimmed). Based on these path
 /// segments, the parser will create an annotation tree. If there are multiple annotations with
@@ -52,7 +52,7 @@ use pyo3::IntoPyObjectExt;
 /// ```
 ///
 /// Another usage for annotations are additional properties expected from the model, for
-/// example written in CTL:
+/// example, written in CTL:
 /// ```text
 /// #! property : AG (problem => AF apoptosis)
 /// ```
@@ -94,7 +94,6 @@ fn mk_path(path: &[String]) -> Vec<&str> {
     path.iter().map(|it| it.as_str()).collect()
 }
 
-// TODO: Figure out how this should be pickled?
 #[pymethods]
 impl ModelAnnotation {
     /// Create a new `ModelAnnotation` with an optional string `value`.
@@ -162,13 +161,37 @@ impl ModelAnnotation {
             .borrow(py)
             .as_native()
             .get_child(&self.path)
-            .map(|it| format!("{}", it))
+            .map(|it| format!("{it}"))
             .unwrap_or_else(String::new)
     }
 
     pub fn __repr__(&self, py: Python) -> String {
         let self_str = self.__str__(py);
-        format!("ModelAnnotation.from_aeon({:?})", self_str)
+        format!("ModelAnnotation.from_aeon({self_str:?})")
+    }
+
+    /// Returns the arguments for pickling: the string representation of the annotation subtree
+    /// at the current path. When unpickled, this creates a new root annotation with the
+    /// serialized subtree as its content.
+    pub fn __getnewargs__(&self, py: Python) -> (Option<String>,) {
+        // Get the annotation at the current path and convert to string
+        let ann_str = self.__str__(py);
+        if ann_str.is_empty() {
+            (None,)
+        } else {
+            // Return the value at this node (if any)
+            (self.get_value(py),)
+        }
+    }
+
+    /// Custom reduce method for proper pickle support that preserves the full subtree.
+    pub fn __reduce__(&self, py: Python) -> PyResult<(Py<PyAny>, (String,))> {
+        // Get the string representation of the annotation at this path
+        let ann_str = self.__str__(py);
+        // Return the from_aeon static method and the string representation
+        let cls = py.get_type::<ModelAnnotation>();
+        let from_aeon = cls.getattr("from_aeon")?;
+        Ok((from_aeon.into(), (ann_str,)))
     }
 
     pub fn __len__(&self, py: Python) -> usize {
@@ -266,7 +289,7 @@ impl ModelAnnotation {
 
         match std::fs::read_to_string(path) {
             Ok(file_contents) => Self::from_aeon(py, file_contents.as_str()),
-            Err(e) => throw_runtime_error(format!("Cannot read file: {}.", e)),
+            Err(e) => throw_runtime_error(format!("Cannot read file: {e}.")),
         }
     }
 
@@ -305,7 +328,7 @@ impl ModelAnnotation {
         }
     }
 
-    /// Return the list key-value pairs that correspond to the direct descendants
+    /// Return the list of key-value pairs that correspond to the direct descendants
     /// of this annotation.
     pub fn items(&self, py: Python) -> Vec<(String, ModelAnnotation)> {
         let root_ref = self.root.borrow(py);

@@ -1,9 +1,12 @@
 # Biodivine `lib-hctl-model-checker` API coverage
 
-This document should be up-to-date with `lib-hctl-model-checker` version `0.3.0`.
+This document should be up-to-date with `lib-hctl-model-checker` version `0.3.4`.
 
 Overall, the library exposes a lot of methods that could be considered "internal",
 so a lot of the low-level features are not exposed in the Python bindings.
+
+For example, we don't really expose any of the API which provides progress tracking,
+since this is currently intended for Sketchbook only.
 
 ### `preprocessing` module
 

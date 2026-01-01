@@ -29,7 +29,7 @@ use std::hash::{Hash, Hasher};
 /// assert not (z.is_terminal() or z.is_one() or z.is_zero())
 /// ```
 ///
-/// The value of `BddPointer` are frozen (i.e. immutable).
+/// The value of `BddPointer` are frozen (i.e., immutable).
 ///
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Wrapper)]

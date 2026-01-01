@@ -1,14 +1,14 @@
+use crate::bindings::lib_param_bn::argument_types::subspace_valuation_type::SubspaceValuationType;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::pbn_control::{
-    extract_phenotype_type, AsynchronousPerturbationGraph, ColoredPerturbationSet,
+    AsynchronousPerturbationGraph, ColoredPerturbationSet, extract_phenotype_type,
 };
-use crate::{global_log_level, should_log, throw_runtime_error, AsNative};
+use crate::{AsNative, global_log_level, should_log, throw_runtime_error};
 use biodivine_lib_param_bn::biodivine_std::bitvector::{ArrayBitVector, BitVector};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_pbn_control::control::{ControlMap, PhenotypeOscillationType};
-use pyo3::prelude::PyAnyMethods;
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Py, PyResult, Python, pyclass, pymethods};
 
 #[pyclass(module = "biodivine_aeon", frozen)]
 pub struct Control {
@@ -28,8 +28,8 @@ impl Control {
     pub fn attractor_one_step(
         py: Python,
         graph: Py<AsynchronousPerturbationGraph>,
-        source: &Bound<'_, PyAny>,
-        target: &Bound<'_, PyAny>,
+        source: SubspaceValuationType,
+        target: SubspaceValuationType,
         colors: Option<ColorSet>,
     ) -> PyResult<ColoredPerturbationSet> {
         let source = extract_state(py, &graph, source)?;
@@ -62,8 +62,8 @@ impl Control {
     pub fn attractor_temporary(
         py: Python,
         graph: Py<AsynchronousPerturbationGraph>,
-        source: &Bound<'_, PyAny>,
-        target: &Bound<'_, PyAny>,
+        source: SubspaceValuationType,
+        target: SubspaceValuationType,
         colors: Option<ColorSet>,
     ) -> PyResult<ColoredPerturbationSet> {
         let source = extract_state(py, &graph, source)?;
@@ -97,8 +97,8 @@ impl Control {
     pub fn attractor_permanent(
         py: Python,
         graph: Py<AsynchronousPerturbationGraph>,
-        source: &Bound<'_, PyAny>,
-        target: &Bound<'_, PyAny>,
+        source: SubspaceValuationType,
+        target: SubspaceValuationType,
         colors: Option<ColorSet>,
     ) -> PyResult<ColoredPerturbationSet> {
         let source = extract_state(py, &graph, source)?;
@@ -125,16 +125,16 @@ impl Control {
     /// specified target `phenotype` from any initial state, assuming the perturbation
     /// is applied indefinitely.
     ///
-    /// Optionally, you can provide an `PhenotypeOscillation` type that specifies whether the attractors
-    /// must fully reside in the `phenotype` set (`forbidden`), can only intersect the
-    /// phenotype set but still be proper subsets (`allowed`), or must intersect the phenotype
+    /// Optionally, you can provide a `PhenotypeOscillation` type that specifies whether the attractors
+    /// must fully reside in the `phenotype` set (`forbidden`); can only intersect the
+    /// phenotype set but still be proper subsets (`allowed`); or must intersect the phenotype
     /// while not being subsets (`required`). Default behavior is `forbidden`,
-    /// i.e. each attractor fully resides in the `phenotype` set.
+    /// i.e., each attractor fully resides in the `phenotype` set.
     ///
-    /// To reduce the search space (and speed up the computation), you can also specify an
-    /// `size_limit` constraint (only perturbations that are smaller or equal will be considered).
+    /// To reduce the search space (and speed up the computation), you can also specify a `size_limit`
+    /// constraint (only perturbations that are smaller or equal will be considered).
     /// Furthermore, if `stop_when_found` is set, the method terminates early if a perturbation
-    /// with robustness `1.0` is discovered (i.e. a perturbation is found that is effective for
+    /// with robustness `1.0` is discovered (i.e., a perturbation is found that is effective for
     /// all network colors). When this option is active, other results that have been computed
     /// so far are still returned.
     ///
@@ -160,7 +160,7 @@ impl Control {
             PhenotypeOscillationType::Forbidden
         };
 
-        // If initial states is not set, we consider all networks states as potential initial states
+        // If initial states are not set, we consider all networks states as potential initial states
         let initial_states_native = match initial_states {
             Some(x) => x.as_native().clone(),
             None => graph
@@ -171,7 +171,7 @@ impl Control {
                 .clone(),
         };
 
-        // If size limit is not set, we consider the largest possible size.
+        // If the size limit is not set, we consider the largest possible size.
         let size_limit =
             size_limit.unwrap_or_else(|| graph.get().as_native().perturbable_variables().len());
 
@@ -191,17 +191,18 @@ impl Control {
 fn extract_state(
     py: Python,
     graph: &Py<AsynchronousPerturbationGraph>,
-    state: &Bound<'_, PyAny>,
+    state: SubspaceValuationType,
 ) -> PyResult<ArrayBitVector> {
-    if let Ok(set) = state.extract::<VertexSet>() {
-        return if !set.is_singleton() {
-            throw_runtime_error("The state set must be a singleton.")
-        } else {
-            Ok(set.as_native().iter().next().unwrap())
-        };
-    }
     let graph_ref = graph.borrow(py);
-    let state = graph_ref.as_ref().resolve_subspace_valuation(state)?;
+    let state = state.resolve(graph_ref.as_native().as_symbolic_context())?;
+    if state.len()
+        != graph_ref
+            .as_native()
+            .as_symbolic_context()
+            .num_state_variables()
+    {
+        return throw_runtime_error("The state set must be a singleton.");
+    }
     let mut state_vector = ArrayBitVector::empty(graph_ref.as_ref().as_native().num_vars());
 
     for (k, v) in state {

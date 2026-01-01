@@ -5,16 +5,16 @@ use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
 use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::{runtime_error, throw_index_error, throw_type_error, AsNative};
-use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
+use crate::{AsNative, runtime_error, throw_index_error, throw_type_error};
+use Either::{Left, Right};
 use biodivine_lib_bdd::BddPartialValuation;
+use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
 use biodivine_lib_param_bn::{BinaryOp, FnUpdate};
 use either::Either;
 use pyo3::prelude::{PyAnyMethods, PyListMethods};
 use pyo3::types::{PyDict, PyList, PyTuple};
-use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyObject, PyResult, Python};
+use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 use std::sync::Arc;
-use Either::{Left, Right};
 
 /// Represents a single "color" stored in a `ColorSet` (or a `ColoredVertexSet`), or a projection
 /// of said color to the chosen uninterpreted functions.
@@ -25,7 +25,7 @@ use Either::{Left, Right};
 ///
 /// However, note that each function instantiation is by default represented as a
 /// `BooleanExpression` using anonymous variable names `x_0 ... x_k` (where `k` is the arity
-/// of the uninterpreted function). If you actually want to instantiate the function w.r.t.
+/// of the uninterpreted function). If you actually want to instantiate the function with respect to
 /// a set of arguments, specific `UpdateFunction`, or a parametrized `BooleanNetwork`,
 /// you can use the `ColorModel.instantiate` method.
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -225,7 +225,7 @@ impl ColorModel {
         item: &Bound<'_, PyAny>,
         args: Option<Bound<'_, PyList>>,
         infer_regulations: Option<bool>,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         fn assert_args_is_none(args: Option<Bound<'_, PyList>>) -> PyResult<()> {
             if args.is_some() {
                 throw_type_error("Argument `args` not expected when `item` is an `UpdateFunction`.")
@@ -308,7 +308,9 @@ impl ColorModel {
             return UpdateFunction::new_raw(fake_ctx, Arc::new(instantiated_function))
                 .into_py_any(py);
         }
-        throw_type_error("Expected `UpdateFunction`, `BooleanNetwork`, or a valid function identifier (`VariableId`, `ParameterId`, or a string name) with an `args` collection.")
+        throw_type_error(
+            "Expected `UpdateFunction`, `BooleanNetwork`, or a valid function identifier (`VariableId`, `ParameterId`, or a string name) with an `args` collection.",
+        )
     }
 }
 
@@ -342,7 +344,7 @@ impl ColorModel {
         &self,
         py: Python,
         update_function: UpdateFunction,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let instantiated_function = self.instantiate_fn_update(update_function.as_native())?;
         let update =
             UpdateFunction::new_raw(update_function.__ctx__(), Arc::new(instantiated_function));
@@ -418,7 +420,7 @@ impl ColorModel {
             if let Some(value) = self.native.get_value(output) {
                 if value {
                     let valuation = biodivine_lib_bdd::BddValuation::new(input_row);
-                    let valuation = biodivine_lib_bdd::BddPartialValuation::from(valuation);
+                    let valuation = BddPartialValuation::from(valuation);
                     dnf.push(valuation);
                 }
             } else {
@@ -427,8 +429,7 @@ impl ColorModel {
                     Right(par) => ctx.as_native().get_network_parameter_name(par),
                 };
                 return throw_index_error(format!(
-                    "Function `{}` is not available in this projection.",
-                    name
+                    "Function `{name}` is not available in this projection."
                 ));
             }
         }

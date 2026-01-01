@@ -1,18 +1,22 @@
 use super::regulatory_graph::RegulatoryGraph;
+use crate::bindings::lib_param_bn::argument_types::regulation::RegulationOutput;
+use crate::bindings::lib_param_bn::argument_types::regulation_type::RegulationType;
+use crate::bindings::lib_param_bn::argument_types::sign_type::SignType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_multiple_type::VariableIdMultipleType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_type::VariableIdType;
 use crate::bindings::lib_param_bn::parameter_id::ParameterId;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::update_function::UpdateFunction;
-use crate::bindings::lib_param_bn::variable_id::VariableId;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{runtime_error, throw_index_error, throw_runtime_error, throw_type_error, AsNative};
-use biodivine_lib_param_bn::Sign::{Negative, Positive};
-use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
+use crate::{AsNative, runtime_error, throw_index_error, throw_runtime_error, throw_type_error};
+use biodivine_lib_io_bma::BmaModel;
+use biodivine_lib_param_bn::FnUpdate;
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+use std::path::Path;
 use std::sync::Arc;
 
 /// A `BooleanNetwork` extends a `RegulatoryGraph` with the ability to reference logical
@@ -22,46 +26,19 @@ use std::sync::Arc;
 /// Logical parameters come in two varieties:
 ///
 /// An **explicit parameter** is an uninterpreted function with a fixed name that can appear within
-/// larger expressions, for example `a | f(b, !c & d)`. An explicit parameter has to be declared
+/// larger expressions, for example, `a | f(b, !c & d)`. An explicit parameter has to be declared
 /// using `BooleanNetwork.add_explicit_parameter` and can be referenced using a `ParameterId`.
 /// A single explicit parameter can appear in multiple update functions, in which case it is
 /// always instantiated to the same Boolean function.
 ///
 /// Meanwhile, an **implicit parameter** arises when a variable has an unknown (unspecified)
-/// update function. In such case, we assume the update function of the variable is an
-/// anonymous uninterpreted function which depends on all regulators of said variable. Such
-/// implicit parameter does not have a `ParameterId`. We instead refer to it using the `VariableId`
+/// update function. In such a case, we assume the update function of the variable is an
+/// anonymous uninterpreted function that depends on all regulators of the said variable. Such
+/// an implicit parameter does not have a `ParameterId`. We instead refer to it using the `VariableId`
 /// of the associated variable.
 #[pyclass(module="biodivine_aeon", extends=RegulatoryGraph)]
 #[derive(Clone, Wrapper)]
 pub struct BooleanNetwork(biodivine_lib_param_bn::BooleanNetwork);
-
-impl NetworkVariableContext for BooleanNetwork {
-    fn resolve_network_variable(
-        &self,
-        variable: &Bound<'_, PyAny>,
-    ) -> PyResult<biodivine_lib_param_bn::VariableId> {
-        if let Ok(id) = variable.extract::<VariableId>() {
-            return if id.__index__() < self.as_native().num_vars() {
-                Ok(*id.as_native())
-            } else {
-                throw_index_error(format!("Unknown variable ID `{}`.", id.__index__()))
-            };
-        }
-        if let Ok(name) = variable.extract::<String>() {
-            return if let Some(var) = self.as_native().as_graph().find_variable(name.as_str()) {
-                Ok(var)
-            } else {
-                throw_index_error(format!("Unknown variable name `{}`.", name))
-            };
-        }
-        throw_type_error("Expected `VariableId` or `str`.")
-    }
-
-    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String {
-        self.as_native().get_variable_name(variable).to_string()
-    }
-}
 
 #[pymethods]
 impl BooleanNetwork {
@@ -77,7 +54,7 @@ impl BooleanNetwork {
     #[pyo3(signature = (variables = None, regulations = None, parameters = None, functions = None))]
     fn new(
         variables: Option<&Bound<'_, PyAny>>,
-        regulations: Option<&Bound<'_, PyList>>,
+        regulations: Option<Vec<RegulationType>>,
         parameters: Option<Vec<(String, u32)>>,
         functions: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<(BooleanNetwork, RegulatoryGraph)> {
@@ -95,7 +72,7 @@ impl BooleanNetwork {
             RegulatoryGraph::new(None, regulations)?
         };
         // The functions could be either a `Vec<Option<String>>` or `HashMap<String, String>`.
-        // Technically we could also allow FnUpdate, but that would be a huge pain to resolve
+        // Technically, we could also allow FnUpdate, but that would be a huge pain to resolve
         // correctly and probably won't be used.
         let mut native_bn = biodivine_lib_param_bn::BooleanNetwork::new(rg.as_native().clone());
         if let Some(parameters) = parameters {
@@ -140,7 +117,7 @@ impl BooleanNetwork {
     }
 
     pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
-        // The BN and its underlying RG should be up-to-date, hence it should be ok to just compare the BN.
+        // The BN and its underlying RG should be up to date, hence it should be ok to just compare the BN.
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
@@ -150,7 +127,7 @@ impl BooleanNetwork {
             .into_iter()
             .map(|it| match it {
                 None => "None".to_string(),
-                Some(fun) => format!("\"{}\"", fun),
+                Some(fun) => format!("\"{fun}\""),
             })
             .collect::<Vec<_>>();
         format!(
@@ -205,20 +182,38 @@ impl BooleanNetwork {
 
     /// Read a `BooleanNetwork` from a file path.
     ///
-    /// Supported file formats are `.aeon`, `.sbml`, or `.bnet`.
+    /// Supported file formats are `.aeon`, `.sbml`, `.bnet`, or `.json` (BioModelsAnalyzer format).
     ///
     /// By default, the method reads the underlying regulatory graph just as it is described in the input file.
     /// However, such graph may not always be logically consistent with the actual update functions. If you set
     /// `repair_graph=True`, the underlying graph is instead inferred correctly from the actual update functions.
+    ///
+    /// Multivalued BMA files are automatically binarized. You can turn this off using the
+    /// `binarize` argument (in which case the import will fail). BMA `.xml` files are also
+    /// supported, but only using the `from_bma_xml` method.
     #[staticmethod]
-    #[pyo3(signature = (file_path, repair_graph = false))]
+    #[pyo3(signature = (file_path, repair_graph = false, binarize = true))]
     pub fn from_file(
         py: Python,
         file_path: &str,
         repair_graph: bool,
+        binarize: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let bn = biodivine_lib_param_bn::BooleanNetwork::try_from_file(file_path)
-            .map_err(runtime_error)?;
+        let path: &Path = file_path.as_ref();
+        let extension = path
+            .extension()
+            .and_then(|it| it.to_str())
+            .unwrap_or_default();
+        let bn = if extension.eq_ignore_ascii_case("json") {
+            // JSON files can be opened as BMA models
+            let file_contents = std::fs::read_to_string(path).map_err(runtime_error)?;
+            let model = BmaModel::from_json_string(file_contents.as_str())
+                .map_err(|e| runtime_error(format!("Error loading BMA JSON model: {e}")))?;
+            convert_bma_model(model, binarize)?
+        } else {
+            biodivine_lib_param_bn::BooleanNetwork::try_from_file(file_path)
+                .map_err(runtime_error)?
+        };
         let bn = if repair_graph {
             bn.infer_valid_graph().map_err(runtime_error)?
         } else {
@@ -244,10 +239,10 @@ impl BooleanNetwork {
     /// corresponding `VariableId`.
     pub fn set_variable_name(
         mut self_: PyRefMut<'_, Self>,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         name: &str,
     ) -> PyResult<()> {
-        let var = self_.as_ref().resolve_network_variable(variable)?;
+        let var = variable.resolve(self_.as_native())?;
         self_
             .as_mut()
             .as_native_mut()
@@ -265,13 +260,10 @@ impl BooleanNetwork {
     /// with the `.aeon` format.
     pub fn add_regulation(
         mut self_: PyRefMut<'_, Self>,
-        regulation: &Bound<'_, PyAny>,
+        regulation: RegulationType,
     ) -> PyResult<()> {
-        let (s, m, o, t) = RegulatoryGraph::resolve_regulation(Some(self_.as_ref()), regulation)?;
-        let m = m.as_ref().map(|it| match it {
-            Positive => Monotonicity::Activation,
-            Negative => Monotonicity::Inhibition,
-        });
+        let (s, m, o, t) = regulation.resolve_named(self_.as_native())?;
+        let m = m.map(|it| SignType::from(it).monotonicity());
         self_
             .as_mut()
             .as_native_mut()
@@ -289,19 +281,18 @@ impl BooleanNetwork {
     /// regulation, or throws a `RuntimeError` if the regulation does not exist. Also throws
     /// a `RuntimeError` if the regulation exists, but is used by the corresponding update
     /// function and so cannot be safely removed.
-    pub fn remove_regulation<'a>(
+    pub fn remove_regulation(
         mut self_: PyRefMut<'_, Self>,
-        py: Python<'a>,
-        source: &Bound<'a, PyAny>,
-        target: &Bound<'a, PyAny>,
-    ) -> PyResult<Bound<'a, PyDict>> {
-        let source = self_.as_ref().resolve_network_variable(source)?;
-        let target = self_.as_ref().resolve_network_variable(target)?;
+        source: VariableIdType,
+        target: VariableIdType,
+    ) -> PyResult<RegulationOutput> {
+        let source = source.resolve(self_.as_native())?;
+        let target = target.resolve(self_.as_native())?;
 
-        if let Some(update) = self_.as_native().get_update_function(target) {
-            if update.collect_arguments().contains(&source) {
-                return throw_runtime_error("Cannot remove regulation that is in use.");
-            }
+        if let Some(update) = self_.as_native().get_update_function(target)
+            && update.collect_arguments().contains(&source)
+        {
+            return throw_runtime_error("Cannot remove regulation that is in use.");
         }
 
         // Remove from RG.
@@ -316,7 +307,7 @@ impl BooleanNetwork {
             .as_graph_mut()
             .remove_regulation(source, target)
             .map_err(runtime_error)?;
-        RegulatoryGraph::encode_regulation(py, &removed)
+        Ok(RegulationOutput::from(&removed))
     }
 
     /// Update the `sign` and `essential` flags of a regulation in the underlying
@@ -324,52 +315,39 @@ impl BooleanNetwork {
     ///
     /// Returns the previous state of the regulation as an `IdRegulation` dictionary,
     /// assuming the regulation already existed.
-    pub fn ensure_regulation<'a>(
+    pub fn ensure_regulation(
         mut self_: PyRefMut<'_, Self>,
-        py: Python<'a>,
-        regulation: &Bound<'a, PyAny>,
-    ) -> PyResult<Option<Bound<'a, PyDict>>> {
-        // This is a bit inefficient, but should be good enough for now.
-        let (s, m, o, t) = RegulatoryGraph::resolve_regulation(Some(self_.as_ref()), regulation)?;
-        let source = self_
-            .as_ref()
-            .as_native()
-            .find_variable(s.as_str())
-            .unwrap();
-        let target = self_
-            .as_ref()
-            .as_native()
-            .find_variable(t.as_str())
-            .unwrap();
-        let m = m.as_ref().map(|it| match it {
-            Positive => Monotonicity::Activation,
-            Negative => Monotonicity::Inhibition,
-        });
+        regulation: RegulationType,
+    ) -> PyResult<Option<RegulationOutput>> {
+        // This is a bit inefficient but should be good enough for now.
+        let (s, m, o, t) = regulation.resolve_id(self_.as_native())?;
+        let m = m.map(|it| SignType::from(it).monotonicity());
+
         // Remove old regulation from both BN and RN.
-        let _ignore = self_
-            .as_native_mut()
-            .as_graph_mut()
-            .remove_regulation(source, target);
-        let old = self_
-            .as_mut()
-            .as_native_mut()
-            .remove_regulation(source, target)
-            .ok();
+        let _ignore = self_.as_native_mut().as_graph_mut().remove_regulation(s, t);
+        let old = self_.as_mut().as_native_mut().remove_regulation(s, t).ok();
 
         // Add new regulation to both BN and RN.
+        let reg = biodivine_lib_param_bn::Regulation {
+            regulator: s,
+            target: t,
+            observable: o,
+            monotonicity: m,
+        };
+
         self_
             .as_native_mut()
             .as_graph_mut()
-            .add_regulation(s.as_str(), t.as_str(), o, m)
+            .add_raw_regulation(reg.clone())
             .map_err(runtime_error)?;
+
         self_
             .as_mut()
             .as_native_mut()
-            .add_regulation(s.as_str(), t.as_str(), o, m)
+            .add_raw_regulation(reg)
             .map_err(runtime_error)?;
 
-        old.map(|it| RegulatoryGraph::encode_regulation(py, &it))
-            .transpose()
+        Ok(old.map(|it| RegulationOutput::from(&it)))
     }
 
     /// Create a copy of this `BooleanNetwork` that is extended with the given list of `variables`.
@@ -422,9 +400,11 @@ impl BooleanNetwork {
     pub fn drop(
         self_: PyRef<'_, Self>,
         py: Python,
-        variables: &Bound<'_, PyAny>,
+        variables: VariableIdMultipleType,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let removed = self_.as_ref().resolve_variables(variables)?;
+        let to_remove: Vec<VariableIdType> = variables.clone().into();
+        let to_remove: HashSet<biodivine_lib_param_bn::VariableId> =
+            VariableIdType::resolve_collection(to_remove, self_.as_native())?;
 
         let drop_rg = self_.as_ref().drop(variables)?;
         let mut drop_bn = biodivine_lib_param_bn::BooleanNetwork::new(drop_rg.as_native().clone());
@@ -436,7 +416,7 @@ impl BooleanNetwork {
         }
 
         for var in self_.as_native().variables() {
-            if removed.contains(&var) {
+            if to_remove.contains(&var) {
                 // Do not copy removed variables.
                 continue;
             }
@@ -446,7 +426,7 @@ impl BooleanNetwork {
                 let has_removed_variable = fun
                     .collect_arguments()
                     .into_iter()
-                    .any(|var| removed.contains(&var));
+                    .any(|var| to_remove.contains(&var));
                 if !has_removed_variable {
                     drop_bn
                         .add_string_update_function(
@@ -516,10 +496,10 @@ impl BooleanNetwork {
     pub fn inline_variable(
         self_: PyRef<'_, Self>,
         py: Python,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         repair_graph: bool,
     ) -> PyResult<Py<BooleanNetwork>> {
-        let variable = self_.as_ref().resolve_network_variable(variable)?;
+        let variable = variable.resolve(self_.as_native())?;
         let Some(bn) = self_.as_native().inline_variable(variable, repair_graph) else {
             return throw_runtime_error("Variable has a self-regulation.");
         };
@@ -577,6 +557,24 @@ impl BooleanNetwork {
             .map_err(runtime_error)
     }
 
+    /// Produce a booleannet string representation of this `BooleanNetwork`.
+    ///
+    /// Returns an error if the network cannot be converted to booleannet format.
+    pub fn to_booleannet(&self) -> PyResult<String> {
+        self.as_native().to_booleannet(None).map_err(runtime_error)
+    }
+
+    /// Try to load a `BooleanNetwork` from the contents of a booleannet format string.
+    ///
+    /// Note that booleannet files do not have any information about regulations. As such, regulations
+    /// are loaded as non-essential with no fixed sign.
+    #[staticmethod]
+    pub fn from_booleannet(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
+        let (bn, _) = biodivine_lib_param_bn::BooleanNetwork::try_from_booleannet(file_contents)
+            .map_err(runtime_error)?;
+        BooleanNetwork(bn).export_to_python(py)
+    }
+
     /// Try to load a `BooleanNetwork` from the contents of an `.sbml` model file.
     #[staticmethod]
     pub fn from_sbml(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
@@ -588,6 +586,59 @@ impl BooleanNetwork {
     /// Produce a `.sbml` string representation of this `BooleanNetwork`.
     pub fn to_sbml(&self) -> String {
         self.as_native().to_sbml(None)
+    }
+
+    /// Try to load a `BooleanNetwork` from the contents of a BioModelsAnalyzer `.json` file.
+    ///
+    /// By default, multivalued models are binarized.
+    #[staticmethod]
+    #[pyo3(signature = (file_contents, binarize = true))]
+    pub fn from_bma_json(
+        py: Python,
+        file_contents: &str,
+        binarize: bool,
+    ) -> PyResult<Py<BooleanNetwork>> {
+        let model = BmaModel::from_json_string(file_contents)
+            .map_err(|e| runtime_error(format!("Error loading BMA JSON model: {e}")))?;
+        BooleanNetwork(convert_bma_model(model, binarize)?).export_to_python(py)
+    }
+
+    /// Output the given `BooleanNetwork` in BMA `.json` file format, optionally with `pretty`
+    /// formatting.
+    #[pyo3(signature = (pretty = false))]
+    pub fn to_bma_json(&self, pretty: bool) -> PyResult<String> {
+        let model = BmaModel::try_from(self.as_native())
+            .map_err(|e| runtime_error(format!("AEON to BMA conversion error: {e}")))?;
+        let result = if pretty {
+            model.to_json_string_pretty()
+        } else {
+            model.to_json_string()
+        };
+        result.map_err(|e| runtime_error(format!("BMA JSON conversion error: {e}")))
+    }
+
+    /// Try to load a `BooleanNetwork` from the contents of a BioModelsAnalyzer `.xml` file.
+    ///
+    /// By default, multivalued models are binarized.
+    #[staticmethod]
+    #[pyo3(signature = (file_contents, binarize = true))]
+    pub fn from_bma_xml(
+        py: Python,
+        file_contents: &str,
+        binarize: bool,
+    ) -> PyResult<Py<BooleanNetwork>> {
+        let model = BmaModel::from_xml_string(file_contents)
+            .map_err(|e| runtime_error(format!("Error loading BMA XML model: {e}")))?;
+        BooleanNetwork(convert_bma_model(model, binarize)?).export_to_python(py)
+    }
+
+    /// Output the given `BooleanNetwork` in BMA `.xml` file format.
+    pub fn to_bma_xml(&self) -> PyResult<String> {
+        let model = BmaModel::try_from(self.as_native())
+            .map_err(|e| runtime_error(format!("AEON to BMA conversion error: {e}")))?;
+        model
+            .to_xml_string()
+            .map_err(|e| runtime_error(format!("BMA XML conversion error: {e}")))
     }
 
     /// The number of *explicit parameters*, i.e. named uninterpreted functions in this network.
@@ -675,7 +726,7 @@ impl BooleanNetwork {
 
     /// Create a new explicit parameter.
     ///
-    /// the parameter name must be unique among existing variables and parameters.
+    /// The parameter name must be unique among existing variables and parameters.
     pub fn add_explicit_parameter(&mut self, name: &str, arity: u32) -> PyResult<ParameterId> {
         self.as_native_mut()
             .add_parameter(name, arity)
@@ -688,11 +739,11 @@ impl BooleanNetwork {
     pub fn get_update_function(
         self_: Py<BooleanNetwork>,
         py: Python,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
     ) -> PyResult<Option<UpdateFunction>> {
         let fun = {
             let self_ref = self_.borrow(py);
-            let variable = self_ref.as_ref().resolve_network_variable(variable)?;
+            let variable = variable.resolve(self_ref.as_native())?;
             self_ref.as_native().get_update_function(variable).clone()
         };
         if let Some(fun) = fun {
@@ -711,10 +762,10 @@ impl BooleanNetwork {
     pub fn set_update_function(
         self_: Py<BooleanNetwork>,
         py: Python,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         function: &Bound<'_, PyAny>,
     ) -> PyResult<Option<UpdateFunction>> {
-        let old_fun = Self::get_update_function(self_.clone(), py, variable)?;
+        let old_fun = Self::get_update_function(self_.clone(), py, variable.clone())?;
         let new_fun = if function.is_none() {
             None
         } else if let Ok(fun) = function.extract::<UpdateFunction>() {
@@ -726,7 +777,7 @@ impl BooleanNetwork {
             return throw_type_error("Expected `UpdateFunction` or `str`.");
         };
         let mut bn = self_.borrow_mut(py);
-        let variable = bn.as_ref().resolve_network_variable(variable)?;
+        let variable = variable.resolve(bn.as_native())?;
         bn.as_native_mut()
             .set_update_function(variable, new_fun)
             .map_err(runtime_error)?;
@@ -866,10 +917,10 @@ impl BooleanNetwork {
     #[pyo3(signature = (variable, name = None))]
     pub fn assign_parameter_name(
         &mut self,
-        variable: &Bound<'_, PyAny>,
+        variable: VariableIdType,
         name: Option<String>,
     ) -> PyResult<ParameterId> {
-        let variable = self.resolve_network_variable(variable)?;
+        let variable = variable.resolve(self.as_native())?;
         let name = name.as_deref();
         self.as_native_mut()
             .assign_parameter_name(variable, name)
@@ -898,10 +949,10 @@ impl BooleanNetwork {
     #[pyo3(signature = (variable, ctx = None))]
     pub fn is_variable_input(
         &self,
-        variable: &Bound<PyAny>,
+        variable: VariableIdType,
         ctx: Option<&SymbolicContext>,
     ) -> PyResult<bool> {
-        let variable = self.resolve_network_variable(variable)?;
+        let variable = variable.resolve(self.as_native())?;
         let ctx = ctx.map(|it| it.as_native());
         Ok(self.as_native().is_var_input(variable, ctx))
     }
@@ -919,10 +970,10 @@ impl BooleanNetwork {
     #[pyo3(signature = (variable, ctx = None))]
     pub fn is_variable_constant(
         &self,
-        variable: &Bound<PyAny>,
+        variable: VariableIdType,
         ctx: Option<&SymbolicContext>,
     ) -> PyResult<Option<bool>> {
-        let variable = self.resolve_network_variable(variable)?;
+        let variable = variable.resolve(self.as_native())?;
         let ctx = ctx.map(|it| it.as_native());
         Ok(self.as_native().is_var_constant(variable, ctx))
     }
@@ -1004,9 +1055,21 @@ impl BooleanNetwork {
             return if let Some(var) = self.0.find_parameter(name.as_str()) {
                 Ok(var)
             } else {
-                throw_index_error(format!("Unknown parameter name `{}`.", name))
+                throw_index_error(format!("Unknown parameter name `{name}`."))
             };
         }
         throw_type_error("Expected `ParameterId` or `str`.")
     }
+}
+
+fn convert_bma_model(
+    model: BmaModel,
+    binarize: bool,
+) -> PyResult<biodivine_lib_param_bn::BooleanNetwork> {
+    if !binarize && !model.is_boolean() {
+        return throw_runtime_error("Multi-valued BMA model must be binarized");
+    }
+
+    biodivine_lib_param_bn::BooleanNetwork::try_from(model)
+        .map_err(|e| runtime_error(format!("BMA to AEON conversion error: {e}")))
 }

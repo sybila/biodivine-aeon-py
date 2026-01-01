@@ -16,61 +16,12 @@ impl Classifier {
         }
     }
 
-    /*// Try to fetch the current number of discovered classes in a non-blocking manner
-    pub fn try_get_num_classes(&self) -> Option<usize> {
-        match self.classes.try_lock() {
-            Ok(data) => Some((*data).len()),
-            _ => None,
-        }
-    }*/
-
-    /*// Try to obtain a copy of data in a non-blocking manner (useful if we want to check
-    // results but the computation is still running).
-    pub fn try_export_result(&self) -> Option<HashMap<Class, GraphColors>> {
-        match self.classes.try_lock() {
-            Ok(data) => Some((*data).clone()),
-            _ => None,
-        }
-    }*/
-
-    /*pub fn try_get_params(&self, class: &Class) -> Option<Option<GraphColors>> {
-        match self.classes.try_lock() {
-            Ok(data) => Some((*data).get(class).cloned()),
-            _ => None,
-        }
-    }*/
-
-    /*pub fn get_params(&self, class: &Class) -> Option<GraphColors> {
-        let data = self.classes.lock().unwrap();
-        (*data).get(class).cloned()
-    }*/
-
     pub fn export_result(&self) -> HashMap<Class, GraphColors> {
         let data = self.classes.lock().unwrap();
         (*data).clone()
     }
 
-    /*pub fn export_components(
-        &self,
-    ) -> Vec<(GraphColoredVertices, HashMap<Behaviour, GraphColors>)> {
-        let data = self.attractors.lock().unwrap();
-        (*data).clone()
-    }*/
-
-    /*
-    /// Export only components that have the specified behaviour.
-    pub fn export_components_with_class(&self, class: Behaviour) -> Vec<GraphColoredVertices> {
-        let data = self.attractors.lock().unwrap().clone();
-        data.into_iter()
-            .filter_map(|(attractor, behaviour)| {
-                behaviour
-                    .get(&class)
-                    .map(|colors| attractor.intersect_colors(colors))
-            })
-            .collect()
-    }*/
-
-    /// Static function to classify just one component and immediately obtain results.
+    /// Static function to classify just one component and immediately get results.
     pub fn classify_component(
         component: &GraphColoredVertices,
         graph: &SymbolicAsyncGraph,
@@ -89,29 +40,6 @@ impl Classifier {
         }
         result
     }
-
-    /*/// Find attractor of the given witness colour. The argument set must be a singleton.
-    pub fn attractors(&self, witness_colour: &GraphColors) -> Vec<(GraphVertices, Behaviour)> {
-        if witness_colour.as_bdd() != witness_colour.pick_singleton().as_bdd() {
-            eprintln!("WARNING: Computing attractor witnesses for non-singleton color set.");
-        }
-        let mut result = Vec::new();
-        let attractors = self.attractors.lock().unwrap();
-        for (attractor, behaviour) in attractors.iter() {
-            let attractor_states = attractor.intersect_colors(witness_colour);
-            if attractor_states.is_empty() {
-                continue;
-            }
-            let attractor_states = attractor_states.vertices();
-            let attractor_behaviour = behaviour
-                .iter()
-                .find(|(_, c)| witness_colour.is_subset(c))
-                .unwrap()
-                .0;
-            result.push((attractor_states, *attractor_behaviour));
-        }
-        result
-    }*/
 
     // TODO: Parallelism
     pub fn add_component(&self, component: GraphColoredVertices, graph: &SymbolicAsyncGraph) {

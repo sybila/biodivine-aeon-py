@@ -1,5 +1,5 @@
 use pyo3::prelude::{PyModule, PyModuleMethods};
-use pyo3::{Bound, PyAny, PyResult};
+use pyo3::{Bound, PyResult};
 
 pub mod algorithms;
 pub mod boolean_network;
@@ -9,6 +9,10 @@ pub mod regulatory_graph;
 pub mod symbolic;
 pub mod update_function;
 pub mod variable_id;
+
+/// Contains `enum` types that we use to safely access `Union` types in Python.
+/// Some extra types are also directly in `variable_id` and `parameter_id` modules.
+pub mod argument_types;
 
 pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<variable_id::VariableId>()?;
@@ -36,18 +40,7 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<symbolic::asynchronous_graph::AsynchronousGraph>()?;
     module.add_class::<algorithms::trap_spaces::TrapSpaces>()?;
     module.add_class::<algorithms::fixed_points::FixedPoints>()?;
-    module.add_class::<algorithms::attractors::Attractors>()?;
     module.add_class::<algorithms::percolation::Percolation>()?;
-    module.add_class::<algorithms::reachability::Reachability>()?;
     module.add_class::<algorithms::regulation_constraint::RegulationConstraint>()?;
     Ok(())
-}
-
-/// A trait implemented by types that can resolve a `VariableId` based on its name.
-pub trait NetworkVariableContext {
-    fn resolve_network_variable(
-        &self,
-        variable: &Bound<'_, PyAny>,
-    ) -> PyResult<biodivine_lib_param_bn::VariableId>;
-    fn get_network_variable_name(&self, variable: biodivine_lib_param_bn::VariableId) -> String;
 }

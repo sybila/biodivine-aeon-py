@@ -19,7 +19,7 @@ env:
   # A fixed version used for testing, so that the builds don't
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
-  RUST_VERSION: "1.84.0"
+  RUST_VERSION: "1.90.0"
   # This is the version currently used by `z3-sys`.
   # If this ever changes, you might also need to increase
   # the minimum macOS version below.
@@ -227,7 +227,7 @@ jobs:
           rustup component add llvm-tools-preview
           cargo install cargo-llvm-cov
           python3 -m venv venv
-          ./venv/bin/pip3 install -r dev-requirements.txt
+          ./venv/bin/pip3 install --no-cache-dir -r dev-requirements.txt
       - name: Run tests with coverage.
         run: |
           source ./venv/bin/activate

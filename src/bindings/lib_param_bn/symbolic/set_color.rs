@@ -10,12 +10,13 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces;
 use either::Either;
-use num_bigint::BigInt;
+use num_bigint::BigUint;
+use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3::IntoPyObjectExt;
 
+use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
@@ -24,9 +25,8 @@ use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationSet};
-use crate::AsNative;
 
-/// A symbolic representation of a set of "colours", i.e. interpretations of explicit and
+/// A symbolic representation of a set of "colors", i.e., interpretations of explicit and
 /// implicit parameters within a particular `BooleanNetwork`.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -65,7 +65,7 @@ impl ColorSet {
     /// Normally, a new `ColorSet` is derived using an `AsynchronousGraph`. However, in some
     /// cases you may want to create it manually from a `SymbolicContext` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid set of colors.
     #[new]
     pub fn new(py: Python, ctx: Py<SymbolicContext>, bdd: &Bdd) -> ColorSet {
@@ -107,6 +107,11 @@ impl ColorSet {
         self_.clone()
     }
 
+    fn __getnewargs__(&self, py: Python) -> (Py<SymbolicContext>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
+    }
+
     pub fn __hash__(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.as_native().hash(&mut hasher);
@@ -122,7 +127,7 @@ impl ColorSet {
     }
 
     /// Returns the number of "colors" (function interpretations) that are represented in this set.
-    pub fn cardinality(&self) -> BigInt {
+    pub fn cardinality(&self) -> BigUint {
         self.as_native().exact_cardinality()
     }
 
@@ -226,7 +231,7 @@ impl ColorSet {
     /// Returns an iterator over all interpretations in this `ColorSet` with an optional projection to a subset
     /// of uninterpreted functions.
     ///
-    /// When no `retained` collection is specified, this is equivalent to `ColorSet.__iter__`. However, if a retained
+    /// When no `retained` collection is specified, this is an equivalent to `ColorSet.__iter__`. However, if a retained
     /// set is given, the resulting iterator only considers unique combinations of the `retained` functions.
     /// Consequently, the resulting `ColorModel` instances will fail with an `IndexError` if a value of a function
     /// outside the `retained` set is requested.

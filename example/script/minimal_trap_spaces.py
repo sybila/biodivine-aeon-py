@@ -1,5 +1,8 @@
 from biodivine_aeon import *
+import biodivine_aeon
 import sys
+
+biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_ESSENTIAL
 
 # This script computes the minimal trap spaces of a single, 
 # fully specified Boolean network.
@@ -44,10 +47,12 @@ stg = AsynchronousGraph(bn, ctx)
 # Assert that the network is fully specified.
 assert stg.mk_unit_colors().cardinality() == 1
 
-traps = TrapSpaces.minimal_symbolic(ctx, stg)
+essential = TrapSpaces.essential_symbolic(ctx, stg)
+print(f"Complete: {essential.cardinality()}")
+traps = TrapSpaces.minimize(ctx, essential)
 
 if limit is None:
-	print(f"{traps.cardinality()}")
+	print(f"Minimal: {traps.cardinality()}")
 else:
 	count = 0
 	for space in traps.spaces():

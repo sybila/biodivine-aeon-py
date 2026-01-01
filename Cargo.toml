@@ -1,42 +1,57 @@
 [package]
 name = "biodivine-aeon-py"
-version = "1.2.4"
-edition = "2021"
+version = "1.2.5"
+edition = "2024"
 
 [lib]
 name = "biodivine_aeon"
 crate-type = ["cdylib", "rlib"]
 
+[profile.release]
+lto = true
+
 [features]
-# default = ['static-z3']
-# For releases, we want to include Z3 statically, so that users
+default = ['algorithms-pyo3-bindings']
+# For releases, we want to include Z3 statically so that users
 # don't have to install it (or break compatibility with new versions).
 # So for CI builds, this feature is enabled, but for local builds,
 # you don't need it as long as you have Z3 installed (because your
 # build may take >30min if you enable it).
 static-z3 = ["z3/static-link-z3"]
 
+# Feature flag that enables Python bindings for the algorithms module
+algorithms-pyo3-bindings = []
+
 [dependencies]
-pyo3 = { version = "0.23.2", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
-biodivine-lib-param-bn = { version="0.5.13", features=["solver-z3"] }
-biodivine-lib-bdd = "0.5.22"
-#biodivine-pbn-control = "0.3.1"
-biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "d1a66a5f1b2922198fcec10369f432d0046a00df" }
-biodivine-hctl-model-checker = "0.3.0"
-rand = "0.8.5"
 macros = { path = "macros" }
-zip = "2.1.3"
-num-bigint = "0.4.6"
-num-traits = "0.2.19"
-either = "1.13.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-reqwest = { version = "0.12.15", default-features = false, features = ["blocking", "rustls-tls"] }
+reqwest = { version = "0.13", default-features = false, features = ["blocking", "rustls-tls"] }
+pyo3 = { version = "0.27", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
+biodivine-lib-param-bn = { version="0.7.0", features=["solver-z3", "serde"] }
+biodivine-lib-bdd = { version = "0.6.2", features = ["serde"] }
+#biodivine-pbn-control = "0.3.1"
+biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "9e31bab9d000266ea25c35cc752c69077973d43c" }
+biodivine-hctl-model-checker = "0.3.4"
+biodivine-lib-io-bma = "0.1.2"
+biodivine-algo-bdd-scc = "0.3.1"
+# Cannot update `rand` because lib-bdd uses it to generate random big-int values.
+rand = "0.8"
+cancel-this = { version = "0.4.0", features = ["pyo3"] }
+computation-process = "0.2.0"
+zip = "7.0"
+num-bigint = "0.4"
+num-traits = "0.2"
+either = "1.15"
+thiserror = "2.0"
+log = "0.4"
+dyn-clone = "1.0"
+pyo3-log = "0.13"
 
 # Include Z3 dependencies as strictly as possible, we don't want
 # this to change because it might break our release builds.
-z3="^0.12.1"
-z3-sys = "^0.8.1"
+# Cannot update `z3` because this version is used by lib-param-bn.
+z3="^0.18.2"
 
 [build-dependencies]
-pyo3-build-config = "0.23.2"
+pyo3-build-config = "0.27"

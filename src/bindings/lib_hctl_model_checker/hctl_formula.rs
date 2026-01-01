@@ -1,7 +1,7 @@
 use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{throw_runtime_error, throw_type_error, AsNative};
+use crate::{AsNative, throw_runtime_error, throw_type_error};
 use biodivine_hctl_model_checker::mc_utils::{
     check_hctl_var_support, collect_unique_hctl_vars, collect_unique_wild_cards,
 };
@@ -16,7 +16,7 @@ use biodivine_hctl_model_checker::preprocessing::parser::{
 use pyo3::basic::CompareOp;
 use pyo3::prelude::PyAnyMethods;
 use pyo3::types::{PyDict, PyTuple};
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyResult, Python, pyclass, pymethods};
 use std::collections::HashSet;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
@@ -146,7 +146,9 @@ fn resolve_temporal_unary_operator(op: String) -> PyResult<UnaryOp> {
         "all_future" => Ok(UnaryOp::AF),
         "exist_global" => Ok(UnaryOp::EG),
         "all_global" => Ok(UnaryOp::AG),
-        _ => throw_type_error("Expected one of 'exist_next', 'all_next', 'exist_future', 'all_future', 'exist_global', 'all_global'.")
+        _ => throw_type_error(
+            "Expected one of 'exist_next', 'all_next', 'exist_future', 'all_future', 'exist_global', 'all_global'.",
+        ),
     }
 }
 
@@ -175,7 +177,7 @@ fn resolve_boolean_binary_operator(op: String) -> PyResult<BinaryOp> {
 
 #[pymethods]
 impl HctlFormula {
-    /// Create a new `HctlFormula`, either parsing it from a string, or as a copy of an existing
+    /// Create a new `HctlFormula`, either parsing it from a string or as a copy of an existing
     /// formula.
     ///
     /// If `allow_extended` is specified, the parser will also recognize "extended" propositions
@@ -183,8 +185,8 @@ impl HctlFormula {
     ///
     /// If `minimize_with` is specified with a `SymbolicContext`, the created formula is
     /// automatically converted to a canonical format, using standardized variable names and
-    /// removing redundancies (for this, a `SymbolicContext` is required in order to check
-    /// the mapping between propositions and network variables).
+    /// removing redundancies. For this, a `SymbolicContext` is required to check
+    /// the mapping between propositions and network variables.
     #[new]
     #[pyo3(signature = (value, allow_extended = true, minimize_with = None))]
     pub fn new(
@@ -222,8 +224,8 @@ impl HctlFormula {
     }
 
     fn __getnewargs__<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyTuple>> {
-        // Technically, this is a "different" expression because it is created with a completely new `root`,
-        // but it is much easier (and more transparent) than serializing the root expression and trying to figure
+        // Technically, this is a "different" expression because it is created with a completely new `root`.
+        // But it is much easier (and more transparent) than serializing the root expression and trying to figure
         // out how to serialize a pointer into the AST.
         PyTuple::new(py, [self.__str__()])
     }
@@ -261,7 +263,7 @@ impl HctlFormula {
     /// Create a new `HctlFormula` that uses the `3{x}` operator.
     ///
     /// Optionally, you can provide a named `domain` which further restricts the validity
-    /// of the operator (i.e. it creates the `3{x} in %domain%` operator). Note that such
+    /// of the operator (i.e., it creates the `3{x} in %domain%` operator). Note that such
     /// formulas have separate pattern matching methods (e.g. `HctlFormula.is_exists_in`
     /// instead of `HctlFormula.is_exists`).
     #[staticmethod]
@@ -283,7 +285,7 @@ impl HctlFormula {
     /// Create a new `HctlFormula` that uses the `V{x}` operator.
     ///
     /// Optionally, you can provide a named `domain` which further restricts the validity
-    /// of the operator (i.e. it creates the `V{x} in %domain%` operator). Note that such
+    /// of the operator (i.e., it creates the `V{x} in %domain%` operator). Note that such
     /// formulas have separate pattern matching methods (e.g. `HctlFormula.is_forall_in`
     /// instead of `HctlFormula.is_forall`).
     #[staticmethod]
@@ -305,7 +307,7 @@ impl HctlFormula {
     /// Create a new `HctlFormula` that uses the `!{x}` operator.
     ///
     /// Optionally, you can provide a named `domain` which further restricts the validity
-    /// of the operator (i.e. it creates the `!{x} in %domain%` operator). Note that such
+    /// of the operator (i.e., it creates the `!{x} in %domain%` operator). Note that such
     /// formulas have separate pattern matching methods (e.g. `HctlFormula.is_forall_in`
     /// instead of `HctlFormula.is_forall`).
     #[staticmethod]
@@ -511,24 +513,24 @@ impl HctlFormula {
         Ok(Self::from_native(formula_native))
     }
 
-    /// Check if this `HctlFormula` represents on of the hybrid operators *without* a domain
+    /// Check if this `HctlFormula` represents one of the hybrid operators *without* a domain
     /// restriction (see `HybridOperator`).
     fn is_hybrid(&self) -> bool {
         matches!(self.value.node_type, NodeType::Hybrid(_, _, None, _))
     }
 
-    /// Check if this `HctlFormula` represents on of the hybrid operators *with* a domain
+    /// Check if this `HctlFormula` represents one of the hybrid operators *with* a domain
     /// restriction (see `HybridOperator`).
     fn is_hybrid_in(&self) -> bool {
         matches!(self.value.node_type, NodeType::Hybrid(_, _, Some(_), _))
     }
 
-    /// Check if this `HctlFormula` represents on of the temporal operators (see `TemporalUnaryOperator` and `TemporalBinaryOperator`).
+    /// Check if this `HctlFormula` represents one of the temporal operators (see `TemporalUnaryOperator` and `TemporalBinaryOperator`).
     fn is_temporal(&self) -> bool {
         self.is_temporal_unary() || self.is_temporal_binary()
     }
 
-    /// Check if this `HctlFormula` represents on of the unary temporal operators (see `TemporalUnaryOperator`).
+    /// Check if this `HctlFormula` represents one of the unary temporal operators (see `TemporalUnaryOperator`).
     fn is_temporal_unary(&self) -> bool {
         matches!(
             self.value.node_type,
@@ -539,7 +541,7 @@ impl HctlFormula {
         )
     }
 
-    /// Check if this `HctlFormula` represents on of the binary temporal operators (see `TemporalBinaryOperator`).
+    /// Check if this `HctlFormula` represents one of the binary temporal operators (see `TemporalBinaryOperator`).
     fn is_temporal_binary(&self) -> bool {
         matches!(
             self.value.node_type,
@@ -551,7 +553,7 @@ impl HctlFormula {
         )
     }
 
-    /// Check if this `HctlFormula` represents on of the binary Boolean operators (see `BinaryOperator`).
+    /// Check if this `HctlFormula` represents one of the binary Boolean operators (see `BinaryOperator`).
     fn is_boolean(&self) -> bool {
         matches!(
             self.value.node_type,
@@ -725,7 +727,7 @@ impl HctlFormula {
         matches!(self.value.node_type, NodeType::Binary(BinaryOp::AW, _, _))
     }
 
-    /// Return the operator, variable and argument if this `HctlFormula` represents a
+    /// Return the operator, variable, and argument if this `HctlFormula` represents a
     /// hybrid operator *without domain restriction*.
     fn as_hybrid(&self) -> Option<(String, String, HctlFormula)> {
         match &self.value.node_type {

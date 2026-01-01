@@ -1,16 +1,40 @@
 [build-system]
-requires = ["maturin>=1.7.0,<1.8.0"]
+requires = ["maturin>=1.10.0,<1.11.0"]
 build-backend = "maturin"
 
 [project]
 name = "biodivine_aeon"
 description = "Python bindings for the tool AEON."
-version = "1.2.4"
+version = "1.2.5"
 requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "sybila"}
+]
+keywords = [
+    "boolean-networks",
+    "systems-biology",
+    "model-checking",
+    "bdd",
+    "symbolic-computation",
+    "attractors",
+    "control",
+]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Mathematics",
 ]
 
 [project.urls]

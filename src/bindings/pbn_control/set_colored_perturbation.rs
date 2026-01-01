@@ -9,26 +9,27 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 };
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
 use either::Either;
-use num_bigint::BigInt;
+use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
-use pyo3::prelude::PyListMethods;
 use pyo3::types::PyList;
-use pyo3::{pyclass, pymethods, Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python};
+use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
 
 use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::argument_types::perturbation_type::PerturbationType;
+use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
 use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::lib_param_bn::NetworkVariableContext;
+use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use crate::bindings::pbn_control::asynchronous_perturbation_graph::AsynchronousPerturbationGraph;
 use crate::bindings::pbn_control::{PerturbationModel, PerturbationSet};
-use crate::{throw_runtime_error, AsNative};
+use crate::{AsNative, throw_runtime_error};
 
 /// A symbolic representation of a colored set of "perturbations". A perturbation specifies for
 /// each variable whether it is fixed or not, and if it is fixed, it prescribes a value. To do so,
 /// it uses a combination of state variables and perturbation parameters declared by an
-/// `AsynchronousPerturbationGraph`. The colors then prescribes the interpretations of the
+/// `AsynchronousPerturbationGraph`. The color then prescribes the interpretation of the
 /// remaining network parameters.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -54,7 +55,7 @@ impl ColoredPerturbationSet {
     /// `AsynchronousPerturbationGraph`. However, in some cases you may want to create it
     /// manually from an `AsynchronousPerturbationGraph` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid colored set of perturbations.
     #[new]
     pub fn new(py: Python, ctx: Py<AsynchronousPerturbationGraph>, bdd: &Bdd) -> Self {
@@ -109,6 +110,11 @@ impl ColoredPerturbationSet {
         hasher.finish()
     }
 
+    fn __getnewargs__(&self, py: Python) -> (Py<AsynchronousPerturbationGraph>, Bdd) {
+        let bdd = self.to_bdd(py);
+        (self.ctx.clone(), bdd)
+    }
+
     fn __iter__(&self, py: Python) -> PyResult<_ColorPerturbationModelIterator> {
         self.items(py, None, None)
     }
@@ -118,7 +124,7 @@ impl ColoredPerturbationSet {
     }
 
     /// Returns the number of vertex-color pairs that are represented in this set.
-    fn cardinality(&self) -> BigInt {
+    fn cardinality(&self) -> BigUint {
         let pruner = PerturbationSet::mk_duplicate_pruning_bdd(self.ctx.get());
         let pruned = self.as_native().as_bdd().and(&pruner);
         let all_variables = self
@@ -171,7 +177,7 @@ impl ColoredPerturbationSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single perturbation-color pair.
+    /// True, if this set is a singleton, i.e., a single perturbation-color pair.
     fn is_singleton(&self, py: Python) -> PyResult<bool> {
         let mut it = self.__iter__(py)?;
         let fst = it.native.next();
@@ -185,7 +191,7 @@ impl ColoredPerturbationSet {
     }
 
     /// Compute the existential projection of this relation to the color component.
-    /// I.e. returns a set of colors such that for each color, there is at least one
+    /// I.e., returns a set of colors such that for each color, there is at least one
     /// perturbation-color pair in the original set.
     ///
     /// *Note that this also fixes perturbation parameters to `False`, meaning the set no longer
@@ -204,7 +210,7 @@ impl ColoredPerturbationSet {
         )
     }
 
-    /// Compute the existential projection of this relation to the perturbation component. I.e.
+    /// Compute the existential projection of this relation to the perturbation component. I.e.,
     /// returns a set of perturbations such that for each perturbation, there is at least one
     /// perturbation-color pair in the original set.
     pub fn perturbations(&self) -> PerturbationSet {
@@ -273,7 +279,7 @@ impl ColoredPerturbationSet {
     pub fn select_perturbations(
         &self,
         py: Python,
-        perturbations: &Bound<'_, PyAny>,
+        perturbations: PerturbationType,
     ) -> PyResult<ColoredPerturbationSet> {
         let borrowed = self.ctx.borrow(py);
         let parent = borrowed.as_ref();
@@ -281,8 +287,7 @@ impl ColoredPerturbationSet {
         let mapping =
             native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
 
-        let perturbations =
-            AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbations)?;
+        let perturbations = perturbations.resolve(borrowed.as_native())?;
         let mut selection = BddPartialValuation::empty();
 
         // Go through the given perturbation and mark everything that should be perturbed.
@@ -318,15 +323,14 @@ impl ColoredPerturbationSet {
     fn select_perturbation(
         &self,
         py: Python,
-        perturbation: &Bound<'_, PyAny>,
+        perturbation: PerturbationType,
     ) -> PyResult<ColorSet> {
         let borrowed = self.ctx.borrow(py);
         let parent = borrowed.as_ref();
         let native_graph = self.ctx.get().as_native();
         let mapping =
             native_graph.get_perturbation_bdd_mapping(native_graph.perturbable_variables());
-        let perturbation =
-            AsynchronousPerturbationGraph::resolve_perturbation(&borrowed, perturbation)?;
+        let perturbation = perturbation.resolve(borrowed.as_native())?;
         let mut restriction = BddPartialValuation::empty();
 
         // Initially, set all variables to unperturbed.
@@ -360,7 +364,7 @@ impl ColoredPerturbationSet {
 
     /// Return the global robustness of the given perturbation as represented in this colored set.
     ///
-    /// This is the fraction of colors for which the perturbation is present w.r.t. all colors
+    /// This is the fraction of colors for which the perturbation is present with respect to all colors
     /// that are admissible in the unperturbed system. Note that this has no relation to the
     /// total set of colors stored in this relation (i.e. `set.colors()`).
     ///
@@ -368,17 +372,13 @@ impl ColoredPerturbationSet {
     /// any missing perturbable variables are treated as unperturbed.*
     ///
     /// See also `AsynchronousPerturbationGraph.colored_robustness`.
-    fn perturbation_robustness(
-        &self,
-        py: Python,
-        perturbation: &Bound<'_, PyAny>,
-    ) -> PyResult<f64> {
+    fn perturbation_robustness(&self, py: Python, perturbation: PerturbationType) -> PyResult<f64> {
         let colors = self.select_perturbation(py, perturbation)?;
         AsynchronousPerturbationGraph::colored_robustness(self.ctx.bind(py).clone(), &colors)
     }
 
     /// Only retain those perturbations that have the given `size`. If `up_to` is set to `True`,
-    /// then retain perturbations that have smaller or equal size.
+    /// then retain perturbations that have a smaller or equal size.
     ///
     /// This is similar to `AsynchronousPerturbationGraph.mk_perturbations_with_size`.
     fn select_by_size(&self, py: Python, size: usize, up_to: bool) -> ColoredPerturbationSet {
@@ -396,12 +396,12 @@ impl ColoredPerturbationSet {
     ///
     /// Since this operation cannot be completed symbolically, the result is a list of explicit
     /// `PerturbationModel` instances, together with their robustness and their `ColorSet`.
-    /// The perturbations are returned from smallest to largest (in terms of the number of
-    /// perturbed variables, not robustness). Optionally, you can use `result_limit` to restrict
+    /// The perturbations are returned from smallest to largest (in terms of the
+    /// perturbed variable count, not robustness). Optionally, you can use `result_limit` to restrict
     /// the maximal number of returned perturbations.
     ///
     /// You can also use `ColoredPerturbationSet.select_by_size` to first only select perturbations
-    /// of a specific size and only then enumerate their robustness.
+    /// of a specific size and only then list their robustness.
     #[pyo3(signature = (threshold, result_limit = None))]
     fn select_by_robustness(
         &self,
@@ -441,10 +441,10 @@ impl ColoredPerturbationSet {
                     results.push((model, robustness, color_set));
                 }
 
-                if let Some(limit) = result_limit {
-                    if results.len() >= limit {
-                        return Ok(results);
-                    }
+                if let Some(limit) = result_limit
+                    && results.len() >= limit
+                {
+                    return Ok(results);
                 }
             }
         }
@@ -452,7 +452,7 @@ impl ColoredPerturbationSet {
         Ok(results)
     }
 
-    /// Deterministically pick a subset of this set that contains exactly a single
+    /// Deterministically, pick a subset of this set that exactly contains a single
     /// perturbation-color pair.
     ///
     /// If this set is empty, the result is also empty.
@@ -469,7 +469,7 @@ impl ColoredPerturbationSet {
         Ok(singleton)
     }
 
-    /// Obtain the underlying `Bdd` of this `ColoredPerturbationSet`.
+    /// Get the underlying `Bdd` of this `ColoredPerturbationSet`.
     pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py).as_ref().symbolic_context();
@@ -477,7 +477,7 @@ impl ColoredPerturbationSet {
         Bdd::new_raw_2(ctx_ref.bdd_variable_set(), rs_bdd)
     }
 
-    /// Obtain the internal representation of this `ColoredPerturbationSet`, which uses the
+    /// Get the internal representation of this `ColoredPerturbationSet`, which uses the
     /// `AsynchronousPerturbationGraph` encoding. This is a colored set of vertices, where
     /// the colors depend on the perturbation parameters and normal parameters, but the vertices
     /// are only constrained in case the variable is perturbed.
@@ -500,17 +500,17 @@ impl ColoredPerturbationSet {
     /// resulting iterator only considers unique combinations of the `retained`
     /// functions and variables. Consequently, the resulting `ColorModel` and `PerturbationModel`
     /// instances will fail with an `IndexError` if a value outside the `retained` set
-    /// is requested (for the `PerturbationModel`, `IndexError` is also thrown if a value
-    /// of a variable that is not perturbable is requested).
+    /// is requested. For the `PerturbationModel`, `IndexError` is also thrown if a value
+    /// of a variable that is not perturbable is requested.
     ///
     /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is
-    /// equivalent to `set.colors().items()`. Similarly, with `retained_variables = None` and
+    /// an equivalent to `set.colors().items()`. Similarly, with `retained_variables = None` and
     /// `retained_functions = []`, this is equivalent to `set.perturbations().items()`.
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]
     fn items(
         &self,
         py: Python,
-        retained_variables: Option<&Bound<'_, PyList>>,
+        retained_variables: Option<Vec<VariableIdSymType>>,
         retained_functions: Option<&Bound<'_, PyList>>,
     ) -> PyResult<_ColorPerturbationModelIterator> {
         let ctx = self.ctx.get();
@@ -582,10 +582,7 @@ impl ColoredPerturbationSet {
             .as_native()
             .get_perturbation_bdd_mapping(ctx.as_native().perturbable_variables());
         let retained_network_variables = if let Some(retained) = retained_variables {
-            retained
-                .iter()
-                .map(|it| symbolic_ctx.resolve_network_variable(&it))
-                .collect::<PyResult<Vec<_>>>()?
+            VariableIdSymType::resolve_collection(retained, symbolic_ctx.as_native())?
         } else {
             ctx.as_native().perturbable_variables().clone()
         };
@@ -669,8 +666,8 @@ impl _ColorPerturbationModelIterator {
             let native_ctx = self.ctx.get().as_native();
             // From the color model, we only remove the state variables (perturbation parameters
             // are kept to ensure compatibility).
-            // From `pert_val`, we copy available perturbation parameter,
-            // and also copy state variable if it is perturbed.
+            // From `pert_val`, we copy the available perturbation parameter
+            // and also copy the state variable if it is perturbed.
             for n_var in native_ctx.network_variables() {
                 let s_var = native_ctx.get_state_variable(n_var);
 
@@ -678,12 +675,12 @@ impl _ColorPerturbationModelIterator {
                 color_val.unset_value(s_var);
 
                 // Copy perturbation parameter (and state if relevant).
-                if let Some(p_var) = self.parameter_mapping.get(&n_var) {
-                    if let Some(value) = it.get_value(*p_var) {
-                        pert_val.set_value(*p_var, value);
-                        if value {
-                            pert_val.set_value(s_var, it.get_value(s_var).unwrap())
-                        }
+                if let Some(p_var) = self.parameter_mapping.get(&n_var)
+                    && let Some(value) = it.get_value(*p_var)
+                {
+                    pert_val.set_value(*p_var, value);
+                    if value {
+                        pert_val.set_value(s_var, it.get_value(s_var).unwrap())
                     }
                 }
             }

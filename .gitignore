@@ -97,3 +97,6 @@ coverage.lcov
 
 # Ignore generated documentation.
 docs
+
+# Ignore downloaded model files.
+example/algorithms_evaluation/edition-2022-aeon
