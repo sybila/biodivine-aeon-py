@@ -11,24 +11,35 @@ use super::sampling_utils::pick_random_instances;
 /// database endpoint. It is used to deserialize the model data from the JSON
 /// response.
 ///
-/// The `modelData` field is a string representation of the Boolean network
+/// The `raw_model_data` field is a string representation of the Boolean network
 /// in AEON format. The rest of the fields are metadata about the model.
 #[pyclass(module = "biodivine_aeon")]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BbmModel {
+    #[pyo3(get)]
     pub id: String,
+    #[pyo3(get)]
     pub name: String,
+    #[pyo3(get)]
     pub url_publication: Option<String>,
+    #[pyo3(get)]
     pub url_model: Option<String>,
+    #[pyo3(get)]
     pub keywords: Vec<String>,
+    #[pyo3(get)]
     pub variables: u32,
+    #[pyo3(get)]
     pub inputs: u32,
+    #[pyo3(get)]
     pub regulations: u32,
+    #[pyo3(get)]
     pub notes: Option<String>,
+    #[pyo3(get)]
     pub bib: Option<String>,
-    #[serde(deserialize_with = "deserialize_model_data")]
-    pub model_data: String, // Deserialize directly into a String
+    #[pyo3(get)]
+    #[serde(deserialize_with = "deserialize_model_data", rename = "modelData")]
+    pub raw_model_data: String, // Deserialize directly into a String
 }
 
 /// Custom deserialization function for the `modelData` field.
@@ -61,7 +72,7 @@ impl BbmModel {
     pub fn __repr__(&self) -> String {
         format!(
             "BbmModel(id={}, name={}, variables={}, inputs={}, regulations={}, network={:?})",
-            self.id, self.name, self.variables, self.inputs, self.regulations, self.model_data,
+            self.id, self.name, self.variables, self.inputs, self.regulations, self.raw_model_data,
         )
     }
 
@@ -76,13 +87,13 @@ impl BbmModel {
     /// Extract a `BooleanNetwork` instance from this model.
     /// Leave the inputs as they are (free if not set in the model).
     pub fn to_bn_default(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
-        BooleanNetwork::from_aeon(py, &self.model_data).map_err(runtime_error)
+        BooleanNetwork::from_aeon(py, &self.raw_model_data).map_err(runtime_error)
     }
 
     /// Extract a `BooleanNetwork` instance from this model, setting all inputs
     /// to a given constant value `const_value`.
     fn to_bn_inputs_const(&self, py: Python, const_value: bool) -> PyResult<Py<BooleanNetwork>> {
-        let py_bn = BooleanNetwork::from_aeon(py, &self.model_data).map_err(runtime_error)?;
+        let py_bn = BooleanNetwork::from_aeon(py, &self.raw_model_data).map_err(runtime_error)?;
         let mut bn = py_bn.borrow_mut(py).clone();
         for variable in bn.as_native().inputs(const_value) {
             let update_fn = biodivine_lib_param_bn::FnUpdate::mk_true();

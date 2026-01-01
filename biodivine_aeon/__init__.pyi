@@ -1862,6 +1862,18 @@ class Control:
                             initial_states: VertexSet | None = None) -> ColoredPerturbationSet: ...
 
 class BbmModel:
+    id: str
+    name: str
+    url_publication: Optional[str]
+    url_model: Optional[str]
+    keywords: list[str]
+    variables: int
+    inputs: int
+    regulations: int
+    nodes: Optional[str]
+    bib: Optional[str]
+    raw_model_data: str
+
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
     def __copy__(self) -> BbmModel: ...
@@ -1873,7 +1885,7 @@ class BbmModel:
 
 class BiodivineBooleanModels:
     @staticmethod
-    def fetch_all_model_data() -> list[BbmModel]: ...
+    def fetch_all_model_data(url: Optional[str] = None) -> list[BbmModel]: ...
     @staticmethod
     def fetch_model(id: str) -> BbmModel: ...
     @staticmethod
