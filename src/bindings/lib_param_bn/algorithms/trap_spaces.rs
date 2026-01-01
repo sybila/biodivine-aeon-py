@@ -42,10 +42,10 @@ impl TrapSpaces {
     }
 
     /// **Deprecated**: Use `TrapSpacesComp.minimal_symbolic()` instead.
-    /// Computes the minimal coloured trap spaces of the provided `network` within the specified
+    /// Computes the minimal colored trap spaces of the provided `network` within the specified
     /// `restriction` set.
     ///
-    /// Currently, this method always slower than [Self::essential_symbolic], because it first has to compute
+    /// Currently, this method is always slower than [Self::essential_symbolic] because it first has to compute
     /// the essential set.
     #[staticmethod]
     #[pyo3(signature = (ctx, graph, restriction = None, exclude_fixed_points = None))]
@@ -74,7 +74,7 @@ impl TrapSpaces {
         })
     }
 
-    /// Computes the long-lived coloured trap spaces of the provided `network` within the specified
+    /// Computes the long-lived colored trap spaces of the provided `network` within the specified
     /// `restriction` set.
     ///
     /// Long-lived trap spaces are those that persist for extended periods in the network dynamics.

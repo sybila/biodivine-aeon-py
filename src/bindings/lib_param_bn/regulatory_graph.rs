@@ -522,7 +522,7 @@ impl RegulatoryGraph {
 
     /// Compute the set of *non-trivial* strongly connected components of this `RegulatoryGraph`.
     ///
-    /// If the `subgraph` option is specified, only operates on the subgraph induced by these variables.
+    /// If the `subgraph` option is specified, it only operates on the subgraph induced by these variables.
     ///
     /// Note that a single variable with a self-regulation is considered a non-trivial SCC, even if it is not
     /// a member of a larger component.
@@ -547,7 +547,7 @@ impl RegulatoryGraph {
     /// Compute the set of weakly connected components of this `RegulatoryGraph`. Note that typical regulatory graphs
     /// represent a single weakly connected component.
     ///
-    /// If the `subgraph` option is specified, only operates on the subgraph induced by these variables.
+    /// If the `subgraph` option is specified, it only operates on the subgraph induced by these variables.
     #[pyo3(signature = (subgraph = None))]
     pub fn weakly_connected_components(
         &self,

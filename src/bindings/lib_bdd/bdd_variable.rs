@@ -21,7 +21,7 @@ use std::hash::{Hash, Hasher};
 /// assert d[a] != d[b]
 /// ```
 ///
-/// The value of `BddVariable` is frozen (i.e. immutable).
+/// The value of `BddVariable` is frozen (i.e., immutable).
 ///
 /// See also `BddVariableType`.
 ///  

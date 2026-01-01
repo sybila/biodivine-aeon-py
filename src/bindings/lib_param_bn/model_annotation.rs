@@ -38,7 +38,7 @@ use pyo3::prelude::*;
 ///
 /// #### Annotation syntax
 ///
-/// Annotations are comments which start with `#!`. After the `#!` "preamble", each annotation
+/// Annotations are comments that start with `#!`. After the `#!` "preamble", each annotation
 /// can contain a "path prefix" with path segments separated using `:` (path segments can be
 /// surrounded by white space that is automatically trimmed). Based on these path
 /// segments, the parser will create an annotation tree. If there are multiple annotations with
@@ -52,7 +52,7 @@ use pyo3::prelude::*;
 /// ```
 ///
 /// Another usage for annotations are additional properties expected from the model, for
-/// example written in CTL:
+/// example, written in CTL:
 /// ```text
 /// #! property : AG (problem => AF apoptosis)
 /// ```
@@ -328,7 +328,7 @@ impl ModelAnnotation {
         }
     }
 
-    /// Return the list key-value pairs that correspond to the direct descendants
+    /// Return the list of key-value pairs that correspond to the direct descendants
     /// of this annotation.
     pub fn items(&self, py: Python) -> Vec<(String, ModelAnnotation)> {
         let root_ref = self.root.borrow(py);

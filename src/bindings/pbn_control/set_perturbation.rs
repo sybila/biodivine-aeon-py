@@ -29,7 +29,7 @@ use crate::{AsNative, throw_runtime_error};
 /// Internally, the representation therefore uses the state variables of the perturbable network
 /// variables, plus the perturbation parameters. If a variable is not perturbed, the state variable
 /// should remain unconstrained, as this is the most "natural" representation. However, this
-/// introduces some issues in terms of cardinality computation and iterators, since we now have
+/// introduces some issues in terms of cardinality computation and iterators: We now have
 /// to account for the fact that if a variable is unperturbed, it actually generates two
 /// perturbation instances (one with state variable `true`, one with `false`). We generally
 /// address this by manually fixing the state variable to `false` within these operations.

@@ -26,15 +26,15 @@ use std::sync::Arc;
 /// Logical parameters come in two varieties:
 ///
 /// An **explicit parameter** is an uninterpreted function with a fixed name that can appear within
-/// larger expressions, for example `a | f(b, !c & d)`. An explicit parameter has to be declared
+/// larger expressions, for example, `a | f(b, !c & d)`. An explicit parameter has to be declared
 /// using `BooleanNetwork.add_explicit_parameter` and can be referenced using a `ParameterId`.
 /// A single explicit parameter can appear in multiple update functions, in which case it is
 /// always instantiated to the same Boolean function.
 ///
 /// Meanwhile, an **implicit parameter** arises when a variable has an unknown (unspecified)
-/// update function. In such case, we assume the update function of the variable is an
-/// anonymous uninterpreted function which depends on all regulators of said variable. Such
-/// implicit parameter does not have a `ParameterId`. We instead refer to it using the `VariableId`
+/// update function. In such a case, we assume the update function of the variable is an
+/// anonymous uninterpreted function that depends on all regulators of the said variable. Such
+/// an implicit parameter does not have a `ParameterId`. We instead refer to it using the `VariableId`
 /// of the associated variable.
 #[pyclass(module="biodivine_aeon", extends=RegulatoryGraph)]
 #[derive(Clone, Wrapper)]
@@ -72,7 +72,7 @@ impl BooleanNetwork {
             RegulatoryGraph::new(None, regulations)?
         };
         // The functions could be either a `Vec<Option<String>>` or `HashMap<String, String>`.
-        // Technically we could also allow FnUpdate, but that would be a huge pain to resolve
+        // Technically, we could also allow FnUpdate, but that would be a huge pain to resolve
         // correctly and probably won't be used.
         let mut native_bn = biodivine_lib_param_bn::BooleanNetwork::new(rg.as_native().clone());
         if let Some(parameters) = parameters {
@@ -117,7 +117,7 @@ impl BooleanNetwork {
     }
 
     pub fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {
-        // The BN and its underlying RG should be up-to-date, hence it should be ok to just compare the BN.
+        // The BN and its underlying RG should be up to date, hence it should be ok to just compare the BN.
         richcmp_eq_by_key(py, op, &self, &other, |x| x.as_native())
     }
 
@@ -319,7 +319,7 @@ impl BooleanNetwork {
         mut self_: PyRefMut<'_, Self>,
         regulation: RegulationType,
     ) -> PyResult<Option<RegulationOutput>> {
-        // This is a bit inefficient, but should be good enough for now.
+        // This is a bit inefficient but should be good enough for now.
         let (s, m, o, t) = regulation.resolve_id(self_.as_native())?;
         let m = m.map(|it| SignType::from(it).monotonicity());
 
@@ -726,7 +726,7 @@ impl BooleanNetwork {
 
     /// Create a new explicit parameter.
     ///
-    /// the parameter name must be unique among existing variables and parameters.
+    /// The parameter name must be unique among existing variables and parameters.
     pub fn add_explicit_parameter(&mut self, name: &str, arity: u32) -> PyResult<ParameterId> {
         self.as_native_mut()
             .add_parameter(name, arity)

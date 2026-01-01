@@ -41,7 +41,7 @@ impl Classification {
     /// Extend an existing `classification` dictionary in such a way that every color
     /// in the `colors` set appears in a `Class` with the specified `features`.
     ///
-    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
+    /// For example, extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
     /// `{ `a`: [1,2,3], ['b']: [5,6], ['a','b']: [4] }`.
     ///
     /// This does not "increase" the number of times a feature appears in a class, it merely
@@ -70,9 +70,9 @@ impl Classification {
     }
 
     /// Extend an existing `classification` dictionary in such a way that every color
-    /// in the `colors` set has an additional features according to the specified `Class`.
+    /// in the `colors` set has an additional feature according to the specified `Class`.
     ///
-    /// For example: Extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
+    /// For example, extending `{ ['a']: [1,2,3], ['b']: [4,5,6] }` with `'a': [3,4]` results in
     /// `{ `a`: [1,2], ['b']: [5,6], ['a','a']: [3], ['a','b']: [4] }`.
     ///
     /// In other words, compared to `Class.classification_ensure`, this does "increase" the number
@@ -102,7 +102,7 @@ impl Classification {
 
     /// Read the list of *dynamic assertions* from `.aeon` model annotations.
     ///
-    /// An assertion typically encodes a `HctlFormula` that must be satisfied by all
+    /// An assertion typically encodes an `HctlFormula` that must be satisfied by all
     /// the relevant interpretations of a partially specified model.
     ///
     /// The argument is either a `ModelAnnotation` dictionary, a path to an existing model
@@ -126,7 +126,7 @@ impl Classification {
 
     /// Read the list of *dynamic properties* from `.aeon` model annotations.
     ///
-    /// A property typically encodes a `HctlFormula` that is of interest in a particular model,
+    /// A property typically encodes an `HctlFormula` that is of interest in a particular model,
     /// but is not necessarily satisfied by all relevant interpretations of a model. Each property
     /// is identified by a name (first item in the tuple).
     ///
@@ -562,10 +562,10 @@ impl Classification {
                 }
                 PhenotypeOscillationType::Required => {
                     // Oscillation is required. Select all attractors that intersect the phenotype
-                    // set, but are not fully contained in it.
+                    // set but are not fully contained in it.
 
                     // This one is a bit more tricky. The idea is that if we remove every attractor
-                    // that is fully contained in the `phenotype` set as well as every attractor
+                    // fully contained in the `phenotype` set as well as every attractor
                     // that is fully outside, we get a trap set with all attractors that intersect
                     // the `phenotype` set but are not contained in it.
                     let not_phenotype = unit.minus(&phenotype);
@@ -584,7 +584,7 @@ impl Classification {
                     // Oscillation is allowed. Any attractor that is not fully *outside* the
                     // phenotype set is valid here.
 
-                    // This is basically negating the phenotype set, and then finding all attractors
+                    // This is basically negating the phenotype set and then finding all attractors
                     // that fully reside in the negated set (forbidden oscillation) and
                     // disregarding them.
                     let is_phenotype = unit.intersect(&phenotype);
@@ -681,7 +681,7 @@ impl Classification {
 
         let mut valid_colors = mc_graph.mk_unit_colors();
         for set in results {
-            // We consider the "universal" interpretation of HCTL, i.e. formula holds only if it
+            // We consider the "universal" interpretation of HCTL, i.e., formula holds only if it
             // holds for every state.
             let invalid_set = mc_graph.unit_colored_vertices().minus(&set);
             valid_colors = valid_colors.minus(&invalid_set.colors());

@@ -125,14 +125,14 @@ impl Control {
     /// specified target `phenotype` from any initial state, assuming the perturbation
     /// is applied indefinitely.
     ///
-    /// Optionally, you can provide an `PhenotypeOscillation` type that specifies whether the attractors
-    /// must fully reside in the `phenotype` set (`forbidden`), can only intersect the
-    /// phenotype set but still be proper subsets (`allowed`), or must intersect the phenotype
+    /// Optionally, you can provide a `PhenotypeOscillation` type that specifies whether the attractors
+    /// must fully reside in the `phenotype` set (`forbidden`); can only intersect the
+    /// phenotype set but still be proper subsets (`allowed`); or must intersect the phenotype
     /// while not being subsets (`required`). Default behavior is `forbidden`,
     /// i.e., each attractor fully resides in the `phenotype` set.
     ///
-    /// To reduce the search space (and speed up the computation), you can also specify an
-    /// `size_limit` constraint (only perturbations that are smaller or equal will be considered).
+    /// To reduce the search space (and speed up the computation), you can also specify a `size_limit`
+    /// constraint (only perturbations that are smaller or equal will be considered).
     /// Furthermore, if `stop_when_found` is set, the method terminates early if a perturbation
     /// with robustness `1.0` is discovered (i.e., a perturbation is found that is effective for
     /// all network colors). When this option is active, other results that have been computed
@@ -160,7 +160,7 @@ impl Control {
             PhenotypeOscillationType::Forbidden
         };
 
-        // If initial states is not set, we consider all networks states as potential initial states
+        // If initial states are not set, we consider all networks states as potential initial states
         let initial_states_native = match initial_states {
             Some(x) => x.as_native().clone(),
             None => graph

@@ -28,7 +28,7 @@ use biodivine_lib_bdd::Bdd as RsBdd;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use pyo3::IntoPyObjectExt;
 
-/// A symbolic representation of a colored relation of "spaces", i.e. hypercubes in the state space
+/// A symbolic representation of a colored relation of "spaces", i.e., hypercubes in the state space
 /// of a particular partially specified `BooleanNetwork` together with the instantiations of
 /// individual interpretations of network parameters.
 #[pyclass(module = "biodivine_aeon", frozen)]
@@ -59,7 +59,7 @@ impl AsNative<NetworkColoredSpaces> for ColoredSpaceSet {
 
 #[pymethods]
 impl ColoredSpaceSet {
-    /// Normally, a new `ColoredSpaceSet` is derived using an `SymbolicSpaceContext`. However, in some
+    /// Normally, a new `ColoredSpaceSet` is derived using a `SymbolicSpaceContext`. However, in some
     /// cases you may want to create it manually from a `SymbolicSpaceContext` and a `Bdd`.
     ///
     /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
@@ -157,7 +157,7 @@ impl ColoredSpaceSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single vertex-color pair.
+    /// True if this set is a singleton, i.e., a single vertex-color pair.
     fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
@@ -167,14 +167,14 @@ impl ColoredSpaceSet {
         self.as_native().symbolic_size()
     }
 
-    /// Compute the existential projection of this relation to the color component. I.e. returns a set of colors
+    /// Compute the existential projection of this relation to the color component. I.e., returns a set of colors
     /// such that for each color, there is at least one space-color pair in the original set.
     fn colors(&self, py: Python) -> PyResult<ColorSet> {
         let parent_ctx = self.ctx.extract::<Py<SymbolicContext>>(py)?;
         Ok(ColorSet::mk_native(parent_ctx, self.as_native().colors()))
     }
 
-    /// Compute the existential projection of this relation to the subspace component. I.e. returns a set of spaces
+    /// Compute the existential projection of this relation to the subspace component. I.e., returns a set of spaces
     /// such that for each space, there is at least one space-color pair in the original set.
     fn spaces(&self) -> SpaceSet {
         SpaceSet::wrap_native(self.ctx.clone(), self.as_native().spaces())
@@ -200,7 +200,7 @@ impl ColoredSpaceSet {
         self.mk_derived(self.as_native().minus_spaces(spaces.as_native()))
     }
 
-    /// Pick a subset of this relation such that each color that is in the original relation is only present
+    /// Pick a subset of this relation such that each color in the original relation is only present
     /// with a single vertex in the result relation.
     ///
     /// I.e. for each `color` that appears in this set, `result.intersect_colors(color)` is a singleton.
@@ -208,22 +208,22 @@ impl ColoredSpaceSet {
         self.mk_derived(self.as_native().pick_color())
     }
 
-    /// Pick a subset of this relation such that each space that is in the original relation is only present
+    /// Pick a subset of this relation such that each space in the original relation is only present
     /// with a single color in the result relation.
     ///
-    /// I.e. for each `space` that appears in this set, `result.intersect_spaces(space)` is a singleton.
+    /// I.e., for each `space` that appears in this set, `result.intersect_spaces(space)` is a singleton.
     fn pick_space(&self) -> Self {
         self.mk_derived(self.as_native().pick_space())
     }
 
-    /// Deterministically pick a subset of this set that contains exactly a single space-color pair.
+    /// Deterministically pick a subset of this set that exactly contains a single space-color pair.
     ///
     /// If this set is empty, the result is also empty.
     fn pick_singleton(&self) -> Self {
         self.mk_derived(self.as_native().pick_singleton())
     }
 
-    /// Obtain the underlying `Bdd` of this `ColoredSpaceSet`.
+    /// Get the underlying `Bdd` of this `ColoredSpaceSet`.
     fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         Bdd::new_raw_2(self.ctx.borrow(py).as_ref().bdd_variable_set(), rs_bdd)
@@ -232,12 +232,12 @@ impl ColoredSpaceSet {
     /// Returns an iterator over all interpretation-space pairs in this `ColoredSpaceSet` relation, with an optional
     /// projection to a subset of network variables and uninterpreted functions.
     ///
-    /// When no `retained` collections are specified, this is equivalent to `ColoredSpaceSet.__iter__`. However, if
+    /// When no `retained` collections are specified, this is an equivalent to `ColoredSpaceSet.__iter__`. However, if
     /// a retained collection is given, the resulting iterator only considers unique combinations of the `retained`
     /// functions and variables. Consequently, the resulting `ColorModel` and `SpaceModel` instances will fail with
     /// an `IndexError` if a value outside the `retained` set is requested.
     ///
-    /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is equivalent to
+    /// Note that if you set `retained_variables = []` and `retained_functions = None`, this is an equivalent to
     /// `set.colors().items()`. Similarly, with `retained_variables = None` and `retained_functions = []`, this is
     /// equivalent to `set.spaces().items()`.
     #[pyo3(signature = (retained_variables = None, retained_functions = None))]

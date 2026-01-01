@@ -167,7 +167,7 @@ impl AsynchronousGraph {
         self.ctx.get().network_variables()
     }
 
-    /// Return a `VariableId` of the specified network variable, assuming such variable exists.
+    /// Return a `VariableId` of the specified network variable, assuming such a variable exists.
     pub fn find_network_variable(
         &self,
         variable: &Bound<'_, PyAny>,
@@ -184,9 +184,9 @@ impl AsynchronousGraph {
     /// this `AsynchronousGraph`.
     ///
     /// This is only possible when the graph does not use any non-trivial uninterpreted functions
-    /// (i.e. arity more than zero), because there is no suitable way to reconstruct
-    /// a function expression form a partially specified function. The only exception are
-    /// implicit parameters (i.e. fully erased functions) that can be reconstructed as well.
+    /// (i.e., arity more than zero), because there is no suitable way to reconstruct
+    /// a function expression from a partially specified function. The only exception is
+    /// implicit parameters (i.e., fully erased functions) that can be reconstructed as well.
     pub fn reconstruct_network(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
         let Some(native) = self.native.reconstruct_network() else {
             return throw_runtime_error("Cannot reconstruct network: complex parameters found.");
@@ -209,17 +209,17 @@ impl AsynchronousGraph {
         VertexSet::mk_native(self.ctx.clone(), self.native.mk_empty_vertices())
     }
 
-    /// Return a "unit" (i.e. full) `ColoredVertexSet`.
+    /// Return a "unit" (i.e., full) `ColoredVertexSet`.
     pub fn mk_unit_colored_vertices(&self) -> ColoredVertexSet {
         ColoredVertexSet::mk_native(self.ctx.clone(), self.native.mk_unit_colored_vertices())
     }
 
-    /// Return a "unit" (i.e. full) `ColorSet`.
+    /// Return a "unit" (i.e., full) `ColorSet`.
     pub fn mk_unit_colors(&self) -> ColorSet {
         ColorSet::mk_native(self.ctx.clone(), self.native.mk_unit_colors())
     }
 
-    /// Return a "unit" (i.e. full) `VertexSet`.
+    /// Return a "unit" (i.e., full) `VertexSet`.
     pub fn mk_unit_vertices(&self) -> VertexSet {
         VertexSet::mk_native(self.ctx.clone(), self.native.mk_unit_vertices())
     }
@@ -271,17 +271,17 @@ impl AsynchronousGraph {
     ///
     /// Note that the result of this operation does not have to be a subset of
     /// `AsynchronousGraph.mk_unit_colors`. In other words, this method allows you to
-    /// also create instances of colors that represent valid functions, but are disallowed
+    /// also create instances of colors that represent valid functions but are disallowed
     /// by the regulation constraints.
     ///
-    /// The first argument must identify an unknown function (i.e. explicit or implicit parameter).
+    /// The first argument must identify an unknown function (i.e., explicit or implicit parameter).
     /// The second argument then represents a Boolean function of the arity prescribed for the
     /// specified unknown function. Such a Boolean function can be represented as:
     ///  - A `BooleanExpression` (or a string that parses into a `BooleanExpression`) which
     ///    uses only variables `x_0 ... x_{A-1}` (`A` being the function arity).
     ///  - A `Bdd` that only depends on the first `A` symbolic variables.
     ///
-    /// In both cases, the support set of the function can be of course a subset of the prescribed
+    /// In both cases, the support set of the function can be, of course, a subset of the prescribed
     /// variables (e.g. `x_0 | x_3` is allowed for a function with `A=4`, even though `x_1` and
     /// `x_2` are unused).
     pub fn mk_function_colors(
@@ -705,7 +705,7 @@ impl AsynchronousGraph {
     /// with the original `AsynchronousGraph`, it uses the same underlying `BddVariableSet`.
     ///
     /// In other words, the variable is inlined inside the `AsynchronousGraph`, but still
-    /// (theoretically) exists in the symbolic representation, it is just eliminated everywhere,
+    /// (theoretically) exists in the symbolic representation; it is just eliminated everywhere,
     /// including the `SymbolicContext` of the `AsynchronousGraph`.
     ///
     /// *Currently, variables with a self-regulation cannot be inlined (raised a `RuntimeError`).*
@@ -723,7 +723,7 @@ impl AsynchronousGraph {
         };
 
         let native_ctx = native_reduced.symbolic_context().clone();
-        // Try to get network from existing context, otherwise None (won't be picklable)
+        // Try to get network from existing context, otherwise None (won't be pickle-able)
         let network = self.ctx.borrow(py).get_network().cloned();
         let py_ctx = SymbolicContext::wrap_native(py, native_ctx, network)?;
         let py_ctx = Py::new(py, py_ctx)?;

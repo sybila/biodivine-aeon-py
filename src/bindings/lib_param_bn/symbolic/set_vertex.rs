@@ -26,7 +26,7 @@ use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
 use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 
-/// A symbolic representation of a set of "vertices", i.e. valuations of variables
+/// A symbolic representation of a set of "vertices", i.e., valuations of variables
 /// of a particular `BooleanNetwork`.
 #[pyclass(module = "biodivine_aeon", frozen)]
 #[derive(Clone)]
@@ -57,7 +57,7 @@ impl VertexSet {
     /// Normally, a new `VertexSet` is derived using an `AsynchronousGraph`. However, in some
     /// cases you may want to create it manually from a `SymbolicContext` and a `Bdd`.
     ///
-    /// Just keep in mind that this method does not check that the provided `Bdd` is semantically
+    /// Keep in mind that this method does not check that the provided `Bdd` is semantically
     /// a valid set of vertices.
     #[new]
     pub fn new(py: Python, ctx: Py<SymbolicContext>, bdd: &Bdd) -> Self {
@@ -150,12 +150,12 @@ impl VertexSet {
         self.as_native().is_subset(other.as_native())
     }
 
-    /// True if this set is a singleton, i.e. a single vertex.
+    /// True if this set is a singleton, i.e., a single vertex.
     pub fn is_singleton(&self) -> bool {
         self.as_native().is_singleton()
     }
 
-    /// True if this set is a subspace, i.e. it can be expressed using a single conjunctive clause.
+    /// True if this set is a subspace, i.e., it can be expressed using a single conjunctive clause.
     pub fn is_subspace(&self) -> bool {
         self.as_native().is_subspace()
     }
@@ -172,7 +172,7 @@ impl VertexSet {
         self.as_native().symbolic_size()
     }
 
-    /// Obtain the underlying `Bdd` of this `VertexSet`.
+    /// Get the underlying `Bdd` of this `VertexSet`.
     pub fn to_bdd(&self, py: Python) -> Bdd {
         let rs_bdd = self.as_native().as_bdd().clone();
         let ctx = self.ctx.borrow(py);
@@ -193,7 +193,7 @@ impl VertexSet {
     /// Returns an iterator over all vertices in this `VertexSet` with an optional projection to a subset
     /// of network variables.
     ///
-    /// When no `retained` collection is specified, this is equivalent to `VertexSet.__iter__`. However, if a retained
+    /// When no `retained` collection is specified, this is an equivalent to `VertexSet.__iter__`. However, if a retained
     /// set is given, the resulting iterator only considers unique combinations of the `retained` variables.
     /// Consequently, the resulting `VertexModel` instances will fail with an `IndexError` if a value of a variable
     /// outside the `retained` set is requested.
@@ -261,8 +261,8 @@ impl VertexSet {
         }
     }
 
-    /// Compute the largest subspace that is fully enclosed in this vertex set. Note that such
-    /// subspace may not be unique (i.e. there can be other subspaces that are just as large).
+    /// Compute the largest subspace fully enclosed in this vertex set. Note that such
+    /// a subspace may not be unique (i.e., there can be other subspaces that are just as large).
     ///
     /// Returns `None` if the set is empty.
     pub fn enclosed_subspace(&self) -> Option<HashMap<VariableId, bool>> {
