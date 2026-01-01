@@ -10,36 +10,34 @@ bn = bn.infer_valid_graph()
 print("Boolean network loaded.\n")
 
 stg = AsynchronousGraph(bn)
-config = ReachabilityConfig.create_from(stg).with_time_limit(10_000)
-print("Reachability config created.\n")
+config: ReachabilityConfig = {
+    'graph': stg,
+    'max_symbolic_size': 10_000
+}
 
-test_set = {VariableId(1), VariableId(2)}
-test_config = ReachabilityConfig(stg, variables=test_set, time_limit_millis=5_000)
-test_config = test_config.with_variables(test_set)
+print("Reachability config created.\n")
 
 singleton = stg.mk_unit_colored_vertices().pick_singleton()
 print("Initial state:")
 print(singleton)
 print()
 
-reach = ReachabilityComp.with_config(config)
 print("Reachability running forward_closed_superset.")
-result = reach.forward_closed_superset(singleton)
+result = Reachability.forward_superset(config, singleton)
 
 print("Result state:")
 print(result)
 print()
 
 print("Reachability running backward_closed_superset.")
-result = reach.backward_closed_superset(singleton)
+result = Reachability.backward_superset(config, singleton)
 
 print("Result state:")
 print(result)
 print()
 
-reach_with_graph = ReachabilityComp.create_from(stg)
 print("Reachability running backward_closed_superset.")
-result = reach_with_graph.backward_closed_superset(singleton)
+result = Reachability.backward_superset(stg, singleton)
 
 print("Result state:")
 print(result)
