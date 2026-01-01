@@ -378,6 +378,15 @@ def test_boolean_network():
     assert bn3 == BooleanNetwork.from_file("tmp.bnet", repair_graph=True)
     Path("tmp.bnet").unlink()
 
+    # Test booleannet format conversion
+    bn4 = BooleanNetwork(
+        regulations=["b -? a", "a -? b", "b -? b"],
+        functions=["!b", "a & b"]
+    )
+    booleannet_str = bn4.to_booleannet()
+    bn4_roundtrip = BooleanNetwork.from_booleannet(booleannet_str)
+    assert bn4 == bn4_roundtrip
+
     bn1i = bn1.inline_variable("b")
     assert bn1i == BooleanNetwork(
         ["a", "c"],

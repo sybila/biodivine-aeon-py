@@ -1,6 +1,6 @@
 # Biodivine `lib-param-bn` API coverage
 
-This document should be up-to-date with `lib-param-bn` version `0.6.2`.
+This document should be up-to-date with `lib-param-bn` version `0.7.0`.
 
 ### `biodivine_std` module
 
@@ -535,6 +535,14 @@ we export trivial iterators as lists.
         <tr>
             <td><code>BooleanNetwork::to_bnet</code></td>
             <td><code>BooleanNetwork.to_bnet</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::to_booleannet</code></td>
+            <td><code>BooleanNetwork.to_booleannet</code></td>
+        </tr>
+        <tr>
+            <td><code>BooleanNetwork::try_from_booleannet</code></td>
+            <td><code>BooleanNetwork.from_booleannet</code></td>
         </tr>
         <tr>
             <td><code>BooleanNetwork::try_from_sbml</code></td>
