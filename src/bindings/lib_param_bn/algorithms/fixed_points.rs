@@ -35,7 +35,7 @@ impl FixedPoints {
         })
     }
 
-    /// **Deprecated**: Use `FixedPointsComp.symbolilc_vertices()` instead.
+    /// **Deprecated**: Use `FixedPointsComp.symbolic_vertices()` instead.
     /// Iteratively compute the set of fixed-point vertices in an `AsynchronousGraph`.
     ///
     /// This is equivalent to `FixedPoints.symbolic(graph, set).vertices()`, but can be

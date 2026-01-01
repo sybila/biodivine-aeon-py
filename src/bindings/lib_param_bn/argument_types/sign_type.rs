@@ -21,6 +21,8 @@ impl<'a, 'py> FromPyObject<'a, 'py> for SignType {
     type Error = PyErr;
 
     fn extract(obj: Borrowed<'a, 'py, PyAny>) -> Result<Self, Self::Error> {
+        // For backwards compatibility, we also accept `bool`, but this is not
+        // officially part of the public API.
         if let Ok(v) = obj.extract::<bool>() {
             return match v {
                 true => Ok(SignType(Sign::Positive)),
@@ -37,7 +39,7 @@ impl<'a, 'py> FromPyObject<'a, 'py> for SignType {
         }
 
         throw_type_error(format!(
-            "Expected one of `positive`/`negative`/`+`/`-`. Got `{obj:?}`."
+            "Expected one of `positive`/`negative`/`+`/`-` (or deprecated `bool`). Got `{obj:?}`."
         ))
     }
 }

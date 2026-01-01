@@ -41,7 +41,7 @@ bn = BooleanNetwork.from_file(sys.argv[1])
 bn = bn.infer_valid_graph()
 
 # If you want to inline constant input nodes, uncomment this line:
-bn = bn.inline_constants(infer_constants=True, repair_graph=True)
+# bn = bn.inline_constants(infer_constants=True, repair_graph=True)
 
 limit = None
 if len(sys.argv) == 3:

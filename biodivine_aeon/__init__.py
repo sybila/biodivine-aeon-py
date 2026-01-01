@@ -229,7 +229,7 @@ class ReachabilityConfig(GraphConfig, total=False):
 class SccConfig(GraphConfig, total=False):
     """
     A configuration object for the `SCCs` computation. It allows you to specify various
-    parameters for the reachability analysis, such as trimming and long-lived SCC filtering.
+    parameters for the analysis, such as trimming and long-lived SCC filtering.
 
     **This feature is currently in "preview mode", so please expect that the API of this object
     can change.**
@@ -243,8 +243,8 @@ class SccConfig(GraphConfig, total=False):
 class AttractorConfig(GraphConfig, total=False):
     """
     A configuration object for the `Attractors` class. It allows you to specify various
-    parameters for the reachability analysis, such as the underlying `AsynchronousGraph`,
-    the set of active variables, a BDD size limit, and a steps limit.
+    parameters for the analysis, such as the underlying `AsynchronousGraph`,
+    the set of active variables, and a BDD size limit.
 
     **This feature is currently in "preview mode", so please expect that the API of this object
     can change.**

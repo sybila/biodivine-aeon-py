@@ -116,7 +116,6 @@ impl UpdateFunction {
 
     /// Test if a variable or a parameter is used by this `UpdateFunction`.
     fn __contains__(&self, py: Python, item: VariableOrParameterIdType) -> PyResult<bool> {
-        println!("{:?}", item);
         let ctx = self.ctx.borrow(py);
         match item.resolve(ctx.as_native()) {
             Ok(Either::Left(var)) => Ok(self.as_native().contains_variable(var)),

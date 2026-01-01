@@ -22,6 +22,7 @@ use crate::{
         percolation::{PercolationConfig, PercolationError},
         trap_spaces::{TrapSpaces, TrapSpacesConfig, TrapSpacesError},
     },
+    runtime_error,
 };
 
 #[derive(FromPyObject)]
@@ -37,11 +38,11 @@ impl From<Py<AsynchronousGraph>> for PyAsynchronousGraphType {
 }
 
 impl PyAsynchronousGraphType {
-    pub fn clone_native(&self, py: Python) -> SymbolicAsyncGraph {
+    pub fn clone_native(&self, py: Python) -> PyResult<SymbolicAsyncGraph> {
         match self {
-            PyAsynchronousGraphType::Graph(value) => value.get().as_native().clone(),
+            PyAsynchronousGraphType::Graph(value) => Ok(value.get().as_native().clone()),
             PyAsynchronousGraphType::Network(value) => {
-                SymbolicAsyncGraph::new(value.borrow(py).as_native()).unwrap()
+                SymbolicAsyncGraph::new(value.borrow(py).as_native()).map_err(runtime_error)
             }
         }
     }

@@ -125,7 +125,6 @@ impl Attractors {
         let py_config = PyAttractorConfig::from(config);
         let py_ctx = py_config.graph.clone_py_context(py)?;
         let config = py_config.clone_native(py)?;
-        println!("{}", config.max_symbolic_size);
 
         let to_reduce = if let Some(to_reduce) = to_reduce {
             VariableIdType::resolve_collection(to_reduce, &config.graph)?

@@ -26,7 +26,7 @@ pub enum AttractorConfigOrGraph {
 
 impl PyAttractorConfig {
     pub fn clone_native(&self, py: Python) -> PyResult<AttractorConfig> {
-        let mut config = AttractorConfig::new(self.graph.clone_native(py));
+        let mut config = AttractorConfig::new(self.graph.clone_native(py)?);
         if let Some(active_variables) = &self.active_variables {
             config.active_variables =
                 VariableIdType::resolve_collection(active_variables.clone(), &config.graph)?;
