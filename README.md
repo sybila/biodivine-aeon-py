@@ -9,6 +9,12 @@ Boolean networks with symbolic (BDD-based or solver-based) methods. In particula
 
  - **Boolean Network Representation**: Classical and *partially specified* Boolean networks (i.e., with missing or partially unknown update functions).
  - **File Format Support**: Multiple network formats including `.aeon`, `.sbml`, `.bnet`, `.booleannet`, and `.bma` (JSON/XML), with bidirectional conversion (import/export) and model validation capabilities.
+ - **Biodivine Boolean Models (BBM) API**: Access to the Biodivine Boolean Models database with support for:
+    - Model retrieval by numeric ID or unique identifier.
+    - Fetching models with full metadata (name, variables, inputs, regulations, keywords, publications).
+    - Direct conversion to `BooleanNetwork` objects with configurable input handling.
+    - Model filtering and search by network properties (size, inputs, regulations, keywords).
+    - Example script: `example/script/bbm_api.py` demonstrates basic usage of the BBM API.
  - **Network Manipulation**: Transformations and reductions including:
     - Variable inlining and network reduction.
     - Constant and input variable elimination.
@@ -16,12 +22,12 @@ Boolean networks with symbolic (BDD-based or solver-based) methods. In particula
     - Graph repair and regulation constraint removal.
     - Network extension and safe variable removal.
  - **Core Analysis Algorithms**: Competitive symbolic methods for:
-    - Attractor detection and enumeration (with configurable limits and performance options).
-    - Fixed-point enumeration (naive and optimized symbolic methods).
-    - Minimal/maximal/essential trap space enumeration.
-    - Strongly Connected Components (SCC) computation (forward-backward and chain decomposition).
-    - Forward and backward reachability analysis (with configurable active variables and limits).
-    - Subspace percolation analysis.
+    - Attractor detection and enumeration (with configurable limits and performance options). Example scripts: `example/script/attractors.py`, `example/script/attractors_and_fixed_points.py`.
+    - Fixed-point enumeration (naive and optimized symbolic methods). Example script: `example/script/fixed_points.py`.
+    - Minimal/maximal/essential trap space enumeration. Example script: `example/script/minimal_trap_spaces.py`.
+    - Strongly Connected Components (SCC) computation (forward-backward and chain decomposition). Example script: `example/script/scc.py`.
+    - Forward and backward reachability analysis (with configurable active variables and limits). Example script: `example/script/reachability.py`.
+    - Subspace percolation analysis. Example script: `example/script/percolation.py`.
  - **Graph Analysis**: Regulatory graph operations including:
     - Feedback vertex set computation.
     - Cycle detection and enumeration.
