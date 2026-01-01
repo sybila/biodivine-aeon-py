@@ -5,15 +5,14 @@ import biodivine_aeon
 
 biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_NOTHING
 
-# This script computes the attractors of a single,
-# fully specified Boolean network. This includes both fixed points
-# and complex attractors. However, it is typically faster to compute
-# fixed points using the dedicated method and then check the remaining
-# state space for complex attractors. See also
-# `attractors_and_fixed_points.py` for more info.
+# This script computes the non-trivial SCCs of a single,
+# fully specified Boolean network. This *does not* include fixed points,
+# but it includes complex attractors. Note that it is typically faster
+# to compute fixed points using the dedicated method and then check
+# the remaining state space for complex SCCs.
 #
 # The script either prints the number of solutions, or the
-# first `N` solutions, assuming `N` is given as a second argument.
+# first N solutions, assuming N is given as a second argument.
 # In such a case, it prints the smallest enclosing subspace of the attractor.
 #
 # Note that if the network has constant nodes, we can automatically
@@ -21,7 +20,7 @@ biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_NOTHING
 # enabled by default to ensure all nodes are present in the result.
 # You can uncomment this modification below.
 #
-# Also note that computing only the first `X` attractors is not always significantly
+# Also note that computing only the first `X` SCCs is not always significantly
 # faster than computing the total result. I.e., the "time to first" and
 # "time to all" can often be similar (especially if the count is small).
 #
@@ -29,12 +28,12 @@ biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_NOTHING
 #
 # Print the attractor count:
 # ```
-# python3 attractors.py ./path/to/network.aeon
+# python3 scc.py ./path/to/network.aeon
 # ```
 #
 # Print first 1000 attractors:
 # ```
-# python3 attractors.py ./path/to/network.aeon 1000
+# python3 scc.py ./path/to/network.aeon 1000
 # ```
 
 bn = BooleanNetwork.from_file(sys.argv[1])
@@ -52,24 +51,21 @@ stg = AsynchronousGraph(bn)
 # Assert that the network is fully specified.
 assert stg.mk_unit_colors().cardinality() == 1
 
-config: AttractorConfig = {
+config: SccConfig = {
     'graph': stg,
 }
 
 if limit is not None:
     config['solution_count'] = limit
 
-attractors = Attractors.attractors(config)
+scc_list = Scc.chain(config)
 
 if limit is None:
-    print(f"{len(attractors)}")
+    print(f"{len(scc_list)}")
 else:
     count = 0
-    for attractor in attractors:
-        print(attractor.vertices().enclosing_named_subspace())
+    for scc in scc_list:
+        print(scc.vertices().enclosing_named_subspace())
         count += 1
         if count >= limit:
             break
-
-
-

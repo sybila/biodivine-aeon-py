@@ -1884,6 +1884,14 @@ class Attractors:
                    initial_set: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
 
 
+class Scc:
+    @staticmethod
+    def fwd_bwd(config: Union[SccConfig, AsynchronousGraph, BooleanNetwork],
+                initial_set: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
+    @staticmethod
+    def chain(config: Union[SccConfig, AsynchronousGraph, BooleanNetwork],
+              initial_set: Optional[ColoredVertexSet] = None) -> list[ColoredVertexSet]: ...
+
 BddVariableType = Union[BddVariable, str]
 VariableIdType = Union[VariableId, str]
 ParameterIdType = Union[ParameterId, str]
@@ -1922,9 +1930,11 @@ class ReachabilityConfig(GraphConfig, total=False):
 class SccConfig(GraphConfig, total=False):
     should_trim: Literal["none", "both", "sinks", "sources"]
     filter_long_lived: bool
+    solution_count: int
 class AttractorConfig(GraphConfig, total=False):
     active_variables: Sequence[VariableIdType]
     max_symbolic_size: int
+    solution_count: int
 
 class PercolationConfig:
     """

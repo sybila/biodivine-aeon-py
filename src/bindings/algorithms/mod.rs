@@ -6,6 +6,7 @@ pub mod fixed_points;
 pub mod graph_representation;
 pub mod percolation;
 pub mod reachability;
+pub mod scc;
 pub mod token_python;
 pub mod trap_spaces;
 
@@ -17,6 +18,7 @@ pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     percolation::register(module)?;
     module.add_class::<reachability::Reachability>()?;
     module.add_class::<attractors::Attractors>()?;
+    module.add_class::<scc::Scc>()?;
 
     Ok(())
 }

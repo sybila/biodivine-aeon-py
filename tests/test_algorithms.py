@@ -1,6 +1,12 @@
 from biodivine_aeon import *
 import pytest
 
+def union_all(graph: AsynchronousGraph, items: list[ColoredVertexSet]) -> ColoredVertexSet:
+    result = graph.mk_empty_colored_vertices()
+    for item in items:
+        result = result.union(item)
+    return result
+
 def test_algorithms():
     bn = BooleanNetwork.from_file("./example/workflow/data/g2a_p1026.aeon")
     ctx = SymbolicSpaceContext(bn)
@@ -41,13 +47,8 @@ def test_algorithms():
     assert len(attractors) > 0
     assert len(attractors2) > 0
 
-    attractor_states = graph.mk_empty_colored_vertices()
-    for x in attractors:
-        attractor_states = attractor_states.union(x)
-
-    attractor_states2 = graph.mk_empty_colored_vertices()
-    for x in attractors2:
-        attractor_states2 = attractor_states2.union(x)
+    attractor_states = union_all(graph, attractors)
+    attractor_states2 = union_all(graph, attractors2)
 
     assert attractor_states2 == attractor_states
 
@@ -115,6 +116,32 @@ def test_algorithms():
 
     assert len(Attractors.attractors(config_attr, unit)) > 0
 
+    scc_list = Scc.fwd_bwd(graph, unit)
+    scc_states = union_all(graph, scc_list)
+
+    # Every attractor is an SCC (or fixed-point), and we should have at least
+    # one SCC in this model that isn't an attractor.
+    assert attractor_states.is_subset(scc_states.union(fixed_points))
+    assert not scc_states.minus(attractor_states).is_empty()
+
+    # Chain should give us the same SCCs as fwd-bwd:
+    scc_list_2 = Scc.chain(graph, unit)
+    scc_states_2 = union_all(graph, scc_list_2)
+
+    assert scc_states == scc_states_2
+
+    # Try SCC decomposition with custom config
+    scc_config: SccConfig = {
+        'graph': graph,
+        'should_trim': 'sources',
+        'filter_long_lived': True
+    }
+
+    # Every long-lived SCC is an SCC, but the model should also have short-lived SCCs
+    scc_list_3 = Scc.chain(scc_config, unit)
+    scc_states_3 = union_all(graph, scc_list_3)
+    assert scc_states_3.is_subset(scc_states)
+    assert not scc_states.minus(scc_states_3).is_empty()
 
 def test_percolation_case_1():
     bn = BooleanNetwork.from_file("./tests/model-3.aeon")

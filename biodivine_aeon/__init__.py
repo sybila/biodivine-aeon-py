@@ -231,6 +231,8 @@ class SccConfig(GraphConfig, total=False):
     A configuration object for the `SCCs` computation. It allows you to specify various
     parameters for the analysis, such as trimming and long-lived SCC filtering.
 
+    You can also limit the number of enumerated SCCs using `solution_count`.
+
     **This feature is currently in "preview mode", so please expect that the API of this object
     can change.**
     """
@@ -239,12 +241,16 @@ class SccConfig(GraphConfig, total=False):
     should_trim: Literal["none", "both", "sinks", "sources"]
     # Default: false
     filter_long_lived: bool
+    # Default: max. platform integer
+    solution_count: int
 
 class AttractorConfig(GraphConfig, total=False):
     """
     A configuration object for the `Attractors` class. It allows you to specify various
     parameters for the analysis, such as the underlying `AsynchronousGraph`,
     the set of active variables, and a BDD size limit.
+
+    You can also limit the number of enumerated SCCs using `solution_count`.
 
     **This feature is currently in "preview mode", so please expect that the API of this object
     can change.**
@@ -254,3 +260,5 @@ class AttractorConfig(GraphConfig, total=False):
     active_variables: Sequence[VariableIdType]
     # Default: max. platform integer
     max_symbolic_size: int
+    # Default: max. platform integer
+    solution_count: int

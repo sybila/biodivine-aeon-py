@@ -13,8 +13,11 @@ pub struct PyAttractorConfig {
     pub graph: PyAsynchronousGraphType,
     #[pyo3(item, default = None)]
     pub active_variables: Option<Vec<VariableIdType>>,
-    #[pyo3(item, default = None)]
-    pub max_symbolic_size: Option<usize>,
+    #[pyo3(item, default = usize::MAX)]
+    pub max_symbolic_size: usize,
+    // This option will not be necessary once we can export the algorithm as an iterator.
+    #[pyo3(item, default = usize::MAX)]
+    pub solution_count: usize,
 }
 
 /// Corresponds to `AttractorConfig | AsynchronousGraph | BooleanNetwork`.
@@ -31,9 +34,7 @@ impl PyAttractorConfig {
             config.active_variables =
                 VariableIdType::resolve_collection(active_variables.clone(), &config.graph)?;
         }
-        if let Some(max_symbolic_size) = self.max_symbolic_size {
-            config.max_symbolic_size = max_symbolic_size;
-        }
+        config.max_symbolic_size = self.max_symbolic_size;
         Ok(config)
     }
 }
@@ -45,7 +46,8 @@ impl From<AttractorConfigOrGraph> for PyAttractorConfig {
             AttractorConfigOrGraph::Graph(graph) => PyAttractorConfig {
                 graph,
                 active_variables: None,
-                max_symbolic_size: None,
+                max_symbolic_size: usize::MAX,
+                solution_count: usize::MAX,
             },
         }
     }

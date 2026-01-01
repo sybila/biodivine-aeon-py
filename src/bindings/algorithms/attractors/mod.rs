@@ -101,7 +101,8 @@ impl Attractors {
         cancel_this::on_python(|| {
             let state = XieBeerelState::from(&initial_set);
             let mut result = Vec::new();
-            for attr in XieBeerelAttractors::configure(config, state) {
+            for attr in XieBeerelAttractors::configure(config, state).take(py_config.solution_count)
+            {
                 let attr = ColoredVertexSet::mk_native(py_ctx.clone(), attr?);
                 result.push(attr);
             }
@@ -144,7 +145,8 @@ impl Attractors {
 
             let state = XieBeerelState::from(&result);
             let mut result = Vec::new();
-            for attr in XieBeerelAttractors::configure(config, state) {
+            for attr in XieBeerelAttractors::configure(config, state).take(py_config.solution_count)
+            {
                 let attr = ColoredVertexSet::mk_native(py_ctx.clone(), attr?);
                 result.push(attr);
             }
