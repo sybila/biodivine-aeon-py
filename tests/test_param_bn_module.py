@@ -79,6 +79,7 @@ def test_regulatory_graph():
         'essential': True,
         'sign': None,
     })
+
     rg2 = RegulatoryGraph(None, ["a -> b", "b -|? c", "c -? a"])
 
     assert rg1 == rg2
@@ -1229,3 +1230,176 @@ def test_asynchronous_graph_restrict():
     # Here, fixed points are those where c=0, because we cut off
     # all edges going into the c=1 subspace
     assert FixedPoints.symbolic(stg_c).cardinality() == 4.0
+
+
+def test_symbolic_pickle():
+    """Test pickle support for SymbolicContext and symbolic sets."""
+    bn = BooleanNetwork(
+        regulations=["a -> b", "b -| c", "a -? a"],
+        functions=["a", "a", "!b"]
+    )
+    
+    # Test SymbolicContext pickle
+    ctx = SymbolicContext(bn)
+    ctx_pickled = pickle.dumps(ctx)
+    ctx_unpickled = pickle.loads(ctx_pickled)
+    assert ctx.network_variable_count() == ctx_unpickled.network_variable_count()
+    assert ctx.explicit_function_count() == ctx_unpickled.explicit_function_count()
+    
+    # Test SymbolicSpaceContext pickle
+    space_ctx = SymbolicSpaceContext(bn)
+    space_ctx_pickled = pickle.dumps(space_ctx)
+    space_ctx_unpickled = pickle.loads(space_ctx_pickled)
+    assert space_ctx.network_variable_count() == space_ctx_unpickled.network_variable_count()
+    
+    # Test VertexSet pickle
+    graph = AsynchronousGraph(bn)
+    vertices = graph.mk_unit_vertices()
+    vertices_pickled = pickle.dumps(vertices)
+    vertices_unpickled = pickle.loads(vertices_pickled)
+    assert vertices.cardinality() == vertices_unpickled.cardinality()
+    assert vertices == vertices_unpickled
+    
+    # Test ColorSet pickle
+    colors = graph.mk_unit_colors()
+    colors_pickled = pickle.dumps(colors)
+    colors_unpickled = pickle.loads(colors_pickled)
+    assert colors.cardinality() == colors_unpickled.cardinality()
+    assert colors == colors_unpickled
+    
+    # Test ColoredVertexSet pickle
+    colored_vertices = graph.mk_unit_colored_vertices()
+    colored_vertices_pickled = pickle.dumps(colored_vertices)
+    colored_vertices_unpickled = pickle.loads(colored_vertices_pickled)
+    assert colored_vertices.cardinality() == colored_vertices_unpickled.cardinality()
+    assert colored_vertices == colored_vertices_unpickled
+    
+    # Test SpaceSet pickle
+    spaces = space_ctx.mk_unit_spaces()
+    spaces_pickled = pickle.dumps(spaces)
+    spaces_unpickled = pickle.loads(spaces_pickled)
+    assert spaces.cardinality() == spaces_unpickled.cardinality()
+    assert spaces == spaces_unpickled
+    
+    # Test ColoredSpaceSet pickle (use the space context's own unit colored spaces)
+    colored_spaces = space_ctx.mk_unit_colored_spaces()
+    colored_spaces_pickled = pickle.dumps(colored_spaces)
+    colored_spaces_unpickled = pickle.loads(colored_spaces_pickled)
+    assert colored_spaces.cardinality() == colored_spaces_unpickled.cardinality()
+    assert colored_spaces == colored_spaces_unpickled
+
+
+def test_symbolic_pickle_with_space_context():
+    """
+    Test pickle support specifically for VertexSet created with a SymbolicSpaceContext,
+    not just a normal SymbolicContext. This is important because SymbolicSpaceContext
+    has extra symbolic variables for space encoding.
+    """
+    bn = BooleanNetwork(
+        regulations=["a -> b", "b -| c", "a -? a"],
+        functions=["a", "a", "!b"]
+    )
+    
+    # Create a SymbolicSpaceContext
+    space_ctx = SymbolicSpaceContext(bn)
+    
+    # SymbolicSpaceContext extends SymbolicContext, so we can use it to create a VertexSet
+    # The difference is that SymbolicSpaceContext has additional "extra" symbolic variables
+    # for encoding network subspaces (dual variables for each network variable).
+    assert space_ctx.extra_bdd_variable_count() > 0  # Space context should have extra variables
+    
+    # Create a VertexSet using the SymbolicSpaceContext (which inherits from SymbolicContext)
+    bdd = space_ctx.mk_constant(True)
+    vertex_set = VertexSet(space_ctx, bdd)
+    
+    # Verify the vertex set has the expected cardinality (2^3 = 8 vertices for 3 variables)
+    assert vertex_set.cardinality() == 8
+    
+    # Test the pickle round-trip
+    vertex_set_pickled = pickle.dumps(vertex_set)
+    vertex_set_unpickled = pickle.loads(vertex_set_pickled)
+    
+    assert vertex_set.cardinality() == vertex_set_unpickled.cardinality()
+    assert vertex_set == vertex_set_unpickled
+    
+    # The unpickled vertex set should have the same symbolic size
+    assert vertex_set.symbolic_size() == vertex_set_unpickled.symbolic_size()
+    
+    # Test that we can still do operations on the unpickled set
+    singleton = vertex_set_unpickled.pick_singleton()
+    assert singleton.cardinality() == 1
+    
+    # Test pickling a non-trivial subset
+    restricted = vertex_set.intersect(singleton)
+    assert restricted.cardinality() == 1
+    
+    restricted_pickled = pickle.dumps(restricted)
+    restricted_unpickled = pickle.loads(restricted_pickled)
+    assert restricted == restricted_unpickled
+
+
+def test_symbolic_pickle_with_extra_variables():
+    """
+    Test pickle support for SymbolicContext created with extra symbolic variables.
+    This tests the extra_variables parameter preservation during pickle.
+    """
+    bn = BooleanNetwork(
+        regulations=["a -> b", "b -| c", "a -? a"],
+        functions=["a", "a", "!b"]
+    )
+    
+    # Create a SymbolicContext with extra variables for variable 'a'
+    extra_vars = {"a": 2, "b": 1}  # 2 extra variables for 'a', 1 for 'b'
+    ctx = SymbolicContext(bn, extra_vars)
+    
+    # Verify extra variables are set up
+    assert ctx.extra_bdd_variable_count() == 3  # 2 + 1
+    
+    # Test the pickle round-trip
+    ctx_pickled = pickle.dumps(ctx)
+    ctx_unpickled = pickle.loads(ctx_pickled)
+    
+    # After unpickling, the context should have the same structure
+    assert ctx.network_variable_count() == ctx_unpickled.network_variable_count()
+    assert ctx.extra_bdd_variable_count() == ctx_unpickled.extra_bdd_variable_count()
+    assert ctx.explicit_function_count() == ctx_unpickled.explicit_function_count()
+    
+    # Verify we can still access extra BDD variables
+    extra_bdd_vars = ctx_unpickled.extra_bdd_variables()
+    assert ctx.extra_bdd_variables() == extra_bdd_vars
+    
+    # The variable a should have 2 extra BDD variables
+    a_id = VariableId(0)  # `a` is the first variable
+    assert len(extra_bdd_vars.get(a_id, [])) == 2
+
+
+def test_symbolic_pickle_deep_copy_semantics():
+    """
+    Test that pickle creates a deep copy, not a reference to the same object.
+    Modifications to the unpickled object should not affect the original.
+    """
+    bn = BooleanNetwork(
+        regulations=["a -> b", "b -| c", "a -? a"],
+        functions=["a", "a", "!b"]
+    )
+    
+    graph = AsynchronousGraph(bn)
+    original_vertices = graph.mk_unit_vertices()
+    
+    # Pickle and unpickle
+    pickled = pickle.dumps(original_vertices)
+    unpickled_vertices = pickle.loads(pickled)
+    
+    # Both should be equal initially
+    assert original_vertices == unpickled_vertices
+    
+    # Get a singleton from unpickled
+    singleton = unpickled_vertices.pick_singleton()
+    modified = unpickled_vertices.minus(singleton)
+    
+    # Original should still have all vertices
+    assert original_vertices.cardinality() == 8
+    assert modified.cardinality() == 7
+    
+    # The objects should no longer be equal after modification
+    assert original_vertices != modified

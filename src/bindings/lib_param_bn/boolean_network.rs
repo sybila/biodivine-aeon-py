@@ -561,9 +561,7 @@ impl BooleanNetwork {
     ///
     /// Returns an error if the network cannot be converted to booleannet format.
     pub fn to_booleannet(&self) -> PyResult<String> {
-        self.as_native()
-            .to_booleannet(None)
-            .map_err(runtime_error)
+        self.as_native().to_booleannet(None).map_err(runtime_error)
     }
 
     /// Try to load a `BooleanNetwork` from the contents of a booleannet format string.
@@ -571,10 +569,7 @@ impl BooleanNetwork {
     /// Note that booleannet files do not have any information about regulations. As such, regulations
     /// are loaded as non-essential with no fixed sign.
     #[staticmethod]
-    pub fn from_booleannet(
-        py: Python,
-        file_contents: &str,
-    ) -> PyResult<Py<BooleanNetwork>> {
+    pub fn from_booleannet(py: Python, file_contents: &str) -> PyResult<Py<BooleanNetwork>> {
         let (bn, _) = biodivine_lib_param_bn::BooleanNetwork::try_from_booleannet(file_contents)
             .map_err(runtime_error)?;
         BooleanNetwork(bn).export_to_python(py)

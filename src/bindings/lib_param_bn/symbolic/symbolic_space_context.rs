@@ -10,7 +10,7 @@ use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
 use crate::pyo3_utils::richcmp_eq_by_key;
-use crate::{AsNative, global_log_level, throw_type_error};
+use crate::{AsNative, global_log_level, throw_runtime_error, throw_type_error};
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColors;
 use biodivine_lib_param_bn::trap_spaces::{NetworkColoredSpaces, NetworkSpaces};
 use biodivine_lib_param_bn::{ExtendedBoolean, Space};
@@ -46,12 +46,23 @@ impl SymbolicSpaceContext {
     #[new]
     pub fn from_boolean_network(
         py: Python,
-        network: &BooleanNetwork,
+        network: Py<BooleanNetwork>,
     ) -> PyResult<(SymbolicSpaceContext, SymbolicContext)> {
-        let ctx =
-            biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::new(network.as_native());
-        let inner = SymbolicContext::wrap_native(py, ctx.inner_context().clone())?;
+        let ctx = biodivine_lib_param_bn::trap_spaces::SymbolicSpaceContext::new(
+            network.borrow(py).as_native(),
+        );
+        let inner =
+            SymbolicContext::wrap_native(py, ctx.inner_context().clone(), Some(network.clone()))?;
         Ok((SymbolicSpaceContext(ctx), inner))
+    }
+
+    fn __getnewargs__(self_: PyRef<SymbolicSpaceContext>) -> PyResult<(Py<BooleanNetwork>,)> {
+        match self_.as_ref().get_network() {
+            Some(network) => Ok((network.clone(),)),
+            None => throw_runtime_error(
+                "Cannot serialize SymbolicContext: network reference not available. This context was created internally and cannot be serialized.",
+            ),
+        }
     }
 
     fn __richcmp__(&self, py: Python, other: &Self, op: CompareOp) -> PyResult<Py<PyAny>> {

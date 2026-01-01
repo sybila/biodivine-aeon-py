@@ -90,7 +90,7 @@ impl AsynchronousGraph {
     #[staticmethod]
     pub fn mk_for_model_checking(
         py: Python,
-        network: &BooleanNetwork,
+        network: Py<BooleanNetwork>,
         requirement: &Bound<'_, PyAny>,
     ) -> PyResult<Self> {
         let var_count = if let Ok(count) = requirement.extract::<usize>() {
@@ -112,11 +112,16 @@ impl AsynchronousGraph {
             Err(_) => return throw_runtime_error("Cannot represent more than 2^16 variables."),
         };
 
-        match get_extended_symbolic_graph(network.as_native(), var_count) {
+        let network_ref = network.borrow(py);
+        match get_extended_symbolic_graph(network_ref.as_native(), var_count) {
             Ok(graph) => {
                 let py_ctx = Py::new(
                     py,
-                    SymbolicContext::wrap_native(py, graph.symbolic_context().clone())?,
+                    SymbolicContext::wrap_native(
+                        py,
+                        graph.symbolic_context().clone(),
+                        Some(network.clone()),
+                    )?,
                 )?;
                 Ok(AsynchronousGraph {
                     ctx: py_ctx,
@@ -718,7 +723,9 @@ impl AsynchronousGraph {
         };
 
         let native_ctx = native_reduced.symbolic_context().clone();
-        let py_ctx = SymbolicContext::wrap_native(py, native_ctx)?;
+        // Try to get network from existing context, otherwise None (won't be picklable)
+        let network = self.ctx.borrow(py).get_network().cloned();
+        let py_ctx = SymbolicContext::wrap_native(py, native_ctx, network)?;
         let py_ctx = Py::new(py, py_ctx)?;
         Ok(AsynchronousGraph {
             native: native_reduced,
@@ -772,7 +779,7 @@ impl AsynchronousGraph {
     pub fn wrap_native(py: Python, stg: SymbolicAsyncGraph) -> PyResult<AsynchronousGraph> {
         let ctx = Py::new(
             py,
-            SymbolicContext::wrap_native(py, stg.symbolic_context().clone())?,
+            SymbolicContext::wrap_native(py, stg.symbolic_context().clone(), None)?,
         )?;
         Ok(AsynchronousGraph { ctx, native: stg })
     }

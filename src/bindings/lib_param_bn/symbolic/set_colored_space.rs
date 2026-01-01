@@ -106,6 +106,15 @@ impl ColoredSpaceSet {
         self_.clone()
     }
 
+    fn __getnewargs__(&self, py: Python) -> (Py<SymbolicSpaceContext>, Bdd) {
+        let ctx_borrowed = self.ctx.borrow(py);
+        let bdd = Bdd::new_raw_2(
+            ctx_borrowed.as_ref().bdd_variable_set(),
+            self.native.as_bdd().clone(),
+        );
+        (self.ctx.clone(), bdd)
+    }
+
     fn __hash__(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.as_native().hash(&mut hasher);
