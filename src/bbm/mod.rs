@@ -9,7 +9,6 @@ use pyo3::{Bound, PyResult};
 pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<biodivine_boolean_models::BiodivineBooleanModels>()?;
     module.add_class::<bbm_model::BbmModel>()?;
-    module.add_class::<filter_config::BbmFilterConfig>()?;
 
     Ok(())
 }

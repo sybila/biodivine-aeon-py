@@ -1,10 +1,10 @@
 use biodivine_lib_bdd::BddPartialValuation;
+use biodivine_lib_param_bn::BooleanNetwork;
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
-use biodivine_lib_param_bn::BooleanNetwork;
 
-use rand::prelude::StdRng;
 use rand::SeedableRng;
+use rand::prelude::StdRng;
 
 /// Randomly select a color from the given set of colors.
 pub(super) fn pick_random_color(
@@ -27,7 +27,7 @@ pub(super) fn pick_random_color(
 }
 
 /// Generate a given number of instances of a provided partially specified BN.
-/// Instances are selected at random, but user provides a random `seed` for
+/// Instances are selected at random, but the user provides a random `seed` for
 /// reproducibility.
 pub(super) fn pick_random_instances(
     bn: &BooleanNetwork,

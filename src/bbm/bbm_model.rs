@@ -1,9 +1,9 @@
-use pyo3::{pyclass, pymethods, Bound, Py, PyAny, PyErr, PyResult, Python};
+use pyo3::{Bound, Py, PyAny, PyErr, PyResult, Python, pyclass, pymethods};
 use serde::de::{self, Deserializer};
 use serde::{Deserialize, Serialize};
 
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
-use crate::{runtime_error, AsNative};
+use crate::{AsNative, runtime_error};
 
 use super::sampling_utils::pick_random_instances;
 
@@ -12,7 +12,7 @@ use super::sampling_utils::pick_random_instances;
 /// response.
 ///
 /// The `modelData` field is a string representation of the Boolean network
-/// in aeon format. The rest of the fields are metadata about the model.
+/// in AEON format. The rest of the fields are metadata about the model.
 #[pyclass(module = "biodivine_aeon")]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
