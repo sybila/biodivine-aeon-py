@@ -1,5 +1,5 @@
 from typing import (Callable, Iterator, Literal, Mapping, Optional, Sequence,
-                    TypedDict, Union, overload)
+                    TypedDict, Union, overload, Any)
 
 LOG_NOTHING: Literal[0]
 LOG_ESSENTIAL: Literal[1]
@@ -1860,6 +1860,47 @@ class Control:
                             size_limit: Optional[int] = None,
                             stop_when_found: bool = False,
                             initial_states: VertexSet | None = None) -> ColoredPerturbationSet: ...
+
+class BbmModel:
+    id: str
+    name: str
+    url_publication: Optional[str]
+    url_model: Optional[str]
+    keywords: list[str]
+    variables: int
+    inputs: int
+    regulations: int
+    notes: Optional[str]
+    bib: Optional[str]
+    raw_model_data: str
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __copy__(self) -> BbmModel: ...
+    def __deepcopy__(self, _memo: dict) -> BbmModel: ...
+    def to_bn_default(self) -> BooleanNetwork: ...
+    def to_bn_inputs_true(self) -> BooleanNetwork: ...
+    def to_bn_inputs_false(self) -> BooleanNetwork: ...
+    def to_bn_inputs_random(self, instance_count: int, random_seed: int) -> list[BooleanNetwork]: ...
+
+class BiodivineBooleanModels:
+    @staticmethod
+    def fetch_all_model_data(url: Optional[str] = None) -> list[BbmModel]: ...
+    @staticmethod
+    def fetch_model(id: str) -> BbmModel: ...
+    @staticmethod
+    def fetch_network(id: str, inline_inputs: bool = False) -> BooleanNetwork: ...
+    @staticmethod
+    def fetch_ids(config: Optional[BbmFilterConfig] = None) -> list[str]: ...
+
+class BbmFilterConfig(TypedDict, total=False):
+    min_variables: int
+    max_variables: int
+    min_inputs: int
+    max_inputs: int
+    min_regulations: int
+    max_regulations: int
+    keywords: Sequence[str]
 
 class Reachability:
     @staticmethod
