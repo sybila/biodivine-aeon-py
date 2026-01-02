@@ -1,6 +1,9 @@
 from biodivine_aeon import *
 import sys
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 # This file provides functionality that is equivalent to the `stability_analysis` feature in the AEON
 # online interface
 

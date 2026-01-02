@@ -1,9 +1,8 @@
 from biodivine_aeon import *
 import sys
 
-import biodivine_aeon
-
-biodivine_aeon.LOG_LEVEL = biodivine_aeon.LOG_NOTHING
+import logging
+logging.basicConfig(level=logging.INFO)
 
 # This script computes the non-trivial SCCs of a single,
 # fully specified Boolean network. This *does not* include fixed points,
