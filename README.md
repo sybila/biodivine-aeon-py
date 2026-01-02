@@ -1,3 +1,11 @@
+[![Crates.io](https://img.shields.io/pypi/v/biodivine_aeon?style=flat-square)](https://pypi.org/project/biodivine-aeon/)
+[![Api Docs](https://img.shields.io/badge/docs-api-yellowgreen?style=flat-square)](https://biodivine.fi.muni.cz/docs/aeon-py/latest/biodivine_aeon.html)
+[![Continuous integration](https://img.shields.io/github/actions/workflow/status/sybila/biodivine-aeon-py/test.yml?branch=main&style=flat-square)](https://github.com/sybila/biodivine-aeon-py/actions/workflows/test.yml)
+[![Coverage](https://img.shields.io/codecov/c/github/sybila/biodivine-aeon-py?style=flat-square)](https://codecov.io/gh/sybila/biodivine-aeon-py)
+[![GitHub issues](https://img.shields.io/github/issues/sybila/biodivine-aeon-py?style=flat-square)](https://github.com/sybila/biodivine-aeon-py/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/sybila/biodivine-aeon-py?style=flat-square)](https://github.com/sybila/biodivine-aeon-py/commits/main)
+[![Crates.io](https://img.shields.io/pypi/l/biodivine_aeon)](https://github.com/sybila/biodivine-aeon-py/blob/main/LICENSE)
+
 # Biodivine/AEON.py
 
  > AEON.py now finally has API documentation! You can learn more about the individual methods and classes 
