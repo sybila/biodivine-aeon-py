@@ -16,7 +16,7 @@ env:
   # This is the version currently used by `z3-sys`.
   # If this ever changes, you might also need to increase
   # the minimum macOS version below.
-  Z3_VERSION: "4.15.2"
+  Z3_VERSION: "4.15.4"
   MACOS_TARGET: "11.0"
   PYTHON_VERSION: "3.12"
 
