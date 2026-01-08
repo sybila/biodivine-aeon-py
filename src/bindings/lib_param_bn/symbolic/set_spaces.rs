@@ -2,7 +2,8 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
-use biodivine_lib_bdd::Bdd as RsBdd;
+use biodivine_lib_bdd::random_sampling::UniformValuationSampler;
+use biodivine_lib_bdd::{Bdd as RsBdd, BddPartialValuation};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
@@ -12,6 +13,8 @@ use num_bigint::BigUint;
 use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use rand::SeedableRng;
+use rand::prelude::StdRng;
 
 use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
@@ -33,11 +36,23 @@ pub struct SpaceSet {
     native: NetworkSpaces,
 }
 
-/// An internal class used for iterating over `SpaceModel` instances of a `VertexSet`.
+/// An internal class used for iterating over `SpaceModel` instances of a `SpaceSet`.
 #[pyclass(module = "biodivine_aeon")]
 pub struct _SpaceModelIterator {
     ctx: Py<SymbolicSpaceContext>,
     native: OwnedRawSymbolicIterator,
+}
+
+/// An internal class used for random uniform sampling of `SpaceModel` instances from a `SpaceSet`.
+/// On the Python side, it just looks like an infinite iterator.
+///
+/// Similar to [`_SpaceModelIterator`], but uses a sampler to get valuations from the projection
+/// BDD instead of iterating it fully.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _SpaceModelSampler {
+    ctx: Py<SymbolicSpaceContext>,
+    projection: RawProjection,
+    sampler: UniformValuationSampler<StdRng>,
 }
 
 impl AsNative<NetworkSpaces> for SpaceSet {
@@ -198,21 +213,37 @@ impl SpaceSet {
         py: Python,
     ) -> PyResult<_SpaceModelIterator> {
         let ctx = self.ctx.borrow(py);
-        let retained = if let Some(retained) = retained {
-            let mut retained_vars = Vec::new();
-            for var in retained {
-                let var = var.resolve(ctx.as_native().inner_context())?;
-                retained_vars.push(ctx.as_native().get_positive_variable(var));
-                retained_vars.push(ctx.as_native().get_negative_variable(var));
-            }
-            retained_vars
-        } else {
-            ctx.as_ref().as_native().all_extra_state_variables().clone()
-        };
+        let retained = Self::compute_retained_variables(&ctx, retained)?;
         let projection = RawProjection::new(retained, self.as_native().as_bdd());
         Ok(_SpaceModelIterator {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
+        })
+    }
+
+    /// Returns a sampler for random uniform sampling of subspaces from this `SpaceSet` with an
+    /// optional projection to a subset of network variables. **If a projection is specified,
+    /// the sampling is uniform with respect to the projected set.**
+    ///
+    /// See also the `items` method regarding the `retained` projection set.
+    ///
+    /// You can specify an optional seed to make the sampling random but deterministic.
+    #[pyo3(signature = (retained = None, seed = None))]
+    fn sample_items(
+        &self,
+        retained: Option<Vec<VariableIdType>>,
+        seed: Option<u64>,
+        py: Python,
+    ) -> PyResult<_SpaceModelSampler> {
+        let ctx = self.ctx.borrow(py);
+        let retained = Self::compute_retained_variables(&ctx, retained)?;
+        let projection = RawProjection::new(retained, self.as_native().as_bdd());
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        let sampler = projection.bdd().mk_uniform_valuation_sampler(rng);
+        Ok(_SpaceModelSampler {
+            ctx: self.ctx.clone(),
+            projection,
+            sampler,
         })
     }
 
@@ -262,6 +293,29 @@ impl SpaceSet {
 
         RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
     }
+
+    /// Helper function to compute retained variables from an optional list of VariableIdType.
+    /// This is shared between `items` and `sample_items` to avoid duplication.
+    pub fn compute_retained_variables(
+        ctx: &SymbolicSpaceContext,
+        retained: Option<Vec<VariableIdType>>,
+    ) -> PyResult<Vec<biodivine_lib_bdd::BddVariable>> {
+        if let Some(retained) = retained {
+            let mut retained_vars = Vec::new();
+            for var in retained {
+                let var = var.resolve(ctx.as_native().inner_context())?;
+                retained_vars.push(ctx.as_native().get_positive_variable(var));
+                retained_vars.push(ctx.as_native().get_negative_variable(var));
+            }
+            Ok(retained_vars)
+        } else {
+            Ok(ctx
+                .as_native()
+                .inner_context()
+                .all_extra_state_variables()
+                .clone())
+        }
+    }
 }
 
 #[pymethods]
@@ -274,6 +328,32 @@ impl _SpaceModelIterator {
         self.native
             .next()
             .map(|it| SpaceModel::new_native(self.ctx.clone(), it))
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<SpaceModel> {
+        self.__next__()
+    }
+}
+
+#[pymethods]
+impl _SpaceModelSampler {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    fn __next__(&mut self) -> Option<SpaceModel> {
+        self.projection
+            .bdd()
+            .random_valuation_sample(&mut self.sampler)
+            .map(|it| {
+                let mut retained = BddPartialValuation::empty();
+                for x in self.projection.retained_variables() {
+                    retained.set_value(*x, it[*x]);
+                }
+
+                SpaceModel::new_native(self.ctx.clone(), retained)
+            })
     }
 
     #[allow(clippy::should_implement_trait)]

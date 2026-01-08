@@ -8,19 +8,20 @@ use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
 use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
 use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
 use crate::bindings::lib_param_bn::symbolic::symbolic_space_context::SymbolicSpaceContext;
-use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
-use biodivine_lib_bdd::Bdd as RsBdd;
+use biodivine_lib_bdd::random_sampling::UniformValuationSampler;
+use biodivine_lib_bdd::{Bdd as RsBdd, BddPartialValuation};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use either::Either;
 use num_bigint::BigUint;
 use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+use rand::SeedableRng;
+use rand::prelude::StdRng;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
@@ -43,6 +44,20 @@ pub struct ColoredVertexSet {
 pub struct _ColorVertexModelIterator {
     ctx: Py<SymbolicContext>,
     native: OwnedRawSymbolicIterator,
+    retained_explicit: Vec<biodivine_lib_param_bn::ParameterId>,
+    retained_implicit: Vec<biodivine_lib_param_bn::VariableId>,
+}
+
+/// An internal class used for random uniform sampling of `ColorModel` and `VertexModel` pairs from a `ColoredVertexSet`.
+/// On the Python side, it just looks like an infinite iterator.
+///
+/// Similar to [`_ColorVertexModelIterator`], but uses a sampler to get valuations from the projection
+/// BDD instead of iterating it fully.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _ColorVertexModelSampler {
+    ctx: Py<SymbolicContext>,
+    projection: RawProjection,
+    sampler: UniformValuationSampler<StdRng>,
     retained_explicit: Vec<biodivine_lib_param_bn::ParameterId>,
     retained_implicit: Vec<biodivine_lib_param_bn::VariableId>,
 }
@@ -254,64 +269,43 @@ impl ColoredVertexSet {
         retained_functions: Option<&Bound<'_, PyList>>,
     ) -> PyResult<_ColorVertexModelIterator> {
         let ctx = self.ctx.get();
-        // First, extract all functions that should be retained (see also ColorSet.items).
-        let mut retained_explicit = Vec::new();
-        let mut retained_implicit = Vec::new();
-        let mut retained_functions = if let Some(retained) = retained_functions {
-            let mut result = Vec::new();
-            for x in retained {
-                let function = ctx.resolve_function(&x)?;
-                let table = match function {
-                    Either::Left(x) => {
-                        if retained_implicit.contains(&x) {
-                            continue;
-                        }
-                        retained_implicit.push(x);
-                        ctx.as_native().get_implicit_function_table(x).unwrap()
-                    }
-                    Either::Right(x) => {
-                        if retained_explicit.contains(&x) {
-                            continue;
-                        }
-                        retained_explicit.push(x);
-                        ctx.as_native().get_explicit_function_table(x)
-                    }
-                };
-                result.append(&mut table.symbolic_variables().clone());
-            }
-            result
-        } else {
-            retained_explicit.append(&mut ctx.as_native().network_parameters().collect::<Vec<_>>());
-            retained_implicit.append(&mut ctx.as_native().network_implicit_parameters());
-            self.ctx.get().as_native().parameter_variables().clone()
-        };
-        retained_explicit.sort();
-        retained_implicit.sort();
-
-        // Then add all retained network variables (see also VertexSet.items).
-        let mut retained_variables = if let Some(retained) = retained_variables {
-            retained
-                .iter()
-                .map(|it| {
-                    it.resolve(ctx.as_native())
-                        .map(|it| ctx.as_native().get_state_variable(it))
-                })
-                .collect::<PyResult<Vec<_>>>()?
-        } else {
-            self.ctx.get().as_native().state_variables().clone()
-        };
-
-        let mut retained = Vec::new();
-        retained.append(&mut retained_functions);
-        retained.append(&mut retained_variables);
-        retained.sort();
-
+        let (retained, implicit, explicit) =
+            Self::compute_retained(ctx, retained_variables, retained_functions)?;
         let projection = RawProjection::new(retained, self.as_native().as_bdd());
         Ok(_ColorVertexModelIterator {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
-            retained_implicit,
-            retained_explicit,
+            retained_implicit: implicit,
+            retained_explicit: explicit,
+        })
+    }
+
+    /// Returns a sampler for random uniform sampling of interpretation-vertex pairs from this `ColoredVertexSet` with an
+    /// optional projection to a subset of network variables and uninterpreted functions. **If a projection is specified,
+    /// the sampling is uniform with respect to the projected set.**
+    ///
+    /// See also the `items` method regarding the `retained_variables` and `retained_functions` projection sets.
+    ///
+    /// You can specify an optional seed to make the sampling random but deterministic.
+    #[pyo3(signature = (retained_variables = None, retained_functions = None, seed = None))]
+    pub fn sample_items(
+        &self,
+        retained_variables: Option<Vec<VariableIdType>>,
+        retained_functions: Option<&Bound<'_, PyList>>,
+        seed: Option<u64>,
+    ) -> PyResult<_ColorVertexModelSampler> {
+        let ctx = self.ctx.get();
+        let (retained, implicit, explicit) =
+            Self::compute_retained(ctx, retained_variables, retained_functions)?;
+        let projection = RawProjection::new(retained, self.as_native().as_bdd());
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        let sampler = projection.bdd().mk_uniform_valuation_sampler(rng);
+        Ok(_ColorVertexModelSampler {
+            ctx: self.ctx.clone(),
+            projection,
+            sampler,
+            retained_explicit: explicit,
+            retained_implicit: implicit,
         })
     }
 
@@ -342,6 +336,33 @@ impl ColoredVertexSet {
         }
 
         RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+    }
+
+    /// Helper function to compute retained variables and functions.
+    /// This is shared between `items` and `sample_items` to avoid duplication.
+    fn compute_retained(
+        ctx: &SymbolicContext,
+        retained_variables: Option<Vec<VariableIdType>>,
+        retained_functions: Option<&Bound<'_, PyList>>,
+    ) -> PyResult<(
+        Vec<biodivine_lib_bdd::BddVariable>,
+        Vec<biodivine_lib_param_bn::VariableId>,
+        Vec<biodivine_lib_param_bn::ParameterId>,
+    )> {
+        // First, extract all functions that should be retained (see also ColorSet.items).
+        let (mut retained_functions, implicit, explicit) =
+            ColorSet::read_retained_functions(ctx, retained_functions)?;
+
+        // Then add all retained network variables (see also VertexSet.items).
+        let mut retained_variables =
+            VertexSet::compute_retained_variables(ctx, retained_variables)?;
+
+        let mut retained = Vec::new();
+        retained.append(&mut retained_functions);
+        retained.append(&mut retained_variables);
+        retained.sort();
+
+        Ok((retained, implicit, explicit))
     }
 }
 
@@ -374,6 +395,46 @@ impl _ColorVertexModelIterator {
             let vertex = VertexModel::new_native(self.ctx.clone(), state_val);
             (color, vertex)
         })
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<(ColorModel, VertexModel)> {
+        self.__next__()
+    }
+}
+
+#[pymethods]
+impl _ColorVertexModelSampler {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    fn __next__(&mut self) -> Option<(ColorModel, VertexModel)> {
+        self.projection
+            .bdd()
+            .random_valuation_sample(&mut self.sampler)
+            .map(|it| {
+                let mut retained_color = BddPartialValuation::empty();
+                let mut retained_state = BddPartialValuation::empty();
+                let native_ctx = self.ctx.get().as_native();
+                // Only state / color variables should be retained
+                for x in self.projection.retained_variables() {
+                    if native_ctx.find_state_variable(*x).is_some() {
+                        retained_state.set_value(*x, it[*x]);
+                    } else {
+                        retained_color.set_value(*x, it[*x]);
+                    }
+                }
+
+                let color = ColorModel::new_native(
+                    self.ctx.clone(),
+                    retained_color,
+                    self.retained_implicit.clone(),
+                    self.retained_explicit.clone(),
+                );
+                let vertex = VertexModel::new_native(self.ctx.clone(), retained_state);
+                (color, vertex)
+            })
     }
 
     #[allow(clippy::should_implement_trait)]

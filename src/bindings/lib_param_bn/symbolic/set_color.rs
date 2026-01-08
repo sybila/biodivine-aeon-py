@@ -2,7 +2,17 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
-use biodivine_lib_bdd::Bdd as RsBdd;
+use crate::AsNative;
+use crate::bindings::lib_bdd::bdd::Bdd;
+use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
+use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
+use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
+use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
+use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
+use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
+use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationSet};
+use biodivine_lib_bdd::random_sampling::UniformValuationSampler;
+use biodivine_lib_bdd::{Bdd as RsBdd, BddPartialValuation};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
@@ -15,16 +25,8 @@ use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-
-use crate::AsNative;
-use crate::bindings::lib_bdd::bdd::Bdd;
-use crate::bindings::lib_param_bn::symbolic::model_color::ColorModel;
-use crate::bindings::lib_param_bn::symbolic::set_colored_space::ColoredSpaceSet;
-use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
-use crate::bindings::lib_param_bn::symbolic::set_spaces::SpaceSet;
-use crate::bindings::lib_param_bn::symbolic::set_vertex::VertexSet;
-use crate::bindings::lib_param_bn::symbolic::symbolic_context::SymbolicContext;
-use crate::bindings::pbn_control::{ColoredPerturbationSet, PerturbationSet};
+use rand::SeedableRng;
+use rand::prelude::StdRng;
 
 /// A symbolic representation of a set of "colors", i.e., interpretations of explicit and
 /// implicit parameters within a particular `BooleanNetwork`.
@@ -40,6 +42,20 @@ pub struct ColorSet {
 pub struct _ColorModelIterator {
     ctx: Py<SymbolicContext>,
     native: OwnedRawSymbolicIterator,
+    retained_explicit: Vec<biodivine_lib_param_bn::ParameterId>,
+    retained_implicit: Vec<biodivine_lib_param_bn::VariableId>,
+}
+
+/// An internal class used for random uniform sampling of `ColorModel` instances from a `ColorSet`.
+/// On the Python side, it just looks like an infinite iterator.
+///
+/// Similar to [`_ColorModelIterator`], but uses a sampler to get valuations from the projection
+/// BDD instead of iterating it fully.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _ColorModelSampler {
+    ctx: Py<SymbolicContext>,
+    projection: RawProjection,
+    sampler: UniformValuationSampler<StdRng>,
     retained_explicit: Vec<biodivine_lib_param_bn::ParameterId>,
     retained_implicit: Vec<biodivine_lib_param_bn::VariableId>,
 }
@@ -238,6 +254,75 @@ impl ColorSet {
     #[pyo3(signature = (retained = None))]
     pub fn items(&self, retained: Option<&Bound<'_, PyList>>) -> PyResult<_ColorModelIterator> {
         let ctx = self.ctx.get();
+        let (retained, implicit, explicit) = Self::read_retained_functions(ctx, retained)?;
+
+        let projection = RawProjection::new(retained, self.as_native().as_bdd());
+        Ok(_ColorModelIterator {
+            ctx: self.ctx.clone(),
+            native: projection.into_iter(),
+            retained_implicit: implicit,
+            retained_explicit: explicit,
+        })
+    }
+
+    /// Returns a sampler for random uniform sampling of colors from this `ColorSet` with an
+    /// optional projection to a subset of uninterpreted functions. **If a projection is specified,
+    /// the sampling is uniform with respect to the projected set.**
+    ///
+    /// See also the `items` method regarding the `retained` projection set.
+    ///
+    /// You can specify an optional seed to make the sampling random but deterministic.
+    #[pyo3(signature = (retained = None, seed = None))]
+    pub fn sample_items(
+        &self,
+        retained: Option<&Bound<'_, PyList>>,
+        seed: Option<u64>,
+    ) -> PyResult<_ColorModelSampler> {
+        let ctx = self.ctx.get();
+        let (retained, implicit, explicit) = Self::read_retained_functions(ctx, retained)?;
+        let projection = RawProjection::new(retained, self.as_native().as_bdd());
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        let sampler = projection.bdd().mk_uniform_valuation_sampler(rng);
+        Ok(_ColorModelSampler {
+            ctx: self.ctx.clone(),
+            projection,
+            sampler,
+            retained_explicit: explicit,
+            retained_implicit: implicit,
+        })
+    }
+}
+
+impl ColorSet {
+    pub fn mk_native(ctx: Py<SymbolicContext>, native: GraphColors) -> Self {
+        Self { ctx, native }
+    }
+
+    pub fn mk_derived(&self, native: GraphColors) -> ColorSet {
+        ColorSet {
+            ctx: self.ctx.clone(),
+            native,
+        }
+    }
+
+    pub fn semantic_eq(a: &ColorSet, b: &ColorSet) -> bool {
+        let a = a.as_native().as_bdd();
+        let b = b.as_native().as_bdd();
+        if a.num_vars() != b.num_vars() {
+            return false;
+        }
+
+        RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+    }
+
+    pub fn read_retained_functions(
+        ctx: &SymbolicContext,
+        retained: Option<&Bound<'_, PyList>>,
+    ) -> PyResult<(
+        Vec<biodivine_lib_bdd::BddVariable>,
+        Vec<biodivine_lib_param_bn::VariableId>,
+        Vec<biodivine_lib_param_bn::ParameterId>,
+    )> {
         let mut retained_explicit = Vec::new();
         let mut retained_implicit = Vec::new();
         let retained = if let Some(retained) = retained {
@@ -266,41 +351,12 @@ impl ColorSet {
         } else {
             retained_explicit.append(&mut ctx.as_native().network_parameters().collect::<Vec<_>>());
             retained_implicit.append(&mut ctx.as_native().network_implicit_parameters());
-            self.ctx.get().as_native().parameter_variables().clone()
+            ctx.as_native().parameter_variables().clone()
         };
         retained_explicit.sort();
         retained_implicit.sort();
 
-        let projection = RawProjection::new(retained, self.as_native().as_bdd());
-        Ok(_ColorModelIterator {
-            ctx: self.ctx.clone(),
-            native: projection.into_iter(),
-            retained_implicit,
-            retained_explicit,
-        })
-    }
-}
-
-impl ColorSet {
-    pub fn mk_native(ctx: Py<SymbolicContext>, native: GraphColors) -> Self {
-        Self { ctx, native }
-    }
-
-    pub fn mk_derived(&self, native: GraphColors) -> ColorSet {
-        ColorSet {
-            ctx: self.ctx.clone(),
-            native,
-        }
-    }
-
-    pub fn semantic_eq(a: &ColorSet, b: &ColorSet) -> bool {
-        let a = a.as_native().as_bdd();
-        let b = b.as_native().as_bdd();
-        if a.num_vars() != b.num_vars() {
-            return false;
-        }
-
-        RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+        Ok((retained, retained_implicit, retained_explicit))
     }
 }
 
@@ -319,6 +375,37 @@ impl _ColorModelIterator {
                 self.retained_explicit.clone(),
             )
         })
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<ColorModel> {
+        self.__next__()
+    }
+}
+
+#[pymethods]
+impl _ColorModelSampler {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    fn __next__(&mut self) -> Option<ColorModel> {
+        self.projection
+            .bdd()
+            .random_valuation_sample(&mut self.sampler)
+            .map(|it| {
+                let mut retained = BddPartialValuation::empty();
+                for x in self.projection.retained_variables() {
+                    retained.set_value(*x, it[*x]);
+                }
+
+                ColorModel::new_native(
+                    self.ctx.clone(),
+                    retained,
+                    self.retained_implicit.clone(),
+                    self.retained_explicit.clone(),
+                )
+            })
     }
 
     #[allow(clippy::should_implement_trait)]

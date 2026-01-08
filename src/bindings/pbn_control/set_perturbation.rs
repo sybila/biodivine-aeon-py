@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::ops::{Not, Shr};
 
-use biodivine_lib_bdd::{Bdd as RsBdd, bdd};
+use biodivine_lib_bdd::random_sampling::UniformValuationSampler;
+use biodivine_lib_bdd::{Bdd as RsBdd, BddPartialValuation, bdd};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
@@ -11,9 +12,12 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
 use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
+use rand::SeedableRng;
+use rand::prelude::StdRng;
 
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
+use crate::bindings::lib_param_bn::symbolic::asynchronous_graph::AsynchronousGraph;
 use crate::bindings::lib_param_bn::symbolic::set_color::ColorSet;
 use crate::bindings::lib_param_bn::symbolic::set_colored_vertex::ColoredVertexSet;
 use crate::bindings::lib_param_bn::variable_id::VariableIdResolvable;
@@ -45,6 +49,19 @@ pub struct PerturbationSet {
 pub struct _PerturbationModelIterator {
     ctx: Py<AsynchronousPerturbationGraph>,
     native: OwnedRawSymbolicIterator,
+    parameter_mapping: HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>,
+}
+
+/// An internal class used for random uniform sampling of `PerturbationModel` instances from a `PerturbationSet`.
+/// On the Python side, it just looks like an infinite iterator.
+///
+/// Similar to [`_PerturbationModelIterator`], but uses a sampler to get valuations from the projection
+/// BDD instead of iterating it fully.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _PerturbationModelSampler {
+    ctx: Py<AsynchronousPerturbationGraph>,
+    projection: RawProjection,
+    sampler: UniformValuationSampler<StdRng>,
     parameter_mapping: HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>,
 }
 
@@ -250,25 +267,7 @@ impl PerturbationSet {
         let self_ctx = self.ctx.borrow(py);
         let parent = self_ctx.as_ref();
         let ctx = self.ctx.get();
-        let retained = if let Some(retained) = retained {
-            VariableIdSymType::resolve_collection(retained, parent.as_native())?
-        } else {
-            ctx.as_native().perturbable_variables().to_vec()
-        };
-        let map = ctx.as_native().get_perturbation_bdd_mapping(&retained);
-        let mut retained_symbolic = Vec::new();
-        for net_var in retained {
-            if let Some(p_var) = map.get(&net_var) {
-                let state_var = parent
-                    .as_native()
-                    .symbolic_context()
-                    .get_state_variable(net_var);
-                retained_symbolic.push(state_var);
-                retained_symbolic.push(*p_var);
-            } else {
-                return throw_runtime_error(format!("Variable {net_var} is not perturbable."));
-            }
-        }
+        let (retained_symbolic, map) = Self::compute_retained_variables(parent, ctx, retained)?;
 
         let pruner = Self::mk_duplicate_pruning_bdd(self.ctx.get());
         let bdd = self.as_native().as_bdd();
@@ -277,6 +276,39 @@ impl PerturbationSet {
         Ok(_PerturbationModelIterator {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
+            parameter_mapping: map,
+        })
+    }
+
+    /// Returns a sampler for random uniform sampling of perturbations from this `PerturbationSet` with an
+    /// optional projection to a subset of network variables. **If a projection is specified,
+    /// the sampling is uniform with respect to the projected set.**
+    ///
+    /// See also the `items` method regarding the `retained` projection set.
+    ///
+    /// You can specify an optional seed to make the sampling random but deterministic.
+    #[pyo3(signature = (retained = None, seed = None))]
+    pub fn sample_items(
+        &self,
+        py: Python,
+        retained: Option<Vec<VariableIdSymType>>,
+        seed: Option<u64>,
+    ) -> PyResult<_PerturbationModelSampler> {
+        let self_ctx = self.ctx.borrow(py);
+        let parent = self_ctx.as_ref();
+        let ctx = self.ctx.get();
+        let (retained_symbolic, map) = Self::compute_retained_variables(parent, ctx, retained)?;
+
+        let pruner = Self::mk_duplicate_pruning_bdd(self.ctx.get());
+        let bdd = self.as_native().as_bdd();
+
+        let projection = RawProjection::new(retained_symbolic, &pruner.and(bdd));
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        let sampler = projection.bdd().mk_uniform_valuation_sampler(rng);
+        Ok(_PerturbationModelSampler {
+            ctx: self.ctx.clone(),
+            projection,
+            sampler,
             parameter_mapping: map,
         })
     }
@@ -334,6 +366,38 @@ impl PerturbationSet {
         }
         bdd
     }
+
+    /// Helper function to compute retained variables from an optional list of VariableIdSymType.
+    /// This is shared between `items` and `sample_items` to avoid duplication.
+    pub fn compute_retained_variables(
+        parent: &AsynchronousGraph,
+        ctx: &AsynchronousPerturbationGraph,
+        retained: Option<Vec<VariableIdSymType>>,
+    ) -> PyResult<(
+        Vec<biodivine_lib_bdd::BddVariable>,
+        HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>,
+    )> {
+        let retained = if let Some(retained) = retained {
+            VariableIdSymType::resolve_collection(retained, parent.as_native())?
+        } else {
+            ctx.as_native().perturbable_variables().to_vec()
+        };
+        let map = ctx.as_native().get_perturbation_bdd_mapping(&retained);
+        let mut retained_symbolic = Vec::new();
+        for net_var in retained {
+            if let Some(p_var) = map.get(&net_var) {
+                let state_var = parent
+                    .as_native()
+                    .symbolic_context()
+                    .get_state_variable(net_var);
+                retained_symbolic.push(state_var);
+                retained_symbolic.push(*p_var);
+            } else {
+                return throw_runtime_error(format!("Variable {net_var} is not perturbable."));
+            }
+        }
+        Ok((retained_symbolic, map))
+    }
 }
 
 #[pymethods]
@@ -354,6 +418,44 @@ impl _PerturbationModelIterator {
             }
             PerturbationModel::new_native(self.ctx.clone(), it, self.parameter_mapping.clone())
         })
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<PerturbationModel> {
+        self.__next__()
+    }
+}
+
+#[pymethods]
+impl _PerturbationModelSampler {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    pub fn __next__(&mut self) -> Option<PerturbationModel> {
+        self.projection
+            .bdd()
+            .random_valuation_sample(&mut self.sampler)
+            .map(|it| {
+                let mut retained = BddPartialValuation::empty();
+                for x in self.projection.retained_variables() {
+                    retained.set_value(*x, it[*x]);
+                }
+
+                // Remove state variables if the value is unperturbed.
+                let native_ctx = self.ctx.get().as_native();
+                for (var, p_var) in &self.parameter_mapping {
+                    if let Some(false) = retained.get_value(*p_var) {
+                        let s_var = native_ctx.as_symbolic_context().get_state_variable(*var);
+                        retained.unset_value(s_var);
+                    }
+                }
+                PerturbationModel::new_native(
+                    self.ctx.clone(),
+                    retained,
+                    self.parameter_mapping.clone(),
+                )
+            })
     }
 
     #[allow(clippy::should_implement_trait)]
