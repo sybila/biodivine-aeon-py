@@ -13,6 +13,10 @@ lto = true
 [features]
 default = ['algorithms-pyo3-bindings']
 
+# For now, Z3 is disabled because we don't really need it. However,
+# if you ever need to put it back, look at the commit history (before
+# version 1.3.1) and at this discussion: https://github.com/prove-rs/z3.rs/issues/483
+
 # Feature flag that enables Python bindings for the algorithms module
 algorithms-pyo3-bindings = []
 
