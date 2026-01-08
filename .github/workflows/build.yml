@@ -107,7 +107,7 @@ jobs:
     strategy:
       matrix:
         # For now, windows builds are broken...
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         python: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
