@@ -1016,6 +1016,41 @@ def test_symbolic_samplers():
         # `a` / `c` must be also present, but they don't have any prescribed value.
         assert "a" in color_sample and "c" in color_sample
 
+    b_or_c_f_id = b_or_c.extend_with_colors(f_id)
+    b_or_c_f_id_sampler = b_or_c_f_id.sample_items(seed=1)
+    for (color_sample, vertex_sample) in [next(b_or_c_f_id_sampler) for _ in range(100)]:
+        assert vertex_sample['b'] or vertex_sample['c']
+        assert color_sample["f"] == exp_id
+        # `a` must be also present, but does not have any prescribed value.
+        assert "a" in vertex_sample
+        # `a` / `c` must be also present, but they don't have any prescribed value.
+        assert "a" in color_sample and "c" in color_sample
+
+    ctx = SymbolicSpaceContext(bn)
+    unit_spaces = ctx.mk_unit_spaces()
+
+    unit_spaces_sampler = unit_spaces.sample_items(retained=['b', 'c'], seed=1)
+    for s in [next(unit_spaces_sampler) for _ in range(100)]:
+        assert "a" not in s
+        assert s["b"] in [True, False, None]
+        assert s["c"] in [True, False, None]
+
+    unit_colored_spaces = ctx.mk_unit_colored_spaces(AsynchronousGraph(bn, ctx))
+    b = ctx.mk_singleton(b_space)
+    c = ctx.mk_singleton(c_space)
+    colored_spaces = unit_colored_spaces.intersect_spaces(b.union(c))
+
+    for (i, s) in colored_spaces.items(retained_variables=["b", "c"], retained_functions=["f"]):
+        assert "c" not in i
+        assert "a" not in i
+        assert "a" not in s
+        assert "b" in s
+        assert "c" in s
+
+        fn_b = bn.get_update_function("b")
+        assert fn_b is not None
+        fn_b = i.instantiate(fn_b)
+        assert str(fn_b) in {"a", "a & c", "a & !c"}
 
 def test_symbolic_iterators():
     bn = BooleanNetwork.from_aeon("""

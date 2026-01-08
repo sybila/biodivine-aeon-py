@@ -381,7 +381,7 @@ impl VertexSet {
 
     /// Helper function to compute retained variables from an optional list of VariableIdType.
     /// This is shared between `items` and `sample_items` to avoid duplication.
-    fn compute_retained_variables(
+    pub fn compute_retained_variables(
         ctx: &SymbolicContext,
         retained: Option<Vec<VariableIdType>>,
     ) -> PyResult<Vec<biodivine_lib_bdd::BddVariable>> {
