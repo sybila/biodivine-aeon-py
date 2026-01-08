@@ -2,17 +2,19 @@ use std::collections::{HashMap, HashSet};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::ops::{Not, Shr};
 
+use biodivine_lib_bdd::random_sampling::UniformValuationSampler;
 use biodivine_lib_bdd::{Bdd as RsBdd, BddPartialValuation};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColoredVertices, GraphColors};
-use either::Either;
 use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::types::PyList;
 use pyo3::{Bound, IntoPyObjectExt, Py, PyAny, PyResult, Python, pyclass, pymethods};
+use rand::SeedableRng;
+use rand::prelude::StdRng;
 
 use crate::bindings::lib_bdd::bdd::Bdd;
 use crate::bindings::lib_param_bn::argument_types::perturbation_type::PerturbationType;
@@ -44,6 +46,22 @@ pub struct _ColorPerturbationModelIterator {
     graph: Py<AsynchronousPerturbationGraph>,
     ctx: Py<SymbolicContext>,
     native: OwnedRawSymbolicIterator,
+    retained_explicit: Vec<biodivine_lib_param_bn::ParameterId>,
+    retained_implicit: Vec<biodivine_lib_param_bn::VariableId>,
+    parameter_mapping: HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>,
+}
+
+/// An internal class used for random uniform sampling of `ColorModel` and `PerturbationModel` pairs from a `ColoredPerturbationSet`.
+/// On the Python side, it just looks like an infinite iterator.
+///
+/// Similar to [`_ColorPerturbationModelIterator`], but uses a sampler to get valuations from the projection
+/// BDD instead of iterating it fully.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _ColorPerturbationModelSampler {
+    graph: Py<AsynchronousPerturbationGraph>,
+    ctx: Py<SymbolicContext>,
+    projection: RawProjection,
+    sampler: UniformValuationSampler<StdRng>,
     retained_explicit: Vec<biodivine_lib_param_bn::ParameterId>,
     retained_implicit: Vec<biodivine_lib_param_bn::VariableId>,
     parameter_mapping: HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>,
@@ -516,51 +534,115 @@ impl ColoredPerturbationSet {
         let ctx = self.ctx.get();
         let symbolic_ctx_py = self.ctx.borrow(py).as_ref().symbolic_context();
         let symbolic_ctx = symbolic_ctx_py.get();
+        let (retained, retained_implicit, retained_explicit, parameter_mapping) =
+            Self::compute_retained(symbolic_ctx, ctx, retained_variables, retained_functions)?;
+
+        let pruner = PerturbationSet::mk_duplicate_pruning_bdd(self.ctx.get());
+        let bdd = self.as_native().as_bdd();
+
+        let projection = RawProjection::new(retained, &pruner.and(bdd));
+        Ok(_ColorPerturbationModelIterator {
+            ctx: symbolic_ctx_py,
+            graph: self.ctx.clone(),
+            native: projection.into_iter(),
+            retained_implicit,
+            retained_explicit,
+            parameter_mapping,
+        })
+    }
+
+    /// Returns a sampler for random uniform sampling of perturbation-color pairs from this `ColoredPerturbationSet` with an
+    /// optional projection to a subset of network variables and uninterpreted functions. **If a projection is specified,
+    /// the sampling is uniform with respect to the projected set.**
+    ///
+    /// See also the `items` method regarding the `retained_variables` and `retained_functions` projection sets.
+    ///
+    /// You can specify an optional seed to make the sampling random but deterministic.
+    #[pyo3(signature = (retained_variables = None, retained_functions = None, seed = None))]
+    fn sample_items(
+        &self,
+        py: Python,
+        retained_variables: Option<Vec<VariableIdSymType>>,
+        retained_functions: Option<&Bound<'_, PyList>>,
+        seed: Option<u64>,
+    ) -> PyResult<_ColorPerturbationModelSampler> {
+        let ctx = self.ctx.get();
+        let symbolic_ctx_py = self.ctx.borrow(py).as_ref().symbolic_context();
+        let symbolic_ctx = symbolic_ctx_py.get();
+        let (retained, retained_implicit, retained_explicit, parameter_mapping) =
+            Self::compute_retained(symbolic_ctx, ctx, retained_variables, retained_functions)?;
+
+        let pruner = PerturbationSet::mk_duplicate_pruning_bdd(self.ctx.get());
+        let bdd = self.as_native().as_bdd();
+
+        let projection = RawProjection::new(retained, &pruner.and(bdd));
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        let sampler = projection.bdd().mk_uniform_valuation_sampler(rng);
+        Ok(_ColorPerturbationModelSampler {
+            ctx: symbolic_ctx_py,
+            graph: self.ctx.clone(),
+            projection,
+            sampler,
+            retained_explicit,
+            retained_implicit,
+            parameter_mapping,
+        })
+    }
+}
+
+impl AsNative<GraphColoredVertices> for ColoredPerturbationSet {
+    fn as_native(&self) -> &GraphColoredVertices {
+        &self.native
+    }
+
+    fn as_native_mut(&mut self) -> &mut GraphColoredVertices {
+        &mut self.native
+    }
+}
+
+impl ColoredPerturbationSet {
+    pub fn mk_native(ctx: Py<AsynchronousPerturbationGraph>, native: GraphColoredVertices) -> Self {
+        Self { ctx, native }
+    }
+
+    pub fn mk_derived(&self, native: GraphColoredVertices) -> Self {
+        Self {
+            ctx: self.ctx.clone(),
+            native,
+        }
+    }
+
+    pub fn semantic_eq(a: &Self, b: &Self) -> bool {
+        let a = a.as_native().as_bdd();
+        let b = b.as_native().as_bdd();
+        if a.num_vars() != b.num_vars() {
+            return false;
+        }
+
+        RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+    }
+
+    /// Helper function to compute retained variables and functions.
+    /// This is shared between `items` and `sample_items` to avoid duplication.
+    // This is just an internal helper function... it should get better in the future.
+    #[allow(clippy::type_complexity)]
+    fn compute_retained(
+        symbolic_ctx: &SymbolicContext,
+        ctx: &AsynchronousPerturbationGraph,
+        retained_variables: Option<Vec<VariableIdSymType>>,
+        retained_functions: Option<&Bound<'_, PyList>>,
+    ) -> PyResult<(
+        Vec<biodivine_lib_bdd::BddVariable>,
+        Vec<biodivine_lib_param_bn::VariableId>,
+        Vec<biodivine_lib_param_bn::ParameterId>,
+        HashMap<biodivine_lib_param_bn::VariableId, biodivine_lib_bdd::BddVariable>,
+    )> {
         // First, extract all functions that should be retained (see also ColorSet.items).
         // However, in this case, skip all perturbation parameters.
-        let mut retained_explicit = Vec::new();
-        let mut retained_implicit = Vec::new();
-        let mut retained_functions = if let Some(retained) = retained_functions {
-            let mut result = Vec::new();
-            for x in retained {
-                let function = symbolic_ctx.resolve_function(&x)?;
-                let table = match function {
-                    Either::Left(x) => {
-                        if retained_implicit.contains(&x) {
-                            continue;
-                        }
-                        retained_implicit.push(x);
-                        symbolic_ctx
-                            .as_native()
-                            .get_implicit_function_table(x)
-                            .unwrap()
-                    }
-                    Either::Right(x) => {
-                        if retained_explicit.contains(&x) {
-                            continue;
-                        }
-                        retained_explicit.push(x);
-                        symbolic_ctx.as_native().get_explicit_function_table(x)
-                    }
-                };
-                result.append(&mut table.symbolic_variables().clone());
-            }
-            result
-        } else {
-            retained_explicit.append(
-                &mut symbolic_ctx
-                    .as_native()
-                    .network_parameters()
-                    .collect::<Vec<_>>(),
-            );
-            retained_implicit.append(&mut symbolic_ctx.as_native().network_implicit_parameters());
-            symbolic_ctx.as_native().parameter_variables().clone()
-        };
-        retained_explicit.sort();
-        retained_implicit.sort();
+        let (mut retained_functions, retained_implicit, mut retained_explicit) =
+            ColorSet::read_retained_functions(symbolic_ctx, retained_functions)?;
 
         // Remove all perturbation parameters from retained functions:
-
         let perturbation_parameters = ctx
             .as_native()
             .perturbable_variables()
@@ -602,51 +684,12 @@ impl ColoredPerturbationSet {
         retained.append(&mut retained_variables);
         retained.sort();
 
-        let pruner = PerturbationSet::mk_duplicate_pruning_bdd(self.ctx.get());
-        let bdd = self.as_native().as_bdd();
-
-        let projection = RawProjection::new(retained, &pruner.and(bdd));
-        Ok(_ColorPerturbationModelIterator {
-            ctx: symbolic_ctx_py,
-            graph: self.ctx.clone(),
-            native: projection.into_iter(),
+        Ok((
+            retained,
             retained_implicit,
             retained_explicit,
             parameter_mapping,
-        })
-    }
-}
-
-impl AsNative<GraphColoredVertices> for ColoredPerturbationSet {
-    fn as_native(&self) -> &GraphColoredVertices {
-        &self.native
-    }
-
-    fn as_native_mut(&mut self) -> &mut GraphColoredVertices {
-        &mut self.native
-    }
-}
-
-impl ColoredPerturbationSet {
-    pub fn mk_native(ctx: Py<AsynchronousPerturbationGraph>, native: GraphColoredVertices) -> Self {
-        Self { ctx, native }
-    }
-
-    pub fn mk_derived(&self, native: GraphColoredVertices) -> Self {
-        Self {
-            ctx: self.ctx.clone(),
-            native,
-        }
-    }
-
-    pub fn semantic_eq(a: &Self, b: &Self) -> bool {
-        let a = a.as_native().as_bdd();
-        let b = b.as_native().as_bdd();
-        if a.num_vars() != b.num_vars() {
-            return false;
-        }
-
-        RsBdd::binary_op_with_limit(1, a, b, biodivine_lib_bdd::op_function::xor).is_some()
+        ))
     }
 }
 
@@ -698,6 +741,70 @@ impl _ColorPerturbationModelIterator {
             );
             (color, vertex)
         })
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<(ColorModel, PerturbationModel)> {
+        self.__next__()
+    }
+}
+
+#[pymethods]
+impl _ColorPerturbationModelSampler {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    fn __next__(&mut self) -> Option<(ColorModel, PerturbationModel)> {
+        self.projection
+            .bdd()
+            .random_valuation_sample(&mut self.sampler)
+            .map(|it| {
+                let mut retained = BddPartialValuation::empty();
+                for x in self.projection.retained_variables() {
+                    retained.set_value(*x, it[*x]);
+                }
+
+                // Here, we have to create two copies of the partial valuation that don't have
+                // any "invalid" variables, otherwise those could propagate further by instantiating
+                // a symbolic set from the model object.
+                let mut color_val = retained.clone();
+                let mut pert_val = BddPartialValuation::empty();
+                let native_ctx = self.ctx.get().as_native();
+                // From the color model, we only remove the state variables (perturbation parameters
+                // are kept to ensure compatibility).
+                // From `pert_val`, we copy the available perturbation parameter
+                // and also copy the state variable if it is perturbed.
+                for n_var in native_ctx.network_variables() {
+                    let s_var = native_ctx.get_state_variable(n_var);
+
+                    // Clear every state variable from color valuation.
+                    color_val.unset_value(s_var);
+
+                    // Copy perturbation parameter (and state if relevant).
+                    if let Some(p_var) = self.parameter_mapping.get(&n_var)
+                        && let Some(value) = retained.get_value(*p_var)
+                    {
+                        pert_val.set_value(*p_var, value);
+                        if value {
+                            pert_val.set_value(s_var, retained.get_value(s_var).unwrap())
+                        }
+                    }
+                }
+
+                let color = ColorModel::new_native(
+                    self.ctx.clone(),
+                    color_val,
+                    self.retained_implicit.clone(),
+                    self.retained_explicit.clone(),
+                );
+                let vertex = PerturbationModel::new_native(
+                    self.graph.clone(),
+                    pert_val,
+                    self.parameter_mapping.clone(),
+                );
+                (color, vertex)
+            })
     }
 
     #[allow(clippy::should_implement_trait)]

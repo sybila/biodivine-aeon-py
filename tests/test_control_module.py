@@ -277,6 +277,24 @@ def test_symbolic_representation():
     assert some_set_one.select_by_robustness(0.99, result_limit=1)[0][0].perturbation_size() == 1
     assert some_set_one.select_by_robustness(0.50, result_limit=1)[0][0].perturbation_size() == 0
 
+    p_set = graph.mk_unit_perturbations()
+    p_set_sampler = p_set.sample_items(seed=1)
+
+    for p in [next(p_set_sampler) for _ in range(100)]:
+        assert 'a' in p and 'b' not in p and 'c' in p
+
+    p_colored_set = graph.mk_unit_colored_perturbations()
+    p_colored_set_sampler = p_colored_set.sample_items(
+        retained_functions=['f_a', 'f'],
+        retained_variables=['a'],
+        seed=1
+    )
+
+    for c, p in [next(p_colored_set_sampler) for _ in range(100)]:
+        assert 'a' in p and 'b' not in p and 'c' not in p
+        assert 'f_a' in c and 'f' in c and 'f_c' not in c
+
+
 def test_base_network_compatibility():
     bn = BooleanNetwork.from_aeon("""
     a -> b
