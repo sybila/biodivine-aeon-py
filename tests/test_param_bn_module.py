@@ -983,6 +983,40 @@ def test_asynchronous_graph():
     assert stg.mk_unit_colors().extend_with_vertices(stg.mk_unit_vertices()) == stg.mk_unit_colored_vertices()
 
 
+def test_symbolic_samplers():
+    bn = BooleanNetwork.from_aeon("""
+    a -> b
+    b -|? c
+    c -?? b
+    c -| a
+    $b: a & f(c)    
+    """)
+
+    graph = AsynchronousGraph(bn)
+
+    b_space: dict[str, Literal[0, 1]] = {'b': 1}
+    c_space: dict[str, Literal[0, 1]] = {'c': 1}
+
+    # Vertices where `b=1` or `c=1`
+    b_or_c = graph.mk_subspace_vertices(b_space).union(graph.mk_subspace_vertices(c_space))
+
+    b_or_c_sampler = b_or_c.sample_items(seed=1)
+    for vertex_sample in [next(b_or_c_sampler) for _ in range(100)]:
+        assert vertex_sample['b'] or vertex_sample['c']
+        # `a` must be also present, but does not have any prescribed value.
+        assert "a" in vertex_sample
+
+    # Colors where `f` is identity.
+    exp_id = BooleanExpression("x_0")
+    f_id = graph.mk_function_colors("f", exp_id)
+
+    f_id_sampler = f_id.sample_items(seed=1)
+    for color_sample in [next(f_id_sampler) for _ in range(100)]:
+        assert color_sample["f"] == exp_id
+        # `a` / `c` must be also present, but they don't have any prescribed value.
+        assert "a" in color_sample and "c" in color_sample
+
+
 def test_symbolic_iterators():
     bn = BooleanNetwork.from_aeon("""
     a -> b

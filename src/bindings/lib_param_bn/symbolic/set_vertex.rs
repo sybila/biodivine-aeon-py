@@ -3,7 +3,8 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::ops::Not;
 
-use biodivine_lib_bdd::Bdd as RsBdd;
+use biodivine_lib_bdd::random_sampling::UniformValuationSampler;
+use biodivine_lib_bdd::{Bdd as RsBdd, BddPartialValuation};
 use biodivine_lib_param_bn::biodivine_std::traits::Set;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
@@ -14,6 +15,8 @@ use num_bigint::BigUint;
 use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
+use rand::SeedableRng;
+use rand::prelude::StdRng;
 
 use crate::AsNative;
 use crate::bindings::lib_bdd::bdd::Bdd;
@@ -40,6 +43,18 @@ pub struct VertexSet {
 pub struct _VertexModelIterator {
     ctx: Py<SymbolicContext>,
     native: OwnedRawSymbolicIterator,
+}
+
+/// An internal class used for random uniform sampling of `VertexModel` instances from a `VertexSet`.
+/// On the Python side, it just looks like an infinite iterator.
+///
+/// Similar to [`_VertexModelIterator`], but uses a sampler to get valuations from the projection
+/// BDD instead of iterating it fully.
+#[pyclass(module = "biodivine_aeon")]
+pub struct _VertexModelSampler {
+    ctx: Py<SymbolicContext>,
+    projection: RawProjection,
+    sampler: UniformValuationSampler<StdRng>,
 }
 
 impl AsNative<GraphVertices> for VertexSet {
@@ -200,21 +215,36 @@ impl VertexSet {
     #[pyo3(signature = (retained = None))]
     pub fn items(&self, retained: Option<Vec<VariableIdType>>) -> PyResult<_VertexModelIterator> {
         let ctx = self.ctx.get();
-        let retained = if let Some(retained) = retained {
-            retained
-                .iter()
-                .map(|it| {
-                    it.resolve(ctx.as_native())
-                        .map(|it| ctx.as_native().get_state_variable(it))
-                })
-                .collect::<PyResult<Vec<_>>>()?
-        } else {
-            self.ctx.get().as_native().state_variables().clone()
-        };
+        let retained = Self::compute_retained_variables(ctx, retained)?;
         let projection = RawProjection::new(retained, self.as_native().as_bdd());
         Ok(_VertexModelIterator {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
+        })
+    }
+
+    /// Returns a sampler for random uniform sampling of vertices from this `VertexSet` with an
+    /// optional projection to a subset of network variables. **If a projection is specified,
+    /// the sampling is uniform with respect to the projected set.**
+    ///
+    /// See also the `items` method regarding the `retained` projection set.
+    ///
+    /// You can specify an optional seed to make the sampling random but deterministic.
+    #[pyo3(signature = (retained = None, seed = None))]
+    pub fn sample_items(
+        &self,
+        retained: Option<Vec<VariableIdType>>,
+        seed: Option<u64>,
+    ) -> PyResult<_VertexModelSampler> {
+        let ctx = self.ctx.get();
+        let retained = Self::compute_retained_variables(ctx, retained)?;
+        let projection = RawProjection::new(retained, self.as_native().as_bdd());
+        let rng = StdRng::seed_from_u64(seed.unwrap_or_default());
+        let sampler = projection.bdd().mk_uniform_valuation_sampler(rng);
+        Ok(_VertexModelSampler {
+            ctx: self.ctx.clone(),
+            projection,
+            sampler,
         })
     }
 
@@ -348,6 +378,25 @@ impl VertexSet {
     pub fn context(&self) -> Py<SymbolicContext> {
         self.ctx.clone()
     }
+
+    /// Helper function to compute retained variables from an optional list of VariableIdType.
+    /// This is shared between `items` and `sample_items` to avoid duplication.
+    fn compute_retained_variables(
+        ctx: &SymbolicContext,
+        retained: Option<Vec<VariableIdType>>,
+    ) -> PyResult<Vec<biodivine_lib_bdd::BddVariable>> {
+        if let Some(retained) = retained {
+            retained
+                .iter()
+                .map(|it| {
+                    it.resolve(ctx.as_native())
+                        .map(|it| ctx.as_native().get_state_variable(it))
+                })
+                .collect::<PyResult<Vec<_>>>()
+        } else {
+            Ok(ctx.as_native().state_variables().clone())
+        }
+    }
 }
 
 #[pymethods]
@@ -360,6 +409,32 @@ impl _VertexModelIterator {
         self.native
             .next()
             .map(|it| VertexModel::new_native(self.ctx.clone(), it))
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn next(&mut self) -> Option<VertexModel> {
+        self.__next__()
+    }
+}
+
+#[pymethods]
+impl _VertexModelSampler {
+    fn __iter__(self_: Py<Self>) -> Py<Self> {
+        self_
+    }
+
+    fn __next__(&mut self) -> Option<VertexModel> {
+        self.projection
+            .bdd()
+            .random_valuation_sample(&mut self.sampler)
+            .map(|it| {
+                let mut retained = BddPartialValuation::empty();
+                for x in self.projection.retained_variables() {
+                    retained.set_value(*x, it[*x]);
+                }
+
+                VertexModel::new_native(self.ctx.clone(), retained)
+            })
     }
 
     #[allow(clippy::should_implement_trait)]

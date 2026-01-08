@@ -9,7 +9,6 @@ use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
 use biodivine_lib_param_bn::trap_spaces::NetworkColoredSpaces;
-use either::Either;
 use num_bigint::BigUint;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -250,47 +249,8 @@ impl ColoredSpaceSet {
         let ctx = self.ctx.borrow(py);
         let ctx_parent = ctx.as_ref();
         // First, extract all functions that should be retained (see also ColorSet.items).
-        let mut retained_explicit = Vec::new();
-        let mut retained_implicit = Vec::new();
-        let mut retained_functions = if let Some(retained) = retained_functions {
-            let mut result = Vec::new();
-            for x in retained {
-                let function = ctx_parent.resolve_function(&x)?;
-                let table = match function {
-                    Either::Left(x) => {
-                        if retained_implicit.contains(&x) {
-                            continue;
-                        }
-                        retained_implicit.push(x);
-                        ctx_parent
-                            .as_native()
-                            .get_implicit_function_table(x)
-                            .unwrap()
-                    }
-                    Either::Right(x) => {
-                        if retained_explicit.contains(&x) {
-                            continue;
-                        }
-                        retained_explicit.push(x);
-                        ctx_parent.as_native().get_explicit_function_table(x)
-                    }
-                };
-                result.append(&mut table.symbolic_variables().clone());
-            }
-            result
-        } else {
-            retained_explicit.append(
-                &mut ctx_parent
-                    .as_native()
-                    .network_parameters()
-                    .collect::<Vec<_>>(),
-            );
-            retained_implicit.append(&mut ctx_parent.as_native().network_implicit_parameters());
-            ctx_parent.as_native().parameter_variables().clone()
-        };
-        retained_explicit.sort();
-        retained_implicit.sort();
-
+        let (mut retained_functions, implicit, explicit) =
+            ColorSet::read_retained_functions(ctx_parent, retained_functions)?;
         // Then add all retained network variables (see also SpaceSet.items).
         let mut retained_variables = if let Some(retained) = retained_variables {
             let mut retained_vars = Vec::new();
@@ -313,8 +273,8 @@ impl ColoredSpaceSet {
         Ok(_ColorSpaceModelIterator {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
-            retained_implicit,
-            retained_explicit,
+            retained_implicit: implicit,
+            retained_explicit: explicit,
         })
     }
 

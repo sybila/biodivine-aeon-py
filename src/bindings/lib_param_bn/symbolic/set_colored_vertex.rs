@@ -15,7 +15,6 @@ use biodivine_lib_param_bn::symbolic_async_graph::GraphColoredVertices;
 use biodivine_lib_param_bn::symbolic_async_graph::projected_iteration::{
     OwnedRawSymbolicIterator, RawProjection,
 };
-use either::Either;
 use num_bigint::BigUint;
 use pyo3::IntoPyObjectExt;
 use pyo3::basic::CompareOp;
@@ -255,38 +254,8 @@ impl ColoredVertexSet {
     ) -> PyResult<_ColorVertexModelIterator> {
         let ctx = self.ctx.get();
         // First, extract all functions that should be retained (see also ColorSet.items).
-        let mut retained_explicit = Vec::new();
-        let mut retained_implicit = Vec::new();
-        let mut retained_functions = if let Some(retained) = retained_functions {
-            let mut result = Vec::new();
-            for x in retained {
-                let function = ctx.resolve_function(&x)?;
-                let table = match function {
-                    Either::Left(x) => {
-                        if retained_implicit.contains(&x) {
-                            continue;
-                        }
-                        retained_implicit.push(x);
-                        ctx.as_native().get_implicit_function_table(x).unwrap()
-                    }
-                    Either::Right(x) => {
-                        if retained_explicit.contains(&x) {
-                            continue;
-                        }
-                        retained_explicit.push(x);
-                        ctx.as_native().get_explicit_function_table(x)
-                    }
-                };
-                result.append(&mut table.symbolic_variables().clone());
-            }
-            result
-        } else {
-            retained_explicit.append(&mut ctx.as_native().network_parameters().collect::<Vec<_>>());
-            retained_implicit.append(&mut ctx.as_native().network_implicit_parameters());
-            self.ctx.get().as_native().parameter_variables().clone()
-        };
-        retained_explicit.sort();
-        retained_implicit.sort();
+        let (mut retained_functions, implicit, explicit) =
+            ColorSet::read_retained_functions(ctx, retained_functions)?;
 
         // Then add all retained network variables (see also VertexSet.items).
         let mut retained_variables = if let Some(retained) = retained_variables {
@@ -310,8 +279,8 @@ impl ColoredVertexSet {
         Ok(_ColorVertexModelIterator {
             ctx: self.ctx.clone(),
             native: projection.into_iter(),
-            retained_implicit,
-            retained_explicit,
+            retained_implicit: implicit,
+            retained_explicit: explicit,
         })
     }
 
