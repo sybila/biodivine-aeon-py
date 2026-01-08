@@ -1,4 +1,4 @@
 maturin list-python
-maturin build --release --features static-z3 -o dist
+maturin build --release -o dist
 dir dist
 pip install "dist/*.whl"

@@ -1,5 +1,4 @@
-# This runs on every commit that is not on a dev-* branch. It should be reasonably fast,
-# as it links to Z3 dynamically.
+# This runs on every commit that is not on a dev-* branch.
 name: pdoc
 on:
   push:
@@ -9,15 +8,7 @@ on:
     branches:
       - '*'
 env:
-  # A fixed version used for testing, so that the builds don't
-  # spontaneously break after a few years.
-  # Make sure to update this from time to time.
   RUST_VERSION: "1.90.0"
-  # This is the version currently used by `z3-sys`.
-  # If this ever changes, you might also need to increase
-  # the minimum macOS version below.
-  Z3_VERSION: "4.15.4"
-  MACOS_TARGET: "11.0"
   PYTHON_VERSION: "3.12"
 
 jobs:
@@ -28,14 +19,6 @@ jobs:
     steps:
       - name: Checkout.
         uses: actions/checkout@v4
-      - name: Setup Z3.
-        id: z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ env.Z3_VERSION }}
-          add_to_library_path: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Python.
         uses: actions/setup-python@v5
         with:

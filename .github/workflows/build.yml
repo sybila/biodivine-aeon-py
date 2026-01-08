@@ -1,5 +1,4 @@
-# This workflow only runs for tags. It takes a lot of time to complete because
-# it has to bundle Z3 statically into the final binary.
+# This workflow only runs for tags.
 # Specifically, we:
 #  - Build the library using static Z3 on linux/windows/macOS and upload the result to GitHub storage.
 #  - Create a release package from the uploaded wheel files and push it to PyPI.
@@ -14,9 +13,6 @@ env:
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
   RUST_VERSION: "1.90.0"
-  # This is the version currently used by `z3-sys`.
-  Z3_VERSION: "4.15.4"
-  MACOS_TARGET: "11.0"
   PYTHON_VERSION: "3.12"
 
 jobs:
@@ -32,7 +28,7 @@ jobs:
         with:
           target: x86_64
           container: daemontus/manylinux-aeon:latest
-          args: "--release --features static-z3 --compatibility manylinux_2_28 --out=target/dist"
+          args: "--release --compatibility manylinux_2_28 --out=target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -52,14 +48,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
-      # The considered version of z3 needs at least this version of macOS.
-      - run: echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
-      - run: echo "CMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOS_TARGET }}" >> $GITHUB_ENV
       - name: Maturin build.
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: "--release --target universal2-apple-darwin --features static-z3 --out=target/dist"
+          args: "--release --target universal2-apple-darwin --out=target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -84,7 +77,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: x64
-          args: "--release --features static-z3 --out=target/dist"
+          args: "--release --out=target/dist"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:

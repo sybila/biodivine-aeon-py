@@ -12,12 +12,6 @@ lto = true
 
 [features]
 default = ['algorithms-pyo3-bindings']
-# For releases, we want to include Z3 statically so that users
-# don't have to install it (or break compatibility with new versions).
-# So for CI builds, this feature is enabled, but for local builds,
-# you don't need it as long as you have Z3 installed (because your
-# build may take >30min if you enable it).
-static-z3 = ["z3/bundled", "z3-sys/bundled", "z3-sys/reqwest-native-tls-vendored"]
 
 # Feature flag that enables Python bindings for the algorithms module
 algorithms-pyo3-bindings = []
@@ -28,7 +22,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 regex = "1.12"
 pyo3 = { version = "0.27", features = ["abi3-py37", "extension-module", "num-bigint", "py-clone"] }
-biodivine-lib-param-bn = { version="0.7.2", features=["solver-z3", "serde"] }
+biodivine-lib-param-bn = { version="0.7.2", features=["serde"] }
 biodivine-lib-bdd = { version = "0.6.2", features = ["serde"] }
 #biodivine-pbn-control = "0.3.1"
 biodivine-pbn-control = { git = "https://github.com/sybila/biodivine-pbn-control", rev = "9e31bab9d000266ea25c35cc752c69077973d43c" }
@@ -47,12 +41,6 @@ thiserror = "2.0"
 log = "0.4"
 dyn-clone = "1.0"
 pyo3-log = "0.13"
-
-# Include Z3 dependencies as strictly as possible, we don't want
-# this to change because it might break our release builds.
-# Cannot update `z3` because this version is used by lib-param-bn.
-z3="^0.19.7"
-z3-sys = "0.10.4"
 
 [build-dependencies]
 pyo3-build-config = "0.27"
