@@ -12,8 +12,8 @@ env:
   # A fixed version used for testing so that the builds don't
   # spontaneously break after a few years.
   # Make sure to update this from time to time.
-  RUST_VERSION: "1.90.0"
-  PYTHON_VERSION: "3.12"
+  RUST_VERSION: "1.93.0"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   build-linux:
@@ -108,7 +108,7 @@ jobs:
       matrix:
         # For now, windows builds are broken...
         os: [macos-latest, ubuntu-latest]
-        python: ["3.9", "3.10", "3.11", "3.12"]
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -121,7 +121,7 @@ jobs:
           auto-activate-base: false
           show-channel-urls: true
       - name: Build and upload the conda packages
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.4.0
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.5.0
         with:
           python-version: ${{ matrix.python }}
           meta_yaml_dir: "conda"

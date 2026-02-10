@@ -8,8 +8,8 @@ on:
     branches:
       - '*'
 env:
-  RUST_VERSION: "1.90.0"
-  PYTHON_VERSION: "3.12"
+  RUST_VERSION: "1.93.0"
+  PYTHON_VERSION: "3.14"
 
 jobs:
 
