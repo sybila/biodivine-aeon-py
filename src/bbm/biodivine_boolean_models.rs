@@ -95,12 +95,14 @@ impl BiodivineBooleanModels {
         // MAX is hopefully never going to be a valid ID
         let num_id = id.parse::<usize>().unwrap_or(usize::MAX);
         let models_list = Self::fetch_all_model_data(py, None)?;
-        let model = models_list
+
+        // Check that the model exists:
+        models_list
             .into_iter()
             .find(|m| m.id == id || extract_id(&m.bib).is_some_and(|it| it == num_id))
             .ok_or(runtime_error("Model not found in BBM database."))?;
 
-        let py_bn = BooleanNetwork::from_aeon(py, &model.raw_model_data).map_err(runtime_error)?;
+        let py_bn = BbmModel::fetch_model_data(id, py)?;
 
         let py_bn = match inline_inputs {
             true => py_bn.borrow_mut(py).inline_inputs(py, true, true)?,

@@ -24,7 +24,6 @@ def test_fetch_model_by_numeric_id():
     assert hasattr(model_1, 'inputs')
     assert hasattr(model_1, 'regulations')
     assert hasattr(model_1, 'keywords')
-    assert hasattr(model_1, 'raw_model_data')
 
 
 def test_fetch_model_properties():
@@ -43,8 +42,6 @@ def test_fetch_model_properties():
     assert isinstance(model.regulations, int)
     assert model.regulations >= 0
     assert isinstance(model.keywords, list)
-    assert isinstance(model.raw_model_data, str)
-    assert len(model.raw_model_data) > 0
 
 
 def test_fetch_model_consistency():
@@ -79,8 +76,6 @@ def test_fetch_model_high_id():
     
     assert isinstance(model_150, BbmModel)
     assert isinstance(model_200, BbmModel)
-    assert hasattr(model_150, 'raw_model_data')
-    assert hasattr(model_200, 'raw_model_data')
 
 
 def test_fetch_model_invalid_id():

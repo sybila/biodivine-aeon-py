@@ -1,6 +1,8 @@
+use pyo3::prelude::PyAnyMethods;
 use pyo3::{Bound, Py, PyAny, PyErr, PyResult, Python, pyclass, pymethods};
-use serde::de::{self, Deserializer};
+use serde::de::Deserializer;
 use serde::{Deserialize, Serialize};
+use std::ffi::CString;
 
 use crate::bindings::lib_param_bn::boolean_network::BooleanNetwork;
 use crate::{AsNative, runtime_error};
@@ -19,16 +21,17 @@ use super::sampling_utils::pick_random_instances;
 pub struct BbmModel {
     /// A unique identifier.
     #[pyo3(get)]
+    #[serde(deserialize_with = "deserialize_string_or_int")]
     pub id: String,
     /// A descriptive name of the model.
     #[pyo3(get)]
     pub name: String,
     /// URL to the paper where the model was published.
     #[pyo3(get)]
-    pub url_publication: Option<String>,
+    pub url_publication: String,
     /// URL to the actual model data (if it exists).
     #[pyo3(get)]
-    pub url_model: Option<String>,
+    pub url_model: Vec<String>,
     /// List of keywords. See the BBM repository for the full list.
     #[pyo3(get)]
     pub keywords: Vec<String>,
@@ -47,28 +50,6 @@ pub struct BbmModel {
     /// A bibliographic entry.
     #[pyo3(get)]
     pub bib: Option<String>,
-    /// Raw model data (typically `.aeon` model string).
-    #[pyo3(get)]
-    #[serde(deserialize_with = "deserialize_model_data", rename = "modelData")]
-    pub raw_model_data: String, // Deserialize directly into a String
-}
-
-/// Custom deserialization function for the `modelData` field.
-/// Converts the raw byte data from the JSON response into a UTF-8 string.
-fn deserialize_model_data<'de, D>(deserializer: D) -> Result<String, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    #[derive(Deserialize)]
-    struct RawModelData {
-        #[serde(rename = "type")]
-        _data_type: String,
-        data: Vec<u8>,
-    }
-
-    let raw: RawModelData = RawModelData::deserialize(deserializer)?;
-    String::from_utf8(raw.data)
-        .map_err(|e| de::Error::custom(format!("Failed to convert model data to string: {}", e)))
 }
 
 #[pymethods]
@@ -82,8 +63,8 @@ impl BbmModel {
 
     pub fn __repr__(&self) -> String {
         format!(
-            "BbmModel(id={}, name={}, variables={}, inputs={}, regulations={}, network={:?})",
-            self.id, self.name, self.variables, self.inputs, self.regulations, self.raw_model_data,
+            "BbmModel(id={}, name={}, variables={}, inputs={}, regulations={})",
+            self.id, self.name, self.variables, self.inputs, self.regulations,
         )
     }
 
@@ -98,13 +79,13 @@ impl BbmModel {
     /// Extract a `BooleanNetwork` instance from this model.
     /// Leave the inputs as they are (free if not set in the model).
     pub fn to_bn_default(&self, py: Python) -> PyResult<Py<BooleanNetwork>> {
-        BooleanNetwork::from_aeon(py, &self.raw_model_data).map_err(runtime_error)
+        Self::fetch_model_data(self.id.as_str(), py)
     }
 
     /// Extract a `BooleanNetwork` instance from this model, setting all inputs
     /// to a given constant value `const_value`.
     fn to_bn_inputs_const(&self, py: Python, const_value: bool) -> PyResult<Py<BooleanNetwork>> {
-        let py_bn = BooleanNetwork::from_aeon(py, &self.raw_model_data).map_err(runtime_error)?;
+        let py_bn = Self::fetch_model_data(self.id.as_str(), py)?;
         let mut bn = py_bn.borrow_mut(py).clone();
         for variable in bn.as_native().inputs(true) {
             let update_fn = if const_value {
@@ -152,5 +133,30 @@ impl BbmModel {
                 .collect::<Result<Vec<Py<BooleanNetwork>>, PyErr>>()
                 .map_err(runtime_error)?;
         Ok(instantiated_bns)
+    }
+}
+
+impl BbmModel {
+    pub fn fetch_model_data(id: &str, py: Python) -> PyResult<Py<BooleanNetwork>> {
+        let url = format!("https://bbm.sybila.fi.muni.cz/api/models/{id}/aeon");
+        let code =
+            format!("__import__('urllib.request').request.urlopen('{url}').read().decode('utf-8')");
+        let code = CString::new(code)?;
+        let result = py.eval(code.as_c_str(), None, None)?;
+        let result = result.extract::<String>()?;
+        BooleanNetwork::from_aeon(py, result.as_str())
+    }
+}
+
+fn deserialize_string_or_int<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value: serde_json::Value = Deserialize::deserialize(deserializer)?;
+
+    match value {
+        serde_json::Value::Number(n) => Ok(n.to_string()),
+        serde_json::Value::String(s) => Ok(s),
+        _ => Err(serde::de::Error::custom("Expected a string or a number")),
     }
 }
