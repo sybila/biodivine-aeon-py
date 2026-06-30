@@ -11,7 +11,9 @@ use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvabl
 use crate::pyo3_utils::richcmp_eq_by_key;
 use crate::{AsNative, runtime_error, throw_index_error, throw_runtime_error, throw_type_error};
 use biodivine_lib_io_bma::BmaModel;
-use biodivine_lib_param_bn::FnUpdate;
+use biodivine_lib_param_bn::symbolic_async_graph::RegulationConstraint as NativeRegulationConstraint;
+use biodivine_lib_param_bn::symbolic_async_graph::SymbolicContext as NativeSymbolicContext;
+use biodivine_lib_param_bn::{FnUpdate, Monotonicity};
 use macros::Wrapper;
 use pyo3::basic::CompareOp;
 use pyo3::prelude::*;
@@ -824,6 +826,60 @@ impl BooleanNetwork {
             .infer_valid_graph()
             .map_err(runtime_error)
             .and_then(|it| BooleanNetwork(it).export_to_python(py))
+    }
+
+    /// Check that the constraints on each regulation are satisfied. If not, return an
+    /// error message for each such validated constraint.
+    ///
+    /// Similar to `BooleanNetwork.infer_valid_graph`, but it does not actually create
+    /// a new network, just checks for inconsistencies.
+    pub fn check_regulation_constraints(&self) -> PyResult<Vec<String>> {
+        let mut errors_detected = Vec::new();
+        let self_native = self.as_native();
+        let ctx = NativeSymbolicContext::new(self_native).map_err(runtime_error)?;
+        for var in self_native.variables() {
+            let var_name = self_native.get_variable_name(var);
+            let regulators = self_native.regulators(var);
+            let function = if let Some(function) = self_native.get_update_function(var) {
+                ctx.mk_fn_update_true(function)
+            } else {
+                ctx.mk_implicit_function_is_true(var, &regulators)
+            };
+
+            for reg in self_native.regulators(var) {
+                let reg_name = self_native.get_variable_name(reg);
+
+                let regulation = self_native
+                    .as_graph()
+                    .find_regulation(reg, var)
+                    .expect("Correctness violation: Regulation does not exist.");
+
+                if regulation.observable {
+                    let valid = NativeRegulationConstraint::mk_observability(&ctx, &function, reg);
+                    if valid.is_false() {
+                        errors_detected.push(format!("Regulator `{reg_name}` is not essential in the update function of `{var_name}`"));
+                    }
+                }
+
+                match regulation.monotonicity {
+                    Some(Monotonicity::Activation) => {
+                        let valid = NativeRegulationConstraint::mk_activation(&ctx, &function, reg);
+                        if valid.is_false() {
+                            errors_detected.push(format!("Regulator `{reg_name}` is not positively monotone (activator) in the update function of `{var_name}`"));
+                        }
+                    }
+                    Some(Monotonicity::Inhibition) => {
+                        let valid = NativeRegulationConstraint::mk_inhibition(&ctx, &function, reg);
+                        if valid.is_false() {
+                            errors_detected.push(format!("Regulator `{reg_name}` is not negatively monotone (inhibitor) in the update function of `{var_name}`"));
+                        }
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        Ok(errors_detected)
     }
 
     /// Make a copy of this `BooleanNetwork` with all constraints on the regulations removed.
