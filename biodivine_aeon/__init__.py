@@ -1,3 +1,5 @@
+import importlib.util
+import warnings
 from typing import Literal, TypedDict, Mapping, Union, Optional, Sequence
 
 # Notes on Python version updates:
@@ -275,3 +277,24 @@ class BbmFilterConfig(TypedDict, total=False):
     min_regulations: int
     max_regulations: int
     keywords: Sequence[str]
+
+
+def _regulatory_graph_show(self):
+    """
+    Visualize this regulatory graph using graphviz.
+
+    Returns a ``graphviz.Source`` object if the ``graphviz`` package is installed
+    (suitable for display in Jupyter notebooks). Otherwise, returns the text
+    representation of the graph and emits a warning.
+    """
+    if importlib.util.find_spec("graphviz") is not None:
+        import graphviz
+        return graphviz.Source(self.to_dot())
+    warnings.warn(
+        "The `graphviz` package is not installed. Install it to show graph visualizations.",
+        stacklevel=2,
+    )
+    return str(self)
+
+
+RegulatoryGraph.show = _regulatory_graph_show

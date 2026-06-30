@@ -726,6 +726,8 @@ class RegulatoryGraph:
                        length: Optional[int] = None,
     ) -> Optional[list[VariableId]]:
         ...
+    def show(self):
+        ...
 
 class BooleanNetwork(RegulatoryGraph):
     @overload
