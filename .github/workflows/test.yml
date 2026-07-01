@@ -29,7 +29,7 @@ jobs:
     env:
       RUSTFLAGS: "-D warnings"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
@@ -44,7 +44,7 @@ jobs:
     env:
       RUSTFLAGS: "-D warnings"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
@@ -58,7 +58,7 @@ jobs:
     env:
       RUSTFLAGS: "-D warnings"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
@@ -72,9 +72,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Python.
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
@@ -102,9 +102,9 @@ jobs:
         python: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Python.
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           architecture: x64
@@ -125,9 +125,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Python.
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
@@ -159,9 +159,9 @@ jobs:
       # Here, we don't need to bother with the `manylinux` container,
       # since we are only testing, not building multiplatform `wheel` files.
       - name: Checkout.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Python.
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
@@ -193,9 +193,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup Python.
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
