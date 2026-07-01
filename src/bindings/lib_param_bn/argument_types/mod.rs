@@ -28,6 +28,14 @@ pub mod variable_id_sym_type;
 /// `VariableIdType = Union[VariableId, str]`
 pub mod variable_id_type;
 
+/// `VertexSetType = Union[VertexSet, ColoredVertexSet, VertexModel, SpaceModel, Mapping[VariableIdType, BoolType]]`
+/// (for colored set, a projection is performed to retrieve just the vertices)
+pub mod vertex_set_type;
+
+/// `Union[VertexSetType, Sequence[VertexSetType]]`
+/// (the vertex sets are either immediately merged, or returned as a vector)
+pub mod vertex_set_multiple_type;
+
 /// `Union[VariableId, ParameterId, str]`
 #[derive(FromPyObject, Debug, Clone)]
 pub enum VariableOrParameterIdType {

@@ -157,6 +157,13 @@ A `BooleanExpression` can be typically also substituted with its "raw" string re
 requires the expression to be repeatedly parsed whenever used and is thus slower and more error prone.
 """
 
+VertexSetType = Union[VertexSet, ColoredVertexSet, VertexModel, SpaceModel, Mapping[VariableIdType, BoolType]]
+"""
+A union of types that can be implicitly converted to a `VertexSet`.
+
+ - For a colored set, a projection is performed returning all vertices.
+ - For `SpaceModel` and variable mapping, all vertices in the subspace defined by these values are considered.
+"""
 
 # IDT = TypeVar('IDT', covariant=True)
 # class Regulation(TypedDict, Generic[IDT]):
@@ -279,9 +286,10 @@ class BbmFilterConfig(TypedDict, total=False):
     keywords: Sequence[str]
 
 
-def _regulatory_graph_show(self):
+def _show_dot_graph(self, *args, **kwargs):
     """
-    Visualize this regulatory graph using graphviz.
+    Visualize this graph using graphviz. The graph must have a `to_dot` method. All arguments are passed
+    directly to the method itself.
 
     Returns a ``graphviz.Source`` object if the ``graphviz`` package is installed
     (suitable for display in Jupyter notebooks). Otherwise, returns the text
@@ -289,7 +297,7 @@ def _regulatory_graph_show(self):
     """
     if importlib.util.find_spec("graphviz") is not None:
         import graphviz
-        return graphviz.Source(self.to_dot())
+        return graphviz.Source(self.to_dot(*args, **kwargs))
     warnings.warn(
         "The `graphviz` package is not installed. Install it to show graph visualizations.",
         stacklevel=2,
@@ -297,4 +305,6 @@ def _regulatory_graph_show(self):
     return str(self)
 
 
-RegulatoryGraph.show = _regulatory_graph_show
+Bdd.show = _show_dot_graph
+RegulatoryGraph.show = _show_dot_graph
+AsynchronousGraph.show = _show_dot_graph

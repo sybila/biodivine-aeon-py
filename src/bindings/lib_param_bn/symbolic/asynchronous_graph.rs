@@ -10,6 +10,7 @@ use crate::bindings::lib_hctl_model_checker::hctl_formula::HctlFormula;
 use crate::bindings::lib_param_bn::argument_types::bool_type::BoolType;
 use crate::bindings::lib_param_bn::argument_types::subspace_valuation_type::SubspaceValuationType;
 use crate::bindings::lib_param_bn::argument_types::variable_id_sym_type::VariableIdSymType;
+use crate::bindings::lib_param_bn::argument_types::vertex_set_multiple_type::VertexSetMultipleType;
 use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::{AsNative, runtime_error, throw_runtime_error, throw_type_error};
 use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
@@ -21,6 +22,7 @@ use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 use std::collections::HashMap;
+use std::io::Write;
 
 #[pyclass(module = "biodivine_aeon", frozen, subclass)]
 pub struct AsynchronousGraph {
@@ -772,6 +774,114 @@ impl AsynchronousGraph {
     pub fn logically_unique_colors(&self, colors: &ColorSet) -> ColorSet {
         let result = self.as_native().logically_unique_subset(colors.as_native());
         ColorSet::mk_native(self.ctx.clone(), result)
+    }
+
+    /// Convert the current graph into a `.dot` visualization string.
+    ///
+    /// You can supply a `subgraph` which limits the visualization to the given set of nodes.
+    /// You can assign specific sets of nodes a color by providing the `highlight` list
+    /// (assigning a color string to a subset of vertices). Finally, if you use the restriction
+    /// parameter, the immediate successor outside the restriction set of each node will
+    /// be still shown. You can hide these outside successors using
+    /// the `prune_outgoing_edges` parameter.
+    #[pyo3(signature=(subgraph = None, highlight = None, prune_outgoing_edges = false))]
+    pub fn to_dot(
+        &self,
+        subgraph: Option<VertexSetMultipleType>,
+        highlight: Option<Vec<(String, VertexSetMultipleType)>>,
+        prune_outgoing_edges: bool,
+        py: Python,
+    ) -> PyResult<String> {
+        if !self
+            .as_native()
+            .symbolic_context()
+            .parameter_variables()
+            .is_empty()
+        {
+            return throw_runtime_error("Cannot convert graph with partially unknown dynamics.");
+        }
+
+        fn state_name(state: &BddValuation) -> String {
+            state
+                .as_vector()
+                .iter()
+                .map(|&b| if b { '1' } else { '0' })
+                .collect()
+        }
+
+        let mut buffer: Vec<u8> = Vec::new();
+        let output: &mut dyn Write = &mut buffer;
+
+        writeln!(output, "digraph G {{")?;
+
+        let bdd_vars = self.as_native().symbolic_context().bdd_variable_set();
+
+        // First, "resolve" all state colors:
+        let mut state_colors: Vec<(String, biodivine_lib_bdd::Bdd)> = Vec::new();
+        let highlight = highlight.unwrap_or_default();
+        for (color, vertices) in highlight {
+            let vertices = vertices.resolve_union(self, py)?;
+            state_colors.push((color, vertices.as_native().as_bdd().clone()));
+        }
+
+        // Then, resolve the restriction set:
+        let restriction = subgraph
+            .map(|it| it.resolve_union(self, py))
+            .unwrap_or_else(|| Ok(self.mk_unit_vertices()))?;
+
+        let mut iterator = restriction.items(None)?;
+        while let Some(item) = iterator.next() {
+            // Augment the valuation with `false` values for the remaining BDD variables:
+            let state = {
+                let mut v = BddValuation::new(vec![false; usize::from(bdd_vars.num_vars())]);
+                for (var, val) in item.to_valuation().as_native().to_values() {
+                    v[var] = val;
+                }
+                v
+            };
+
+            // Output the state and successors:
+
+            let source_name: String = state_name(&state);
+
+            // Go through all state colorings and use the last one applicable:
+            let mut state_color = "#d3d3d3".to_string();
+            for (color, states) in &state_colors {
+                if states.eval_in(&state) {
+                    state_color = color.clone();
+                }
+            }
+
+            writeln!(
+                output,
+                "\tv{source_name} [shape=box, label=\"{source_name}\", style=filled, fillcolor=\"{state_color}\"];",
+            )?;
+
+            for var in self.as_native().variables() {
+                let var_bdd = self.as_native().symbolic_context().get_state_variable(var);
+                let function = self.as_native().get_symbolic_fn_update(var);
+                let function_output = function.eval_in(&state);
+                if state[var_bdd] != function_output {
+                    let mut target_state = state.clone();
+                    target_state[var_bdd] = !target_state[var_bdd];
+
+                    if prune_outgoing_edges {
+                        let is_in_restriction =
+                            restriction.as_native().as_bdd().eval_in(&target_state);
+                        if !is_in_restriction {
+                            continue;
+                        }
+                    }
+
+                    let target_name = state_name(&target_state);
+
+                    writeln!(output, "\t\tv{source_name} -> v{target_name};",)?;
+                }
+            }
+        }
+
+        writeln!(output, "}}")?;
+        Ok(String::from_utf8(buffer).expect("Invalid UTF formatting in .dot string."))
     }
 }
 

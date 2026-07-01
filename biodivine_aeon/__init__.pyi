@@ -1,5 +1,5 @@
 from typing import (Callable, Iterator, Literal, Mapping, Optional, Sequence,
-                    TypedDict, Union, overload, Any)
+                    TypedDict, Union, overload, Any, Tuple)
 
 LOG_NOTHING: Literal[0]
 LOG_ESSENTIAL: Literal[1]
@@ -223,6 +223,8 @@ class Bdd:
     def as_bool(self) -> Optional[bool]:
         ...
     def to_dot(self, zero_pruned: bool = True) -> str:
+        ...
+    def show(self, zero_pruned: bool = True):
         ...
     def to_expression(self) -> BooleanExpression:
         ...
@@ -657,6 +659,8 @@ class RegulatoryGraph:
         ...
     def to_dot(self) -> str:
         ...
+    def show(self):
+        ...
     def variable_count(self) -> int:
         ...
     def variable_names(self) -> list[str]:
@@ -725,8 +729,6 @@ class RegulatoryGraph:
                        subgraph: Optional[Sequence[VariableIdType]] = None,
                        length: Optional[int] = None,
     ) -> Optional[list[VariableId]]:
-        ...
-    def show(self):
         ...
 
 class BooleanNetwork(RegulatoryGraph):
@@ -1464,6 +1466,18 @@ class AsynchronousGraph:
     def inline_variable_symbolic(self, var: VariableIdType) -> AsynchronousGraph: ...
     def restrict(self, set: Union[ColoredVertexSet, VertexSet, ColorSet]) -> AsynchronousGraph: ...
     def logically_unique_colors(self, colors: ColorSet) -> ColorSet: ...
+    def to_dot(
+            self,
+            subgraph: Optional[Union[VertexSetType, Sequence[VertexSetType]]] = None,
+            highlight: Optional[Sequence[Tuple[str, Union[VertexSetType, Sequence[VertexSetType]]]]] = None,
+            prune_outgoing_edges: bool = False,
+    ) -> str: ...
+    def show(
+            self,
+            subgraph: Optional[Union[VertexSetType, Sequence[VertexSetType]]] = None,
+            highlight: Optional[Sequence[Tuple[str, Union[VertexSetType, Sequence[VertexSetType]]]]] = None,
+            prune_outgoing_edges: bool = False,
+    ): ...
 
 class TrapSpaces:
     @staticmethod
@@ -1980,6 +1994,7 @@ HybridOperator = Literal["exists", "forall", "bind", "jump"]
 PhenotypeOscillation = Literal["required", "allowed", "forbidden"]
 BoolClauseType = Union[BddPartialValuation, BddValuation, Mapping[str, BoolType], Mapping[BddVariable, BoolType]]
 BoolExpressionType = Union[BooleanExpression, str]
+VertexSetType = Union[VertexSet, ColoredVertexSet, VertexModel, SpaceModel, Mapping[VariableIdType, BoolType]]
 # IDT = TypeVar('IDT', covariant=True)
 # class Regulation(TypedDict, Generic[IDT]):
 #     source: IDT

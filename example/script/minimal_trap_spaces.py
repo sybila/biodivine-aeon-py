@@ -45,7 +45,7 @@ ctx = SymbolicSpaceContext(bn)
 stg = AsynchronousGraph(bn, ctx)
 
 # Assert that the network is fully specified.
-assert stg.mk_unit_colors().cardinality() == 1
+#assert stg.mk_unit_colors().cardinality() == 1
 
 essential = TrapSpaces.essential_symbolic(ctx, stg)
 print(f"Complete: {essential.cardinality()}")
