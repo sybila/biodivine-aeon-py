@@ -893,13 +893,6 @@ impl AsynchronousGraph {
 
                     let target_name = state_name(&target_state, state_vars);
 
-                    if function_value.is_none() {
-                        println!(
-                            "{source_name} {target_name} {}",
-                            function_reduced.to_boolean_expression(bdd_vars)
-                        )
-                    }
-
                     let edge_style = if function_value.is_none() {
                         "dashed"
                     } else {
