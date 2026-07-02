@@ -14,14 +14,14 @@ use crate::bindings::lib_param_bn::argument_types::vertex_set_multiple_type::Ver
 use crate::bindings::lib_param_bn::variable_id::{VariableId, VariableIdResolvable};
 use crate::{AsNative, runtime_error, throw_runtime_error, throw_type_error};
 use biodivine_hctl_model_checker::mc_utils::get_extended_symbolic_graph;
-use biodivine_lib_bdd::BddValuation;
 use biodivine_lib_bdd::boolean_expression::BooleanExpression as RsBooleanExpression;
+use biodivine_lib_bdd::{BddValuation, BddVariable};
 use biodivine_lib_param_bn::symbolic_async_graph::{GraphColors, SymbolicAsyncGraph};
 use either::{Left, Right};
 use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::io::Write;
 
 #[pyclass(module = "biodivine_aeon", frozen, subclass)]
@@ -792,20 +792,14 @@ impl AsynchronousGraph {
         prune_outgoing_edges: bool,
         py: Python,
     ) -> PyResult<String> {
-        if !self
-            .as_native()
-            .symbolic_context()
-            .parameter_variables()
-            .is_empty()
-        {
-            return throw_runtime_error("Cannot convert graph with partially unknown dynamics.");
-        }
+        // Note: This function could probably be much more optimized if we wanted it to
+        // work on larger graphs, but considering the output is often unreadable for 128+
+        // vertices, this should work reasonably well.
 
-        fn state_name(state: &BddValuation) -> String {
-            state
-                .as_vector()
+        fn state_name(state: &BddValuation, state_vars: &[BddVariable]) -> String {
+            state_vars
                 .iter()
-                .map(|&b| if b { '1' } else { '0' })
+                .map(|b| if state[*b] { '1' } else { '0' })
                 .collect()
         }
 
@@ -814,7 +808,9 @@ impl AsynchronousGraph {
 
         writeln!(output, "digraph G {{")?;
 
-        let bdd_vars = self.as_native().symbolic_context().bdd_variable_set();
+        let native_ctx = self.as_native().symbolic_context();
+        let bdd_vars = native_ctx.bdd_variable_set();
+        let state_vars = native_ctx.state_variables();
 
         // First, "resolve" all state colors:
         let mut state_colors: Vec<(String, biodivine_lib_bdd::Bdd)> = Vec::new();
@@ -831,10 +827,13 @@ impl AsynchronousGraph {
 
         let mut iterator = restriction.items(None)?;
         while let Some(item) = iterator.next() {
+            // A partial valuation with only the state variables:
+            let state_partial = item.to_valuation();
+
             // Augment the valuation with `false` values for the remaining BDD variables:
             let state = {
                 let mut v = BddValuation::new(vec![false; usize::from(bdd_vars.num_vars())]);
-                for (var, val) in item.to_valuation().as_native().to_values() {
+                for (var, val) in state_partial.as_native().to_values() {
                     v[var] = val;
                 }
                 v
@@ -842,7 +841,7 @@ impl AsynchronousGraph {
 
             // Output the state and successors:
 
-            let source_name: String = state_name(&state);
+            let source_name: String = state_name(&state, state_vars);
 
             // Go through all state colorings and use the last one applicable:
             let mut state_color = "#d3d3d3".to_string();
@@ -857,11 +856,30 @@ impl AsynchronousGraph {
                 "\tv{source_name} [shape=box, label=\"{source_name}\", style=filled, fillcolor=\"{state_color}\"];",
             )?;
 
+            let unit_colors_bdd = self.as_native().unit_colors().as_bdd();
+
             for var in self.as_native().variables() {
-                let var_bdd = self.as_native().symbolic_context().get_state_variable(var);
+                let var_bdd = native_ctx.get_state_variable(var);
                 let function = self.as_native().get_symbolic_fn_update(var);
-                let function_output = function.eval_in(&state);
-                if state[var_bdd] != function_output {
+                // What the output of the function depends on:
+                let function_reduced_base =
+                    function.restrict(&state_partial.as_native().to_values());
+                // What the output of the function depends on, including regulation constraints:
+                let function_reduced = function_reduced_base.and(unit_colors_bdd);
+
+                let state_value = Some(state[var_bdd]);
+                let function_value = if function_reduced == *unit_colors_bdd {
+                    Some(true)
+                } else if function_reduced.is_false() {
+                    Some(false)
+                } else {
+                    None
+                };
+
+                if state_value != function_value {
+                    // At this point, we know that there exists some transition, we just have
+                    // to check if it is enabled always, or only sometimes.
+
                     let mut target_state = state.clone();
                     target_state[var_bdd] = !target_state[var_bdd];
 
@@ -873,9 +891,34 @@ impl AsynchronousGraph {
                         }
                     }
 
-                    let target_name = state_name(&target_state);
+                    let target_name = state_name(&target_state, state_vars);
 
-                    writeln!(output, "\t\tv{source_name} -> v{target_name};",)?;
+                    if function_value.is_none() {
+                        println!(
+                            "{source_name} {target_name} {}",
+                            function_reduced.to_boolean_expression(bdd_vars)
+                        )
+                    }
+
+                    let edge_style = if function_value.is_none() {
+                        "dashed"
+                    } else {
+                        "solid"
+                    };
+                    let edge_label: String = if function_value.is_none() {
+                        // At this point, we need to reconstruct which parameters the edge depends on:
+                        let mut literals = BTreeSet::new();
+                        for var in function_reduced_base.support_set() {
+                            literals.insert(bdd_vars.name_of_str(var));
+                        }
+                        literals.into_iter().collect::<Vec<_>>().join(", ")
+                    } else {
+                        "".to_string()
+                    };
+                    writeln!(
+                        output,
+                        "\t\tv{source_name} -> v{target_name} [style={edge_style}, label=\"{edge_label}\"];"
+                    )?;
                 }
             }
         }
