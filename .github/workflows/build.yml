@@ -30,7 +30,7 @@ jobs:
           container: daemontus/manylinux-aeon:latest
           args: "--release --compatibility manylinux_2_28 --out=target/dist"
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-linux
           path: target/dist
@@ -54,7 +54,7 @@ jobs:
           command: build
           args: "--release --target universal2-apple-darwin --out=target/dist"
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-macos
           path: target/dist
@@ -79,7 +79,7 @@ jobs:
           target: x64
           args: "--release --out=target/dist"
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-windows
           path: target/dist
